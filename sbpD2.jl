@@ -6,3 +6,7 @@ struct D2{T}
     eClosure::Vector{T}
     dClosure::Vector{T}
 end
+
+function closureSize(D::D2)::Int
+    return length(quadratureClosure)
+end
