@@ -1,6 +1,6 @@
 abstract type DiffOp end
 
-function apply(D::DiffOp, v::AbstractVector) where N
+function apply(D::DiffOp, v::AbstractVector)
     error("not implemented")
 end
 
@@ -28,6 +28,20 @@ struct Laplace1D <: DiffOp
     op
 end
 
-function apply(L::Laplace, v::AbstractVector)::AbstractVector
+# u = L*v
+function apply(L::Laplace, u::AbstractVector, v::AbstractVector)::AbstractVector
+    N = closureSize(L.op)
+    M = length(v)
 
+    for i ∈ 1:N
+        u[i] = apply(L.op.closureStencils[i], v, i)
+    end
+
+    for i ∈ N+1:M-N
+        u[i] = apply(L.op.innerStencil, i);
+    end
+
+    for i ∈ M:-1:M-N+1
+        u[i] = apply(flip(L.op.closureStencils[M-i+1]), v, i)
+    end
 end
