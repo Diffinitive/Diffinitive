@@ -1,0 +1,7 @@
+# H order 2
+
+closure
+1/2
+
+inner_stencil
+1
