@@ -6,7 +6,7 @@ function getState(ts::TimeStepper)
 end
 
 
-function step(ts::TimeStepper)
+function step!(ts::TimeStepper)
 	error("not implemented")
 end
 
@@ -45,7 +45,7 @@ function getState(ts::Rk4)
 	return ts.t, ts.v
 end
 
-function step(ts::Rk4)
+function step!(ts::Rk4)
     k1 = ts.F(ts.v,ts.t)
 	k2 = ts.F(ts.v+0.5*ts.k*k1,ts.t+0.5*ts.k)
 	k3 = ts.F(ts.v+0.5*ts.k*k2,ts.t+0.5*ts.k)
