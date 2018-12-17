@@ -1,4 +1,4 @@
-abstract type TimeStepper end 
+abstract type TimeStepper end
 
 # Returns v and t
 function getState(ts::TimeStepper)
@@ -51,7 +51,7 @@ function step(ts::Rk4)
 	k3 = ts.F(ts.v+0.5*ts.k*k2,ts.t+0.5*ts.k)
     k4 = ts.F(ts.v+    ts.k*k3,ts.t+    ts.k)
     ts.v  = ts.v + (1/6)*(k1+2*(k2+k3)+k4)*ts.k
-	
+
 	ts.n = ts.n + 1
 	ts.t = ts.t + ts.k
 
