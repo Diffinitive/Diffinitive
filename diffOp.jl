@@ -16,7 +16,7 @@ function boundaryCondition(D::DiffOp)
     error("not implemented")
 end
 
-function interface(Du::DiffOp, Dv::DiffOp, b::BoundaryID; type)
+function interface(Du::DiffOp, Dv::DiffOp, b::grid.BoundaryId; type)
     error("not implemented")
 end
 
