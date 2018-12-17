@@ -18,30 +18,37 @@ abstract type BoundaryId end
 
 # Move to seperate file.
 struct EquidistantGrid <: Grid
-    numberOfDimensions::UInt
-    numberOfPoints::Vector{UInt}
+    nPointsPerDim::Vector{Int}
     limits::Vector{Pair{Real, Real}}
-    function EquidistantGrid(nDims, nPoints, lims)
-        @assert nDims == size(nPoints)
-        return new(nDims, nPoints, lims)
+    function EquidistantGrid(nPointsPerDim, lims)
+        @assert length(lims) == length(nPointsPerDim)
+        return new(nPointsPerDim, lims)
     end
 end
 
 function numberOfDimensions(grid::EquidistantGrid)
-    return grid.numberOfDimensions
+    return length(grid.nPointsPerDim)
 end
 
 function numberOfPoints(grid::EquidistantGrid)
-    return grid.numberOfPoints
+    numberOfPoints = grid.nPointsPerDim[1];
+    for i = 2:length(grid.nPointsPerDim);
+        numberOfPoints = numberOfPoints*grid.nPointsPerDim[i]
+    end
+    return numberOfPoints
 end
 
 function points(grid::EquidistantGrid)
-    points::Matrix{Real,3}(undef, numberOfPoints(grid))
+    points = Vector{Real}(undef, numberOfPoints(grid))
+    for i = 1:numberOfDimensions(grid)
+        lims = limitsForDimension(grid,i)
+        points = range(lims.first, stop=lims.second, length=grid.nPointsPerDim[i])
+    end
     return points
 end
 
-function limitsForDimension(grid::EquidistantGrid, dim::UInt)
-    return grid.limits(dim)
+function limitsForDimension(grid::EquidistantGrid, dim::Int)
+    return grid.limits[dim]
 end
 
 end
