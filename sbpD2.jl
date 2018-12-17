@@ -1,8 +1,8 @@
 
 struct D2{T}
     quadratureClosure::Vector{T}
-    innerStencil::Vector{T}
-    closureStencils::Matrix{T}
+    innerStencil::Stencil
+    closureStencils::Vector{Stencil} # TBD: Should this be a tuple?
     eClosure::Vector{T}
     dClosure::Vector{T}
 end
@@ -11,9 +11,9 @@ function closureSize(D::D2)::Int
     return length(quadratureClosure)
 end
 
-struct Stencil
+struct Stencil{T}
     range::NTuple{2,Int}
-    weights::Vector{Float64}
+    weights::Vector{T} # TBD: Should this be a tuple?
     function Stencil(range, weights)
         width = range[2]-range[1]+1
         if width != length(weights)
