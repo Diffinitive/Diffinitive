@@ -14,6 +14,7 @@ function points(grid::Grid)
     error("Not yet implemented")
 end
 
+# TODO: Should this be here?
 abstract type BoundaryId end
 
 # TODO: Move to seperate file.
@@ -54,7 +55,7 @@ end
 
 # TODO: Decide if spacings should be positive or if it is allowed to be negative
 #       If defined as positive, then need to do something extra when calculating the
-#       points. The current implementation works for
+#       points. The current implementation works for arbitarily given limits of the grid.
 function spacings(grid::EquidistantGrid)
     h = Vector{Real}(undef, numberOfDimensions(grid))
     for i ∈ eachindex(h)
