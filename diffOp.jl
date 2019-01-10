@@ -1,6 +1,6 @@
 abstract type DiffOp end
 
-function apply(D::DiffOp, v::AbstractVector)
+function apply!(D::DiffOp, u::AbstractVector, v::AbstractVector)
     error("not implemented")
 end
 
