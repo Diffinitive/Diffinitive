@@ -1,0 +1,13 @@
+# D2 order 2
+
+boundary_stencils
+1 -2 1
+
+inner_stencil
+1 -2 1
+
+e
+1
+
+d1
+-3/2 2 -1/2

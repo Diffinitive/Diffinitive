@@ -1,0 +1,7 @@
+# H order 4
+
+closure
+17/48 59/48 43/48 49/48
+
+inner_stencil
+1
