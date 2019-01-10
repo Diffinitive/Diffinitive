@@ -1,4 +1,5 @@
 module grid
+using Plots
 
 abstract type Grid end
 
@@ -49,6 +50,17 @@ end
 
 function limitsForDimension(grid::EquidistantGrid, dim::Int)
     return grid.limits[dim]
+end
+
+function plotOnGrid(grid::EquidistantGrid,v::Vector)
+    dim = numberOfDimensions(grid)
+    x = points(grid)
+
+    if dim ==1
+        plot(x,v)
+    else
+        error(string("Plot not implemented for dim =", string(dim)))
+    end
 end
 
 end
