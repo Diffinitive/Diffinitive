@@ -15,30 +15,32 @@ function readOperator(D2fn, Hfn)
     h = readSectionedFile(Hfn)
 
     # Create inner stencil
-    innerStencilWeights = stringToVector(Float64, d["inner_stencil"])
+    innerStencilWeights = stringToVector(Float64, d["inner_stencil"][1])
     width = length(innerStencilWeights)
-    r = (-width//2, width//2)
+    r = (-div(width,2), div(width,2))
+
     innerStencil = Stencil(r, innerStencilWeights)
 
     # Create boundary stencils
     boundarySize = length(d["boundary_stencils"])
     closureStencils = Vector{Stencil}()
+
     for i ∈ 1:boundarySize
         stencilWeights = stringToVector(Float64, d["boundary_stencils"][i])
-
+        width = length(stencilWeights)
+        r = (1-i,width-i)
+        push!(closureStencils,Stencil(r, stencilWeights))
     end
 
     d2 = D2(
-        stringToVector(Float64, h["closure"]),
+        stringToVector(Float64, h["closure"][1]),
         innerStencil,
         closureStencils,
-        stringToVector(Float64, d["e"]),
-        stringToVector(Float64, d["d1"]),
+        stringToVector(Float64, d["e"][1]),
+        stringToVector(Float64, d["d1"][1]),
     )
 
-    # Return d2!
-
-    return nothing
+    return d2
 end
 
 
@@ -66,6 +68,6 @@ function readSectionedFile(filename)::Dict{String, Vector{String}}
     return sections
 end
 
-function stringToVector(T::DataType, s::String; delimiter = " ")
-    return parse(T, split(s, delimiter))
+function stringToVector(T::DataType, s::String)
+    return T.(eval.(Meta.parse.(split(s))))
 end
