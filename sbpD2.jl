@@ -1,20 +1,21 @@
 abstract type ConstantStencilOperator end
 
-function apply!(op::ConstantStencilOperator, u::AbstractVector, v::AbstractVector, h::Real, start::Int, N::Int; stride::Int=1)
+function apply!(op::ConstantStencilOperator, u::AbstractVector, v::AbstractVector, h::Real)
+    N = length(v)
     cSize = closureSize(op)
 
-    for i ∈ range(start; length=cSize, step=stride)
-        u[i] = apply!(op.closureStencils[i], v, i; stride=stride)/h^2
+    for i ∈ range(1; length=cSize)
+        u[i] = apply(op.closureStencils[i], v, i)/h^2
     end
 
-    innerStart = start + cSize*stride
-    innerEnd = N - cSize*stride-1
-    for i ∈ range(innerStart, stop=innerEnd, step=stride)
-        u[i] = apply(op.innerStencil, v, i; stride=stride)/h^2
+    innerStart = 1 + cSize
+    innerEnd = N - cSize
+    for i ∈ range(innerStart, stop=innerEnd)
+        u[i] = apply(op.innerStencil, v, i)/h^2
     end
 
-    for i ∈ range(innerEnd+1, length=cSize, step=cSize)
-        u[i] = op.parity*apply(flip(op.closureStencils[M-i+1]), v, i; stride=stride)/h^2
+    for i ∈ range(innerEnd+1, length=cSize)
+        u[i] = op.parity*apply(flip(op.closureStencils[N-i+1]), v, i)/h^2
     end
 end
 
@@ -31,7 +32,7 @@ struct D2{T} <: ConstantStencilOperator
 end
 
 function closureSize(D::D2)::Int
-    return length(quadratureClosure)
+    return length(D.quadratureClosure)
 end
 
 function readOperator(D2fn, Hfn)

@@ -30,11 +30,7 @@ end
 
 # u = L*v
 function apply!(L::Laplace1D, u::AbstractVector, v::AbstractVector)
-    N = closureSize(L.op)
-    M = length(v)
-
-    h = scaling(L.grid)
-
-    apply!(L.op, u, v, grid.spacings(L.grid)[1], 1, L.grid.numberOfPointsPerDim, stride=1)
+    h = grid.spacings(L.grid)[1]
+    apply!(L.op, u, v, h)
     return nothing
 end

@@ -24,10 +24,10 @@ function Base.getindex(s::Stencil, i::Int)
     end
 end
 
-function apply(s::Stencil, v::AbstractVector, i::Int; stride::Int = 1)
+function apply(s::Stencil, v::AbstractVector, i::Int)
     w = zero(eltype(v))
-    for j ∈ i .+ stride.*(s.range[1]:s.range[2])
-        w += v[j]
+    for j ∈ s.range[1]:s.range[2]
+        w += s[j]*v[i+j]
     end
     return w
 end
