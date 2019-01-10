@@ -117,4 +117,10 @@ function plotOnGrid(grid::EquidistantGrid,v::Vector)
     end
 end
 
+# Evaluate function f on the grid g
+function evalOn(g::Grid, f::Function)
+    F(x) = f(x...)
+    return F.(points(g))
+end
+
 end
