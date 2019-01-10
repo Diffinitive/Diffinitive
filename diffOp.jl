@@ -1,6 +1,6 @@
 abstract type DiffOp end
 
-function apply(D::DiffOp, v::AbstractVector)
+function apply!(D::DiffOp, u::AbstractVector, v::AbstractVector)
     error("not implemented")
 end
 
@@ -35,17 +35,6 @@ function apply!(L::Laplace1D, u::AbstractVector, v::AbstractVector)
 
     h = scaling(L.grid)
 
-    for i ∈ 1:N
-        u[i] = apply(L.op.closureStencils[i], v, i)/h^2
-    end
-
-    for i ∈ N+1:M-N
-        u[i] = apply(L.op.innerStencil, i)/h^2
-    end
-
-    for i ∈ M:-1:M-N+1
-        u[i] = apply(flip(L.op.closureStencils[M-i+1]), v, i)/h^2
-    end
-
+    apply!(L.op, u, v, grid.spacings(L.grid)[1], 1, L.grid.numberOfPointsPerDim, stride=1)
     return nothing
 end
