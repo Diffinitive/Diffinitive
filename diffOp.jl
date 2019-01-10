@@ -29,7 +29,7 @@ struct Laplace1D <: DiffOp
 end
 
 # u = L*v
-function apply(L::Laplace1D, u::AbstractVector, v::AbstractVector)
+function apply!(L::Laplace1D, u::AbstractVector, v::AbstractVector)
     N = closureSize(L.op)
     M = length(v)
 
