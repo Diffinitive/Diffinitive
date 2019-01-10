@@ -1,5 +1,5 @@
 module grid
-using Plots
+using PyPlot
 
 abstract type Grid end
 
@@ -41,7 +41,7 @@ struct EquidistantGrid <: Grid
         return new(nPointsPerDim, lims)
     end
     # 1D constructor which can be called as EquidistantGrid(m, (xl,xr))
-    function EquidistantGrid(nPointsPerDim::Integer, lims::NTuple{2,Integer})
+    function EquidistantGrid(nPointsPerDim::Integer, lims::NTuple{2,Real})
         return EquidistantGrid((nPointsPerDim,), ((lims[1],),(lims[2],)))
     end
 
@@ -94,26 +94,42 @@ function points(grid::EquidistantGrid)
     end
     dx̄ = Tuple(dx̄)
 
-    nPoints = numberOfPoints(grid)
-    points = Vector{NTuple{numberOfDimensions(grid),Real}}(undef, nPoints)
+    points = Vector{NTuple{numberOfDimensions(grid),Real}}(undef, numberOfPoints(grid))
     # Compute the points based on their Cartesian indices and the signed
     # grid spacings
     cartesianIndices = CartesianIndices(grid.numberOfPointsPerDim)
-    for i ∈ 1:nPoints
+    for i ∈ 1:numberOfPoints(grid)
         ci = Tuple(cartesianIndices[i]) .-1
         points[i] = grid.limits[1] .+ dx̄.*ci
+    end
+    # TBD: Keep? this? How do we want to represent points in 1D?
+    if numberOfDimensions(grid) == 1
+        points = broadcast(x -> x[1], points)
     end
     return points
 end
 
-function plotOnGrid(grid::EquidistantGrid,v::Vector)
-    dim = numberOfDimensions(grid)
-    x = points(grid)
+function pointsalongdim(grid::EquidistantGrid, dim::Integer)
+    @assert dim<=numberOfDimensions(grid)
+    @assert dim>0
+    points = range(grid.limits[1][dim],stop=grid.limits[2][dim],length=grid.numberOfPointsPerDim[dim])
+end
 
-    if dim ==1
-        plot(x,v)
+function plotgridfunction(grid::EquidistantGrid, gridfunction)
+    if numberOfDimensions(grid) == 1
+        plot(pointsalongdim(grid,1), gridfunction, linewidth=2.0)
+    elseif numberOfDimensions(grid) == 2
+        x = pointsalongdim(grid,1)
+        X = repeat(x,1,grid.numberOfPointsPerDim[2])
+        y = pointsalongdim(grid,2)
+        Y = repeat(y,1,grid.numberOfPointsPerDim[1])'
+    elseif numberOfDimensions(grid) == 3
+        x = pointsalongdim(grid,1)
+        X = repeat(x,1,grid.numberOfPointsPerDim[2])
+        y = pointsalongdim(grid,2)
+        Y = repeat(y,1,grid.numberOfPointsPerDim[1])'
     else
-        error(string("Plot not implemented for dim =", string(dim)))
+        error(string("Plot not implemented for dimension =", string(dim)))
     end
 end
 
