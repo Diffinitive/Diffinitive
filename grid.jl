@@ -120,21 +120,15 @@ function plotgridfunction(grid::EquidistantGrid, gridfunction)
     if numberOfDimensions(grid) == 1
         plot(pointsalongdim(grid,1), gridfunction, linewidth=2.0)
     elseif numberOfDimensions(grid) == 2
+        mx = grid.numberOfPointsPerDim[1];
+        my = grid.numberOfPointsPerDim[2];
         x = pointsalongdim(grid,1)
-        X = repeat(x,1,grid.numberOfPointsPerDim[2])
+        X = repeat(x,1,my)
         y = pointsalongdim(grid,2)
-        Y = repeat(y,1,grid.numberOfPointsPerDim[1])'
-        surface(X,Y,reshape(gridfunction))
-    elseif numberOfDimensions(grid) == 3
-        x = pointsalongdim(grid,1)
-        X = repeat(x,1,grid.numberOfPointsPerDim[2])
-        y = pointsalongdim(grid,2)
-        Y = repeat(y,1,grid.numberOfPointsPerDim[1])'
-        y = pointsalongdim(grid,2)
-        Y = repeat(y,1,grid.numberOfPointsPerDim[1])'
-        surface(X,Y,gridfunction)
+        Y = repeat(y,1,mx)'
+        surface(X,Y,reshape(gridfunction,mx,my))
     else
-        error(string("Plot not implemented for dimension ", string(dim)))
+        error(string("Plot not implemented for dimension ", string(numberOfDimensions(grid))))
     end
 end
 
