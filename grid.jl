@@ -1,5 +1,6 @@
 module grid
-using PyPlot
+using Plots
+pyplot()
 
 abstract type Grid end
 
@@ -123,13 +124,17 @@ function plotgridfunction(grid::EquidistantGrid, gridfunction)
         X = repeat(x,1,grid.numberOfPointsPerDim[2])
         y = pointsalongdim(grid,2)
         Y = repeat(y,1,grid.numberOfPointsPerDim[1])'
+        surface(X,Y,reshape(gridfunction))
     elseif numberOfDimensions(grid) == 3
         x = pointsalongdim(grid,1)
         X = repeat(x,1,grid.numberOfPointsPerDim[2])
         y = pointsalongdim(grid,2)
         Y = repeat(y,1,grid.numberOfPointsPerDim[1])'
+        y = pointsalongdim(grid,2)
+        Y = repeat(y,1,grid.numberOfPointsPerDim[1])'
+        surface(X,Y,gridfunction)
     else
-        error(string("Plot not implemented for dimension =", string(dim)))
+        error(string("Plot not implemented for dimension ", string(dim)))
     end
 end
 
