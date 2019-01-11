@@ -32,5 +32,6 @@ end
 function apply!(L::Laplace1D, u::AbstractVector, v::AbstractVector)
     h = grid.spacings(L.grid)[1]
     apply!(L.op, u, v, h)
+    u .= L.a * u
     return nothing
 end
