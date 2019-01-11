@@ -15,12 +15,16 @@ function apply!(op::ConstantStencilOperator, u::AbstractVector, v::AbstractVecto
     end
 
     for i ∈ range(innerEnd+1, length=cSize)
-        u[i] = op.parity*apply(flip(op.closureStencils[N-i+1]), v, i)/h^2
+        u[i] = Int(op.parity)*apply(flip(op.closureStencils[N-i+1]), v, i)/h^2
     end
+
+    return nothing
 end
 
-odd = -1
-even = 1
+@enum Parity begin
+    odd = -1
+    even = 1
+end
 
 struct D2{T} <: ConstantStencilOperator
     quadratureClosure::Vector{T}
@@ -28,7 +32,7 @@ struct D2{T} <: ConstantStencilOperator
     closureStencils::Vector{Stencil} # TBD: Should this be a tuple?
     eClosure::Vector{T}
     dClosure::Vector{T}
-    parity::Int
+    parity::Parity
 end
 
 function closureSize(D::D2)::Int
