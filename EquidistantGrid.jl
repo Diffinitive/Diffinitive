@@ -96,7 +96,8 @@ function pointsalongdim(grid::EquidistantGrid, dim::Integer)
 end
 
 using PyPlot, PyCall
-# using Plots; pyplot()
+#pygui(:qt)
+#using Plots; pyplot()
 
 function plotgridfunction(grid::EquidistantGrid, gridfunction)
     if numberOfDimensions(grid) == 1
@@ -107,13 +108,13 @@ function plotgridfunction(grid::EquidistantGrid, gridfunction)
         x = pointsalongdim(grid,1)
         X = repeat(x,1,my)
         y = pointsalongdim(grid,2)
-        Y = repeat(y,1,mx)
-        # plot_surface(X,Y,reshape(gridfunction,mx,my))
-        fig = figure()
-        ax = fig[:add_subplot](1,1,1, projection = "3d")
-        ax[:plot_surface](X,Y,reshape(gridfunction,mx,my))
-        plt[:show]()
+        Y = permutedims(repeat(y,1,mx))
+        plot_surface(X,Y,reshape(gridfunction,mx,my))
+        # fig = figure()
+        # ax = fig[:add_subplot](1,1,1, projection = "3d")
+        # ax[:plot_surface](X,Y,reshape(gridfunction,mx,my))
     else
         error(string("Plot not implemented for dimension ", string(numberOfDimensions(grid))))
     end
+    savefig("gridfunction")
 end
