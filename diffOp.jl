@@ -16,7 +16,7 @@ function boundaryCondition(D::DiffOp)
     error("not implemented")
 end
 
-function interface(Du::DiffOp, Dv::DiffOp, b::grid.BoundaryId; type)
+function interface(Du::DiffOp, Dv::DiffOp, b::Grid.BoundaryId; type)
     error("not implemented")
 end
 
@@ -30,7 +30,7 @@ end
 
 # u = L*v
 function apply!(L::Laplace1D, u::AbstractVector, v::AbstractVector)
-    h = grid.spacings(L.grid)[1]
+    h = Grid.spacings(L.grid)[1]
     apply!(L.op, u, v, h)
     u .= L.a * u
     return nothing
@@ -47,7 +47,7 @@ end
 # u = L*v
 function apply!(L::Laplace2D, u::AbstractVector, v::AbstractVector)
     u .= 0*u
-    h = grid.spacings(L.grid)
+    h = Grid.spacings(L.grid)
 
     li = LinearIndices(L.grid.numberOfPointsPerDim)
     n_x, n_y = L.grid.numberOfPointsPerDim
