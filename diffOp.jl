@@ -12,7 +12,7 @@ function matrixRepresentation(D::DiffOp)
     error("not implemented")
 end
 
-function boundaryCondition(D::DiffOp)
+function boundaryCondition(D::DiffOp,b::Grid.BoundaryId,type)::(Closure, Penalty)
     error("not implemented")
 end
 
@@ -20,6 +20,17 @@ function interface(Du::DiffOp, Dv::DiffOp, b::Grid.BoundaryId; type)
     error("not implemented")
 end
 
+abstract type Closure end
+
+function apply(c::Closure, v::AbstractVector, i::Int)
+    error("not implemented")
+end
+
+abstract type Penalty end
+
+function apply(c::Penalty, g, i::Int)
+    error("not implemented")
+end
 
 # Differential operator for a*d^2/dx^2
 struct Laplace1D <: DiffOp
