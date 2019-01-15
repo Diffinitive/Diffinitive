@@ -9,8 +9,8 @@ u = zeros(length(v))
 
 sbp.apply!(Laplace,u,v)
 
-@show u
-@show u'*u
+#@show u
+#@show u'*u
 
 sbp.Grid.plotgridfunction(g,u)
 

@@ -1,24 +1,18 @@
 abstract type ConstantStencilOperator end
 
-function apply!(op::ConstantStencilOperator, u::AbstractVector, v::AbstractVector, h::Real)
-    N = length(v)
+function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Int)
     cSize = closureSize(op)
+    N = length(v)
 
-    for i ∈ range(1; length=cSize)
-        u[i] = apply(op.closureStencils[i], v, i)/h^2
+    if i ∈ range(1; length=cSize)
+        uᵢ = apply(op.closureStencils[i], v, i)/h^2
+    elseif i ∈ range(N - cSize+1, length=cSize)
+        uᵢ = Int(op.parity)*apply(flip(op.closureStencils[N-i+1]), v, i)/h^2
+    else
+        uᵢ = apply(op.innerStencil, v, i)/h^2
     end
 
-    innerStart = 1 + cSize
-    innerEnd = N - cSize
-    for i ∈ range(innerStart, stop=innerEnd)
-        u[i] = apply(op.innerStencil, v, i)/h^2
-    end
-
-    for i ∈ range(innerEnd+1, length=cSize)
-        u[i] = Int(op.parity)*apply(flip(op.closureStencils[N-i+1]), v, i)/h^2
-    end
-
-    return nothing
+    return uᵢ
 end
 
 @enum Parity begin

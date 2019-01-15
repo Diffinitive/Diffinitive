@@ -1,6 +1,6 @@
 abstract type DiffOp end
 
-function apply!(D::DiffOp, u::AbstractVector, v::AbstractVector)
+function apply(D::DiffOp, v::AbstractVector, i::Int)
     error("not implemented")
 end
 
@@ -32,6 +32,21 @@ function apply(c::Penalty, g, i::Int)
     error("not implemented")
 end
 
+# DiffOp must have a grid!!!
+function apply!(D::DiffOp, u::AbstractVector, v::AbstractVector)
+    for i ∈ 1:Grid.numberOfPoints(D.grid)
+        u[i] = apply(D, v, i)
+    end
+
+    return nothing
+end
+
+function apply(D::DiffOp, v::AbstractVector)::AbstractVector
+    u = zeros(eltype(v), size(v))
+    apply!(D,v,u)
+    return u
+end
+
 # Differential operator for a*d^2/dx^2
 struct Laplace1D <: DiffOp
     grid
@@ -40,11 +55,10 @@ struct Laplace1D <: DiffOp
 end
 
 # u = L*v
-function apply!(L::Laplace1D, u::AbstractVector, v::AbstractVector)
+function apply(L::Laplace1D, v::AbstractVector, i::Int)
     h = Grid.spacings(L.grid)[1]
-    apply!(L.op, u, v, h)
-    u .= L.a * u
-    return nothing
+    uᵢ = L.a * apply(L.op, h, v, i)
+    return uᵢ
 end
 
 
@@ -56,34 +70,17 @@ struct Laplace2D <: DiffOp
 end
 
 # u = L*v
-function apply!(L::Laplace2D, u::AbstractVector, v::AbstractVector)
-    u .= 0*u
+function apply(L::Laplace2D, v::AbstractVector, i::Int)
     h = Grid.spacings(L.grid)
 
     li = LinearIndices(L.grid.numberOfPointsPerDim)
-    n_x, n_y = L.grid.numberOfPointsPerDim
+    ci = CartesianIndices(L.grid.numberOfPointsPerDim)
+    I = ci[i]
 
+    # 2nd x-derivative
+    uᵢ  = apply(L.op, h[1], view(v, li[:,I[2]]), I[1])
+    # 2nd y-derivative
+    uᵢ += apply(L.op, h[2], view(v, li[I[1],:]), I[2])
 
-    # For each x
-    temp = zeros(eltype(u), n_y)
-    for i ∈ 1:n_x
-
-        v_i = view(v, li[i,:])
-        apply!(L.op, temp, v_i, h[2])
-
-        u[li[i,:]] += temp
-    end
-
-    # For each y
-    temp = zeros(eltype(u), n_x)
-    for i ∈ 1:n_y
-        v_i = view(v, li[:,i])
-        apply!(L.op, temp, v_i, h[1])
-
-        u[li[:,i]] += temp
-    end
-
-    u .= L.a*u
-
-    return nothing
+    return uᵢ
 end
