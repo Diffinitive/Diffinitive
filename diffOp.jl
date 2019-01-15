@@ -34,9 +34,9 @@ end
 
 # Differential operator for a*d^2/dx^2
 struct Laplace1D <: DiffOp
-    grid
-    a
-    op
+    grid::Grid.EquidistantGrid
+    a::Real
+    op::D2{Float64}
 end
 
 # u = L*v
@@ -50,9 +50,9 @@ end
 
 # Differential operator for a*d^2/dx^2 + a*d^2/dy^2
 struct Laplace2D <: DiffOp
-    grid
-    a
-    op
+    grid::Grid.EquidistantGrid
+    a::Real
+    op::D2{Float64}
 end
 
 # u = L*v
