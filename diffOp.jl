@@ -47,30 +47,21 @@ function apply(D::DiffOp, v::AbstractVector)::AbstractVector
     return u
 end
 
-# Differential operator for a*d^2/dx^2
-struct Laplace1D <: DiffOp
-    grid::Grid.EquidistantGrid
+struct Laplace{Dim} <: DiffOp
+    grid::Grid.EquidistantGrid{Dim}
     a::Real
     op::D2{Float64}
 end
 
 # u = L*v
-function apply(L::Laplace1D, v::AbstractVector, i::Int)
+function apply(L::Laplace{1}, v::AbstractVector, i::Int)
     h = Grid.spacings(L.grid)[1]
     uᵢ = L.a * apply(L.op, h, v, i)
     return uᵢ
 end
 
-
-# Differential operator for a*d^2/dx^2 + a*d^2/dy^2
-struct Laplace2D <: DiffOp
-    grid::Grid.EquidistantGrid
-    a::Real
-    op::D2{Float64}
-end
-
 # u = L*v
-function apply(L::Laplace2D, v::AbstractVector, i::Int)
+function apply(L::Laplace{2}, v::AbstractVector, i::Int)
     h = Grid.spacings(L.grid)
 
     li = LinearIndices(L.grid.numberOfPointsPerDim)
