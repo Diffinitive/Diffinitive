@@ -22,8 +22,8 @@ end
 
 struct D2{T} <: ConstantStencilOperator
     quadratureClosure::Vector{T}
-    innerStencil::Stencil
-    closureStencils::Vector{Stencil} # TBD: Should this be a tuple?
+    innerStencil::Stencil{T}
+    closureStencils::Vector{Stencil{T}} # TBD: Should this be a tuple?
     eClosure::Vector{T}
     dClosure::Vector{T}
     parity::Parity
@@ -46,7 +46,7 @@ function readOperator(D2fn, Hfn)
 
     # Create boundary stencils
     boundarySize = length(d["boundary_stencils"])
-    closureStencils = Vector{Stencil}()
+    closureStencils = Vector{typeof(innerStencil)}() # TBD: is the the right way to get the correct type?
 
     for i ∈ 1:boundarySize
         stencilWeights = stringToVector(Float64, d["boundary_stencils"][i])
