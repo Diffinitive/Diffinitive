@@ -53,11 +53,10 @@ end
 # @Input: grid - an EquidistantGrid
 # @Return: h̄ - Grid spacing for each coordinate direction stored in a tuple.
 function spacings(grid::EquidistantGrid)
-    h̄ = Vector{Real}(undef, numberOfDimensions(grid))
-    for i ∈ eachindex(h̄)
-        h̄[i] = abs(grid.limits[2][i]-grid.limits[1][i])/(grid.numberOfPointsPerDim[i]-1)
-    end
-    return Tuple(h̄)
+    a = grid.limits[1]
+    b = grid.limits[2]
+
+    return abs.(b.-a)./(grid.numberOfPointsPerDim.-1)
 end
 
 # Computes the points of an EquidistantGrid as a vector of tuples. The vector is ordered
