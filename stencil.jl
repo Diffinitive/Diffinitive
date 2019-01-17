@@ -1,12 +1,13 @@
-struct Stencil
+struct Stencil{T<:Real}
     range::NTuple{2,Int}
-    weights::Vector # TBD: Should this be a tuple?
+    weights::Vector{T} # Should this be a tuple?? (Check type stability)
+
     function Stencil(range, weights)
         width = range[2]-range[1]+1
         if width != length(weights)
             error("The width and the number of weights must be the same")
         end
-        new(range, weights)
+        new{eltype(weights)}(range, weights)
     end
 end
 
@@ -20,7 +21,7 @@ function Base.getindex(s::Stencil, i::Int)
     if s.range[1] <= i <= s.range[2]
         return s.weights[1 + i - s.range[1]]
     else
-        return 0
+        return eltype(s.weights)(0)
     end
 end
 
