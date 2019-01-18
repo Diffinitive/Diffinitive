@@ -1,15 +1,15 @@
 abstract type ConstantStencilOperator end
 
-function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Int)
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Int)
     cSize = closureSize(op)
     N = length(v)
 
     if i ∈ range(1; length=cSize)
-        uᵢ = apply(op.closureStencils[i], v, i)/h^2
+        @inbounds uᵢ = apply(op.closureStencils[i], v, i)/h^2
     elseif i ∈ range(N - cSize+1, length=cSize)
-        uᵢ = Int(op.parity)*apply(flip(op.closureStencils[N-i+1]), v, i)/h^2
+        @inbounds uᵢ = Int(op.parity)*apply(flip(op.closureStencils[N-i+1]), v, i)/h^2
     else
-        uᵢ = apply(op.innerStencil, v, i)/h^2
+        @inbounds uᵢ = apply(op.innerStencil, v, i)/h^2
     end
 
     return uᵢ
