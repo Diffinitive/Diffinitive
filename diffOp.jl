@@ -69,9 +69,11 @@ function apply(L::Laplace{2}, v::AbstractVector, i::Int)
     I = ci[i]
 
     # 2nd x-derivative
-    uᵢ  = apply(L.op, h[1], view(v, li[:,I[2]]), I[1])
+    vx = view(v, view(li,:,I[2]))
+    uᵢ  = apply(L.op, h[1], vx , I[1])
     # 2nd y-derivative
-    uᵢ += apply(L.op, h[2], view(v, li[I[1],:]), I[2])
+    vy = view(v, view(li,I[1],:))
+    uᵢ += apply(L.op, h[2], vy, I[2])
 
     return uᵢ
 end
