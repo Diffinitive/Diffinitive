@@ -18,17 +18,18 @@ end
 
 # Provides index into the Stencil based on offset for the root element
 function Base.getindex(s::Stencil, i::Int)
-    if s.range[1] <= i <= s.range[2]
-        return s.weights[1 + i - s.range[1]]
-    else
+    @boundscheck if i < s.range[1] || s.range[2] < i
         return eltype(s.weights)(0)
     end
+
+    return s.weights[1 + i - s.range[1]]
 end
 
-function apply(s::Stencil, v::AbstractVector, i::Int)
+Base.@propagate_inbounds function apply(s::Stencil, v::AbstractVector, i::Int)
     w = zero(eltype(v))
     for j ∈ s.range[1]:s.range[2]
-        w += s[j]*v[i+j]
+        @inbounds weight = s[j]
+        w += weight*v[i+j]
     end
     return w
 end
