@@ -17,6 +17,7 @@ end
 
 # Provides index into the Stencil based on offset for the root element
 function Base.getindex(s::Stencil, i::Int)
+    # TBD: Rearrange to mark with @boundscheck?
     if s.range[1] <= i <= s.range[2]
         return s.weights[1 + i - s.range[1]]
     else
@@ -27,7 +28,7 @@ end
 function apply(s::Stencil, v::AbstractVector, i::Int)
     w = zero(eltype(v))
     for j ∈ s.range[1]:s.range[2]
-        w += s[j]*v[i+j]
+        w += s[j]*v[i+j] # TBD: Make this without boundschecks?
     end
     return w
 end
