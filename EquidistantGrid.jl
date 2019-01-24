@@ -77,7 +77,7 @@ end
 function pointsalongdim(grid::EquidistantGrid, dim::Integer)
     @assert dim<=numberOfDimensions(grid)
     @assert dim>0
-    points = range(grid.limits[1][dim],stop=grid.limits[2][dim],length=grid.numberOfPointsPerDim[dim])
+    points = range(grid.limit_lower[dim],stop=grid.limit_lower[dim],length=grid.numberOfPointsPerDim[dim])
 end
 
 using PyPlot, PyCall
