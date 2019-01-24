@@ -60,6 +60,8 @@ function apply(L::Laplace{1}, v::AbstractVector, i::Int)
     return uᵢ
 end
 
+using UnsafeArrays
+
 # u = L*v
 function apply(L::Laplace{2}, v::AbstractVector, i::Int)
     h = Grid.spacings(L.grid)
@@ -69,10 +71,10 @@ function apply(L::Laplace{2}, v::AbstractVector, i::Int)
     I = ci[i]
 
     # 2nd x-derivative
-    vx = view(v, view(li,:,I[2]))
+    vx = uview(v, uview(li,:,I[2]))
     uᵢ  = apply(L.op, h[1], vx , I[1])
     # 2nd y-derivative
-    vy = view(v, view(li,I[1],:))
+    vy = uview(v, uview(li,I[1],:))
     uᵢ += apply(L.op, h[2], vy, I[2])
 
     return uᵢ
