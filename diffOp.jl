@@ -33,30 +33,22 @@ function apply(c::Penalty, g, i::Int)
 end
 
 # Differential operator for a*d^2/dx^2
-struct Laplace1D <: DiffOp
-    grid::Grid.EquidistantGrid
-    a::Real
+struct Laplace{D, T<:Real} <: DiffOp
+    grid::Grid.EquidistantGrid{D,T}
+    a::T
     op::D2{Float64}
 end
 
 # u = L*v
-function apply!(L::Laplace1D, u::AbstractVector, v::AbstractVector)
+function apply!(L::Laplace{1}, u::AbstractVector, v::AbstractVector)
     h = Grid.spacings(L.grid)[1]
     apply!(L.op, u, v, h)
     u .= L.a * u
     return nothing
 end
 
-
-# Differential operator for a*d^2/dx^2 + a*d^2/dy^2
-struct Laplace2D <: DiffOp
-    grid::Grid.EquidistantGrid
-    a::Real
-    op::D2{Float64}
-end
-
 # u = L*v
-function apply!(L::Laplace2D, u::AbstractVector, v::AbstractVector)
+function apply!(L::Laplace{2}, u::AbstractVector, v::AbstractVector)
     u .= 0*u
     h = Grid.spacings(L.grid)
 
