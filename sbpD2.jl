@@ -26,10 +26,10 @@ end
     even = 1
 end
 
-struct D2{T} <: ConstantStencilOperator
+struct D2{T,N,M,K} <: ConstantStencilOperator
     quadratureClosure::Vector{T}
-    innerStencil::Stencil
-    closureStencils::Vector{Stencil} # TBD: Should this be a tuple?
+    innerStencil::Stencil{T,N}
+    closureStencils::NTuple{M, Stencil{T,K}}
     eClosure::Vector{T}
     dClosure::Vector{T}
     parity::Parity
@@ -48,7 +48,7 @@ function readOperator(D2fn, Hfn)
     width = length(innerStencilWeights)
     r = (-div(width,2), div(width,2))
 
-    innerStencil = Stencil(r, innerStencilWeights)
+    innerStencil = Stencil(r, Tuple(innerStencilWeights))
 
     # Create boundary stencils
     boundarySize = length(d["boundary_stencils"])
@@ -58,7 +58,7 @@ function readOperator(D2fn, Hfn)
         stencilWeights = stringToVector(Float64, d["boundary_stencils"][i])
         width = length(stencilWeights)
         r = (1-i,width-i)
-        push!(closureStencils,Stencil(r, stencilWeights))
+        closureStencils = (closureStencils..., Stencil(r, Tuple(stencilWeights)))
     end
 
     d2 = D2(

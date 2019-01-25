@@ -33,10 +33,10 @@ function apply(c::Penalty, g, i::Int)
 end
 
 # Differential operator for a*d^2/dx^2
-struct Laplace{D, T<:Real} <: DiffOp
-    grid::Grid.EquidistantGrid{D,T}
+struct Laplace{Dim,T<:Real,N,M,K} <: DiffOp
+    grid::Grid.EquidistantGrid{Dim,T}
     a::T
-    op::D2{Float64}
+    op::D2{Float64,N,M,K}
 end
 
 # u = L*v
