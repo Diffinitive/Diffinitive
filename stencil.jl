@@ -1,19 +1,11 @@
-struct Stencil{T<:Real}
-    range::NTuple{2,Int}
-    weights::Vector{T} # Should this be a tuple?? (Check type stability)
-
-    function Stencil(range, weights)
-        width = range[2]-range[1]+1
-        if width != length(weights)
-            error("The width and the number of weights must be the same")
-        end
-        new{eltype(weights)}(range, weights)
-    end
+struct Stencil{T<:Real,N}
+    range::Tuple{Int,Int}
+    weights::NTuple{N,T}
 end
 
 function flip(s::Stencil)
     range = (-s.range[2], -s.range[1])
-    s = Stencil(range, s.weights[end:-1:1])
+    return Stencil(range, reverse(s.weights))
 end
 
 # Provides index into the Stencil based on offset for the root element

@@ -47,10 +47,10 @@ function apply(D::DiffOp, v::AbstractVector)::AbstractVector
     return u
 end
 
-struct Laplace{Dim,T<:Real} <: DiffOp
+struct Laplace{Dim,T<:Real,N,M,K} <: DiffOp
     grid::Grid.EquidistantGrid{Dim,T}
     a::T
-    op::D2{Float64}
+    op::D2{Float64,N,M,K}
 end
 
 # u = L*v
