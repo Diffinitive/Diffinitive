@@ -49,6 +49,10 @@ function spacings(grid::EquidistantGrid)
     return abs.(grid.limit_upper.-grid.limit_lower)./(grid.numberOfPointsPerDim.-1)
 end
 
+function Base.eachindex(grid::EquidistantGrid)
+    CartesianIndices(grid.numberOfPointsPerDim)
+end
+
 # Computes the points of an EquidistantGrid as a vector of tuples. The vector is ordered
 # such that points in the first coordinate direction varies first, then the second
 # and lastely the third (if applicable)
@@ -56,22 +60,10 @@ end
 # @Input: grid - an EquidistantGrid
 # @Return: points - the points of the grid.
 function points(grid::EquidistantGrid)
-    dx̄ = (grid.limit_upper.-grid.limit_lower)./(grid.numberOfPointsPerDim.-1)
-
-    points = Vector{typeof(dx̄)}(undef, numberOfPoints(grid))
-    # Compute the points based on their Cartesian indices and the signed
-    # grid spacings
-    cartesianIndices = CartesianIndices(grid.numberOfPointsPerDim)
-    for i ∈ 1:numberOfPoints(grid)
-        ci = Tuple(cartesianIndices[i]) .-1
-        points[i] = grid.limit_lower .+ dx̄.*ci
-    end
-
-    # TBD: Keep? this? How do we want to represent points in 1D?
-    if numberOfDimensions(grid) == 1
-        points = broadcast(x -> x[1], points)
-    end
-    return points
+    # TODO: Make this return an abstract array?
+    physical_domain_size = (grid.limit_upper .- grid.limit_lower)
+    indices = Tuple.(CartesianIndices(grid.numberOfPointsPerDim))
+    return broadcast(I -> grid.limit_lower .+ physical_domain_size.*(I.-1), indices)
 end
 
 function pointsalongdim(grid::EquidistantGrid, dim::Integer)

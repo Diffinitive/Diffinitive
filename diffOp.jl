@@ -1,5 +1,6 @@
 abstract type DiffOp end
 
+# TBD: The "error("not implemented")" thing seems to be hiding good error information. How to fix that? Different way of saying that these should be implemented?
 function apply(D::DiffOp, v::AbstractVector, i::Int)
     error("not implemented")
 end
@@ -32,10 +33,12 @@ function apply(c::Penalty, g, i::Int)
     error("not implemented")
 end
 
-# DiffOp must have a grid!!!
-function apply!(D::DiffOp, u::AbstractVector, v::AbstractVector)
-    for i ∈ 1:Grid.numberOfPoints(D.grid)
-        u[i] = apply(D, v, i)
+abstract type DiffOpCartesian{Dim} <: DiffOp end
+
+# DiffOp must have a grid of dimension Dim!!!
+function apply!(D::DiffOpCartesian{Dim}, u::AbstractArray{T,Dim}, v::AbstractArray{T,Dim}) where {T,Dim}
+    for I ∈ eachindex(D.grid)
+        u[I] = apply(D, v, I)
     end
 
     return nothing
@@ -47,10 +50,14 @@ function apply(D::DiffOp, v::AbstractVector)::AbstractVector
     return u
 end
 
-struct Laplace{Dim,T<:Real,N,M,K} <: DiffOp
+struct Laplace{Dim,T<:Real,N,M,K} <: DiffOpCartesian{Dim}
     grid::Grid.EquidistantGrid{Dim,T}
     a::T
     op::D2{Float64,N,M,K}
+end
+
+function apply(L::Laplace{Dim}, v::AbstractArray{T,Dim} where T, I::CartesianIndex{Dim}) where Dim
+    error("not implemented")
 end
 
 # u = L*v
@@ -63,19 +70,15 @@ end
 using UnsafeArrays
 
 # u = L*v
-function apply(L::Laplace{2}, v::AbstractVector, i::Int)
+function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::CartesianIndex{2})
     h = Grid.spacings(L.grid)
 
-    li = LinearIndices(L.grid.numberOfPointsPerDim)
-    ci = CartesianIndices(L.grid.numberOfPointsPerDim)
-    I = ci[i]
-
     # 2nd x-derivative
-    @inbounds vx = uview(v, uview(li,:,I[2]))
-    uᵢ  = apply(L.op, h[1], vx , I[1])
+    @inbounds vx = uview(v, :, I[2])
+    @inbounds uᵢ  = apply(L.op, h[1], vx , I[1])
     # 2nd y-derivative
-    @inbounds vy = uview(v, uview(li,I[1],:))
-    uᵢ += apply(L.op, h[2], vy, I[2])
+    @inbounds vy = uview(v, I[1], :)
+    @inbounds uᵢ += apply(L.op, h[2], vy, I[2])
 
     return uᵢ
 end
