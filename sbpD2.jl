@@ -1,18 +1,33 @@
 abstract type ConstantStencilOperator end
 
+# Apply for different regions Lower/Interior/Upper
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Lower})
+    return @inbounds apply(op.closureStencils[Int(i)], v, Int(i))/h^2
+end
+
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Interior})
+    return @inbounds apply(op.innerStencil, v, Int(i))/h^2
+end
+
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Upper})
+    N = length(v)
+    return @inbounds Int(op.parity)*apply(flip(op.closureStencils[N-Int(i)+1]), v, Int(i))/h^2
+end
+
+# Wrapper functions for using regular indecies without specifying regions
 @inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Int)
     cSize = closureSize(op)
     N = length(v)
 
-    if i ∈ range(1; length=cSize)
-        @inbounds uᵢ = apply(op.closureStencils[i], v, i)/h^2
-    elseif i ∈ range(N - cSize+1, length=cSize)
-        @inbounds uᵢ = Int(op.parity)*apply(flip(op.closureStencils[N-i+1]), v, i)/h^2
+    if 0 < i <= cSize
+        return apply(op, h, v, Index{Lower}(i))
+    elseif cSize < i <= N-cSize
+        return apply(op, h, v, Index{Interior}(i))
+    elseif N-cSize < i <= N
+        return apply(op, h, v, Index{Upper}(i))
     else
-        @inbounds uᵢ = apply(op.innerStencil, v, i)/h^2
+        error("Bounds error") # TODO: Make this more standard
     end
-
-    return uᵢ
 end
 
 @enum Parity begin
