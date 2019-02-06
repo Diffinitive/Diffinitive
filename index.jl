@@ -2,6 +2,7 @@ abstract type Region end
 struct Interior <: Region end
 struct Lower    <: Region end
 struct Upper    <: Region end
+struct Unknown  <: Region end
 
 struct Index{R<:Region, T<:Integer}
     i::T

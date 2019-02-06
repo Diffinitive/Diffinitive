@@ -1,6 +1,6 @@
 abstract type ConstantStencilOperator end
 
-# Apply for different regions Lower/Interior/Upper
+# Apply for different regions Lower/Interior/Upper or Unknown region
 @inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Lower})
     return @inbounds apply(op.closureStencils[Int(i)], v, Int(i))/h^2
 end
@@ -14,10 +14,11 @@ end
     return @inbounds Int(op.parity)*apply(flip(op.closureStencils[N-Int(i)+1]), v, Int(i))/h^2
 end
 
-# Wrapper functions for using regular indecies without specifying regions
-@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Int)
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, index::Index{Unknown})
     cSize = closureSize(op)
     N = length(v)
+
+    i = Int(index)
 
     if 0 < i <= cSize
         return apply(op, h, v, Index{Lower}(i))
@@ -28,6 +29,11 @@ end
     else
         error("Bounds error") # TODO: Make this more standard
     end
+end
+
+# Wrapper functions for using regular indecies without specifying regions
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Int)
+    return apply(op, h, v, Index{Unknown}(i))
 end
 
 @enum Parity begin
