@@ -69,16 +69,21 @@ end
 
 using UnsafeArrays
 
-# u = L*v
-function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::CartesianIndex{2})
+function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}}) where {R1, R2}
     h = Grid.spacings(L.grid)
 
     # 2nd x-derivative
-    @inbounds vx = uview(v, :, I[2])
+    @inbounds vx = uview(v, :, Int(I[2]))
     @inbounds uᵢ  = apply(L.op, h[1], vx , I[1])
     # 2nd y-derivative
-    @inbounds vy = uview(v, I[1], :)
+    @inbounds vy = uview(v, Int(I[1]), :)
     @inbounds uᵢ += apply(L.op, h[2], vy, I[2])
 
     return uᵢ
+end
+
+# Slow but maybe convenient?
+function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, i::CartesianIndex{2})
+    I = Index{Unknown}.(Tuple(i))
+    apply(L, v, I)
 end
