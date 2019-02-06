@@ -59,21 +59,21 @@ function readOperator(D2fn, Hfn)
     h = readSectionedFile(Hfn)
 
     # Create inner stencil
-    innerStencilWeights = stringToVector(Float64, d["inner_stencil"][1])
+    innerStencilWeights = stringToTuple(Float64, d["inner_stencil"][1])
     width = length(innerStencilWeights)
     r = (-div(width,2), div(width,2))
 
-    innerStencil = Stencil(r, Tuple(innerStencilWeights))
+    innerStencil = Stencil(r, innerStencilWeights)
 
     # Create boundary stencils
     boundarySize = length(d["boundary_stencils"])
     closureStencils = Vector{typeof(innerStencil)}() # TBD: is the the right way to get the correct type?
 
     for i ∈ 1:boundarySize
-        stencilWeights = stringToVector(Float64, d["boundary_stencils"][i])
+        stencilWeights = stringToTuple(Float64, d["boundary_stencils"][i])
         width = length(stencilWeights)
         r = (1-i,width-i)
-        closureStencils = (closureStencils..., Stencil(r, Tuple(stencilWeights)))
+        closureStencils = (closureStencils..., Stencil(r, stencilWeights))
     end
 
     d2 = D2(
@@ -111,6 +111,10 @@ function readSectionedFile(filename)::Dict{String, Vector{String}}
     end
 
     return sections
+end
+
+function stringToTuple(T::DataType, s::String)
+    return Tuple(stringToVector(T,s))
 end
 
 function stringToVector(T::DataType, s::String)
