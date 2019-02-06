@@ -42,11 +42,11 @@ end
 end
 
 struct D2{T,N,M,K} <: ConstantStencilOperator
-    quadratureClosure::Vector{T}
+    quadratureClosure::NTuple{M,T}
     innerStencil::Stencil{T,N}
-    closureStencils::NTuple{M, Stencil{T,K}}
-    eClosure::Vector{T}
-    dClosure::Vector{T}
+    closureStencils::NTuple{M,Stencil{T,K}}
+    eClosure::NTuple{M,T}
+    dClosure::NTuple{M,T}
     parity::Parity
 end
 
@@ -76,12 +76,16 @@ function readOperator(D2fn, Hfn)
         closureStencils = (closureStencils..., Stencil(r, stencilWeights))
     end
 
+    quadratureClosure = pad_tuple(stringToTuple(Float64, h["closure"][1]), boundarySize)
+    eClosure = pad_tuple(stringToTuple(Float64, d["e"][1]), boundarySize)
+    dClosure = pad_tuple(stringToTuple(Float64, d["d1"][1]), boundarySize)
+
     d2 = D2(
-        stringToVector(Float64, h["closure"][1]),
+        quadratureClosure,
         innerStencil,
         closureStencils,
-        stringToVector(Float64, d["e"][1]),
-        stringToVector(Float64, d["d1"][1]),
+        eClosure,
+        dClosure,
         even
     )
 
@@ -119,4 +123,13 @@ end
 
 function stringToVector(T::DataType, s::String)
     return T.(eval.(Meta.parse.(split(s))))
+end
+
+
+function pad_tuple(t::NTuple{N, T}, n::Integer) where {N,T}
+    if N >= n
+        return t
+    else
+        return pad_tuple((t..., zero(T)), n)
+    end
 end
