@@ -1,0 +1,7 @@
+# TODO
+
+Kolla att vi har @inbounds och @propagate_inbounds på rätt ställen
+Kolla att vi gör boundschecks överallt och att de är markerade med @boundscheck
+Kolla att vi har @inline på rätt ställen
+
+Ändra namn på variabler och funktioner så att det följer style-guide
