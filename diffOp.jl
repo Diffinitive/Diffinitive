@@ -67,18 +67,35 @@ function apply(L::Laplace{1}, v::AbstractVector, i::Int)
     return uᵢ
 end
 
-using UnsafeArrays
+function apply!(L::Laplace{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}) where T
+    regions = (Lower, Interior, Upper)
+    for r1 ∈ regions
+        for r2 ∈ regions
+            apply!(L, u, v, r1, r2)
+        end
+    end
+    return nothing
+end
 
+function apply!(L::Laplace{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::R1, r2::R2) where {T, R1, R2}
+    N = L.grid.numberOfPointsPerDim;
+    closuresize = closureSize(L.op);
+    for I ∈ regionindices(N, closuresize, (r1,r2))
+        @inbounds indextuple = (Index(I[1], r1), Index(I[2], r2))
+        @inbounds u[I] = apply(L, v, indextuple)
+    end
+    return nothing
+end
+
+using UnsafeArrays
 function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}}) where {R1, R2}
     h = Grid.spacings(L.grid)
-
     # 2nd x-derivative
     @inbounds vx = uview(v, :, Int(I[2]))
-    @inbounds uᵢ  = apply(L.op, h[1], vx , I[1])
+    @inbounds uᵢ = L.a*apply(L.op, h[1], vx , I[1])
     # 2nd y-derivative
     @inbounds vy = uview(v, Int(I[1]), :)
-    @inbounds uᵢ += apply(L.op, h[2], vy, I[2])
-
+    @inbounds uᵢ += L.a*apply(L.op, h[2], vy, I[2])
     return uᵢ
 end
 

@@ -38,3 +38,25 @@ function Index(i::Integer, boundary_width::Integer, dim_size::Integer)
 end
 
 IndexTuple(t::Vararg{Tuple{T, DataType}}) where T<:Integer = Index.(t)
+
+function regionindices(gridsize::NTuple{Dim,Integer}, closuresize::Integer, region::NTuple{Dim,DataType}) where Dim
+    return regionindices(gridsize, ntuple(x->closuresize,Dim), region)
+end
+
+function regionindices(gridsize::NTuple{Dim,Integer}, closuresize::NTuple{Dim,Integer}, region::NTuple{Dim,DataType}) where Dim
+    regions = map(getunitrange,gridsize,closuresize,region)
+    return CartesianIndices(regions)
+end
+
+function getunitrange(gridsize::Integer, closuresize::Integer, region::R) where R
+    if region == Lower
+        r = 1:closuresize
+    elseif region == Interior
+        r = (closuresize+1):(gridsize - closuresize)
+    elseif region == Upper
+        r = (gridsize - closuresize + 1):gridsize
+    else
+        error("Unspecified region")
+    end
+    return r
+end
