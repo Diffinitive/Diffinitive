@@ -44,6 +44,29 @@ function apply!(D::DiffOpCartesian{Dim}, u::AbstractArray{T,Dim}, v::AbstractArr
     return nothing
 end
 
+function apply!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}) where T
+    apply!(D, u, v, Lower, Lower)
+    apply!(D, u, v, Lower, Interior)
+    apply!(D, u, v, Lower, Upper)
+    apply!(D, u, v, Interior, Lower)
+    apply!(D, u, v, Interior, Interior)
+    apply!(D, u, v, Interior, Upper)
+    apply!(D, u, v, Upper, Lower)
+    apply!(D, u, v, Upper, Interior)
+    apply!(D, u, v, Upper, Upper)
+    return nothing
+end
+
+function apply!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
+    N = D.grid.numberOfPointsPerDim
+    closuresize = closureSize(D.op)
+    for I ∈ regionindices(N, closuresize, (r1,r2))
+        @inbounds indextuple = (Index(I[1], r1), Index(I[2], r2))
+        @inbounds u[I] = apply(D, v, indextuple)
+    end
+    return nothing
+end
+
 function apply(D::DiffOp, v::AbstractVector)::AbstractVector
     u = zeros(eltype(v), size(v))
     apply!(D,v,u)
@@ -65,29 +88,6 @@ function apply(L::Laplace{1}, v::AbstractVector, i::Int)
     h = Grid.spacings(L.grid)[1]
     uᵢ = L.a * apply(L.op, h, v, i)
     return uᵢ
-end
-
-function apply!(L::Laplace{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}) where T
-    apply!(L, u, v, Lower, Lower)
-    apply!(L, u, v, Lower, Interior)
-    apply!(L, u, v, Lower, Upper)
-    apply!(L, u, v, Interior, Lower)
-    apply!(L, u, v, Interior, Interior)
-    apply!(L, u, v, Interior, Upper)
-    apply!(L, u, v, Upper, Lower)
-    apply!(L, u, v, Upper, Interior)
-    apply!(L, u, v, Upper, Upper)
-    return nothing
-end
-
-function apply!(L::Laplace{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
-    N = L.grid.numberOfPointsPerDim
-    closuresize = closureSize(L.op)
-    for I ∈ regionindices(N, closuresize, (r1,r2))
-        @inbounds indextuple = (Index(I[1], r1), Index(I[2], r2))
-        @inbounds u[I] = apply(L, v, indextuple)
-    end
-    return nothing
 end
 
 using UnsafeArrays
