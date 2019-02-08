@@ -68,12 +68,15 @@ function apply(L::Laplace{1}, v::AbstractVector, i::Int)
 end
 
 function apply!(L::Laplace{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}) where T
-    regions = (Lower, Interior, Upper)
-    for r1 ∈ regions
-        for r2 ∈ regions
-            apply!(L, u, v, r1, r2)
-        end
-    end
+    apply!(L, u, v, Lower, Lower)
+    apply!(L, u, v, Lower, Interior)
+    apply!(L, u, v, Lower, Upper)
+    apply!(L, u, v, Interior, Lower)
+    apply!(L, u, v, Interior, Interior)
+    apply!(L, u, v, Interior, Upper)
+    apply!(L, u, v, Upper, Lower)
+    apply!(L, u, v, Upper, Interior)
+    apply!(L, u, v, Upper, Upper)
     return nothing
 end
 
