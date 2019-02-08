@@ -67,6 +67,34 @@ function apply_region!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::Abstract
     return nothing
 end
 
+function apply_tiled!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}) where T
+    apply_region_tiled!(D, u, v, Lower, Lower)
+    apply_region_tiled!(D, u, v, Lower, Interior)
+    apply_region_tiled!(D, u, v, Lower, Upper)
+    apply_region_tiled!(D, u, v, Interior, Lower)
+    apply_region_tiled!(D, u, v, Interior, Interior)
+    apply_region_tiled!(D, u, v, Interior, Upper)
+    apply_region_tiled!(D, u, v, Upper, Lower)
+    apply_region_tiled!(D, u, v, Upper, Interior)
+    apply_region_tiled!(D, u, v, Upper, Upper)
+    return nothing
+end
+
+using TiledIteration
+function apply_region_tiled!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
+    N = D.grid.numberOfPointsPerDim
+    closuresize = closureSize(D.op)
+    ri = regionindices(N, closuresize, (r1,r2))
+
+    for tileaxs ∈ TileIterator(axes(ri), padded_tilesize(T, (5,5), 2)) # TBD: Is this the right way, the right size?
+        for i ∈ tileaxs[1], j ∈ tileaxs[2]
+            I = ri[i,j]
+            u[i,j] = apply(D, v, (Index{r1}(I[1]), Index{r2}(I[2])))
+        end
+    end
+    return nothing
+end
+
 function apply(D::DiffOp, v::AbstractVector)::AbstractVector
     u = zeros(eltype(v), size(v))
     apply!(D,v,u)
