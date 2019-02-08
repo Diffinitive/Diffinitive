@@ -66,7 +66,7 @@ end
 
 @inline function apply!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}, ri::CartesianIndices{2}) where T
     for I ∈ ri
-        @inbounds indextuple = (Index(I[1], r1), Index(I[2], r2))
+        @inbounds indextuple = (Index{r1}(I[1]), Index{r2}(I[2]))
         @inbounds u[I] = apply(D, v, indextuple)
     end
     return nothing
