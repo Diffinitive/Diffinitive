@@ -77,10 +77,11 @@ function apply!(L::Laplace{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}) whe
     return nothing
 end
 
-function apply!(L::Laplace{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::R1, r2::R2) where {T, R1, R2}
-    N = L.grid.numberOfPointsPerDim;
-    closuresize = closureSize(L.op);
-    for I ∈ regionindices(N, closuresize, (r1,r2))
+function apply!(L::Laplace{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
+    N = L.grid.numberOfPointsPerDim
+    closuresize = closureSize(L.op)
+    regionTuple = (r1,r2)
+    for I ∈ regionindices(N, closuresize, regionTuple)
         @inbounds indextuple = (Index(I[1], r1), Index(I[2], r2))
         @inbounds u[I] = apply(L, v, indextuple)
     end
