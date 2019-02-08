@@ -57,10 +57,15 @@ function apply!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T
     return nothing
 end
 
-function apply!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
+@inline function apply!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
     N = D.grid.numberOfPointsPerDim
     closuresize = closureSize(D.op)
-    for I ∈ regionindices(N, closuresize, (r1,r2))
+    apply!(D, u, v, r1, r2, regionindices(N, closuresize, (r1,r2)))
+    return nothing
+end
+
+@inline function apply!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}, ri::CartesianIndices{2}) where T
+    for I ∈ ri
         @inbounds indextuple = (Index(I[1], r1), Index(I[2], r2))
         @inbounds u[I] = apply(D, v, indextuple)
     end
