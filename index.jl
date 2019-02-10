@@ -48,15 +48,6 @@ function regionindices(gridsize::NTuple{Dim,Integer}, closuresize::NTuple{Dim,In
     return CartesianIndices(regions)
 end
 
-function getrange(gridsize::Integer, closuresize::Integer, region::Type{<:Region})
-    if region == Lower
-        r = 1:closuresize
-    elseif region == Interior
-        r = (closuresize+1):(gridsize - closuresize)
-    elseif region == Upper
-        r = (gridsize - closuresize + 1):gridsize
-    else
-        error("Unspecified region")
-    end
-    return r
-end
+getrange(gridsize::Integer, closuresize::Integer, ::Type{Lower}   ) = 1:closuresize
+getrange(gridsize::Integer, closuresize::Integer, ::Type{Interior}) = (closuresize+1):(gridsize - closuresize)
+getrange(gridsize::Integer, closuresize::Integer, ::Type{Upper}   ) = (gridsize - closuresize + 1):gridsize
