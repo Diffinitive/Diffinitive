@@ -44,11 +44,11 @@ function regionindices(gridsize::NTuple{Dim,Integer}, closuresize::Integer, regi
 end
 
 function regionindices(gridsize::NTuple{Dim,Integer}, closuresize::NTuple{Dim,Integer}, region::NTuple{Dim,DataType}) where Dim
-    regions = map(getunitrange,gridsize,closuresize,region)
+    regions = map(getrange,gridsize,closuresize,region)
     return CartesianIndices(regions)
 end
 
-function getunitrange(gridsize::Integer, closuresize::Integer, region::R) where R
+function getrange(gridsize::Integer, closuresize::Integer, region::Type{<:Region})
     if region == Lower
         r = 1:closuresize
     elseif region == Interior
