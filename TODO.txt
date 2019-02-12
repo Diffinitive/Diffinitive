@@ -5,3 +5,8 @@ Kolla att vi gör boundschecks överallt och att de är markerade med @boundsche
 Kolla att vi har @inline på rätt ställen
 
 Ändra namn på variabler och funktioner så att det följer style-guide
+
+Profilera
+
+Konvertera till paket
+Skriv tester
