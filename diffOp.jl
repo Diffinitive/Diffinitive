@@ -119,14 +119,13 @@ function apply(L::Laplace{1}, v::AbstractVector, i::Int)
     return uᵢ
 end
 
-using UnsafeArrays
 function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}}) where {R1, R2}
     h = Grid.spacings(L.grid)
     # 2nd x-derivative
-    @inbounds vx = uview(v, :, Int(I[2]))
+    @inbounds vx = view(v, :, Int(I[2]))
     @inbounds uᵢ = L.a*apply(L.op, h[1], vx , I[1])
     # 2nd y-derivative
-    @inbounds vy = uview(v, Int(I[1]), :)
+    @inbounds vy = view(v, Int(I[1]), :)
     @inbounds uᵢ += L.a*apply(L.op, h[2], vy, I[2])
     return uᵢ
 end
