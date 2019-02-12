@@ -88,7 +88,7 @@ function apply_region_tiled!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::Ab
     ri = regionindices(N, closuresize, (r1,r2))
 
     for tileaxs ∈ TileIterator(axes(ri), padded_tilesize(T, (5,5), 2)) # TBD: Is this the right way, the right size?
-        for i ∈ tileaxs[1], j ∈ tileaxs[2]
+        for j ∈ tileaxs[2], i ∈ tileaxs[1]
             I = ri[i,j]
             u[i,j] = apply(D, v, (Index{r1}(I[1]), Index{r2}(I[2])))
         end
