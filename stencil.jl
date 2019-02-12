@@ -25,3 +25,12 @@ Base.@propagate_inbounds function apply(s::Stencil, v::AbstractVector, i::Int)
     end
     return w
 end
+
+Base.@propagate_inbounds function apply_backwards(s::Stencil, v::AbstractVector, i::Int)
+    w = zero(eltype(v))
+    for j ∈ s.range[2]:-1:s.range[1]
+        @inbounds weight = s[j]
+        w += weight*v[i-j]
+    end
+    return w
+end

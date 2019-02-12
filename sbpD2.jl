@@ -11,7 +11,7 @@ end
 
 @inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Upper})
     N = length(v)
-    return @inbounds Int(op.parity)*apply(flip(op.closureStencils[N-Int(i)+1]), v, Int(i))/h^2
+    return @inbounds Int(op.parity)*apply_backwards(op.closureStencils[N-Int(i)+1], v, Int(i))/h^2
 end
 
 @inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, index::Index{Unknown})
