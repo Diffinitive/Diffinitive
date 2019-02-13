@@ -1,10 +1,6 @@
 abstract type AbstractGrid end
 
-function numberOfDimensions(grid::AbstractGrid)
-    error("Not implemented for abstact type AbstractGrid")
-end
-
-function numberOfPoints(grid::AbstractGrid)
+function dimension(grid::AbstractGrid)
     error("Not implemented for abstact type AbstractGrid")
 end
 

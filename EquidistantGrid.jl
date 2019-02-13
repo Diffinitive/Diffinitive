@@ -5,52 +5,30 @@
 # the domain is defined as (-1,1)x(0,2).
 
 struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
-    numberOfPointsPerDim::NTuple{Dim, Int} # First coordinate direction stored first, then
-
+    size::NTuple{Dim, Int} # First coordinate direction stored first
     limit_lower::NTuple{Dim, T}
     limit_upper::NTuple{Dim, T}
+    spacing::NTuple{Dim, T}
 
     # General constructor
-    function EquidistantGrid(nPointsPerDim::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}) where Dim where T
-        @assert all(nPointsPerDim.>0)
+    function EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}) where Dim where T
+        @assert all(size.>0)
         @assert all(limit_upper.-limit_lower .!= 0)
-        return new{Dim,T}(nPointsPerDim, limit_lower, limit_upper)
+        spacing = abs.(limit_upper.-limit_lower)./(size.-1)
+        return new{Dim,T}(size, limit_lower, limit_upper, spacing)
     end
-
-    # # 1D constructor which can be called as EquidistantGrid(m, (xl,xr))
-    # function EquidistantGrid(nPointsPerDim::Integer, lims::NTuple{2,Real})
-    #     return EquidistantGrid((nPointsPerDim,), ((lims[1],),(lims[2],)))
-    # end
-
 end
 
 # Returns the number of dimensions of an EquidistantGrid.
 #
 # @Input: grid - an EquidistantGrid
-# @Return: numberOfPoints - The number of dimensions
-function numberOfDimensions(grid::EquidistantGrid)
-    return length(grid.numberOfPointsPerDim)
-end
-
-# Computes the total number of points of an EquidistantGrid.
-#
-# @Input: grid - an EquidistantGrid
-# @Return: numberOfPoints - The total number of points
-function numberOfPoints(grid::EquidistantGrid)
-    return prod(grid.numberOfPointsPerDim)
-end
-
-# Computes the grid spacing of an EquidistantGrid, i.e the unsigned distance
-# between two points for each coordinate direction.
-#
-# @Input: grid - an EquidistantGrid
-# @Return: h̄ - Grid spacing for each coordinate direction stored in a tuple.
-function spacings(grid::EquidistantGrid)
-    return abs.(grid.limit_upper.-grid.limit_lower)./(grid.numberOfPointsPerDim.-1)
+# @Return: dimension - The dimension of the grid
+function dimension(grid::EquidistantGrid)
+    return length(grid.size)
 end
 
 function Base.eachindex(grid::EquidistantGrid)
-    CartesianIndices(grid.numberOfPointsPerDim)
+    CartesianIndices(grid.size)
 end
 
 # Computes the points of an EquidistantGrid as a vector of tuples. The vector is ordered
@@ -62,28 +40,12 @@ end
 function points(grid::EquidistantGrid)
     # TODO: Make this return an abstract array?
     physical_domain_size = (grid.limit_upper .- grid.limit_lower)
-    indices = Tuple.(CartesianIndices(grid.numberOfPointsPerDim))
+    indices = Tuple.(CartesianIndices(grid.size))
     return broadcast(I -> grid.limit_lower .+ physical_domain_size.*(I.-1), indices)
 end
 
 function pointsalongdim(grid::EquidistantGrid, dim::Integer)
-    @assert dim<=numberOfDimensions(grid)
+    @assert dim<=dimension(grid)
     @assert dim>0
-    points = range(grid.limit_lower[dim],stop=grid.limit_lower[dim],length=grid.numberOfPointsPerDim[dim])
-end
-
-using PyPlot, PyCall
-
-function plotgridfunction(grid::EquidistantGrid, gridfunction)
-    if numberOfDimensions(grid) == 1
-        plot(pointsalongdim(grid,1), gridfunction, linewidth=2.0)
-    elseif numberOfDimensions(grid) == 2
-        mx = grid.numberOfPointsPerDim[1]
-        my = grid.numberOfPointsPerDim[2]
-        X = repeat(pointsalongdim(grid,1),1,my)
-        Y = permutedims(repeat(pointsalongdim(grid,2),1,mx))
-        plot_surface(X,Y,reshape(gridfunction,mx,my));
-    else
-        error(string("Plot not implemented for dimension ", string(numberOfDimensions(grid))))
-    end
+    points = range(grid.limit_lower[dim],stop=grid.limit_lower[dim],length=grid.size[dim])
 end
