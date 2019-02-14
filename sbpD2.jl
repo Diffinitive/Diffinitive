@@ -2,16 +2,16 @@ abstract type ConstantStencilOperator end
 
 # Apply for different regions Lower/Interior/Upper or Unknown region
 @inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Lower})
-    return @inbounds apply(op.closureStencils[Int(i)], v, Int(i))/h^2
+    return @inbounds h*h*apply(op.closureStencils[Int(i)], v, Int(i))
 end
 
 @inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Interior})
-    return @inbounds apply(op.innerStencil, v, Int(i))/h^2
+    return @inbounds h*h*apply(op.innerStencil, v, Int(i))
 end
 
 @inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Upper})
     N = length(v)
-    return @inbounds Int(op.parity)*apply_backwards(op.closureStencils[N-Int(i)+1], v, Int(i))/h^2
+    return @inbounds h*h*Int(op.parity)*apply_backwards(op.closureStencils[N-Int(i)+1], v, Int(i))
 end
 
 @inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, index::Index{Unknown})

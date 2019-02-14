@@ -17,13 +17,14 @@ end
 end
 
 Base.@propagate_inbounds @inline function apply(s::Stencil{T,N}, v::AbstractVector, i::Int) where {T,N}
-    w = zero(eltype(v))
-    @simd for k ∈ 1:N
+    w = s.weights[1]*v[i+ s.range[1]]
+    @simd for k ∈ 2:N
         w += s.weights[k]*v[i+ s.range[1] + k-1]
     end
     return w
 end
 
+# TODO: Fix loop unrolling here as well. Then we can also remove Base.getindex(::Stencil)
 Base.@propagate_inbounds @inline function apply_backwards(s::Stencil, v::AbstractVector, i::Int)
     w = zero(eltype(v))
     for j ∈ s.range[2]:-1:s.range[1]

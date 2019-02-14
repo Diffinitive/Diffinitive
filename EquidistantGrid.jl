@@ -8,15 +8,19 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
     size::NTuple{Dim, Int} # First coordinate direction stored first
     limit_lower::NTuple{Dim, T}
     limit_upper::NTuple{Dim, T}
-    spacing::NTuple{Dim, T}
+    inverse_spacing::NTuple{Dim, T} # The reciprocal of the grid spacing
 
     # General constructor
     function EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}) where Dim where T
         @assert all(size.>0)
         @assert all(limit_upper.-limit_lower .!= 0)
-        spacing = abs.(limit_upper.-limit_lower)./(size.-1)
-        return new{Dim,T}(size, limit_lower, limit_upper, spacing)
+        inverse_spacing = (size.-1)./abs.(limit_upper.-limit_lower)
+        return new{Dim,T}(size, limit_lower, limit_upper, inverse_spacing)
     end
+end
+
+function Base.eachindex(grid::EquidistantGrid)
+    CartesianIndices(grid.size)
 end
 
 # Returns the number of dimensions of an EquidistantGrid.
@@ -27,8 +31,10 @@ function dimension(grid::EquidistantGrid)
     return length(grid.size)
 end
 
-function Base.eachindex(grid::EquidistantGrid)
-    CartesianIndices(grid.size)
+# Returns the spacing of the grid
+#
+function spacing(grid::EquidistantGrid)
+    return 1.0./grid.inverse_spacing
 end
 
 # Computes the points of an EquidistantGrid as a vector of tuples. The vector is ordered

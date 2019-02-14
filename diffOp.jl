@@ -113,13 +113,13 @@ function apply(L::Laplace{1}, v::AbstractVector, i::Int)
     return uᵢ
 end
 
-function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}}) where {R1, R2}
+@inline function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}}) where {R1, R2}
     # 2nd x-derivative
     @inbounds vx = view(v, :, Int(I[2]))
-    @inbounds uᵢ = L.a*apply(L.op, L.grid.spacing[1], vx , I[1])
+    @inbounds uᵢ = L.a*apply(L.op, L.grid.inverse_spacing[1], vx , I[1])
     # 2nd y-derivative
     @inbounds vy = view(v, Int(I[1]), :)
-    @inbounds uᵢ += L.a*apply(L.op, L.grid.spacing[2], vy, I[2])
+    @inbounds uᵢ += L.a*apply(L.op, L.grid.inverse_spacing[2], vy, I[2])
     return uᵢ
 end
 
