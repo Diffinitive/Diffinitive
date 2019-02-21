@@ -1,6 +1,11 @@
 struct Stencil{T<:Real,N}
     range::Tuple{Int,Int}
     weights::NTuple{N,T}
+
+    function Stencil(range::Tuple{Int,Int},weights::NTuple{N,T}) where {T <: Real, N}
+        @assert range[2]-range[1]+1 == N
+        new{T,N}(range,weights)
+    end
 end
 
 function flip(s::Stencil)
