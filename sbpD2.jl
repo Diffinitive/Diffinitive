@@ -31,6 +31,7 @@ end
     end
 end
 
+
 # Wrapper functions for using regular indecies without specifying regions
 @inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Int)
     return apply(op, h, v, Index{Unknown}(i))
@@ -45,8 +46,8 @@ struct D2{T,N,M,K} <: ConstantStencilOperator
     quadratureClosure::NTuple{M,T}
     innerStencil::Stencil{T,N}
     closureStencils::NTuple{M,Stencil{T,K}}
-    eClosure::NTuple{M,T}
-    dClosure::NTuple{M,T}
+    eClosure::Stencil{T,M}
+    dClosure::Stencil{T,M}
     parity::Parity
 end
 
@@ -77,8 +78,8 @@ function readOperator(D2fn, Hfn)
     end
 
     quadratureClosure = pad_tuple(stringToTuple(Float64, h["closure"][1]), boundarySize)
-    eClosure = pad_tuple(stringToTuple(Float64, d["e"][1]), boundarySize)
-    dClosure = pad_tuple(stringToTuple(Float64, d["d1"][1]), boundarySize)
+    eClosure = Stencil((0,boundarySize-1), pad_tuple(stringToTuple(Float64, d["e"][1]), boundarySize))
+    dClosure = Stencil((0,boundarySize-1), pad_tuple(stringToTuple(Float64, d["d1"][1]), boundarySize))
 
     d2 = D2(
         quadratureClosure,
@@ -92,6 +93,23 @@ function readOperator(D2fn, Hfn)
     return d2
 end
 
+
+function apply_e(op::D2, v::AbstractVector, ::Type{Lower})
+    apply(op.eClosure,v,1)
+end
+
+function apply_e(op::D2, v::AbstractVector, ::Type{Upper})
+    apply(flip(op.eClosure),v,length(v))
+end
+
+
+function apply_d(op::D2, h::Real, v::AbstractVector, ::Type{Lower})
+    -apply(op.dClosure,v,1)/h
+end
+
+function apply_d(op::D2, h::Real, v::AbstractVector, ::Type{Upper})
+    -apply(flip(op.dClosure),v,length(v))/h
+end
 
 function readSectionedFile(filename)::Dict{String, Vector{String}}
     f = open(filename)
