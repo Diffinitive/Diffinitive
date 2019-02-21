@@ -128,3 +128,29 @@ function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, i::CartesianIndex{2
     I = Index{Unknown}.(Tuple(i))
     apply(L, v, I)
 end
+
+"""
+A BoundaryCondition should implement the method
+    sat(::DiffOp, v::AbstractArray, data::AbstractArray, ...)
+"""
+abstract type BoundaryCondition end
+
+struct Dirichlet <: BoundaryCondition
+    tau::Float64
+    # boundaryId??
+end
+
+struct Neumann <: BoundaryCondition
+    # boundaryId??
+end
+
+function sat(L::Laplace{2}, bc::Neumann, v::AbstractArray{T,2}, g::AbstractVector{T}, i::CartesianIndex{2})
+    # Hi * e * H_gamma * (d'*v - g)
+    # e, d, H_gamma applied based on bc.boundaryId
+end
+
+function sat(L::Laplace{2}, bc::Dirichlet, v::AbstractArray{T,2}, g::AbstractVector{T}, i::CartesianIndex{2})
+    # Hi * (tau/h*e + sig*d) * H_gamma * (e'*v - g)
+    # e, d, H_gamma applied based on bc.boundaryId
+end
+
