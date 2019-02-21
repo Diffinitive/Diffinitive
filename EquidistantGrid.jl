@@ -37,17 +37,16 @@ function spacing(grid::EquidistantGrid)
     return 1.0./grid.inverse_spacing
 end
 
-# Computes the points of an EquidistantGrid as a vector of tuples. The vector is ordered
-# such that points in the first coordinate direction varies first, then the second
-# and lastely the third (if applicable)
+# Computes the points of an EquidistantGrid as an array of tuples with
+# the same dimension as the grid.
 #
 # @Input: grid - an EquidistantGrid
 # @Return: points - the points of the grid.
 function points(grid::EquidistantGrid)
     # TODO: Make this return an abstract array?
-    physical_domain_size = (grid.limit_upper .- grid.limit_lower)
     indices = Tuple.(CartesianIndices(grid.size))
-    return broadcast(I -> grid.limit_lower .+ physical_domain_size.*(I.-1), indices)
+    h = spacing(grid)
+    return broadcast(I -> grid.limit_lower .+ (I.-1).*h, indices)
 end
 
 function pointsalongdim(grid::EquidistantGrid, dim::Integer)
