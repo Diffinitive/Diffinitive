@@ -82,10 +82,11 @@ end
 using TiledIteration
 function apply_region_tiled!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
     ri = regionindices(D.grid.size, closureSize(D.op), (r1,r2))
-    for tileaxs ∈ TileIterator(axes(ri), padded_tilesize(T, (5,5), 2)) # TBD: Is this the right way, the right size?
+    # TODO: Pass Tilesize to function
+    for tileaxs ∈ TileIterator(axes(ri), padded_tilesize(T, (5,5), 2))
         for j ∈ tileaxs[2], i ∈ tileaxs[1]
             I = ri[i,j]
-            u[i,j] = apply(D, v, (Index{r1}(I[1]), Index{r2}(I[2])))
+            u[I] = apply(D, v, (Index{r1}(I[1]), Index{r2}(I[2])))
         end
     end
     return nothing

@@ -1,17 +1,12 @@
-module sbpPlot
-using PyPlot, PyCall
-
-function plotgridfunction(grid::EquidistantGrid, gridfunction)
-    if dimension(grid) == 1
-        plot(pointsalongdim(grid,1), gridfunction, linewidth=2.0)
-    elseif dimension(grid) == 2
-        mx = grid.size[1]
-        my = grid.size[2]
-        X = repeat(pointsalongdim(grid,1),1,my)
-        Y = permutedims(repeat(pointsalongdim(grid,2),1,mx))
-        plot_surface(X,Y,reshape(gridfunction,mx,my));
+include("sbp.jl")
+using Makie
+import .sbp.Grid
+function plotgridfunction(grid::sbp.Grid.EquidistantGrid, gridfunction::AbstractArray)
+    if sbp.Grid.dimension(grid) == 1
+        plot(sbp.Grid.pointsalongdim(grid,1), gridfunction)
+    elseif sbp.Grid.dimension(grid) == 2
+        scene = surface(sbp.Grid.pointsalongdim(grid,1),sbp.Grid.pointsalongdim(grid,2), gridfunction)
     else
         error(string("Plot not implemented for dimension ", string(dimension(grid))))
     end
-end
 end
