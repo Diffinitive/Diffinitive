@@ -1,24 +1,40 @@
 abstract type ConstantStencilOperator end
 
-function apply!(op::ConstantStencilOperator, u::AbstractVector, v::AbstractVector, h::Real)
+# Apply for different regions Lower/Interior/Upper or Unknown region
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Lower})
+    return @inbounds h*h*apply(op.closureStencils[Int(i)], v, Int(i))
+end
+
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Interior})
+    return @inbounds h*h*apply(op.innerStencil, v, Int(i))
+end
+
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Index{Upper})
     N = length(v)
+    return @inbounds h*h*Int(op.parity)*apply_backwards(op.closureStencils[N-Int(i)+1], v, Int(i))
+end
+
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, index::Index{Unknown})
     cSize = closureSize(op)
+    N = length(v)
 
-    for i ∈ range(1; length=cSize)
-        u[i] = apply(op.closureStencils[i], v, i)/h^2
+    i = Int(index)
+
+    if 0 < i <= cSize
+        return apply(op, h, v, Index{Lower}(i))
+    elseif cSize < i <= N-cSize
+        return apply(op, h, v, Index{Interior}(i))
+    elseif N-cSize < i <= N
+        return apply(op, h, v, Index{Upper}(i))
+    else
+        error("Bounds error") # TODO: Make this more standard
     end
+end
 
-    innerStart = 1 + cSize
-    innerEnd = N - cSize
-    for i ∈ range(innerStart, stop=innerEnd)
-        u[i] = apply(op.innerStencil, v, i)/h^2
-    end
 
-    for i ∈ range(innerEnd+1, length=cSize)
-        u[i] = Int(op.parity)*apply(flip(op.closureStencils[N-i+1]), v, i)/h^2
-    end
-
-    return nothing
+# Wrapper functions for using regular indecies without specifying regions
+@inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, i::Int)
+    return apply(op, h, v, Index{Unknown}(i))
 end
 
 @enum Parity begin
@@ -27,11 +43,11 @@ end
 end
 
 struct D2{T,N,M,K} <: ConstantStencilOperator
-    quadratureClosure::Vector{T}
+    quadratureClosure::NTuple{M,T}
     innerStencil::Stencil{T,N}
-    closureStencils::NTuple{M, Stencil{T,K}}
-    eClosure::Vector{T}
-    dClosure::Vector{T}
+    closureStencils::NTuple{M,Stencil{T,K}}
+    eClosure::Stencil{T,M}
+    dClosure::Stencil{T,M}
     parity::Parity
 end
 
@@ -44,35 +60,56 @@ function readOperator(D2fn, Hfn)
     h = readSectionedFile(Hfn)
 
     # Create inner stencil
-    innerStencilWeights = stringToVector(Float64, d["inner_stencil"][1])
+    innerStencilWeights = stringToTuple(Float64, d["inner_stencil"][1])
     width = length(innerStencilWeights)
     r = (-div(width,2), div(width,2))
 
-    innerStencil = Stencil(r, Tuple(innerStencilWeights))
+    innerStencil = Stencil(r, innerStencilWeights)
 
     # Create boundary stencils
     boundarySize = length(d["boundary_stencils"])
-    closureStencils = Vector{Stencil}()
+    closureStencils = Vector{typeof(innerStencil)}() # TBD: is the the right way to get the correct type?
 
     for i ∈ 1:boundarySize
-        stencilWeights = stringToVector(Float64, d["boundary_stencils"][i])
+        stencilWeights = stringToTuple(Float64, d["boundary_stencils"][i])
         width = length(stencilWeights)
         r = (1-i,width-i)
-        closureStencils = (closureStencils..., Stencil(r, Tuple(stencilWeights)))
+        closureStencils = (closureStencils..., Stencil(r, stencilWeights))
     end
 
+    quadratureClosure = pad_tuple(stringToTuple(Float64, h["closure"][1]), boundarySize)
+    eClosure = Stencil((0,boundarySize-1), pad_tuple(stringToTuple(Float64, d["e"][1]), boundarySize))
+    dClosure = Stencil((0,boundarySize-1), pad_tuple(stringToTuple(Float64, d["d1"][1]), boundarySize))
+
     d2 = D2(
-        stringToVector(Float64, h["closure"][1]),
+        quadratureClosure,
         innerStencil,
         closureStencils,
-        stringToVector(Float64, d["e"][1]),
-        stringToVector(Float64, d["d1"][1]),
+        eClosure,
+        dClosure,
         even
     )
 
     return d2
 end
 
+
+function apply_e(op::D2, v::AbstractVector, ::Type{Lower})
+    apply(op.eClosure,v,1)
+end
+
+function apply_e(op::D2, v::AbstractVector, ::Type{Upper})
+    apply(flip(op.eClosure),v,length(v))
+end
+
+
+function apply_d(op::D2, h::Real, v::AbstractVector, ::Type{Lower})
+    -apply(op.dClosure,v,1)/h
+end
+
+function apply_d(op::D2, h::Real, v::AbstractVector, ::Type{Upper})
+    -apply(flip(op.dClosure),v,length(v))/h
+end
 
 function readSectionedFile(filename)::Dict{String, Vector{String}}
     f = open(filename)
@@ -98,6 +135,19 @@ function readSectionedFile(filename)::Dict{String, Vector{String}}
     return sections
 end
 
+function stringToTuple(T::DataType, s::String)
+    return Tuple(stringToVector(T,s))
+end
+
 function stringToVector(T::DataType, s::String)
     return T.(eval.(Meta.parse.(split(s))))
+end
+
+
+function pad_tuple(t::NTuple{N, T}, n::Integer) where {N,T}
+    if N >= n
+        return t
+    else
+        return pad_tuple((t..., zero(T)), n)
+    end
 end

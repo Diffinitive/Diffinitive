@@ -1,6 +1,11 @@
 struct Stencil{T<:Real,N}
     range::Tuple{Int,Int}
     weights::NTuple{N,T}
+
+    function Stencil(range::Tuple{Int,Int},weights::NTuple{N,T}) where {T <: Real, N}
+        @assert range[2]-range[1]+1 == N
+        new{T,N}(range,weights)
+    end
 end
 
 function flip(s::Stencil)
@@ -9,19 +14,25 @@ function flip(s::Stencil)
 end
 
 # Provides index into the Stencil based on offset for the root element
-function Base.getindex(s::Stencil, i::Int)
-    # TBD: Rearrange to mark with @boundscheck?
-    if s.range[1] <= i <= s.range[2]
-        return s.weights[1 + i - s.range[1]]
-    else
-        return 0
+@inline function Base.getindex(s::Stencil, i::Int)
+    @boundscheck if i < s.range[1] || s.range[2] < i
+        return eltype(s.weights)(0)
     end
+    return s.weights[1 + i - s.range[1]]
 end
 
-function apply(s::Stencil, v::AbstractVector, i::Int)
-    w = zero(eltype(v))
-    for j ∈ s.range[1]:s.range[2]
-        w += s[j]*v[i+j] # TBD: Make this without boundschecks?
+Base.@propagate_inbounds @inline function apply(s::Stencil{T,N}, v::AbstractVector, i::Int) where {T,N}
+    w = s.weights[1]*v[i + s.range[1]]
+    @simd for k ∈ 2:N
+        w += s.weights[k]*v[i + s.range[1] + k-1]
+    end
+    return w
+end
+
+Base.@propagate_inbounds @inline function apply_backwards(s::Stencil{T,N}, v::AbstractVector, i::Int) where {T,N}
+    w = s.weights[N]*v[i - s.range[2]]
+    @simd for k ∈ N-1:-1:1
+        w += s.weights[k]*v[i - s.range[1] - k + 1]
     end
     return w
 end
