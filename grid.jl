@@ -1,7 +1,7 @@
 module Grid
 
-# TODO: Where is this used?
-abstract type BoundaryId end
+abstract type BoundaryIdentifier end
+struct CartesianBoundary{Dim, R<:Region} <: BoundaryIdentifier end
 
 include("AbstractGrid.jl")
 include("EquidistantGrid.jl")
