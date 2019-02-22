@@ -39,6 +39,10 @@ end
 
 IndexTuple(t::Vararg{Tuple{T, DataType}}) where T<:Integer = Index.(t)
 
+# TODO: Use the values of the region structs, e.g. Lower(), for the region parameter instead of the types.
+# For example the following works:
+#   (Lower(),Upper()) isa NTuple{2, Region} -> true
+#   typeof((Lower(),Upper()))               -> Tuple{Lower,Upper}
 function regionindices(gridsize::NTuple{Dim,Integer}, closuresize::Integer, region::NTuple{Dim,DataType}) where Dim
     return regionindices(gridsize, ntuple(x->closuresize,Dim), region)
 end
