@@ -129,27 +129,56 @@ function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, i::CartesianIndex{2
     apply(L, v, I)
 end
 
+# Boundary operators
+
+function apply_e(L::Laplace{2}, v::AbstractArray{T,2} where T, ::CartesianBoundary{1,R}, j::Int) where R
+    @inbounds vy = view(v, :, j)
+    return apply_e(L.op,vy, R)
+end
+
+function apply_e(L::Laplace{2}, v::AbstractArray{T,2} where T, ::CartesianBoundary{2,R}, i::Int) where R
+    @inbounds vx = view(v, i, :)
+    return apply_e(L.op, vy, R)
+end
+
+function apply_d(L::Laplace{2}, v::AbstractArray{T,2} where T, ::CartesianBoundary{1,R}, j::Int) where R
+    @inbounds vy = view(v, :, j)
+    return apply_d(L.op,vy, R)
+end
+
+function apply_d(L::Laplace{2}, v::AbstractArray{T,2} where T, ::CartesianBoundary{2,R}, i::Int) where R
+    @inbounds vx = view(v, i, :)
+    return apply_d(L.op, vy, R)
+end
+
+
+function apply_e_T(L::Laplace{2}, v::AbstractArray{T,2} where T, boundaryId, i::Int)
+
+end
+
+function apply_d_T(L::Laplace{2}, v::AbstractArray{T,2} where T, boundaryId, i::Int)
+
+end
+
 """
 A BoundaryCondition should implement the method
     sat(::DiffOp, v::AbstractArray, data::AbstractArray, ...)
 """
 abstract type BoundaryCondition end
 
-struct Dirichlet <: BoundaryCondition
+struct Dirichlet{Id<:BoundaryIdentifier} <: BoundaryCondition
     tau::Float64
-    # boundaryId??
 end
 
-struct Neumann <: BoundaryCondition
-    # boundaryId??
+struct Neumann{Id<:BoundaryIdentifier} <: BoundaryCondition
 end
 
-function sat(L::Laplace{2}, bc::Neumann, v::AbstractArray{T,2}, g::AbstractVector{T}, i::CartesianIndex{2})
+function sat(L::Laplace{2}, bc::Neumann, v::AbstractArray{T,2} where T, g::AbstractVector{T}, i::CartesianIndex{2})
     # Hi * e * H_gamma * (d'*v - g)
     # e, d, H_gamma applied based on bc.boundaryId
 end
 
-function sat(L::Laplace{2}, bc::Dirichlet, v::AbstractArray{T,2}, g::AbstractVector{T}, i::CartesianIndex{2})
+function sat(L::Laplace{2}, bc::Dirichlet, v::AbstractArray{T,2} where T, g::AbstractVector{T}, i::CartesianIndex{2})
     # Hi * (tau/h*e + sig*d) * H_gamma * (e'*v - g)
     # e, d, H_gamma applied based on bc.boundaryId
 end
