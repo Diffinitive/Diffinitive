@@ -10,3 +10,5 @@ Profilera
 
 Konvertera till paket
 Skriv tester
+
+Specificera operatorer i TOML eller något liknande?

@@ -166,19 +166,20 @@ A BoundaryCondition should implement the method
 """
 abstract type BoundaryCondition end
 
-struct Dirichlet{Id<:BoundaryIdentifier} <: BoundaryCondition
+struct Dirichlet{Bid<:BoundaryIdentifier} <: BoundaryCondition
     tau::Float64
 end
 
-struct Neumann{Id<:BoundaryIdentifier} <: BoundaryCondition
+struct Neumann{Bid<:BoundaryIdentifier} <: BoundaryCondition
 end
 
-function sat(L::Laplace{2}, bc::Neumann, v::AbstractArray{T,2} where T, g::AbstractVector{T}, i::CartesianIndex{2})
+function sat(L::Laplace{2}, bc::Neumann{CartesianBoundary{1,R}}, v::AbstractArray{T,2} where T, g::AbstractVector{T}, i::CartesianIndex{2}) where R
+
     # Hi * e * H_gamma * (d'*v - g)
     # e, d, H_gamma applied based on bc.boundaryId
 end
 
-function sat(L::Laplace{2}, bc::Dirichlet, v::AbstractArray{T,2} where T, g::AbstractVector{T}, i::CartesianIndex{2})
+function sat(L::Laplace{2}, bc::Dirichlet{CartesianBoundary{1,R}}, v::AbstractArray{T,2} where T, g::AbstractVector{T}, i::CartesianIndex{2})
     # Hi * (tau/h*e + sig*d) * H_gamma * (e'*v - g)
     # e, d, H_gamma applied based on bc.boundaryId
 end
