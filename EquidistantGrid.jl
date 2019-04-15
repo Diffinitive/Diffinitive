@@ -52,5 +52,5 @@ end
 function pointsalongdim(grid::EquidistantGrid, dim::Integer)
     @assert dim<=dimension(grid)
     @assert dim>0
-    points = range(grid.limit_lower[dim],stop=grid.limit_lower[dim],length=grid.size[dim])
+    points = collect(range(grid.limit_lower[dim],stop=grid.limit_upper[dim],length=grid.size[dim]))
 end
