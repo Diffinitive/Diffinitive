@@ -180,7 +180,7 @@ function sat(L::Laplace{2}, bc::Neumann{CartesianBoundary{1,R}}, v::AbstractArra
     # e, d, H_gamma applied based on bc.boundaryId
 end
 
-function sat(L::Laplace{2}, bc::Dirichlet{CartesianBoundary{1,R}}, v::AbstractArray{T,2} where T, g::AbstractVector{T}, i::CartesianIndex{2})
+function sat(L::Laplace{2}, bc::Dirichlet{CartesianBoundary{1,R}}, v::AbstractArray{T,2} where T, g::AbstractVector{T}, i::CartesianIndex{2}) where R
     # Hi * (tau/h*e + sig*d) * H_gamma * (e'*v - g)
     # e, d, H_gamma applied based on bc.boundaryId
 end
