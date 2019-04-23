@@ -102,6 +102,8 @@ struct Laplace{Dim,T<:Real,N,M,K} <: DiffOpCartesian{Dim}
     grid::Grid.EquidistantGrid{Dim,T}
     a::T
     op::D2{Float64,N,M,K}
+    e::BoundaryValue
+    d::NormalDerivative
 end
 
 function apply(L::Laplace{Dim}, v::AbstractArray{T,Dim} where T, I::CartesianIndex{Dim}) where Dim
@@ -129,6 +131,35 @@ function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, i::CartesianIndex{2
     I = Index{Unknown}.(Tuple(i))
     apply(L, v, I)
 end
+
+struct BoundaryOperator
+
+end
+
+struct BoundaryValue
+	op::D2{Float64,N,M,K}
+end
+
+function apply(e::BoundaryValue)
+
+end
+
+function apply_adjoint(e::BoundaryValue)
+
+end
+
+struct NormalDerivative
+	op::D2{Float64,N,M,K}
+end
+
+function apply(e::NormalDerivative)
+
+end
+
+function apply_adjoint(e::NormalDerivative)
+
+end
+
 
 # Boundary operators
 
@@ -185,3 +216,10 @@ function sat(L::Laplace{2}, bc::Dirichlet{CartesianBoundary{1,R}}, v::AbstractAr
     # e, d, H_gamma applied based on bc.boundaryId
 end
 
+function apply(s::MyWaveEq{D},  v::AbstractArray{T,D}, i::CartesianIndex{D}) where D
+	return apply(s.L, v, i) +
+		sat(s.L, Dirichlet{CartesianBoundary{1,Lower}}(s.tau),  v, s.g_w, i) +
+		sat(s.L, Dirichlet{CartesianBoundary{1,Upper}}(s.tau),  v, s.g_e, i) +
+		sat(s.L, Dirichlet{CartesianBoundary{2,Lower}}(s.tau),  v, s.g_s, i) +
+		sat(s.L, Dirichlet{CartesianBoundary{2,Upper}}(s.tau),  v, s.g_n, i) +
+end
