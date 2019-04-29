@@ -46,13 +46,12 @@ Base.size(ta::TensorApplication) = range_size(ta.t,size(ta.o))
 
 Base.getindex(tm::TensorApplication, I::Vararg) = apply(tm.t, tm.o, I...)
 
-→(t::TensorMapping{R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(t,o)
+→(t::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(t,o)
 # Should we overload some other infix binary operator?
 # * has the wrong parsing properties... a*b*c is parsed to (a*b)*c (through a*b*c = *(a,b,c))
 # while a→b→c is parsed as a→(b→c)
 # The associativity of the operators might be fixed somehow... (rfold/lfold?)
 # ∘ also is an option but that has the same problem as * (but is not n-ary) (or is this best used for composition of Mappings?)
-
 
 struct TensorMappingComposition{T,R,K,D} <: TensorMapping{T,R,D}
 	t1::TensorMapping{T,R,K}
