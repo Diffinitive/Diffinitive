@@ -36,6 +36,8 @@ apply_transpose(tm::TensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::Var
 
 # range_size(::TensorMappingTranspose{T,R,D}, domain_size::NTuple{}) = range_size_of_transpose???
 
+
+
 struct TensorApplication{T,R,D} <: AbstractArray{T,R}
 	t::TensorMapping{R,D}
 	o::AbstractArray{T,D}
@@ -52,6 +54,15 @@ Base.getindex(tm::TensorApplication, I::Vararg) = apply(tm.t, tm.o, I...)
 # while a→b→c is parsed as a→(b→c)
 # The associativity of the operators might be fixed somehow... (rfold/lfold?)
 # ∘ also is an option but that has the same problem as * (but is not n-ary) (or is this best used for composition of Mappings?)
+
+# If we want to use * it would be something like this:
+import Base.*
+*(args::Union{TensorMapping{T}, AbstractArray{T}}...) where T = foldr(*,args)
+*(t::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(t,o)
+# We need to be really careful about good error messages.
+# For example what happens if you try to multiply TensorApplication with a TensorMapping(wrong order)?
+
+
 
 struct TensorMappingComposition{T,R,K,D} <: TensorMapping{T,R,D}
 	t1::TensorMapping{T,R,K}
