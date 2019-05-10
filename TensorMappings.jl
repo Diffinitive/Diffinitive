@@ -31,7 +31,8 @@ Base.adjoint(t::TensorMappingTranspose) = t.tm
 apply(tm::TensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::Vararg) where {T,R,D} = apply_transpose(tm.tm, v, I...)
 apply_transpose(tm::TensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,D} = apply(tm.tm, v, I...)
 
-# range_size(::TensorMappingTranspose{T,R,D}, domain_size::NTuple{}) = range_size_of_transpose???
+range_size(tmt::TensorMappingTranspose{T,R,D}, domain_size::NTuple{D,Integer}) = domain_size(tmt.tm, domain_size)
+domain_size(tmt::TensorMappingTranspose{T,R,D}, range_size::NTuple{D,Integer}) = range_size(tmt.tm, range_size)
 
 
 
@@ -63,6 +64,14 @@ end
 
 import Base.∘
 ∘(s::TensorMapping{T,R,K}, t::TensorMapping{T,K,D}) where {T,R,K,D} = TensorMappingComposition(s,t)
+
+function range_size(tm::TensorMappingComposition{T,R,K,D}, domain_size::NTuple{D,Integer}) where {T,R,D}
+	range_size(tm.t1, domain_size(tm.t2, domain_size))
+end
+
+function domain_size(tm::TensorMappingComposition{T,R,K,D}, range_size::NTuple{R,Integer}) where {T,R,D}
+	domain_size(tm.t1, domain_size(tm.t2, range_size))
+end
 
 function apply(c::TensorMappingComposition{T,R,K,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,K,D}
 	apply(c.t1, TensorApplication(c.t2,v), I...)
