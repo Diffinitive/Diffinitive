@@ -2,35 +2,21 @@ module TensorMappings
 # Needs a better name ImplicitTensorMappings? Get rid of "Tensor" in the name_
 
 abstract type TensorMapping{T,R,D} end
-abstract type TensorOperator{T,D} <: TensorMapping{T,D,D} end # Does this help?
 
 range_dim(::TensorMapping{T,R,D}) where {T,R,D} = R
 domain_dim(::TensorMapping{T,R,D}) where {T,R,D} = D
+# range_size(::TensorMapping{T,R,D}, domain_size::NTuple{D,Integer}) where {T,R,D}
+# domain_size(::TensorMapping{T,R,D}, range_size::NTuple{R,Integer}) where {T,R,D}
 
-range_size(::TensorOperator{T,D}, domain_size::NTuple{D,Integer}) where {T,D} = domain_size
-domain_size(::TensorOperator{T,D}, range_size::NTuple{D,Integer}) where {T,D} = range_size
-# More precise domain_size/range_size type?
-
-# Should be implemented by a TensorMapping
-# ========================================
 # apply(t::TensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {R,D,T} =
 # apply_transpose(t::TensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {R,D,T} =
-# Does it make sense that apply should work for any size of v? And the application adapts?
-# Think about boundschecking!
-
-# range_size(::TensorMapping{T,R,D}, domain_size::NTuple{D,Integer}) where {T,R,D} =
-# More prciese domain_size type?
-# domain_size(::TensorMapping{T,R,D}, range_size::NTuple{R,Integer}) where {T,R,D} =
-
 # Implementing apply_transpose and domain_size is only needed if you want to take transposes of the TensorMapping.
+# TODO: Think about boundschecking!
 
-# What does a TensorMapping apply() to?
-# =====================================
-# Is it too strict that TensorMappings apply to AbstractArrays? Maybe we don't need
-# to know the operands size. That could simplify the handeling of the range_size...
-# It would just fail if apply does something out of bounds..
-# No i think knowing the size is a requirement. The TensorMapping must be able to do
-# different things for different indecies based for example on how close to the boundary we are.
+abstract type TensorOperator{T,D} <: TensorMapping{T,D,D} end
+domain_size(::TensorOperator{T,D}, range_size::NTuple{D,Integer}) where {T,D} = range_size
+range_size(::TensorOperator{T,D}, domain_size::NTuple{D,Integer}) where {T,D} = domain_size
+
 
 
 # Allow using the ' operator:
@@ -38,7 +24,8 @@ struct TensorMappingTranspose{T,R,D} <: TensorMapping{T,D,R}
 	tm::TensorMapping{T,R,D}
 end
 
-Base.adjoint(t::TensorMapping) = TensorMappingTranspose(t) # Maybe this should be implemented on a type by type basis or through a trait to provide earlier errors.
+Base.adjoint(t::TensorMapping) = TensorMappingTranspose(t)
+# TBD: Should this be implemented on a type by type basis or through a trait to provide earlier errors?
 Base.adjoint(t::TensorMappingTranspose) = t.tm
 
 apply(tm::TensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::Vararg) where {T,R,D} = apply_transpose(tm.tm, v, I...)
@@ -54,18 +41,13 @@ struct TensorApplication{T,R,D} <: AbstractArray{T,R}
 end
 
 Base.size(ta::TensorApplication) = range_size(ta.t,size(ta.o))
-## What else is needed so that we have a proper AbstractArray?
-
 Base.getindex(tm::TensorApplication, I::Vararg) = apply(tm.t, tm.o, I...)
+# TODO: What else is needed to implement the AbstractArray interface?
 
 →(t::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(t,o)
 # Should we overload some other infix binary operator?
-# * has the wrong parsing properties... a*b*c is parsed to (a*b)*c (through a*b*c = *(a,b,c))
-# while a→b→c is parsed as a→(b→c)
-# The associativity of the operators might be fixed somehow... (rfold/lfold?)
-# ∘ also is an option but that has the same problem as * (but is not n-ary) (or is this best used for composition of Mappings?)
+# We need the associativity to be a→b→c = a→(b→c), which is the case for '→'
 
-# If we want to use * it would be something like this:
 import Base.*
 *(args::Union{TensorMapping{T}, AbstractArray{T}}...) where T = foldr(*,args)
 *(t::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(t,o)
