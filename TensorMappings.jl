@@ -8,7 +8,8 @@ range_dim(::TensorMapping{T,R,D}) where {T,R,D} = R
 domain_dim(::TensorMapping{T,R,D}) where {T,R,D} = D
 
 range_size(::TensorOperator{T,D}, domain_size::NTuple{D,Integer}) where {T,D} = domain_size
-# More prciese domain_size type?
+domain_size(::TensorOperator{T,D}, range_size::NTuple{D,Integer}) where {T,D} = range_size
+# More precise domain_size/range_size type?
 
 # Should be implemented by a TensorMapping
 # ========================================
@@ -19,7 +20,9 @@ range_size(::TensorOperator{T,D}, domain_size::NTuple{D,Integer}) where {T,D} = 
 
 # range_size(::TensorMapping{T,R,D}, domain_size::NTuple{D,Integer}) where {T,R,D} =
 # More prciese domain_size type?
-# range_size_of_transpose()???
+# domain_size(::TensorMapping{T,R,D}, range_size::NTuple{R,Integer}) where {T,R,D} =
+
+# Implementing apply_transpose and domain_size is only needed if you want to take transposes of the TensorMapping.
 
 
 
