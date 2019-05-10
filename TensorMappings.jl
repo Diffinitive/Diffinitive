@@ -24,6 +24,13 @@ domain_size(::TensorOperator{T,D}, range_size::NTuple{D,Integer}) where {T,D} = 
 
 # Implementing apply_transpose and domain_size is only needed if you want to take transposes of the TensorMapping.
 
+# What does a TensorMapping apply() to?
+# =====================================
+# Is it too strict that TensorMappings apply to AbstractArrays? Maybe we don't need
+# to know the operands size. That could simplify the handeling of the range_size...
+# It would just fail if apply does something out of bounds..
+# No i think knowing the size is a requirement. The TensorMapping must be able to do
+# different things for different indecies based for example on how close to the boundary we are.
 
 
 # Allow using the ' operator:
