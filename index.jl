@@ -26,15 +26,7 @@ Base.convert(::Type{CartesianIndex}, I::NTuple{N,Index} where N) = CartesianInde
 Base.Int(I::Index) = I.i
 
 function Index(i::Integer, boundary_width::Integer, dim_size::Integer)
-    if 0 < i <= boundary_width
-        return Index{Lower}(i)
-    elseif boundary_width < i <= dim_size-boundary_width
-        return Index{Interior}(i)
-    elseif dim_size-boundary_width < i <= dim_size
-        return Index{Upper}(i)
-    else
-        error("Bounds error") # TODO: Make this more standard
-    end
+    return Index{getregion(i,boundary_width,dim_size)}(i)
 end
 
 IndexTuple(t::Vararg{Tuple{T, DataType}}) where T<:Integer = Index.(t)
@@ -50,6 +42,18 @@ end
 function regionindices(gridsize::NTuple{Dim,Integer}, closuresize::NTuple{Dim,Integer}, region::NTuple{Dim,DataType}) where Dim
     regions = map(getrange,gridsize,closuresize,region)
     return CartesianIndices(regions)
+end
+
+function getregion(i::Integer, boundary_width::Integer, dim_size::Integer)
+	if 0 < i <= boundary_width
+        return Lower
+    elseif boundary_width < i <= dim_size-boundary_width
+        return Interior
+    elseif dim_size-boundary_width < i <= dim_size
+        return Upper
+    else
+        error("Bounds error") # TODO: Make this more standard
+    end
 end
 
 function getrange(gridsize::Integer, closuresize::Integer, region::DataType)
