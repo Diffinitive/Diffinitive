@@ -105,7 +105,7 @@ struct NormalDerivative{N,M,K}
 end
 
 function apply_transpose(d::NormalDerivative, v::AbstractArray, I::Integer)
-	u = selectdim(v,dim(d.bId),I)
+	u = selectdim(v,3-dim(d.bId),I)
 	return apply_d(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
 end
 
@@ -194,7 +194,7 @@ function apply(e::BoundaryValue, v::AbstractArray, I::Tuple{Integer,Integer})
 end
 
 function apply_transpose(e::BoundaryValue, v::AbstractArray, I::Integer)
-	u = selectdim(v,dim(e.bId),I)
+	u = selectdim(v,3-dim(e.bId),I)
 	return apply_e(e.op, u, region(e.bId))
 end
 
