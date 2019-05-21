@@ -92,4 +92,9 @@ export range_size
 export →
 
 
+# # Automatic dimension expansion?
+# struct TensorOperator1dAd2d{T,I} <: TensorOperator{T,2}
+# 	t::TensorOperator{T,1}
+# end
+
 end #module
