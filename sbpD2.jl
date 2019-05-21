@@ -103,12 +103,12 @@ function apply_e(op::D2, v::AbstractVector, ::Type{Upper})
 end
 
 
-function apply_d(op::D2, h::Real, v::AbstractVector, ::Type{Lower})
-    -apply(op.dClosure,v,1)/h
+function apply_d(op::D2, h_inv::Real, v::AbstractVector, ::Type{Lower})
+    -h_inv*apply(op.dClosure,v,1)
 end
 
-function apply_d(op::D2, h::Real, v::AbstractVector, ::Type{Upper})
-    -apply(flip(op.dClosure),v,length(v))/h
+function apply_d(op::D2, h_inv::Real, v::AbstractVector, ::Type{Upper})
+    -h_inv*apply(flip(op.dClosure),v,length(v))
 end
 
 function readSectionedFile(filename)::Dict{String, Vector{String}}
