@@ -106,7 +106,7 @@ end
 
 function apply_transpose(d::NormalDerivative, v::AbstractArray, I::Integer)
 	u = selectdim(v,dim(d.bId),I)
-	return apply_d(d.op, h, u, region(d.bId))
+	return apply_d(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
 end
 
 # Not correct abstraction level
@@ -124,9 +124,9 @@ function apply(d::NormalDerivative, v::AbstractArray, I::Tuple{Integer,Integer})
 
 	if r == Lower
 		# Note, closures are indexed by offset. Fix this D:<
-		return d.op.dClosure[i-1]*v[j]
+		return d.grid.inverse_spacing[dim(d.bId)]*d.op.dClosure[i-1]*v[j]
 	elseif r == Upper
-		return d.op.dClosure[N_i-j]*v[j]
+		return d.grid.inverse_spacing[dim(d.bId)]*d.op.dClosure[N_i-j]*v[j]
 	end
 end
 
@@ -170,14 +170,32 @@ end
 
 struct BoundaryValue{N,M,K}
 	op::D2{Float64,N,M,K}
+	grid::EquidistantGrid
+	bId::CartesianBoundary
 end
 
-function apply(e::BoundaryValue)
+function apply(e::BoundaryValue, v::AbstractArray, I::Tuple{Integer,Integer})
+	i = I[dim(e.bId)]
+	j = I[3-dim(e.bId)]
+	N_i = e.grid.size[dim(e.bId)]
 
+	r = getregion(i, closureSize(e.op), N_i)
+
+	if r != region(e.bId)
+		return 0
+	end
+
+	if r == Lower
+		# Note, closures are indexed by offset. Fix this D:<
+		return e.op.eClosure[i-1]*v[j]
+	elseif r == Upper
+		return e.op.eClosure[N_i-j]*v[j]
+	end
 end
 
-function apply_adjoint(e::BoundaryValue)
-
+function apply_transpose(e::BoundaryValue, v::AbstractArray, I::Integer)
+	u = selectdim(v,dim(e.bId),I)
+	return apply_e(e.op, u, region(e.bId))
 end
 
 
