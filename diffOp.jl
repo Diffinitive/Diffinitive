@@ -130,11 +130,41 @@ function apply(d::NormalDerivative, v::AbstractArray, I::Tuple{Integer,Integer})
 	end
 end
 
+struct BoundaryValue{N,M,K}
+	op::D2{Float64,N,M,K}
+	grid::EquidistantGrid
+	bId::CartesianBoundary
+end
+
+function apply(e::BoundaryValue, v::AbstractArray, I::Tuple{Integer,Integer})
+	i = I[dim(e.bId)]
+	j = I[3-dim(e.bId)]
+	N_i = e.grid.size[dim(e.bId)]
+
+	r = getregion(i, closureSize(e.op), N_i)
+
+	if r != region(e.bId)
+		return 0
+	end
+
+	if r == Lower
+		# Note, closures are indexed by offset. Fix this D:<
+		return e.op.eClosure[i-1]*v[j]
+	elseif r == Upper
+		return e.op.eClosure[N_i-j]*v[j]
+	end
+end
+
+function apply_transpose(e::BoundaryValue, v::AbstractArray, I::Integer)
+	u = selectdim(v,3-dim(e.bId),I)
+	return apply_e(e.op, u, region(e.bId))
+end
+
 struct Laplace{Dim,T<:Real,N,M,K} <: DiffOpCartesian{Dim}
     grid::EquidistantGrid{Dim,T}
     a::T
     op::D2{Float64,N,M,K}
-    # e::BoundaryValue
+    e::BoundaryValue
     d::NormalDerivative
 end
 
@@ -166,36 +196,6 @@ end
 
 struct BoundaryOperator
 
-end
-
-struct BoundaryValue{N,M,K}
-	op::D2{Float64,N,M,K}
-	grid::EquidistantGrid
-	bId::CartesianBoundary
-end
-
-function apply(e::BoundaryValue, v::AbstractArray, I::Tuple{Integer,Integer})
-	i = I[dim(e.bId)]
-	j = I[3-dim(e.bId)]
-	N_i = e.grid.size[dim(e.bId)]
-
-	r = getregion(i, closureSize(e.op), N_i)
-
-	if r != region(e.bId)
-		return 0
-	end
-
-	if r == Lower
-		# Note, closures are indexed by offset. Fix this D:<
-		return e.op.eClosure[i-1]*v[j]
-	elseif r == Upper
-		return e.op.eClosure[N_i-j]*v[j]
-	end
-end
-
-function apply_transpose(e::BoundaryValue, v::AbstractArray, I::Integer)
-	u = selectdim(v,3-dim(e.bId),I)
-	return apply_e(e.op, u, region(e.bId))
 end
 
 
