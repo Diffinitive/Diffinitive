@@ -104,6 +104,32 @@ struct NormalDerivative{N,M,K}
 	bId::CartesianBoundary
 end
 
+function apply_transpose(d::NormalDerivative, v::AbstractArray, I::Integer)
+	u = selectdim(v,dim(d.bId),I)
+	return apply_d(d.op, h, u, region(d.bId))
+end
+
+# Not correct abstraction level
+# TODO: Not type stable D:<
+function apply(d::NormalDerivative, v::AbstractArray, I::Tuple{Integer,Integer})
+	i = I[dim(d.bId)]
+	j = I[3-dim(d.bId)]
+	N_i = d.grid.size[dim(d.bId)]
+
+	r = getregion(i, closureSize(d.op), N_i)
+
+	if r != region(d.bId)
+		return 0
+	end
+
+	if r == Lower
+		# Note, closures are indexed by offset. Fix this D:<
+		return d.op.dClosure[i-1]*v[j]
+	elseif r == Upper
+		return d.op.dClosure[N_i-j]*v[j]
+	end
+end
+
 struct Laplace{Dim,T<:Real,N,M,K} <: DiffOpCartesian{Dim}
     grid::EquidistantGrid{Dim,T}
     a::T
@@ -154,33 +180,6 @@ function apply_adjoint(e::BoundaryValue)
 
 end
 
-
-
-function apply_transpose(d::NormalDerivative, v::AbstractArray, I::Integer)
-	u = selectdim(v,dim(d.bId),I)
-	return apply_d(d.op, h, u, region(d.bId))
-end
-
-# Not correct abstraction level
-# TODO: Not type stable D:<
-function apply(d::NormalDerivative, v::AbstractArray, I::Tuple{Integer,Integer})
-	i = I[dim(d.bId)]
-	j = I[3-dim(d.bId)]
-	N_i = d.grid.size[dim(d.bId)]
-
-	r = getregion(i, closureSize(d.op), N_i)
-
-	if r != region(d.bId)
-		return 0
-	end
-
-	if r == Lower
-		# Note, closures are indexed by offset. Fix this D:<
-		return d.op.dClosure[i-1]*v[j]
-	elseif r == Upper
-		return d.op.dClosure[N_i-j]*v[j]
-	end
-end
 
 """
 A BoundaryCondition should implement the method
