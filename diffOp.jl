@@ -13,11 +13,11 @@ function matrixRepresentation(D::DiffOp)
     error("not implemented")
 end
 
-function boundaryCondition(D::DiffOp,b::Grid.BoundaryId,type)::(Closure, Penalty)
+function boundaryCondition(D::DiffOp,b::BoundaryIdentifier,type)::(Closure, Penalty)
     error("not implemented")
 end
 
-function interface(Du::DiffOp, Dv::DiffOp, b::Grid.BoundaryId; type)
+function interface(Du::DiffOp, Dv::DiffOp, b::BoundaryIdentifier; type)
     error("not implemented")
 end
 
@@ -98,11 +98,17 @@ function apply(D::DiffOp, v::AbstractVector)::AbstractVector
     return u
 end
 
+struct NormalDerivative{N,M,K}
+	op::D2{Float64,N,M,K}
+	grid::EquidistantGrid
+	bId::CartesianBoundary
+end
+
 struct Laplace{Dim,T<:Real,N,M,K} <: DiffOpCartesian{Dim}
-    grid::Grid.EquidistantGrid{Dim,T}
+    grid::EquidistantGrid{Dim,T}
     a::T
     op::D2{Float64,N,M,K}
-    e::BoundaryValue
+    # e::BoundaryValue
     d::NormalDerivative
 end
 
@@ -136,7 +142,7 @@ struct BoundaryOperator
 
 end
 
-struct BoundaryValue
+struct BoundaryValue{N,M,K}
 	op::D2{Float64,N,M,K}
 end
 
@@ -148,16 +154,32 @@ function apply_adjoint(e::BoundaryValue)
 
 end
 
-struct NormalDerivative
-	op::D2{Float64,N,M,K}
+
+
+function apply_transpose(d::NormalDerivative, v::AbstractArray, I::Integer)
+	u = selectdim(v,dim(d.bId),I)
+	return apply_d(d.op, h, u, region(d.bId))
 end
 
-function apply(e::NormalDerivative)
+# Not correct abstraction level
+# TODO: Not type stable D:<
+function apply(d::NormalDerivative, v::AbstractArray, I::Tuple{Integer,Integer})
+	i = I[dim(d.bId)]
+	j = I[3-dim(d.bId)]
+	N_i = d.grid.size[dim(d.bId)]
 
-end
+	r = getregion(i, closureSize(d.op), N_i)
 
-function apply_adjoint(e::NormalDerivative)
+	if r != region(d.bId)
+		return 0
+	end
 
+	if r == Lower
+		# Note, closures are indexed by offset. Fix this D:<
+		return d.op.dClosure[i-1]*v[j]
+	elseif r == Upper
+		return d.op.dClosure[N_i-j]*v[j]
+	end
 end
 
 """
@@ -173,21 +195,21 @@ end
 struct Neumann{Bid<:BoundaryIdentifier} <: BoundaryCondition
 end
 
-function sat(L::Laplace{2}, bc::Neumann{CartesianBoundary{1,R}}, v::AbstractArray{T,2} where T, g::AbstractVector{T}, i::CartesianIndex{2}) where R
+function sat(L::Laplace{2}, bc::Neumann{CartesianBoundary{1,R}}, v::AbstractArray{T,2} where T, g::AbstractVector, i::CartesianIndex{2}) where R
 
     # Hi * e * H_gamma * (d'*v - g)
     # e, d, H_gamma applied based on bc.boundaryId
 end
 
-function sat(L::Laplace{2}, bc::Dirichlet{CartesianBoundary{1,R}}, v::AbstractArray{T,2} where T, g::AbstractVector{T}, i::CartesianIndex{2}) where R
+function sat(L::Laplace{2}, bc::Dirichlet{CartesianBoundary{1,R}}, v::AbstractArray{T,2} where T, g::AbstractVector, i::CartesianIndex{2}) where R
     # Hi * (tau/h*e + sig*d) * H_gamma * (e'*v - g)
     # e, d, H_gamma applied based on bc.boundaryId
 end
 
-function apply(s::MyWaveEq{D},  v::AbstractArray{T,D}, i::CartesianIndex{D}) where D
-	return apply(s.L, v, i) +
-		sat(s.L, Dirichlet{CartesianBoundary{1,Lower}}(s.tau),  v, s.g_w, i) +
-		sat(s.L, Dirichlet{CartesianBoundary{1,Upper}}(s.tau),  v, s.g_e, i) +
-		sat(s.L, Dirichlet{CartesianBoundary{2,Lower}}(s.tau),  v, s.g_s, i) +
-		sat(s.L, Dirichlet{CartesianBoundary{2,Upper}}(s.tau),  v, s.g_n, i) +
-end
+# function apply(s::MyWaveEq{D},  v::AbstractArray{T,D}, i::CartesianIndex{D}) where D
+# 	return apply(s.L, v, i) +
+# 		sat(s.L, Dirichlet{CartesianBoundary{1,Lower}}(s.tau),  v, s.g_w, i) +
+# 		sat(s.L, Dirichlet{CartesianBoundary{1,Upper}}(s.tau),  v, s.g_e, i) +
+# 		sat(s.L, Dirichlet{CartesianBoundary{2,Lower}}(s.tau),  v, s.g_s, i) +
+# 		sat(s.L, Dirichlet{CartesianBoundary{2,Upper}}(s.tau),  v, s.g_n, i)
+# end
