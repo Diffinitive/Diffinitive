@@ -160,38 +160,6 @@ function apply_adjoint(e::NormalDerivative)
 
 end
 
-
-# Boundary operators
-
-function apply_e(L::Laplace{2}, v::AbstractArray{T,2} where T, ::CartesianBoundary{1,R}, j::Int) where R
-    @inbounds vy = view(v, :, j)
-    return apply_e(L.op,vy, R)
-end
-
-function apply_e(L::Laplace{2}, v::AbstractArray{T,2} where T, ::CartesianBoundary{2,R}, i::Int) where R
-    @inbounds vx = view(v, i, :)
-    return apply_e(L.op, vy, R)
-end
-
-function apply_d(L::Laplace{2}, v::AbstractArray{T,2} where T, ::CartesianBoundary{1,R}, j::Int) where R
-    @inbounds vy = view(v, :, j)
-    return apply_d(L.op,vy, R)
-end
-
-function apply_d(L::Laplace{2}, v::AbstractArray{T,2} where T, ::CartesianBoundary{2,R}, i::Int) where R
-    @inbounds vx = view(v, i, :)
-    return apply_d(L.op, vy, R)
-end
-
-
-function apply_e_T(L::Laplace{2}, v::AbstractArray{T,2} where T, boundaryId, i::Int)
-
-end
-
-function apply_d_T(L::Laplace{2}, v::AbstractArray{T,2} where T, boundaryId, i::Int)
-
-end
-
 """
 A BoundaryCondition should implement the method
     sat(::DiffOp, v::AbstractArray, data::AbstractArray, ...)
