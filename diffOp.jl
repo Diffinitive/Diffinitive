@@ -205,22 +205,30 @@ A BoundaryCondition should implement the method
 """
 abstract type BoundaryCondition end
 
+struct Neumann{Bid<:BoundaryIdentifier} <: BoundaryCondition end
+
+function sat(L::Laplace{2,T}, bc::Neumann{Bid}, v::AbstractArray{T,2}, g::AbstractVector{T}, I::CartesianIndex{2}) where {T,Bid}
+    e = BoundaryValue(L.op, L.grid, Bid())
+    d = NormalDerivative(L.op, L.grid, Bid())
+    Hᵧ = BoundaryQuadrature(L.op, L.grid, Bid())
+    # TODO: Implement BoundaryQuadrature method
+
+    return -L.Hi*e*Hᵧ*(d'*v - g)
+    # Need to handle d'*v - g so that it is an AbstractArray that TensorMappings can act on
+end
+
 struct Dirichlet{Bid<:BoundaryIdentifier} <: BoundaryCondition
     tau::Float64
 end
 
-struct Neumann{Bid<:BoundaryIdentifier} <: BoundaryCondition
-end
+function sat(L::Laplace{2,T}, bc::Dirichlet{Bid}, v::AbstractArray{T,2}, g::AbstractVector{T}, i::CartesianIndex{2}) where {T,Bid}
+    e = BoundaryValue(L.op, L.grid, Bid())
+    d = NormalDerivative(L.op, L.grid, Bid())
+    Hᵧ = BoundaryQuadrature(L.op, L.grid, Bid())
+    # TODO: Implement BoundaryQuadrature method
 
-function sat(L::Laplace{2}, bc::Neumann{CartesianBoundary{1,R}}, v::AbstractArray{T,2} where T, g::AbstractVector, i::CartesianIndex{2}) where R
-
-    # Hi * e * H_gamma * (d'*v - g)
-    # e, d, H_gamma applied based on bc.boundaryId
-end
-
-function sat(L::Laplace{2}, bc::Dirichlet{CartesianBoundary{1,R}}, v::AbstractArray{T,2} where T, g::AbstractVector, i::CartesianIndex{2}) where R
-    # Hi * (tau/h*e + sig*d) * H_gamma * (e'*v - g)
-    # e, d, H_gamma applied based on bc.boundaryId
+    return -L.Hi*(tau/h*e + d)*Hᵧ*(e'*v - g)
+    # Need to handle scalar multiplication and addition of TensorMapping
 end
 
 # function apply(s::MyWaveEq{D},  v::AbstractArray{T,D}, i::CartesianIndex{D}) where D
