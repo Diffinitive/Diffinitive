@@ -31,8 +31,8 @@ Base.adjoint(t::TensorMappingTranspose) = t.tm
 apply(tm::TensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::Vararg) where {T,R,D} = apply_transpose(tm.tm, v, I...)
 apply_transpose(tm::TensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,D} = apply(tm.tm, v, I...)
 
-range_size(tmt::TensorMappingTranspose{T,R,D}, domain_size::NTuple{D,Integer}) = domain_size(tmt.tm, domain_size)
-domain_size(tmt::TensorMappingTranspose{T,R,D}, range_size::NTuple{D,Integer}) = range_size(tmt.tm, range_size)
+range_size(tmt::TensorMappingTranspose{T,R,D}, domain_size::NTuple{D,Integer}) where {T,R,D} = domain_size(tmt.tm, domain_size)
+domain_size(tmt::TensorMappingTranspose{T,R,D}, range_size::NTuple{D,Integer}) where {T,R,D} = range_size(tmt.tm, range_size)
 
 
 
@@ -41,23 +41,57 @@ struct TensorApplication{T,R,D} <: AbstractArray{T,R}
 	o::AbstractArray{T,D}
 end
 
-Base.size(ta::TensorApplication) = range_size(ta.t,size(ta.o))
-Base.getindex(tm::TensorApplication, I::Vararg) = apply(tm.t, tm.o, I...)
+Base.size(ta::TensorApplication{T,R,D}) where {T,R,D} = range_size(ta.t,size(ta.o))
+Base.getindex(ta::TensorApplication{T,R,D}, I::Vararg) where {T,R,D} = apply(ta.t, ta.o, I...)
 # TODO: What else is needed to implement the AbstractArray interface?
-
-→(t::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(t,o)
+import Base.*
+→(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(tm,o)
 # Should we overload some other infix binary operator?
 # We need the associativity to be a→b→c = a→(b→c), which is the case for '→'
-
-import Base.*
 *(args::Union{TensorMapping{T}, AbstractArray{T}}...) where T = foldr(*,args)
-*(t::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(t,o)
+*(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(tm,o)
+*(scalar, ta::TensorApplication{T,R,D}) where {T,R,D} = scalar*ta.o
+*(ta::TensorApplication{T,R,D}, scalar::Number) where {T,R,D} = scalar*ta
 # We need to be really careful about good error messages.
 # For example what happens if you try to multiply TensorApplication with a TensorMapping(wrong order)?
 
+# NOTE: TensorApplicationExpressions attempt to handle the situation when a TensorMapping
+# acts on a TensorApplication +- AbstractArray, such that the expression still can be
+# evaluated lazily per index.
+# TODO: Better naming of both struct and members
+# Since this is a lower layer which shouldnt be exposed, my opinion is that
+# we can afford to be quite verbose.
+struct TensorApplicationExpression{T,R,D} <: AbstractArray{T,R}
+	ta::TensorApplication{R,D}
+	o::AbstractArray{T,D}
+end
+Base.size(tae::TensorApplicationExpression) = size(tae.ta) #TODO: Not sure how to handle this
+Base.getindex(tae::TensorApplicationExpression, I::Vararg) = apply(tae.ta, ta.o, I...) + o[I...]
+import Base.+
+import Base.-
++(ta::TensorApplication{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplicationExpression(ta,o)
++(o::AbstractArray{T,D},ta::TensorApplication{T,R,D}) where {T,R,D} = ta + o
+-(ta::TensorApplication{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = ta + -o
+-(o::AbstractArray{T,D},ta::TensorApplication{T,R,D}) where {T,R,D} = -ta + o
 
+# NOTE: Another (quite neat) way to handle lazy evaluation of
+# TensorApplication + AbstractArray is by using broadcasting.
+# However, with the drafted implementation below a
+# TensorApplication+AbstractArray now results in a generic function and we would
+# then need to define TensorMapping*generic function which does not seem like a
+# good idea.
+# NOTE: Could one use MappedArrays.jl instead?
+#
+# # Lazy evaluations of expressions on TensorApplications
+# # TODO: Need to decide on some good naming here.
+# +(ta::TensorApplication,o::AbstractArray) = I -> ta[I] + o[I]
+# +(o::AbstractArray,ta::TensorApplication) = ta+o
+# *(scalar::Number,ta::TensorApplication) = I -> scalar*ta[I]
+# *(ta::TensorApplication,scalar::Number) = scalar*ta
+# -(ta::TensorApplication,o::AbstractArray) = ta + -o
+# -(o::AbstractArray + ta::TensorApplication) = -ta + o
 
-struct TensorMappingComposition{T,R,K,D} <: TensorMapping{T,R,D}
+struct TensorMappingComposition{T,R,K,D} <: TensorMapping{T,R,D} where K<:typeof(R)
 	t1::TensorMapping{T,R,K}
 	t2::TensorMapping{T,K,D}
 end
@@ -65,11 +99,11 @@ end
 import Base.∘
 ∘(s::TensorMapping{T,R,K}, t::TensorMapping{T,K,D}) where {T,R,K,D} = TensorMappingComposition(s,t)
 
-function range_size(tm::TensorMappingComposition{T,R,K,D}, domain_size::NTuple{D,Integer}) where {T,R,D}
+function range_size(tm::TensorMappingComposition{T,R,K,D}, domain_size::NTuple{D,Integer}) where {T,R,K,D}
 	range_size(tm.t1, domain_size(tm.t2, domain_size))
 end
 
-function domain_size(tm::TensorMappingComposition{T,R,K,D}, range_size::NTuple{R,Integer}) where {T,R,D}
+function domain_size(tm::TensorMappingComposition{T,R,K,D}, range_size::NTuple{R,Integer}) where {T,R,K,D}
 	domain_size(tm.t1, domain_size(tm.t2, range_size))
 end
 
