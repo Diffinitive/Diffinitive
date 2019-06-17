@@ -66,7 +66,7 @@ struct TensorApplicationExpression{T,R,D} <: AbstractArray{T,R}
 	o::AbstractArray{T,D}
 end
 Base.size(tae::TensorApplicationExpression) = size(tae.ta) #TODO: Not sure how to handle this
-Base.getindex(tae::TensorApplicationExpression, I::Vararg) = apply(tae.ta, ta.o, I...) + o[I...]
+Base.getindex(tae::TensorApplicationExpression, I::Vararg) = tae.ta[I...] + tae.o[I...]
 import Base.+
 import Base.-
 +(ta::TensorApplication{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplicationExpression(ta,o)
