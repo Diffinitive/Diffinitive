@@ -44,12 +44,11 @@ end
 Base.size(ta::TensorApplication{T,R,D}) where {T,R,D} = range_size(ta.t,size(ta.o))
 Base.getindex(ta::TensorApplication{T,R,D}, I::Vararg) where {T,R,D} = apply(ta.t, ta.o, I...)
 # TODO: What else is needed to implement the AbstractArray interface?
-import Base.*
 →(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(tm,o)
 # Should we overload some other infix binary operator?
 # We need the associativity to be a→b→c = a→(b→c), which is the case for '→'
-*(args::Union{TensorMapping{T}, AbstractArray{T}}...) where T = foldr(*,args)
-*(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(tm,o)
+Base.:*(args::Union{TensorMapping{T}, AbstractArray{T}}...) where T = foldr(*,args)
+Base.:*(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = TensorApplication(tm,o)
 # We need to be really careful about good error messages.
 # For example what happens if you try to multiply TensorApplication with a TensorMapping(wrong order)?
 
@@ -60,8 +59,7 @@ struct TensorMappingComposition{T,R,K,D} <: TensorMapping{T,R,D}
 	t2::TensorMapping{T,K,D}
 end
 
-import Base.∘
-∘(s::TensorMapping{T,R,K}, t::TensorMapping{T,K,D}) where {T,R,K,D} = TensorMappingComposition(s,t)
+Base.:∘(s::TensorMapping{T,R,K}, t::TensorMapping{T,K,D}) where {T,R,K,D} = TensorMappingComposition(s,t)
 
 function range_size(tm::TensorMappingComposition{T,R,K,D}, domain_size::NTuple{D,Integer}) where {T,R,K,D}
 	range_size(tm.t1, domain_size(tm.t2, domain_size))
