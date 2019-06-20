@@ -1,4 +1,4 @@
-name = "LazyTensor"
+name = "LazyTensors"
 uuid = "62fbed2c-918d-11e9-279b-eb3a325b37d3"
 authors = ["Jonatan Werpers <jonatan.werpers@it.uu.se>"]
 version = "0.1.0"

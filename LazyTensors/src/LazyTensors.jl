@@ -1,4 +1,4 @@
-module LazyTensor
+module LazyTensors
 
 
 """
