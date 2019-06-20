@@ -9,15 +9,13 @@ struct LazyElementwiseOperation{T,D,Op, T1<:AbstractArray{T,D}, T2 <: AbstractAr
     b::T2
 
     function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op, T1<:AbstractArray{T,D}, T2<:AbstractArray{T,D}}
-        #TODO: Remove assert? Asserts are not removed when compiling with
-        # optimization flags. If so, need to handle boundschecking proparly.
-        @assert size(a) == size(b)
         return new{T,D,Op,T1,T2}(a,b)
     end
 end
 
 Base.size(v::LazyElementwiseOperation) = size(v.a)
 
+# TODO: Make sure boundschecking is done properly and that the lenght of the vectors are equal
 # NOTE: Boundschecking in getindex functions now assumes that the size of the
 # vectors in the LazyElementwiseOperation are the same size. If we remove the
 # size assertion in the constructor we might have to handle
