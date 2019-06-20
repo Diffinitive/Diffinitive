@@ -114,7 +114,7 @@ end
 
 # Abstract type for which the normal operations are defined by their
 # lazy counterparts
-abstract type LazyArray{T,D} <: AbstractArray{T,D} end;
+abstract type LazyArray{T,D} <: AbstractArray{T,D} end
 
 Base.:+(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a +̃ b
 Base.:+(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = b + a
@@ -126,9 +126,7 @@ Base.:*(a::AbstractArray{T,D},b::LazyArray{T,D}) where {T,D} = b * a
 # Base.:/(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a /̃ b
 # Base.:/(a::AbstractArray{T,D},b::LazyArray{T,D}) where {T,D} = a /̃ b
 
-export +̃, -̃, *̃, /̃, +, -, * #, /
-
-
+export +̃, -̃, *̃, /̃
 
 
 
