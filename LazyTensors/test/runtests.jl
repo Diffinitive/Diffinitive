@@ -4,21 +4,21 @@ using LazyTensors
 
 
 @testset "Generic Mapping methods" begin
-    struct DummyMapping{T,R,D} <: LazyTensors.Mapping{T,R,D} end
+    struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
     LazyTensors.apply(m::DummyMapping{T,R,D}, v, i) where {T,R,D} = :apply
     @test range_dim(DummyMapping{Int,2,3}()) == 2
     @test domain_dim(DummyMapping{Int,2,3}()) == 3
     @test apply(DummyMapping{Int,2,3}(), zeros(Int, (0,0,0)),0) == :apply
 end
 
-struct DummyOperator{T,D} <: LazyTensors.Operator{T,D} end
 @testset "Generic Operator methods" begin
+    struct DummyOperator{T,D} <: TensorOperator{T,D} end
     @test range_size(DummyOperator{Int,2}(), (3,5)) == (3,5)
     @test domain_size(DummyOperator{Float64, 3}(), (3,3,1)) == (3,3,1)
 end
 
 @testset "Mapping transpose" begin
-    struct DummyMapping{T,R,D} <: LazyTensors.Mapping{T,R,D} end
+    struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
 
     LazyTensors.apply(m::DummyMapping{T,R,D}, v, i) where {T,R,D} = :apply
     LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, i) where {T,R,D} = :apply_transpose
@@ -37,7 +37,7 @@ end
 end
 
 @testset "TensorApplication" begin
-    struct DummyMapping{T,R,D} <: LazyTensors.Mapping{T,R,D} end
+    struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
 
     LazyTensors.apply(m::DummyMapping{T,R,D}, v, i) where {T,R,D} = (:apply,v,i)
     LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, i) where {T,R,D} = :apply_transpose
