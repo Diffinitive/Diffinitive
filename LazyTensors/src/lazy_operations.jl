@@ -1,30 +1,4 @@
 """
-    LazyTensorMappingTranspose{T,R,D} <: TensorMapping{T,D,R}
-
-Struct for lazy transpose of a TensorMapping.
-
-If a mapping implements the the `apply_transpose` method this allows working with
-the transpose of mapping `m` by using `m'`. `m'` will work as a regular TensorMapping lazily calling
-the appropriate methods of `m`.
-"""
-struct LazyTensorMappingTranspose{T,R,D} <: TensorMapping{T,D,R}
-    tm::TensorMapping{T,R,D}
-end
-export LazyTensorMappingTranspose
-
-# # TBD: Should this be implemented on a type by type basis or through a trait to provide earlier errors?
-Base.adjoint(t::TensorMapping) = LazyTensorMappingTranspose(t)
-Base.adjoint(t::LazyTensorMappingTranspose) = t.tm
-
-apply(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::Vararg) where {T,R,D} = apply_transpose(tm.tm, v, I...)
-apply_transpose(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,D} = apply(tm.tm, v, I...)
-
-range_size(tmt::LazyTensorMappingTranspose{T,R,D}, d_size::NTuple{R,Integer}) where {T,R,D} = domain_size(tmt.tm, domain_size)
-domain_size(tmt::LazyTensorMappingTranspose{T,R,D}, r_size::NTuple{D,Integer}) where {T,R,D} = range_size(tmt.tm, range_size)
-
-
-
-"""
     LazyArray{T,D} <: AbstractArray{T,D}
 
 Array which is calcualted lazily when indexing.
@@ -134,6 +108,32 @@ Base.:*(a::AbstractArray{T,D},b::LazyArray{T,D}) where {T,D} = b * a
 # Base.:/(a::AbstractArray{T,D},b::LazyArray{T,D}) where {T,D} = a /̃ b
 
 export +̃, -̃, *̃, /̃
+
+
+
+"""
+    LazyTensorMappingTranspose{T,R,D} <: TensorMapping{T,D,R}
+
+Struct for lazy transpose of a TensorMapping.
+
+If a mapping implements the the `apply_transpose` method this allows working with
+the transpose of mapping `m` by using `m'`. `m'` will work as a regular TensorMapping lazily calling
+the appropriate methods of `m`.
+"""
+struct LazyTensorMappingTranspose{T,R,D} <: TensorMapping{T,D,R}
+    tm::TensorMapping{T,R,D}
+end
+export LazyTensorMappingTranspose
+
+# # TBD: Should this be implemented on a type by type basis or through a trait to provide earlier errors?
+Base.adjoint(t::TensorMapping) = LazyTensorMappingTranspose(t)
+Base.adjoint(t::LazyTensorMappingTranspose) = t.tm
+
+apply(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::Vararg) where {T,R,D} = apply_transpose(tm.tm, v, I...)
+apply_transpose(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,D} = apply(tm.tm, v, I...)
+
+range_size(tmt::LazyTensorMappingTranspose{T,R,D}, d_size::NTuple{R,Integer}) where {T,R,D} = domain_size(tmt.tm, domain_size)
+domain_size(tmt::LazyTensorMappingTranspose{T,R,D}, r_size::NTuple{D,Integer}) where {T,R,D} = range_size(tmt.tm, range_size)
 
 
 
