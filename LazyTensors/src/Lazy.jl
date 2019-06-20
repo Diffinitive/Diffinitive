@@ -1,9 +1,15 @@
 module Lazy
 
-# Struct allowing for lazy evaluation of operations on AbstractArrays
-# A LazyElementwiseOperation is defined by two same-sized AbstractArrays
-# together with an operation. The operations are carried out when the
-# LazyElementwiseOperation is indexed.
+
+"""
+    LazyElementwiseOperation{T,D,Op, T1<:AbstractArray{T,D}, T2 <: AbstractArray{T,D}} <: AbstractArray{T,D}
+
+Struct allowing for lazy evaluation of elementwise operations on AbstractArrays.
+
+A LazyElementwiseOperation contains two AbstractArrays of equal size,
+together with an operation. The operations are carried out when the
+LazyElementwiseOperation is indexed.
+"""
 struct LazyElementwiseOperation{T,D,Op, T1<:AbstractArray{T,D}, T2 <: AbstractArray{T,D}} <: AbstractArray{T,D}
     a::T1
     b::T2
