@@ -1,2 +1,6 @@
 # This file is machine-generated - editing it directly is not advised
 
+[[LazyTensors]]
+path = "LazyTensors"
+uuid = "62fbed2c-918d-11e9-279b-eb3a325b37d3"
+version = "0.1.0"
