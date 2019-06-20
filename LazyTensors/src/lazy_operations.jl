@@ -25,7 +25,17 @@ domain_size(tmt::LazyTensorMappingTranspose{T,R,D}, r_size::NTuple{D,Integer}) w
 
 
 """
-    LazyTensorMappingApplication{T,R,D} <: AbstractArray{T,R}
+    LazyArray{T,D} <: AbstractArray{T,D}
+
+Array which is calcualted lazily when indexing.
+
+A subtype of `LazyArray` will use lazy version of `+`, `-`, `*`, `/`.
+"""
+abstract type LazyArray{T,D} <: AbstractArray{T,D} end
+export LazyArray
+
+"""
+    LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
 
 Struct for lazy application of a TensorMapping. Created using `*`.
 
@@ -33,7 +43,7 @@ Allows the result of a `TensorMapping` applied to a vector to be treated as an `
 With a mapping `m` and a vector `v` the LazyTensorMappingApplication object can be created by `m*v`.
 The actual result will be calcualted when indexing into `m*v`.
 """
-struct LazyTensorMappingApplication{T,R,D} <: AbstractArray{T,R}
+struct LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
     t::TensorMapping{T,R,D}
     o::AbstractArray{T,D}
 end
@@ -64,7 +74,7 @@ A LazyElementwiseOperation contains two AbstractArrays of equal size,
 together with an operation. The operations are carried out when the
 LazyElementwiseOperation is indexed.
 """
-struct LazyElementwiseOperation{T,D,Op, T1<:AbstractArray{T,D}, T2 <: AbstractArray{T,D}} <: AbstractArray{T,D}
+struct LazyElementwiseOperation{T,D,Op, T1<:AbstractArray{T,D}, T2 <: AbstractArray{T,D}} <: LazyArray{T,D}
     a::T1
     b::T2
 
@@ -112,9 +122,6 @@ end
 @inline *̃(a::AbstractArray{T,D},b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:*}(a,b)
 @inline /̃(a::AbstractArray{T,D},b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:/}(a,b)
 
-# Abstract type for which the normal operations are defined by their
-# lazy counterparts
-abstract type LazyArray{T,D} <: AbstractArray{T,D} end
 
 Base.:+(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a +̃ b
 Base.:+(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = b + a
