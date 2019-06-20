@@ -52,5 +52,9 @@ end
     @test size(m*v) == 2 .*size(v)
     @test (m*v)[0] == (:apply,v,0)
     @test m*m*v isa AbstractVector{Int}
-    @test (m*m*v)[0] == (:apply,m*v,0)
+    @test (m*m*v)[1] == (:apply,m*v,1)
+    @test (m*m*v)[3] == (:apply,m*v,3)
+    @test (m*m*v)[6] == (:apply,m*v,6)
+    @test_broken BoundsError == (m*m*v)[0]
+    @test_broken BoundsError == (m*m*v)[7]
 end
