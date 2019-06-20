@@ -1,8 +1,6 @@
 using Test
 using LazyTensors
 
-
-
 @testset "Generic Mapping methods" begin
     struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
     LazyTensors.apply(m::DummyMapping{T,R,D}, v, i) where {T,R,D} = :apply

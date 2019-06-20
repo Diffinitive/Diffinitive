@@ -8,6 +8,8 @@ A subtype of `LazyArray` will use lazy version of `+`, `-`, `*`, `/`.
 abstract type LazyArray{T,D} <: AbstractArray{T,D} end
 export LazyArray
 
+
+
 """
     LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
 
@@ -28,7 +30,6 @@ Base.:*(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = LazyTen
 Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg) where {T,R,D} = apply(ta.t, ta.o, I...)
 Base.size(ta::LazyTensorMappingApplication{T,R,D}) where {T,R,D} = range_size(ta.t,size(ta.o))
 # TODO: What else is needed to implement the AbstractArray interface?
-
 
 # # We need the associativity to be a→b→c = a→(b→c), which is the case for '→'
 Base.:*(args::Union{TensorMapping{T}, AbstractArray{T}}...) where T = foldr(*,args)
