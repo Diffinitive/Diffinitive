@@ -56,3 +56,53 @@ end
     @test_broken BoundsError == (m*m*v)[0]
     @test_broken BoundsError == (m*m*v)[7]
 end
+
+@testset "LazyArray" begin
+    struct DummyArray{T,D, T1<:AbstractArray{T,D}} <: LazyArray{T,D}
+        data::T1
+    end
+    Base.size(v::DummyArray) = size(v.data)
+    Base.getindex(v::DummyArray, I...) = v.data[I...]
+
+    # Test lazy operations
+    v1 = [1, 2.3, 4]
+    v2 = [1., 2, 3]
+    r_add = v1 .+ v2
+    r_sub = v1 .- v2
+    r_times = v1 .* v2
+    r_div = v1 ./ v2
+    @test isa(v1 +̃ v2, LazyArray)
+    @test isa(v1 -̃ v2, LazyArray)
+    @test isa(v1 *̃ v2, LazyArray)
+    @test isa(v1 /̃ v2, LazyArray)
+    for i ∈ eachindex(v1)
+        @test (v1 +̃ v2)[i] == r_add[i]
+        @test (v1 -̃ v2)[i] == r_sub[i]
+        @test (v1 *̃ v2)[i] == r_times[i]
+        @test (v1 /̃ v2)[i] == r_div[i]
+    end
+    @test_throws BoundsError (v1 +̃  v2)[4]
+
+    # Test operations on LazyArray
+    v1 = DummyArray([1, 2.3, 4])
+    @test isa(v1 + v2, LazyArray)
+    @test isa(v2 + v1, LazyArray)
+    @test isa(v1 - v2, LazyArray)
+    @test isa(v2 - v1, LazyArray)
+    @test isa(v1 * v2, LazyArray)
+    @test isa(v2 * v1, LazyArray)
+    @test_broken isa(v1 / v2, LazyArray)
+    @test_broken isa(v2 / v1, LazyArray)
+    for i ∈ eachindex(v2)
+        @test (v1 + v2)[i] == (v2 + v1)[i] == r_add[i]
+        @test (v1 - v2)[i] == -(v2 - v1)[i] == r_sub[i]
+        @test (v1 * v2)[i] == (v2 * v1)[i]  ==  r_times[i]
+        @test_broken (v1 / v2)[i] == 1/((v2 / v1)[i])  ==  r_div[i]
+    end
+    @test_throws BoundsError (v1 + v2)[4]
+    v2 = [1., 2, 3, 4]
+    # Test that size of arrays is asserted when not specified inbounds
+    @test_throws AssertionError v1 + v2
+    # Test that no error checking is performed when specified inbounds
+    @test_broken @inbounds((v1 + v2)[1] == 2)
+end
