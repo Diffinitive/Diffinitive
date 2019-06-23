@@ -82,9 +82,16 @@ end
         @test (v1 /̃ v2)[i] == r_div[i]
     end
     @test_throws BoundsError (v1 +̃  v2)[4]
+    v2 = [1., 2, 3, 4]
+    # Test that size of arrays is asserted when not specified inbounds
+    @test_throws AssertionError v1 +̃ v2
+    # Test that no error checking is performed when specified inbounds
+    res = (v1,v2) -> (@inbounds (v1 +̃ v2)[1] == 2)
+    @test res(v1,v2)
 
     # Test operations on LazyArray
     v1 = DummyArray([1, 2.3, 4])
+    v2 = [1., 2, 3]
     @test isa(v1 + v2, LazyArray)
     @test isa(v2 + v1, LazyArray)
     @test isa(v1 - v2, LazyArray)
@@ -104,5 +111,6 @@ end
     # Test that size of arrays is asserted when not specified inbounds
     @test_throws AssertionError v1 + v2
     # Test that no error checking is performed when specified inbounds
-    @test_broken @inbounds((v1 + v2)[1] == 2)
+    res = (v1,v2) -> (@inbounds (v1 + v2)[1] == 2)
+    @test res(v1,v2)
 end
