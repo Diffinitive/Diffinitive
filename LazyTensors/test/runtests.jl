@@ -56,3 +56,30 @@ end
     @test_broken BoundsError == (m*m*v)[0]
     @test_broken BoundsError == (m*m*v)[7]
 end
+
+
+@testset "Lazy elementwise operations" begin
+    struct DummyLazyArray{D} <: LazyArray{Int,D}
+        size::NTuple{D,Int}
+    end
+    Base.size(a::DummyLazyArray) = a.size
+    Base.getindex(a::DummyLazyArray, I...) = prod(I)
+
+
+    a = DummyLazyArray((3,))
+
+    @test (a+a)[3] == 6
+    @test (a-a)[3] == 0
+    @test (a*a)[3] == 9
+
+    a = DummyLazyArray((4,))
+    b = [3,2,1,2]
+
+    @test (a+b)[4] == 6
+    @test (a-b)[4] == 2
+    @test (a*b)[4] == 8
+
+    @test (b+a)[4] == 6
+    @test (b-a)[4] == -2
+    @test (b*a)[4] == 8
+end

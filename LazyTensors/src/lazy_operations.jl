@@ -98,12 +98,20 @@ end
 @inline /̃(a::AbstractArray{T,D},b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:/}(a,b)
 
 
-Base.:+(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a +̃ b
-Base.:+(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = b + a
-Base.:-(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a -̃ b
+# NOTE: Är det knas att vi har till exempel * istället för .* ??
+# Oklart om det ens går att lösa..
+Base.:+(a::LazyArray{T,D}, b::LazyArray{T,D}) where {T,D} = a +̃ b
+Base.:+(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a +̃ b
+Base.:+(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = a +̃ b
+
+Base.:-(a::LazyArray{T,D}, b::LazyArray{T,D}) where {T,D} = a -̃ b
+Base.:-(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a -̃ b
 Base.:-(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = a -̃ b
-Base.:*(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a *̃ b
-Base.:*(a::AbstractArray{T,D},b::LazyArray{T,D}) where {T,D} = b * a
+
+Base.:*(a::LazyArray{T,D}, b::LazyArray{T,D}) where {T,D} = a *̃ b
+Base.:*(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a *̃ b
+Base.:*(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = a *̃ b
+
 # TODO: / seems to be ambiguous
 # Base.:/(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a /̃ b
 # Base.:/(a::AbstractArray{T,D},b::LazyArray{T,D}) where {T,D} = a /̃ b
