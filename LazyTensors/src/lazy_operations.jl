@@ -98,17 +98,17 @@ end
 
 # Define lazy operations for AbstractArrays. Operations constructs a LazyElementwiseOperation which
 # can later be indexed into. Lazy operations are denoted by the usual operator followed by a tilde
-Base.@propagate_inbounds +̃(a::AbstractArray{T,D},b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:+}(a,b)
-Base.@propagate_inbounds -̃(a::AbstractArray{T,D},b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:-}(a,b)
-Base.@propagate_inbounds *̃(a::AbstractArray{T,D},b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:*}(a,b)
-Base.@propagate_inbounds /̃(a::AbstractArray{T,D},b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:/}(a,b)
+Base.@propagate_inbounds +̃(a::AbstractArray{T,D}, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:+}(a,b)
+Base.@propagate_inbounds -̃(a::AbstractArray{T,D}, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:-}(a,b)
+Base.@propagate_inbounds *̃(a::AbstractArray{T,D}, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:*}(a,b)
+Base.@propagate_inbounds /̃(a::AbstractArray{T,D}, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:/}(a,b)
 
-Base.@propagate_inbounds Base.:+(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a +̃ b
+Base.@propagate_inbounds Base.:+(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a +̃ b
 Base.@propagate_inbounds Base.:+(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = b + a
-Base.@propagate_inbounds Base.:-(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a -̃ b
+Base.@propagate_inbounds Base.:-(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a -̃ b
 Base.@propagate_inbounds Base.:-(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = a -̃ b
-Base.@propagate_inbounds Base.:*(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a *̃ b
-Base.@propagate_inbounds Base.:*(a::AbstractArray{T,D},b::LazyArray{T,D}) where {T,D} = b * a
+Base.@propagate_inbounds Base.:*(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a *̃ b
+Base.@propagate_inbounds Base.:*(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = b * a
 # TODO: / seems to be ambiguous
 # Base.:/(a::LazyArray{T,D},b::AbstractArray{T,D}) where {T,D} = a /̃ b
 # Base.:/(a::AbstractArray{T,D},b::LazyArray{T,D}) where {T,D} = a /̃ b
