@@ -84,7 +84,7 @@ end
     @test_throws BoundsError (v1 +̃  v2)[4]
     v2 = [1., 2, 3, 4]
     # Test that size of arrays is asserted when not specified inbounds
-    @test_throws AssertionError v1 +̃ v2
+    @test_throws DimensionMismatch v1 +̃ v2
     # Test that no error checking is performed when specified inbounds
     res = (v1,v2) -> (@inbounds (v1 +̃ v2)[1] == 2)
     @test res(v1,v2)
@@ -103,7 +103,7 @@ end
     @test_throws BoundsError (v1 + v2)[4]
     v2 = [1., 2, 3, 4]
     # Test that size of arrays is asserted when not specified inbounds
-    @test_throws AssertionError v1 + v2
+    @test_throws DimensionMismatch v1 + v2
     # Test that no error checking is performed when specified inbounds
     res = (v1,v2) -> (@inbounds (v1 + v2)[1] == 2)
     @test res(v1,v2)
