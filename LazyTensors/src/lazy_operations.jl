@@ -113,19 +113,8 @@ Base.@propagate_inbounds Base.:-(a::LazyArray{T,D}, b::LazyArray{T,D}) where {T,
 Base.@propagate_inbounds Base.:-(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a -̃ b
 Base.@propagate_inbounds Base.:-(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = a -̃ b
 
-Base.@propagate_inbounds Base.:*(a::LazyArray{T,D}, b::LazyArray{T,D}) where {T,D} = a *̃ b
-Base.@propagate_inbounds Base.:*(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a *̃ b
-Base.@propagate_inbounds Base.:*(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = a *̃ b
-
-# TODO: / seems to be ambiguous
-Base.@propagate_inbounds Base.:/(a::LazyArray{T,D}, b::LazyArray{T,D}) where {T,D} = a /̃  b
-Base.@propagate_inbounds Base.:/(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a /̃ b
-Base.@propagate_inbounds Base.:/(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = a /̃ b
-
-# NOTE: Need to define (/) for AbstractVectorOrMat and Union of LazyArrays in order to avoid ambiguities
-# with (/) in the LinearAlgebra package. Not sure if it actually could be usefull.
-Base.@propagate_inbounds Base.:/(a::AbstractVecOrMat, b::Union{LazyArray{T,1}, LazyArray{T,2}})  where {T}  = a /̃ b
-Base.@propagate_inbounds Base.:/(a::Union{LazyArray{T,1}, LazyArray{T,2}}, b::AbstractVecOrMat)  where {T}  = a /̃ b
+# Element wise operation for `*` and `\` are not overloaded due to conflicts with the behavior
+# of regular `*` and `/` for AbstractArrays. Use tilde versions instead.
 
 export +̃, -̃, *̃, /̃
 

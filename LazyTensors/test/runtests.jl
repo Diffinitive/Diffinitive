@@ -96,15 +96,9 @@ end
     @test isa(v2 + v1, LazyArray)
     @test isa(v1 - v2, LazyArray)
     @test isa(v2 - v1, LazyArray)
-    @test isa(v1 * v2, LazyArray)
-    @test isa(v2 * v1, LazyArray)
-    @test isa(v1 / v2, LazyArray)
-    @test isa(v2 / v1, LazyArray)
     for i ∈ eachindex(v2)
         @test (v1 + v2)[i] == (v2 + v1)[i] == r_add[i]
         @test (v1 - v2)[i] == -(v2 - v1)[i] == r_sub[i]
-        @test (v1 * v2)[i] == (v2 * v1)[i]  ==  r_times[i]
-        @test (v1 / v2)[i] == 1/((v2 / v1)[i])  ==  r_div[i]
     end
     @test_throws BoundsError (v1 + v2)[4]
     v2 = [1., 2, 3, 4]
