@@ -85,9 +85,6 @@ end
     v2 = [1., 2, 3, 4]
     # Test that size of arrays is asserted when not specified inbounds
     @test_throws DimensionMismatch v1 +̃ v2
-    # Test that no error checking is performed when specified inbounds
-    res = (v1,v2) -> (@inbounds (v1 +̃ v2)[1] == 2)
-    @test res(v1,v2)
 
     # Test operations on LazyArray
     v1 = DummyArray([1, 2.3, 4])
@@ -104,7 +101,4 @@ end
     v2 = [1., 2, 3, 4]
     # Test that size of arrays is asserted when not specified inbounds
     @test_throws DimensionMismatch v1 + v2
-    # Test that no error checking is performed when specified inbounds
-    res = (v1,v2) -> (@inbounds (v1 + v2)[1] == 2)
-    @test res(v1,v2)
 end
