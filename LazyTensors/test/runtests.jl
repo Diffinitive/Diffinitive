@@ -57,6 +57,32 @@ end
     @test_broken BoundsError == (m*m*v)[7]
 end
 
+@testset "TensorMapping binary operations" begin
+    struct ScalarMapping{T,R,D} <: TensorMapping{T,R,D}
+        λ::T
+    end
+
+    LazyTensors.apply(m::ScalarMapping{T,R,D}, v, i) where {T,R,D} = m.λ*v[i]
+    LazyTensors.range_size(m::ScalarMapping, domain_size) = domain_size
+    LazyTensors.domain_size(m::ScalarMapping, range_sizes) = range_sizes
+
+    A = ScalarMapping{Float64,1,1}(2.0)
+    B = ScalarMapping{Float64,1,1}(3.0)
+
+    v = [1.1,1.2,1.3]
+
+    for i ∈ eachindex(v)
+        @test ((A+B)*v)[i] == 2*v[i] + 3*v[i]
+    end
+
+    for i ∈ eachindex(v)
+        @test ((A-B)*v)[i] == 2*v[i] - 3*v[i]
+    end
+
+    @test range_size(A+B, (3,)) == range_size(A, (3,)) == range_size(B,(3,))
+    @test domain_size(A+B, (3,)) == domain_size(A, (3,)) == domain_size(B,(3,))
+end
+
 @testset "LazyArray" begin
     struct DummyArray{T,D, T1<:AbstractArray{T,D}} <: LazyArray{T,D}
         data::T1

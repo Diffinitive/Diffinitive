@@ -60,6 +60,7 @@ struct LazyElementwiseOperation{T,D,Op, T1<:AbstractArray{T,D}, T2 <: AbstractAr
         return new{T,D,Op,T1,T2}(a,b)
     end
 end
+# TODO: Move Op to be the first parameter? Compare to Binary operations
 
 Base.size(v::LazyElementwiseOperation) = size(v.a)
 
@@ -141,6 +142,26 @@ apply_transpose(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I:
 range_size(tmt::LazyTensorMappingTranspose{T,R,D}, d_size::NTuple{R,Integer}) where {T,R,D} = domain_size(tmt.tm, domain_size)
 domain_size(tmt::LazyTensorMappingTranspose{T,R,D}, r_size::NTuple{D,Integer}) where {T,R,D} = range_size(tmt.tm, range_size)
 
+
+
+
+struct LazyTensorMappingBinaryOperation{Op,T,R,D,T1<:TensorMapping{T,R,D},T2<:TensorMapping{T,R,D}} <: TensorMapping{T,D,R}
+    A::T1
+    B::T2
+
+    @inline function LazyTensorMappingBinaryOperation{Op,T,R,D}(A::T1,B::T2) where {Op,T,R,D, T1<:TensorMapping{T,R,D},T2<:TensorMapping{T,R,D}}
+        return new{Op,T,R,D,T1,T2}(A,B)
+    end
+end
+
+apply(mb::LazyTensorMappingBinaryOperation{:+,T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,D} = apply(mb.A, v, I...) + apply(mb.B,v,I...)
+apply(mb::LazyTensorMappingBinaryOperation{:-,T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,D} = apply(mb.A, v, I...) - apply(mb.B,v,I...)
+
+range_size(mp::LazyTensorMappingBinaryOperation{Op,T,R,D}, domain_size::NTuple{D,Integer}) where {Op,T,R,D} = range_size(mp.A, domain_size)
+domain_size(mp::LazyTensorMappingBinaryOperation{Op,T,R,D}, range_size::NTuple{R,Integer}) where {Op,T,R,D} = domain_size(mp.A, range_size)
+
+Base.:+(A::TensorMapping{T,R,D}, B::TensorMapping{T,R,D}) where {T,R,D} = LazyTensorMappingBinaryOperation{:+,T,R,D}(A,B)
+Base.:-(A::TensorMapping{T,R,D}, B::TensorMapping{T,R,D}) where {T,R,D} = LazyTensorMappingBinaryOperation{:-,T,R,D}(A,B)
 
 
 # TODO: Write tests and documentation for LazyTensorMappingComposition
