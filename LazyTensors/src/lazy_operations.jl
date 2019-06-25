@@ -54,9 +54,6 @@ struct LazyElementwiseOperation{T,D,Op, T1<:AbstractArray{T,D}, T2 <: AbstractAr
     b::T2
 
     @inline function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op, T1<:AbstractArray{T,D}, T2<:AbstractArray{T,D}}
-        # NOTE: Seems like adding the boundscheck introduces allocations. Can this
-        # be fixed? Since boundscheck is removed when inlined into inbounds this
-        # should not in practise effect performance.
         @boundscheck if size(a) != size(b)
             throw(DimensionMismatch("dimensions must match"))
         end
