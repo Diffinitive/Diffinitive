@@ -1,6 +1,9 @@
 module sbp
-include("index.jl")
-include("stencil.jl")
-include("sbpD2.jl")
+
+using Grids
+using RegionIndices
+using SbpOperators
+using DiffOps
+
 include("TimeStepper.jl")
 end  # module
