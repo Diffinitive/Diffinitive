@@ -1,3 +1,9 @@
+module SbpOperators
+
+using RegionIndices
+
+include("stencil.jl")
+
 abstract type ConstantStencilOperator end
 
 # Apply for different regions Lower/Interior/Upper or Unknown region
@@ -151,3 +157,5 @@ function pad_tuple(t::NTuple{N, T}, n::Integer) where {N,T}
         return pad_tuple((t..., zero(T)), n)
     end
 end
+
+end # module

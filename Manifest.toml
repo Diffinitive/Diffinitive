@@ -1,21 +1,71 @@
 # This file is machine-generated - editing it directly is not advised
 
+[[Base64]]
+uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
 [[DiffOps]]
+deps = ["RegionIndices", "TiledIteration"]
 path = "DiffOps"
 uuid = "39474f48-97ec-11e9-01fc-6ddcbe5918df"
 version = "0.1.0"
 
+[[Distributed]]
+deps = ["Random", "Serialization", "Sockets"]
+uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+
 [[Grids]]
+deps = ["RegionIndices"]
 path = "Grids"
 uuid = "960fdf28-97ed-11e9-2a74-bd90bf2fab5a"
 version = "0.1.0"
+
+[[InteractiveUtils]]
+deps = ["Markdown"]
+uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[LazyTensors]]
 path = "LazyTensors"
 uuid = "62fbed2c-918d-11e9-279b-eb3a325b37d3"
 version = "0.1.0"
 
+[[Logging]]
+uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
+
+[[Markdown]]
+deps = ["Base64"]
+uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+
+[[OffsetArrays]]
+git-tree-sha1 = "1af2f79c7eaac3e019a0de41ef63335ff26a0a57"
+uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
+version = "0.11.1"
+
+[[Random]]
+deps = ["Serialization"]
+uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
 [[RegionIndices]]
 path = "RegionIndices"
 uuid = "5d527584-97f1-11e9-084c-4540c7ecf219"
 version = "0.1.0"
+
+[[SbpOperators]]
+path = "SbpOperators"
+uuid = "204357d8-97fd-11e9-05e7-010897a14cd0"
+version = "0.1.0"
+
+[[Serialization]]
+uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[Sockets]]
+uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+
+[[Test]]
+deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
+uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[TiledIteration]]
+deps = ["OffsetArrays", "Test"]
+git-tree-sha1 = "58f6f07d3b54a363ec283a8f5fc9fb4ecebde656"
+uuid = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
+version = "0.2.3"
