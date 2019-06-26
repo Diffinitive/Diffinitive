@@ -21,3 +21,4 @@ function evalOn(g::AbstractGrid, f::Function)
     F(x) = f(x...)
     return F.(points(g))
 end
+export evalOn

@@ -51,6 +51,8 @@ function regionindices(gridsize::NTuple{Dim,Integer}, closuresize::NTuple{Dim,In
     return CartesianIndices(regions)
 end
 
+export regionindices
+
 function getregion(i::Integer, boundary_width::Integer, dim_size::Integer)
 	if 0 < i <= boundary_width
         return Lower
