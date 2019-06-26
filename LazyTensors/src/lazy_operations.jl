@@ -27,7 +27,7 @@ export LazyTensorMappingApplication
 
 Base.:*(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = LazyTensorMappingApplication(tm,o)
 
-Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg) where {T,R,D} = apply(ta.t, ta.o, I...)
+Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Int,R}) where {T,R,D} = apply(ta.t, ta.o, I)
 Base.size(ta::LazyTensorMappingApplication{T,R,D}) where {T,R,D} = range_size(ta.t,size(ta.o))
 # TODO: What else is needed to implement the AbstractArray interface?
 
@@ -69,27 +69,27 @@ Base.size(v::LazyElementwiseOperation) = size(v.a)
 # vectors in the LazyElementwiseOperation are the same size. If we remove the
 # size assertion in the constructor we might have to handle
 # boundschecking differently.
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:+}, I...) where {T,D}
+Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:+}, I::Vararg{Int,D}) where {T,D}
     @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],[I...]))
+        throw(BoundsError([leo],I...))
     end
     return leo.a[I...] + leo.b[I...]
 end
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:-}, I...) where {T,D}
+Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:-}, I::Vararg{Int,D}) where {T,D}
     @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],[I...]))
+        throw(BoundsError([leo],I...))
     end
     return leo.a[I...] - leo.b[I...]
 end
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:*}, I...) where {T,D}
+Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:*}, I::Vararg{Int,D}) where {T,D}
     @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],[I...]))
+        throw(BoundsError([leo],I...))
     end
     return leo.a[I...] * leo.b[I...]
 end
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:/}, I...) where {T,D}
+Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:/}, I::Vararg{Int,D}) where {T,D}
     @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],[I...]))
+        throw(BoundsError([leo],I...))
     end
     return leo.a[I...] / leo.b[I...]
 end
@@ -136,8 +136,8 @@ export LazyTensorMappingTranspose
 Base.adjoint(t::TensorMapping) = LazyTensorMappingTranspose(t)
 Base.adjoint(t::LazyTensorMappingTranspose) = t.tm
 
-apply(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::CartesianIndex{D}) where {T,R,D} = apply_transpose(tm.tm, v, I)
-apply_transpose(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::CartesianIndex{R}) where {T,R,D} = apply(tm.tm, v, I)
+apply(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::NTuple{D,Int}) where {T,R,D} = apply_transpose(tm.tm, v, I)
+apply_transpose(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::NTuple{R,Int}) where {T,R,D} = apply(tm.tm, v, I)
 
 range_size(tmt::LazyTensorMappingTranspose{T,R,D}, d_size::NTuple{R,Integer}) where {T,R,D} = domain_size(tmt.tm, d_size)
 domain_size(tmt::LazyTensorMappingTranspose{T,R,D}, r_size::NTuple{D,Integer}) where {T,R,D} = range_size(tmt.tm, r_size)
@@ -154,8 +154,8 @@ struct LazyTensorMappingBinaryOperation{Op,T,R,D,T1<:TensorMapping{T,R,D},T2<:Te
     end
 end
 
-apply(mb::LazyTensorMappingBinaryOperation{:+,T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,D} = apply(mb.A, v, I...) + apply(mb.B,v,I...)
-apply(mb::LazyTensorMappingBinaryOperation{:-,T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,D} = apply(mb.A, v, I...) - apply(mb.B,v,I...)
+apply(mb::LazyTensorMappingBinaryOperation{:+,T,R,D}, v::AbstractArray{T,D}, I::NTuple{R,Int}) where {T,R,D} = apply(mb.A, v, I...) + apply(mb.B,v,I...)
+apply(mb::LazyTensorMappingBinaryOperation{:-,T,R,D}, v::AbstractArray{T,D}, I::NTuple{R,Int}) where {T,R,D} = apply(mb.A, v, I...) - apply(mb.B,v,I...)
 
 range_size(mp::LazyTensorMappingBinaryOperation{Op,T,R,D}, domain_size::NTuple{D,Integer}) where {Op,T,R,D} = range_size(mp.A, domain_size)
 domain_size(mp::LazyTensorMappingBinaryOperation{Op,T,R,D}, range_size::NTuple{R,Integer}) where {Op,T,R,D} = domain_size(mp.A, range_size)
@@ -180,11 +180,11 @@ Base.:-(A::TensorMapping{T,R,D}, B::TensorMapping{T,R,D}) where {T,R,D} = LazyTe
 #     domain_size(tm.t1, domain_size(tm.t2, range_size))
 # end
 
-# function apply(c::LazyTensorMappingComposition{T,R,K,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,K,D}
+# function apply(c::LazyTensorMappingComposition{T,R,K,D}, v::AbstractArray{T,D}, I::NTuple{R,Int}) where {T,R,K,D}
 #     apply(c.t1, LazyTensorMappingApplication(c.t2,v), I...)
 # end
 
-# function apply_transpose(c::LazyTensorMappingComposition{T,R,K,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,K,D}
+# function apply_transpose(c::LazyTensorMappingComposition{T,R,K,D}, v::AbstractArray{T,D}, I::NTuple{D,Int}) where {T,R,K,D}
 #     apply_transpose(c.t2, LazyTensorMappingApplication(c.t1',v), I...)
 # end
 
