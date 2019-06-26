@@ -1,3 +1,7 @@
+module DiffOps
+
+using RegionIndices
+
 abstract type DiffOp end
 
 # TBD: The "error("not implemented")" thing seems to be hiding good error information. How to fix that? Different way of saying that these should be implemented?
@@ -218,3 +222,5 @@ end
 # 		sat(s.L, Dirichlet{CartesianBoundary{2,Lower}}(s.tau),  v, s.g_s, i) +
 # 		sat(s.L, Dirichlet{CartesianBoundary{2,Upper}}(s.tau),  v, s.g_n, i)
 # end
+
+end # module
