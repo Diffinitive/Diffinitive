@@ -136,8 +136,8 @@ export LazyTensorMappingTranspose
 Base.adjoint(t::TensorMapping) = LazyTensorMappingTranspose(t)
 Base.adjoint(t::LazyTensorMappingTranspose) = t.tm
 
-apply(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::Vararg) where {T,R,D} = apply_transpose(tm.tm, v, I...)
-apply_transpose(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {T,R,D} = apply(tm.tm, v, I...)
+apply(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::CartesianIndex{D}) where {T,R,D} = apply_transpose(tm.tm, v, I)
+apply_transpose(tm::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::CartesianIndex{R}) where {T,R,D} = apply(tm.tm, v, I)
 
 range_size(tmt::LazyTensorMappingTranspose{T,R,D}, d_size::NTuple{R,Integer}) where {T,R,D} = domain_size(tmt.tm, d_size)
 domain_size(tmt::LazyTensorMappingTranspose{T,R,D}, r_size::NTuple{D,Integer}) where {T,R,D} = range_size(tmt.tm, r_size)
