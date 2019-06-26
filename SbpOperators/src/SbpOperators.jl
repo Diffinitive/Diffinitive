@@ -121,7 +121,7 @@ function apply_d(op::D2, h_inv::Real, v::AbstractVector, ::Type{Lower})
     @boundscheck if length(v) < closureSize(op)
         throw(BoundsError())
     end
-    -h_inv*apply(op.dClosure,v,1)
+    h_inv*apply(op.dClosure,v,1)
 end
 
 function apply_d(op::D2, h_inv::Real, v::AbstractVector, ::Type{Upper})
