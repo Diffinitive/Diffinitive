@@ -12,7 +12,7 @@ export NormalDerivative
 
 # Not correct abstraction level
 # TODO: Not type stable D:<
-function apply(d::NormalDerivative, v::AbstractArray, I::NTuple{2,Int})
+function LazyTensors.apply(d::NormalDerivative, v::AbstractArray, I::NTuple{2,Int})
 	i = I[dim(d.bId)]
 	j = I[3-dim(d.bId)]
 	N_i = d.grid.size[dim(d.bId)]
@@ -31,7 +31,7 @@ function apply(d::NormalDerivative, v::AbstractArray, I::NTuple{2,Int})
 	end
 end
 
-function apply_transpose(d::NormalDerivative, v::AbstractArray, I::NTuple{1,Int})
+function LazyTensors.apply_transpose(d::NormalDerivative, v::AbstractArray, I::NTuple{1,Int})
     u = selectdim(v,3-dim(d.bId),I)
     return apply_d(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
 end
@@ -57,19 +57,13 @@ LazyTensors.domain_size(e::BoundaryValue{T}, range_size::NTuple{2,Integer}) wher
 function LazyTensors.apply(e::BoundaryValue, v::AbstractArray, I::NTuple{2,Int})
 	i = I[dim(e.bId)]
 	j = I[3-dim(e.bId)]
-	N_i = e.grid.size[dim(e.bId)]
+	N_i = size(e.grid)[dim(e.bId)]
 
-	r = getregion(i, closureSize(e.op), N_i)
-
-	if r != region(e.bId)
-		return 0
-	end
-
-	if r == Lower
-		# Note, closures are indexed by offset. Fix this D:<
+	if region(e.bId) == Lower
+		# NOTE: closures are indexed by offset. Fix this D:<
 		return e.op.eClosure[i-1]*v[j]
-	elseif r == Upper
-		return e.op.eClosure[N_i-j]*v[j]
+	elseif region(e.bId) == Upper
+		return e.op.eClosure[N_i-i]*v[j]
 	end
 end
 

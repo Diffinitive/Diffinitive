@@ -41,4 +41,24 @@ using LazyTensors
     @test collect(e_s'*v) == [10,11,12,13.0]
     @test collect(e_n'*v) == [1,2,3,4.0]
 
+    g_x = [1,2,3,4.0]
+    g_y = [5,4,3,2,1.0]
+
+    G_w = zeros(Float64, (4,5))
+    G_w[1,:] = g_y
+
+    G_e = zeros(Float64, (4,5))
+    G_e[4,:] = g_y
+
+    G_s = zeros(Float64, (4,5))
+    G_s[:,1] = g_x
+
+    G_n = zeros(Float64, (4,5))
+    G_n[:,5] = g_x
+
+    @test collect(e_w*g_y) == G_w
+    @test collect(e_e*g_y) == G_e
+    @test collect(e_s*g_x) == G_s
+    @test collect(e_n*g_x) == G_n
+
 end
