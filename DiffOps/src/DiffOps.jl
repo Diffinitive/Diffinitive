@@ -6,16 +6,16 @@ using Grids
 
 export Laplace
 
+"""
+    DiffOp
+
+Supertype of differential operator discretisations.
+The action of the DiffOp is defined in the method
+    apply(D::DiffOp, v::AbstractVector, I...)
+"""
 abstract type DiffOp end
 
-# TBD: The "error("not implemented")" thing seems to be hiding good error information. How to fix that? Different way of saying that these should be implemented?
-function apply(D::DiffOp, v::AbstractVector, i::Int)
-    error("not implemented")
-end
-
-function innerProduct(D::DiffOp, u::AbstractVector, v::AbstractVector)::Real
-    error("not implemented")
-end
+function apply end
 
 function matrixRepresentation(D::DiffOp)
     error("not implemented")
