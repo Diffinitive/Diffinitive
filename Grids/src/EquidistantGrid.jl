@@ -25,6 +25,8 @@ function Base.eachindex(grid::EquidistantGrid)
     CartesianIndices(grid.size)
 end
 
+Base.size(g::EquidistantGrid) = g.size
+
 # Returns the number of dimensions of an EquidistantGrid.
 #
 # @Input: grid - an EquidistantGrid
