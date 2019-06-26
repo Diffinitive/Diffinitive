@@ -4,7 +4,7 @@
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[DiffOps]]
-deps = ["RegionIndices", "TiledIteration"]
+deps = ["Grids", "RegionIndices", "SbpOperators", "TiledIteration"]
 path = "DiffOps"
 uuid = "39474f48-97ec-11e9-01fc-6ddcbe5918df"
 version = "0.1.0"
@@ -50,6 +50,7 @@ uuid = "5d527584-97f1-11e9-084c-4540c7ecf219"
 version = "0.1.0"
 
 [[SbpOperators]]
+deps = ["RegionIndices"]
 path = "SbpOperators"
 uuid = "204357d8-97fd-11e9-05e7-010897a14cd0"
 version = "0.1.0"

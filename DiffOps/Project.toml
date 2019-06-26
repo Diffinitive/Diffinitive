@@ -4,7 +4,9 @@ authors = ["Jonatan Werpers <jonatan.werpers@it.uu.se>"]
 version = "0.1.0"
 
 [deps]
+Grids = "960fdf28-97ed-11e9-2a74-bd90bf2fab5a"
 RegionIndices = "5d527584-97f1-11e9-084c-4540c7ecf219"
+SbpOperators = "204357d8-97fd-11e9-05e7-010897a14cd0"
 TiledIteration = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 
 [extras]

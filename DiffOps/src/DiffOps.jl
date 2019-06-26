@@ -1,6 +1,8 @@
 module DiffOps
 
 using RegionIndices
+using SbpOperators
+using Grids
 
 abstract type DiffOp end
 

@@ -4,6 +4,8 @@ using RegionIndices
 
 include("stencil.jl")
 
+export D2, closureSize, apply, readOperator, apply_e, apply_d
+
 abstract type ConstantStencilOperator end
 
 # Apply for different regions Lower/Interior/Upper or Unknown region
