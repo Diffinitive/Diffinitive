@@ -1,0 +1,4 @@
+name = "DiffOps"
+uuid = "39474f48-97ec-11e9-01fc-6ddcbe5918df"
+authors = ["Jonatan Werpers <jonatan.werpers@it.uu.se>"]
+version = "0.1.0"

@@ -1,2 +1,4 @@
 [deps]
+DiffOps = "39474f48-97ec-11e9-01fc-6ddcbe5918df"
+Grids = "960fdf28-97ed-11e9-2a74-bd90bf2fab5a"
 LazyTensors = "62fbed2c-918d-11e9-279b-eb3a325b37d3"

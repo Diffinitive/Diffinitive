@@ -1,5 +1,15 @@
 # This file is machine-generated - editing it directly is not advised
 
+[[DiffOps]]
+path = "DiffOps"
+uuid = "39474f48-97ec-11e9-01fc-6ddcbe5918df"
+version = "0.1.0"
+
+[[Grids]]
+path = "Grids"
+uuid = "960fdf28-97ed-11e9-2a74-bd90bf2fab5a"
+version = "0.1.0"
+
 [[LazyTensors]]
 path = "LazyTensors"
 uuid = "62fbed2c-918d-11e9-279b-eb3a325b37d3"
