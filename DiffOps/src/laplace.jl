@@ -10,29 +10,28 @@ struct NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
 end
 export NormalDerivative
 
+# TODO: This is obviouly strange. Is domain_size just discarded? Is there a way to avoid storing grid in BoundaryValue?
+# Can we give special treatment to TensorMappings that go to a higher dim?
+LazyTensors.range_size(e::NormalDerivative{T}, domain_size::NTuple{1,Integer}) where T = size(e.grid)
+LazyTensors.domain_size(e::NormalDerivative{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],)
+
 # Not correct abstraction level
 # TODO: Not type stable D:<
 function LazyTensors.apply(d::NormalDerivative, v::AbstractArray, I::NTuple{2,Int})
 	i = I[dim(d.bId)]
 	j = I[3-dim(d.bId)]
-	N_i = d.grid.size[dim(d.bId)]
+	N_i = size(d.grid)[dim(d.bId)]
 
-	r = getregion(i, closureSize(d.op), N_i)
-
-	if r != region(d.bId)
-		return 0
-	end
-
-	if r == Lower
+	if region(d.bId) == Lower
 		# Note, closures are indexed by offset. Fix this D:<
 		return d.grid.inverse_spacing[dim(d.bId)]*d.op.dClosure[i-1]*v[j]
-	elseif r == Upper
-		return d.grid.inverse_spacing[dim(d.bId)]*d.op.dClosure[N_i-j]*v[j]
+	elseif region(d.bId) == Upper
+		return -d.grid.inverse_spacing[dim(d.bId)]*d.op.dClosure[N_i-i]*v[j]
 	end
 end
 
 function LazyTensors.apply_transpose(d::NormalDerivative, v::AbstractArray, I::NTuple{1,Int})
-    u = selectdim(v,3-dim(d.bId),I)
+    u = selectdim(v,3-dim(d.bId),I[1])
     return apply_d(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
 end
 
@@ -52,7 +51,7 @@ export BoundaryValue
 # TODO: This is obviouly strange. Is domain_size just discarded? Is there a way to avoid storing grid in BoundaryValue?
 # Can we give special treatment to TensorMappings that go to a higher dim?
 LazyTensors.range_size(e::BoundaryValue{T}, domain_size::NTuple{1,Integer}) where T = size(e.grid)
-LazyTensors.domain_size(e::BoundaryValue{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],);
+LazyTensors.domain_size(e::BoundaryValue{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],)
 
 function LazyTensors.apply(e::BoundaryValue, v::AbstractArray, I::NTuple{2,Int})
 	i = I[dim(e.bId)]
