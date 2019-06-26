@@ -1,3 +1,5 @@
+module RegionIndices
+
 abstract type Region end
 struct Interior <: Region end
 struct Lower    <: Region end
@@ -68,3 +70,5 @@ function getrange(gridsize::Integer, closuresize::Integer, region::DataType)
     end
     return r
 end
+
+end # module

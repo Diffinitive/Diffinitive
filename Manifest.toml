@@ -14,3 +14,8 @@ version = "0.1.0"
 path = "LazyTensors"
 uuid = "62fbed2c-918d-11e9-279b-eb3a325b37d3"
 version = "0.1.0"
+
+[[RegionIndices]]
+path = "RegionIndices"
+uuid = "5d527584-97f1-11e9-084c-4540c7ecf219"
+version = "0.1.0"
