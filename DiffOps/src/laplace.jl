@@ -12,7 +12,7 @@ export NormalDerivative
 
 # Not correct abstraction level
 # TODO: Not type stable D:<
-function apply(d::NormalDerivative, v::AbstractArray, I::CartesianIndex{2})
+function apply(d::NormalDerivative, v::AbstractArray, I::NTuple{2,Int})
 	i = I[dim(d.bId)]
 	j = I[3-dim(d.bId)]
 	N_i = d.grid.size[dim(d.bId)]
@@ -31,7 +31,7 @@ function apply(d::NormalDerivative, v::AbstractArray, I::CartesianIndex{2})
 	end
 end
 
-function apply_transpose(d::NormalDerivative, v::AbstractArray, I::CartesianIndex{1})
+function apply_transpose(d::NormalDerivative, v::AbstractArray, I::NTuple{1,Int})
     u = selectdim(v,3-dim(d.bId),I)
     return apply_d(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
 end
@@ -54,7 +54,7 @@ export BoundaryValue
 LazyTensors.range_size(e::BoundaryValue{T}, domain_size::NTuple{1,Integer}) where T = size(e.grid)
 LazyTensors.domain_size(e::BoundaryValue{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],);
 
-function LazyTensors.apply(e::BoundaryValue, v::AbstractArray, I::CartesianIndex{2})
+function LazyTensors.apply(e::BoundaryValue, v::AbstractArray, I::NTuple{2,Int})
 	i = I[dim(e.bId)]
 	j = I[3-dim(e.bId)]
 	N_i = e.grid.size[dim(e.bId)]
@@ -73,8 +73,8 @@ function LazyTensors.apply(e::BoundaryValue, v::AbstractArray, I::CartesianIndex
 	end
 end
 
-function LazyTensors.apply_transpose(e::BoundaryValue, v::AbstractArray, I::CartesianIndex{1})
-	u = selectdim(v,3-dim(e.bId),I)
+function LazyTensors.apply_transpose(e::BoundaryValue, v::AbstractArray, I::NTuple{1,Int})
+	u = selectdim(v,3-dim(e.bId),I[1])
 	return apply_e(e.op, u, region(e.bId))
 end
 
