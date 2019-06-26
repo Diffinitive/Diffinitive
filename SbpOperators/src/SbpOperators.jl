@@ -103,19 +103,31 @@ end
 
 
 function apply_e(op::D2, v::AbstractVector, ::Type{Lower})
+    @boundscheck if length(v) < closureSize(op)
+        throw(BoundsError())
+    end
     apply(op.eClosure,v,1)
 end
 
 function apply_e(op::D2, v::AbstractVector, ::Type{Upper})
+    @boundscheck if length(v) < closureSize(op)
+        throw(BoundsError())
+    end
     apply(flip(op.eClosure),v,length(v))
 end
 
 
 function apply_d(op::D2, h_inv::Real, v::AbstractVector, ::Type{Lower})
+    @boundscheck if length(v) < closureSize(op)
+        throw(BoundsError())
+    end
     -h_inv*apply(op.dClosure,v,1)
 end
 
 function apply_d(op::D2, h_inv::Real, v::AbstractVector, ::Type{Upper})
+    @boundscheck if length(v) < closureSize(op)
+        throw(BoundsError())
+    end
     -h_inv*apply(flip(op.dClosure),v,length(v))
 end
 
