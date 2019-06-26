@@ -65,6 +65,8 @@ function getregion(i::Integer, boundary_width::Integer, dim_size::Integer)
     end
 end
 
+export getregion
+
 function getrange(gridsize::Integer, closuresize::Integer, region::DataType)
     if region == Lower
         r = 1:closuresize
