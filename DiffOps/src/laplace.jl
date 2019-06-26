@@ -1,17 +1,18 @@
-struct NormalDerivative{N,M,K}
-	op::D2{Float64,N,M,K}
+"""
+    NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
+
+Implements the boundary operator `d` as a TensorMapping
+"""
+struct NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
+	op::D2{T,N,M,K}
 	grid::EquidistantGrid
 	bId::CartesianBoundary
 end
-
-function apply_transpose(d::NormalDerivative, v::AbstractArray, I::Integer)
-	u = selectdim(v,3-dim(d.bId),I)
-	return apply_d(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
-end
+export NormalDerivative
 
 # Not correct abstraction level
 # TODO: Not type stable D:<
-function apply(d::NormalDerivative, v::AbstractArray, I::Tuple{Integer,Integer})
+function apply(d::NormalDerivative, v::AbstractArray, I::CartesianIndex{2})
 	i = I[dim(d.bId)]
 	j = I[3-dim(d.bId)]
 	N_i = d.grid.size[dim(d.bId)]
@@ -30,13 +31,30 @@ function apply(d::NormalDerivative, v::AbstractArray, I::Tuple{Integer,Integer})
 	end
 end
 
-struct BoundaryValue{N,M,K}
-	op::D2{Float64,N,M,K}
+function apply_transpose(d::NormalDerivative, v::AbstractArray, I::CartesianIndex{1})
+    u = selectdim(v,3-dim(d.bId),I)
+    return apply_d(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
+end
+
+
+"""
+    BoundaryValue{T,N,M,K} <: TensorMapping{T,2,1}
+
+Implements the boundary operator `e` as a TensorMapping
+"""
+struct BoundaryValue{T,N,M,K} <: TensorMapping{T,2,1}
+	op::D2{T,N,M,K}
 	grid::EquidistantGrid
 	bId::CartesianBoundary
 end
+export BoundaryValue
 
-function apply(e::BoundaryValue, v::AbstractArray, I::Tuple{Integer,Integer})
+# TODO: This is obviouly strange. Is domain_size just discarded? Is there a way to avoid storing grid in BoundaryValue?
+# Can we give special treatment to TensorMappings that go to a higher dim?
+LazyTensors.range_size(e::BoundaryValue{T}, domain_size::NTuple{1,Integer}) where T = size(e.grid)
+LazyTensors.domain_size(e::BoundaryValue{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],);
+
+function LazyTensors.apply(e::BoundaryValue, v::AbstractArray, I::CartesianIndex{2})
 	i = I[dim(e.bId)]
 	j = I[3-dim(e.bId)]
 	N_i = e.grid.size[dim(e.bId)]
@@ -55,10 +73,12 @@ function apply(e::BoundaryValue, v::AbstractArray, I::Tuple{Integer,Integer})
 	end
 end
 
-function apply_transpose(e::BoundaryValue, v::AbstractArray, I::Integer)
+function LazyTensors.apply_transpose(e::BoundaryValue, v::AbstractArray, I::CartesianIndex{1})
 	u = selectdim(v,3-dim(e.bId),I)
 	return apply_e(e.op, u, region(e.bId))
 end
+
+
 
 struct Laplace{Dim,T<:Real,N,M,K} <: DiffOpCartesian{Dim}
     grid::EquidistantGrid{Dim,T}

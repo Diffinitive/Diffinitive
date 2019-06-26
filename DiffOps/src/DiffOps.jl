@@ -3,6 +3,7 @@ module DiffOps
 using RegionIndices
 using SbpOperators
 using Grids
+using LazyTensors
 
 """
     DiffOp
