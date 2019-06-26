@@ -1,0 +1,10 @@
+name = "LazyTensors"
+uuid = "62fbed2c-918d-11e9-279b-eb3a325b37d3"
+authors = ["Jonatan Werpers <jonatan.werpers@it.uu.se>"]
+version = "0.1.0"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

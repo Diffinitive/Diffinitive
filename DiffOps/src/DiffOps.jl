@@ -1,35 +1,21 @@
+module DiffOps
+
+using RegionIndices
+using SbpOperators
+using Grids
+
+"""
+    DiffOp
+
+Supertype of differential operator discretisations.
+The action of the DiffOp is defined in the method
+    apply(D::DiffOp, v::AbstractVector, I...)
+"""
 abstract type DiffOp end
 
-# TBD: The "error("not implemented")" thing seems to be hiding good error information. How to fix that? Different way of saying that these should be implemented?
-function apply(D::DiffOp, v::AbstractVector, i::Int)
-    error("not implemented")
-end
-
-function innerProduct(D::DiffOp, u::AbstractVector, v::AbstractVector)::Real
-    error("not implemented")
-end
+function apply end
 
 function matrixRepresentation(D::DiffOp)
-    error("not implemented")
-end
-
-function boundaryCondition(D::DiffOp,b::Grid.BoundaryId,type)::(Closure, Penalty)
-    error("not implemented")
-end
-
-function interface(Du::DiffOp, Dv::DiffOp, b::Grid.BoundaryId; type)
-    error("not implemented")
-end
-
-abstract type Closure end
-
-function apply(c::Closure, v::AbstractVector, i::Int)
-    error("not implemented")
-end
-
-abstract type Penalty end
-
-function apply(c::Penalty, g, i::Int)
     error("not implemented")
 end
 
@@ -43,6 +29,7 @@ function apply!(D::DiffOpCartesian{Dim}, u::AbstractArray{T,Dim}, v::AbstractArr
 
     return nothing
 end
+export apply!
 
 function apply_region!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}) where T
     apply_region!(D, u, v, Lower, Lower)
@@ -65,6 +52,7 @@ function apply_region!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::Abstract
     end
     return nothing
 end
+export apply_region!
 
 function apply_tiled!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}) where T
     apply_region_tiled!(D, u, v, Lower, Lower)
@@ -91,6 +79,7 @@ function apply_region_tiled!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::Ab
     end
     return nothing
 end
+export apply_region_tiled!
 
 function apply(D::DiffOp, v::AbstractVector)::AbstractVector
     u = zeros(eltype(v), size(v))
@@ -98,34 +87,17 @@ function apply(D::DiffOp, v::AbstractVector)::AbstractVector
     return u
 end
 
-struct Laplace{Dim,T<:Real,N,M,K} <: DiffOpCartesian{Dim}
-    grid::Grid.EquidistantGrid{Dim,T}
-    a::T
-    op::D2{Float64,N,M,K}
-end
+export apply
 
-function apply(L::Laplace{Dim}, v::AbstractArray{T,Dim} where T, I::CartesianIndex{Dim}) where Dim
-    error("not implemented")
-end
+"""
+A BoundaryCondition should implement the method
+    sat(::DiffOp, v::AbstractArray, data::AbstractArray, ...)
+"""
+abstract type BoundaryCondition end
 
-# u = L*v
-function apply(L::Laplace{1}, v::AbstractVector, i::Int)
-    uᵢ = L.a * apply(L.op, L.grid.spacing[1], v, i)
-    return uᵢ
-end
 
-@inline function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}}) where {R1, R2}
-    # 2nd x-derivative
-    @inbounds vx = view(v, :, Int(I[2]))
-    @inbounds uᵢ = L.a*apply(L.op, L.grid.inverse_spacing[1], vx , I[1])
-    # 2nd y-derivative
-    @inbounds vy = view(v, Int(I[1]), :)
-    @inbounds uᵢ += L.a*apply(L.op, L.grid.inverse_spacing[2], vy, I[2])
-    return uᵢ
-end
+include("laplace.jl")
+export Laplace
 
-# Slow but maybe convenient?
-function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, i::CartesianIndex{2})
-    I = Index{Unknown}.(Tuple(i))
-    apply(L, v, I)
-end
+
+end # module
