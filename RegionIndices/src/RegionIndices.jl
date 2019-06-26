@@ -1,8 +1,12 @@
+module RegionIndices
+
 abstract type Region end
 struct Interior <: Region end
 struct Lower    <: Region end
 struct Upper    <: Region end
 struct Unknown  <: Region end
+
+export Region, Interior, Lower, Upper, Unknown
 
 struct Index{R<:Region, T<:Integer}
     i::T
@@ -12,6 +16,8 @@ struct Index{R<:Region, T<:Integer}
     Index(i::T, ::Type{R}) where {R<:Region,T<:Integer} = Index{R,T}(i)
     Index(t::Tuple{T, DataType}) where {R<:Region,T<:Integer} = Index{t[2],T}(t[1]) # TBD: This is not very specific in what types are allowed in t[2]. Can this be fixed?
 end
+
+export Index
 
 # Index(R::Type{<:Region}) = Index{R}
 
@@ -30,6 +36,7 @@ function Index(i::Integer, boundary_width::Integer, dim_size::Integer)
 end
 
 IndexTuple(t::Vararg{Tuple{T, DataType}}) where T<:Integer = Index.(t)
+export IndexTuple
 
 # TODO: Use the values of the region structs, e.g. Lower(), for the region parameter instead of the types.
 # For example the following works:
@@ -43,6 +50,8 @@ function regionindices(gridsize::NTuple{Dim,Integer}, closuresize::NTuple{Dim,In
     regions = map(getrange,gridsize,closuresize,region)
     return CartesianIndices(regions)
 end
+
+export regionindices
 
 function getregion(i::Integer, boundary_width::Integer, dim_size::Integer)
 	if 0 < i <= boundary_width
@@ -68,3 +77,5 @@ function getrange(gridsize::Integer, closuresize::Integer, region::DataType)
     end
     return r
 end
+
+end # module

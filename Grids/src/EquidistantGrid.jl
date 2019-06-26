@@ -4,6 +4,8 @@
 # the coordinate directions. E.g for a 2D grid with x̄₁=(-1,0) and x̄₂=(1,2)
 # the domain is defined as (-1,1)x(0,2).
 
+export EquidistantGrid
+
 struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
     size::NTuple{Dim, Int} # First coordinate direction stored first
     limit_lower::NTuple{Dim, T}
