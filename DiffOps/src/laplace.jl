@@ -4,10 +4,6 @@ struct Laplace{Dim,T<:Real,N,M,K} <: DiffOpCartesian{Dim}
     op::D2{Float64,N,M,K}
 end
 
-boundary_value(L::Laplace, bId::CartesianBoundary) = BoundaryValue(L.op, L.grid, bId)
-normal_derivative(L::Laplace, bId::CartesianBoundary) = NormalDerivative(L.op, L.grid, bId)
-boundary_quadrature(L::Laplace, bId::CartesianBoundary) = throw(MethodError) # TODO: Implement this
-
 function apply(L::Laplace{Dim}, v::AbstractArray{T,Dim} where T, I::CartesianIndex{Dim}) where Dim
     error("not implemented")
 end
@@ -35,6 +31,9 @@ function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, i::CartesianIndex{2
     apply(L, v, I)
 end
 
+boundary_value(L::Laplace, bId::CartesianBoundary) = BoundaryValue(L.op, L.grid, bId)
+normal_derivative(L::Laplace, bId::CartesianBoundary) = NormalDerivative(L.op, L.grid, bId)
+boundary_quadrature(L::Laplace, bId::CartesianBoundary) = throw(MethodError) # TODO: Implement this
 
 
 """
