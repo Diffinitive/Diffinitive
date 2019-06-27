@@ -18,6 +18,16 @@ function closuresize(D::D2)::Int
     return length(D.quadratureClosure)
 end
 
+apply_quadrature(op::D2{T}, h::Real, v::T, i::Integer, N::Integer, ::Type{Lower}) where T = v*h*op.quadratureClosure[i]
+apply_quadrature(op::D2{T}, h::Real, v::T, i::Integer, N::Integer, ::Type{Upper}) where T = v*h*op.quadratureClosure[N-i+1]
+apply_quadrature(op::D2{T}, h::Real, v::T, i::Integer, N::Integer, ::Type{Interior}) where T = v*h
+
+function apply_quadrature(op::D2{T}, h::Real, v::T, i::Integer, N::Integer) where T
+    r = getregion(i, closuresize(op), N)
+    return apply_quadrature(op, h, v, i, N, r)
+end
+export apply_quadrature
+
 function apply_e_T(op::D2, v::AbstractVector, ::Type{Lower})
     @boundscheck if length(v) < closuresize(op)
         throw(BoundsError())
