@@ -68,9 +68,11 @@ struct Laplace{Dim,T<:Real,N,M,K} <: DiffOpCartesian{Dim}
     grid::EquidistantGrid{Dim,T}
     a::T
     op::D2{Float64,N,M,K}
-    # e::BoundaryValue
-    # d::NormalDerivative
 end
+
+boundary_value(L::Laplace, bId::CartesianBoundary) = BoundaryValue(L.op, L.grid, bId)
+normal_derivative(L::Laplace, bId::CartesianBoundary) = NormalDerivative(L.op, L.grid, bId)
+boundary_quadrature(L::Laplace, bId::CartesianBoundary) = throw(MethodError) # TODO: Implement this
 
 function apply(L::Laplace{Dim}, v::AbstractArray{T,Dim} where T, I::CartesianIndex{Dim}) where Dim
     error("not implemented")
@@ -103,10 +105,9 @@ end
 struct Neumann{Bid<:BoundaryIdentifier} <: BoundaryCondition end
 
 function sat(L::Laplace{2,T}, bc::Neumann{Bid}, v::AbstractArray{T,2}, g::AbstractVector{T}, I::CartesianIndex{2}) where {T,Bid}
-    e = BoundaryValue(L.op, L.grid, Bid())
-    d = NormalDerivative(L.op, L.grid, Bid())
-    Hᵧ = BoundaryQuadrature(L.op, L.grid, Bid())
-    # TODO: Implement BoundaryQuadrature method
+    e = boundary_value(L.op, Bid())
+    d = normal_derivative(L.op, Bid())
+    Hᵧ = boundary_quadrature(L.op, Bid())
 
     return -L.Hi*e*Hᵧ*(d'*v - g)
     # Need to handle d'*v - g so that it is an AbstractArray that TensorMappings can act on
@@ -117,10 +118,9 @@ struct Dirichlet{Bid<:BoundaryIdentifier} <: BoundaryCondition
 end
 
 function sat(L::Laplace{2,T}, bc::Dirichlet{Bid}, v::AbstractArray{T,2}, g::AbstractVector{T}, i::CartesianIndex{2}) where {T,Bid}
-    e = BoundaryValue(L.op, L.grid, Bid())
-    d = NormalDerivative(L.op, L.grid, Bid())
-    Hᵧ = BoundaryQuadrature(L.op, L.grid, Bid())
-    # TODO: Implement BoundaryQuadrature method
+    e = boundary_value(L.op, Bid())
+    d = normal_derivative(L.op, Bid())
+    Hᵧ = boundary_quadrature(L.op, Bid())
 
     return -L.Hi*(tau/h*e + d)*Hᵧ*(e'*v - g)
     # Need to handle scalar multiplication and addition of TensorMapping
