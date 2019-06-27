@@ -43,7 +43,7 @@ boundary_quadrature(L::Laplace, bId::CartesianBoundary) = throw(MethodError) # T
 """
 struct BoundaryValue{T,N,M,K} <: TensorMapping{T,2,1}
     op::D2{T,N,M,K}
-    grid::EquidistantGrid
+    grid::EquidistantGrid{2}
     bId::CartesianBoundary
 end
 export BoundaryValue
@@ -74,7 +74,7 @@ end
 """
 struct NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
     op::D2{T,N,M,K}
-    grid::EquidistantGrid
+    grid::EquidistantGrid{2}
     bId::CartesianBoundary
 end
 export NormalDerivative
