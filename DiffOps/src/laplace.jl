@@ -38,12 +38,12 @@ end
 """
     BoundaryValue{T,N,M,K} <: TensorMapping{T,2,1}
 
-Implements the boundary operator `e` as a TensorMapping
+    Implements the boundary operator `e` as a TensorMapping
 """
 struct BoundaryValue{T,N,M,K} <: TensorMapping{T,2,1}
-	op::D2{T,N,M,K}
-	grid::EquidistantGrid
-	bId::CartesianBoundary
+    op::D2{T,N,M,K}
+    grid::EquidistantGrid
+    bId::CartesianBoundary
 end
 export BoundaryValue
 
@@ -53,21 +53,15 @@ LazyTensors.range_size(e::BoundaryValue{T}, domain_size::NTuple{1,Integer}) wher
 LazyTensors.domain_size(e::BoundaryValue{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],)
 
 function LazyTensors.apply(e::BoundaryValue, v::AbstractArray, I::NTuple{2,Int})
-	i = I[dim(e.bId)]
-	j = I[3-dim(e.bId)]
-	N_i = size(e.grid)[dim(e.bId)]
-
-	if region(e.bId) == Lower
-		# NOTE: closures are indexed by offset. Fix this D:<
-		return e.op.eClosure[i-1]*v[j]
-	elseif region(e.bId) == Upper
-		return e.op.eClosure[N_i-i]*v[j]
-	end
+    i = I[dim(e.bId)]
+    j = I[3-dim(e.bId)]
+    N_i = size(e.grid)[dim(e.bId)]
+    return apply_e(e.op, v[j], N_i, i, region(e.bId))
 end
 
 function LazyTensors.apply_transpose(e::BoundaryValue, v::AbstractArray, I::NTuple{1,Int})
-	u = selectdim(v,3-dim(e.bId),I[1])
-	return apply_e(e.op, u, region(e.bId))
+    u = selectdim(v,3-dim(e.bId),I[1])
+    return apply_e_T(e.op, u, region(e.bId))
 end
 
 
@@ -75,12 +69,12 @@ end
 """
     NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
 
-Implements the boundary operator `d` as a TensorMapping
+    Implements the boundary operator `d` as a TensorMapping
 """
 struct NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
-	op::D2{T,N,M,K}
-	grid::EquidistantGrid
-	bId::CartesianBoundary
+    op::D2{T,N,M,K}
+    grid::EquidistantGrid
+    bId::CartesianBoundary
 end
 export NormalDerivative
 
@@ -92,21 +86,16 @@ LazyTensors.domain_size(e::NormalDerivative{T}, range_size::NTuple{2,Integer}) w
 # Not correct abstraction level
 # TODO: Not type stable D:<
 function LazyTensors.apply(d::NormalDerivative, v::AbstractArray, I::NTuple{2,Int})
-	i = I[dim(d.bId)]
-	j = I[3-dim(d.bId)]
-	N_i = size(d.grid)[dim(d.bId)]
-
-	if region(d.bId) == Lower
-		# Note, closures are indexed by offset. Fix this D:<
-		return d.grid.inverse_spacing[dim(d.bId)]*d.op.dClosure[i-1]*v[j]
-	elseif region(d.bId) == Upper
-		return -d.grid.inverse_spacing[dim(d.bId)]*d.op.dClosure[N_i-i]*v[j]
-	end
+    i = I[dim(d.bId)]
+    j = I[3-dim(d.bId)]
+    N_i = size(d.grid)[dim(d.bId)]
+    h_inv = d.grid.inverse_spacing[dim(d.bId)]
+    return apply_d(d.op, h_inv, v[j], N_i, i, region(d.bId))
 end
 
 function LazyTensors.apply_transpose(d::NormalDerivative, v::AbstractArray, I::NTuple{1,Int})
     u = selectdim(v,3-dim(d.bId),I[1])
-    return apply_d(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
+    return apply_d_T(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
 end
 
 
@@ -138,7 +127,7 @@ function sat(L::Laplace{2,T}, bc::Dirichlet{Bid}, v::AbstractArray{T,2}, g::Abst
 end
 
 # function apply(s::MyWaveEq{D},  v::AbstractArray{T,D}, i::CartesianIndex{D}) where D
-# 	return apply(s.L, v, i) +
+    #   return apply(s.L, v, i) +
 # 		sat(s.L, Dirichlet{CartesianBoundary{1,Lower}}(s.tau),  v, s.g_w, i) +
 # 		sat(s.L, Dirichlet{CartesianBoundary{1,Upper}}(s.tau),  v, s.g_e, i) +
 # 		sat(s.L, Dirichlet{CartesianBoundary{2,Lower}}(s.tau),  v, s.g_s, i) +
