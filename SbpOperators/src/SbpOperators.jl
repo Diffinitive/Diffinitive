@@ -4,7 +4,7 @@ using RegionIndices
 
 include("stencil.jl")
 
-export D2, closureSize, apply, readOperator, apply_e, apply_d
+export D2, closureSize, apply, readOperator, apply_e, apply_d, apply_e_T, apply_d_T
 
 abstract type ConstantStencilOperator end
 
@@ -102,14 +102,14 @@ function readOperator(D2fn, Hfn)
 end
 
 
-function apply_e(op::D2, v::AbstractVector, ::Type{Lower})
+function apply_e_T(op::D2, v::AbstractVector, ::Type{Lower})
     @boundscheck if length(v) < closureSize(op)
         throw(BoundsError())
     end
     apply(op.eClosure,v,1)
 end
 
-function apply_e(op::D2, v::AbstractVector, ::Type{Upper})
+function apply_e_T(op::D2, v::AbstractVector, ::Type{Upper})
     @boundscheck if length(v) < closureSize(op)
         throw(BoundsError())
     end
@@ -117,19 +117,48 @@ function apply_e(op::D2, v::AbstractVector, ::Type{Upper})
 end
 
 
-function apply_d(op::D2, h_inv::Real, v::AbstractVector, ::Type{Lower})
+function apply_e(op::D2, v::Number, N::Integer, i::Integer, ::Type{Lower})
+    @boundscheck if !(0<length(i) <= N)
+        throw(BoundsError())
+    end
+    op.eClosure[i-1]*v
+end
+
+function apply_e(op::D2, v::Number, N::Integer, i::Integer, ::Type{Upper})
+    @boundscheck if !(0<length(i) <= N)
+        throw(BoundsError())
+    end
+    op.eClosure[N-i]*v
+end
+
+function apply_d_T(op::D2, h_inv::Real, v::AbstractVector, ::Type{Lower})
     @boundscheck if length(v) < closureSize(op)
         throw(BoundsError())
     end
     h_inv*apply(op.dClosure,v,1)
 end
 
-function apply_d(op::D2, h_inv::Real, v::AbstractVector, ::Type{Upper})
+function apply_d_T(op::D2, h_inv::Real, v::AbstractVector, ::Type{Upper})
     @boundscheck if length(v) < closureSize(op)
         throw(BoundsError())
     end
     -h_inv*apply(flip(op.dClosure),v,length(v))
 end
+
+function apply_d(op::D2, h_inv::Real, v::Number, N::Integer, i::Integer, ::Type{Lower})
+    @boundscheck if !(0<length(i) <= N)
+        throw(BoundsError())
+    end
+    h_inv*op.dClosure[i-1]*v
+end
+
+function apply_d(op::D2, h_inv::Real, v::Number, N::Integer, i::Integer, ::Type{Upper})
+    @boundscheck if !(0<length(i) <= N)
+        throw(BoundsError())
+    end
+    -h_inv*op.dClosure[N-i]*v
+end
+
 
 function readSectionedFile(filename)::Dict{String, Vector{String}}
     f = open(filename)
