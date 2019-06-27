@@ -1,4 +1,4 @@
-export D2, closureSize, readOperator, apply_e, apply_d, apply_e_T, apply_d_T
+export D2, closuresize, readOperator, apply_e, apply_d, apply_e_T, apply_d_T
 
 @enum Parity begin
     odd = -1
@@ -14,19 +14,19 @@ struct D2{T,N,M,K} <: ConstantStencilOperator
     parity::Parity
 end
 
-function closureSize(D::D2)::Int
+function closuresize(D::D2)::Int
     return length(D.quadratureClosure)
 end
 
 function apply_e_T(op::D2, v::AbstractVector, ::Type{Lower})
-    @boundscheck if length(v) < closureSize(op)
+    @boundscheck if length(v) < closuresize(op)
         throw(BoundsError())
     end
     apply(op.eClosure,v,1)
 end
 
 function apply_e_T(op::D2, v::AbstractVector, ::Type{Upper})
-    @boundscheck if length(v) < closureSize(op)
+    @boundscheck if length(v) < closuresize(op)
         throw(BoundsError())
     end
     apply(flip(op.eClosure),v,length(v))
@@ -48,14 +48,14 @@ function apply_e(op::D2, v::Number, N::Integer, i::Integer, ::Type{Upper})
 end
 
 function apply_d_T(op::D2, h_inv::Real, v::AbstractVector, ::Type{Lower})
-    @boundscheck if length(v) < closureSize(op)
+    @boundscheck if length(v) < closuresize(op)
         throw(BoundsError())
     end
     h_inv*apply(op.dClosure,v,1)
 end
 
 function apply_d_T(op::D2, h_inv::Real, v::AbstractVector, ::Type{Upper})
-    @boundscheck if length(v) < closureSize(op)
+    @boundscheck if length(v) < closuresize(op)
         throw(BoundsError())
     end
     -h_inv*apply(flip(op.dClosure),v,length(v))

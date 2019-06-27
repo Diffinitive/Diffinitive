@@ -17,7 +17,7 @@ end
 end
 
 @inline function apply(op::ConstantStencilOperator, h::Real, v::AbstractVector, index::Index{Unknown})
-    cSize = closureSize(op)
+    cSize = closuresize(op)
     N = length(v)
 
     i = Int(index)

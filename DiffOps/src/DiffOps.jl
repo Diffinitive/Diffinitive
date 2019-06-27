@@ -47,7 +47,7 @@ end
 
 # Maybe this should be split according to b3fbef345810 after all?! Seems like it makes performance more predictable
 function apply_region!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
-    for I ∈ regionindices(D.grid.size, closureSize(D.op), (r1,r2))
+    for I ∈ regionindices(D.grid.size, closuresize(D.op), (r1,r2))
         @inbounds indextuple = (Index{r1}(I[1]), Index{r2}(I[2]))
         @inbounds u[I] = apply(D, v, indextuple)
     end
@@ -70,7 +70,7 @@ end
 
 using TiledIteration
 function apply_region_tiled!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
-    ri = regionindices(D.grid.size, closureSize(D.op), (r1,r2))
+    ri = regionindices(D.grid.size, closuresize(D.op), (r1,r2))
     # TODO: Pass Tilesize to function
     for tileaxs ∈ TileIterator(axes(ri), padded_tilesize(T, (5,5), 2))
         for j ∈ tileaxs[2], i ∈ tileaxs[1]
