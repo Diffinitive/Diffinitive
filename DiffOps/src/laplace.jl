@@ -83,7 +83,6 @@ export NormalDerivative
 LazyTensors.range_size(e::NormalDerivative{T}, domain_size::NTuple{1,Integer}) where T = size(e.grid)
 LazyTensors.domain_size(e::NormalDerivative{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],)
 
-# Not correct abstraction level
 # TODO: Not type stable D:<
 function LazyTensors.apply(d::NormalDerivative, v::AbstractArray, I::NTuple{2,Int})
     i = I[dim(d.bId)]
