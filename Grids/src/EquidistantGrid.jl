@@ -40,6 +40,7 @@ end
 function spacing(grid::EquidistantGrid)
     return 1.0./grid.inverse_spacing
 end
+export spacing
 
 # Computes the points of an EquidistantGrid as an array of tuples with
 # the same dimension as the grid.
