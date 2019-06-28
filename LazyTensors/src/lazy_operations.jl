@@ -32,7 +32,7 @@ Base.size(ta::LazyTensorMappingApplication{T,R,D}) where {T,R,D} = range_size(ta
 # TODO: What else is needed to implement the AbstractArray interface?
 
 # # We need the associativity to be a→b→c = a→(b→c), which is the case for '→'
-Base.:*(args::Union{TensorMapping{T}, AbstractArray{T}}...) where T = foldr(*,args)
+Base.:*(a::TensorMapping{T,R,D}, b::TensorMapping{T,D,K}, args::Union{TensorMapping{T}, AbstractArray{T}}...) where {T,R,D,K} = foldr(*,(a,b,args...))
 # # Should we overload some other infix binary operator?
 # →(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = LazyTensorMappingApplication(tm,o)
 # TODO: We need to be really careful about good error messages.
