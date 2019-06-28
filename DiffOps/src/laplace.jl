@@ -39,7 +39,7 @@ boundary_quadrature(L::Laplace, bId::CartesianBoundary) = throw(MethodError) # T
 """
     BoundaryValue{T,N,M,K} <: TensorMapping{T,2,1}
 
-    Implements the boundary operator `e` as a TensorMapping
+Implements the boundary operator `e` as a TensorMapping
 """
 struct BoundaryValue{T,N,M,K} <: TensorMapping{T,2,1}
     op::D2{T,N,M,K}
@@ -53,6 +53,7 @@ export BoundaryValue
 LazyTensors.range_size(e::BoundaryValue{T}, domain_size::NTuple{1,Integer}) where T = size(e.grid)
 LazyTensors.domain_size(e::BoundaryValue{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],)
 
+# TODO: Make this independent of dimension
 function LazyTensors.apply(e::BoundaryValue, v::AbstractArray, I::NTuple{2,Int})
     i = I[dim(e.bId)]
     j = I[3-dim(e.bId)]
@@ -70,7 +71,7 @@ end
 """
     NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
 
-    Implements the boundary operator `d` as a TensorMapping
+Implements the boundary operator `d` as a TensorMapping
 """
 struct NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
     op::D2{T,N,M,K}
@@ -85,6 +86,7 @@ LazyTensors.range_size(e::NormalDerivative{T}, domain_size::NTuple{1,Integer}) w
 LazyTensors.domain_size(e::NormalDerivative{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],)
 
 # TODO: Not type stable D:<
+# TODO: Make this independent of dimension
 function LazyTensors.apply(d::NormalDerivative, v::AbstractArray, I::NTuple{2,Int})
     i = I[dim(d.bId)]
     j = I[3-dim(d.bId)]
