@@ -33,7 +33,7 @@ end
 
 boundary_value(L::Laplace, bId::CartesianBoundary) = BoundaryValue(L.op, L.grid, bId)
 normal_derivative(L::Laplace, bId::CartesianBoundary) = NormalDerivative(L.op, L.grid, bId)
-boundary_quadrature(L::Laplace, bId::CartesianBoundary) = throw(MethodError) # TODO: Implement this
+boundary_quadrature(L::Laplace, bId::CartesianBoundary) = BoundaryQuadrature(L.op, L.grid, bId)
 
 
 """
@@ -99,6 +99,28 @@ function LazyTensors.apply_transpose(d::NormalDerivative, v::AbstractArray, I::N
     u = selectdim(v,3-dim(d.bId),I[1])
     return apply_d_T(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
 end
+
+"""
+    BoundaryQuadrature{T,N,M,K} <: TensorOperator{T,1}
+
+Implements the boundary operator `q` as a TensorOperator
+"""
+struct BoundaryQuadrature{T,N,M,K} <: TensorOperator{T,1}
+    op::D2{T,N,M,K}
+    grid::EquidistantGrid{2}
+    bId::CartesianBoundary
+end
+export BoundaryQuadrature
+
+# TODO: Make this independent of dimension
+function LazyTensors.apply(q::BoundaryQuadrature{T}, v::AbstractArray{T,1}, I::NTuple{1,Int}) where T
+    h = spacing(q.grid)[3-dim(q.bId)]
+    N = size(v)
+    return apply_quadrature(q.op, h, v[I[1]], I[1], N[1])
+end
+
+LazyTensors.apply_transpose(q::BoundaryQuadrature{T}, v::AbstractArray{T,1}, I::NTuple{1,Int}) where T = apply(q,v,I)
+
 
 
 
