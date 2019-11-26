@@ -5,6 +5,35 @@ using SbpOperators
 using RegionIndices
 using LazyTensors
 
+@testset "Quadrature" begin
+    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    Lx = 2.3
+    Ly = 5.2
+    g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    H = Quadrature(op,g)
+    v = ones(Float64, size(g))
+
+    @test H isa TensorMapping{T,2,2} where T
+    @test H' isa TensorMapping{T,2,2} where T
+    @test sum(collect(H*v)) ≈ (Lx*Ly)
+    @test collect(H*v) == collect(H'*v)
+end
+
+@testset "InverseQuadrature" begin
+    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    Lx = 7.3
+    Ly = 8.2
+    g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    H = Quadrature(op,g)
+    Hinv = InverseQuadrature(op,g)
+    v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
+
+    @test Hinv isa TensorMapping{T,2,2} where T
+    @test Hinv' isa TensorMapping{T,2,2} where T
+    @test collect(Hinv*H*v)  ≈ v
+    @test collect(Hinv*v) == collect(Hinv'*v)
+end
+
 @testset "BoundaryValue" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     g = EquidistantGrid((4,5), (0.0, 0.0), (1.0,1.0))
@@ -184,4 +213,9 @@ end
     @test collect(H_e*v_e) ≈ q_y.*v_e
     @test collect(H_s*v_s) ≈ q_x.*v_s
     @test collect(H_n*v_n) ≈ q_x.*v_n
+
+    @test collect(H_w'*v_w) == collect(H_w'*v_w)
+    @test collect(H_e'*v_e) == collect(H_e'*v_e)
+    @test collect(H_s'*v_s) == collect(H_s'*v_s)
+    @test collect(H_n'*v_n) == collect(H_n'*v_n)
 end

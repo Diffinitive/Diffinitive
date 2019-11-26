@@ -31,10 +31,65 @@ function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, i::CartesianIndex{2
     apply(L, v, I)
 end
 
+quadrature(L::Laplace) = Quadrature(L.op, L.grid)
+inverse_quadrature(L::Laplace) = InverseQuadrature(L.op, L.grid)
 boundary_value(L::Laplace, bId::CartesianBoundary) = BoundaryValue(L.op, L.grid, bId)
 normal_derivative(L::Laplace, bId::CartesianBoundary) = NormalDerivative(L.op, L.grid, bId)
 boundary_quadrature(L::Laplace, bId::CartesianBoundary) = BoundaryQuadrature(L.op, L.grid, bId)
 
+"""
+    Quadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
+
+Implements the quadrature operator `H` of Dim dimension as a TensorMapping
+"""
+struct Quadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
+    op::D2{T,N,M,K}
+    grid::EquidistantGrid{Dim,T}
+end
+export Quadrature
+
+LazyTensors.range_size(H::Quadrature{2}, domain_size::NTuple{2,Integer}) where T = size(H.grid)
+LazyTensors.domain_size(H::Quadrature{2}, range_size::NTuple{2,Integer}) where T = size(H.grid)
+
+# TODO: Dispatch on Tuple{Index{R1},Index{R2}}?
+@inline function LazyTensors.apply(H::Quadrature{2}, v::AbstractArray{T,2} where T, I::NTuple{2,Integer})
+    I = CartesianIndex(I);
+    N = size(H.grid)
+    # Quadrature in x direction
+    @inbounds q = apply_quadrature(H.op, H.grid.spacing[1], v[I] , I[1], N[1])
+    # Quadrature in y-direction
+    @inbounds q = apply_quadrature(H.op, H.grid.spacing[2], q, I[2], N[2])
+    return q
+end
+
+LazyTensors.apply_transpose(H::Quadrature{2}, v::AbstractArray{T,2} where T, I::NTuple{2,Integer}) = LazyTensors.apply(H,v,I)
+
+"""
+    InverseQuadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
+
+Implements the inverse quadrature operator `inv(H)` of Dim dimension as a TensorMapping
+"""
+struct InverseQuadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
+    op::D2{T,N,M,K}
+    grid::EquidistantGrid{Dim,T}
+end
+export InverseQuadrature
+
+LazyTensors.range_size(H_inv::InverseQuadrature{2}, domain_size::NTuple{2,Integer}) where T = size(H_inv.grid)
+LazyTensors.domain_size(H_inv::InverseQuadrature{2}, range_size::NTuple{2,Integer}) where T = size(H_inv.grid)
+
+# TODO: Dispatch on Tuple{Index{R1},Index{R2}}?
+@inline function LazyTensors.apply(H_inv::InverseQuadrature{2}, v::AbstractArray{T,2} where T, I::NTuple{2,Integer})
+    I = CartesianIndex(I);
+    N = size(H_inv.grid)
+    # Inverse quadrature in x direction
+    @inbounds q_inv = apply_inverse_quadrature(H_inv.op, H_inv.grid.inverse_spacing[1], v[I] , I[1], N[1])
+    # Inverse quadrature in y-direction
+    @inbounds q_inv = apply_inverse_quadrature(H_inv.op, H_inv.grid.inverse_spacing[2], q_inv, I[2], N[2])
+    return q_inv
+end
+
+LazyTensors.apply_transpose(H_inv::InverseQuadrature{2}, v::AbstractArray{T,2} where T, I::NTuple{2,Integer}) = LazyTensors.apply(H_inv,v,I)
 
 """
     BoundaryValue{T,N,M,K} <: TensorMapping{T,2,1}
@@ -65,8 +120,6 @@ function LazyTensors.apply_transpose(e::BoundaryValue, v::AbstractArray, I::NTup
     u = selectdim(v,3-dim(e.bId),I[1])
     return apply_e_T(e.op, u, region(e.bId))
 end
-
-
 
 """
     NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
@@ -113,13 +166,14 @@ end
 export BoundaryQuadrature
 
 # TODO: Make this independent of dimension
+# TODO: Dispatch directly on Index{R}?
 function LazyTensors.apply(q::BoundaryQuadrature{T}, v::AbstractArray{T,1}, I::NTuple{1,Int}) where T
-    h = spacing(q.grid)[3-dim(q.bId)]
+    h = q.grid.spacing[3-dim(q.bId)]
     N = size(v)
     return apply_quadrature(q.op, h, v[I[1]], I[1], N[1])
 end
 
-LazyTensors.apply_transpose(q::BoundaryQuadrature{T}, v::AbstractArray{T,1}, I::NTuple{1,Int}) where T = apply(q,v,I)
+LazyTensors.apply_transpose(q::BoundaryQuadrature{T}, v::AbstractArray{T,1}, I::NTuple{1,Int}) where T = LazyTensors.apply(q,v,I)
 
 
 
