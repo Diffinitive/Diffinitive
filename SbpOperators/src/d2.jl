@@ -7,6 +7,7 @@ end
 
 struct D2{T,N,M,K} <: ConstantStencilOperator
     quadratureClosure::NTuple{M,T}
+    inverseQuadratureClosure::NTuple{M,T}
     innerStencil::Stencil{T,N}
     closureStencils::NTuple{M,Stencil{T,K}}
     eClosure::Stencil{T,M}
@@ -18,15 +19,29 @@ function closuresize(D::D2)::Int
     return length(D.quadratureClosure)
 end
 
+# TODO: Dispatch on Index{R}?
 apply_quadrature(op::D2{T}, h::Real, v::T, i::Integer, N::Integer, ::Type{Lower}) where T = v*h*op.quadratureClosure[i]
 apply_quadrature(op::D2{T}, h::Real, v::T, i::Integer, N::Integer, ::Type{Upper}) where T = v*h*op.quadratureClosure[N-i+1]
 apply_quadrature(op::D2{T}, h::Real, v::T, i::Integer, N::Integer, ::Type{Interior}) where T = v*h
 
+# TODO: Avoid branching in inner loops
 function apply_quadrature(op::D2{T}, h::Real, v::T, i::Integer, N::Integer) where T
     r = getregion(i, closuresize(op), N)
     return apply_quadrature(op, h, v, i, N, r)
 end
 export apply_quadrature
+
+# TODO: Dispatch on Index{R}?
+apply_inverse_quadrature(op::D2{T}, h_inv::Real, v::T, i::Integer, N::Integer, ::Type{Lower}) where T = v*h_inv*op.inverseQuadratureClosure[i]
+apply_inverse_quadrature(op::D2{T}, h_inv::Real, v::T, i::Integer, N::Integer, ::Type{Upper}) where T = v*h_inv*op.inverseQuadratureClosure[N-i+1]
+apply_inverse_quadrature(op::D2{T}, h_inv::Real, v::T, i::Integer, N::Integer, ::Type{Interior}) where T = v*h_inv
+
+# TODO: Avoid branching in inner loops
+function apply_inverse_quadrature(op::D2{T}, h_inv::Real, v::T, i::Integer, N::Integer) where T
+    r = getregion(i, closuresize(op), N)
+    return apply_inverse_quadrature(op, h_inv, v, i, N, r)
+end
+export apply_inverse_quadrature
 
 function apply_e_T(op::D2, v::AbstractVector, ::Type{Lower})
     @boundscheck if length(v) < closuresize(op)

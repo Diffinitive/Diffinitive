@@ -21,11 +21,13 @@ function readOperator(D2fn, Hfn)
     end
 
     quadratureClosure = pad_tuple(stringToTuple(Float64, h["closure"][1]), boundarySize)
+    inverseQuadratureClosure = 1.0 ./ quadratureClosure
     eClosure = Stencil((0,boundarySize-1), pad_tuple(stringToTuple(Float64, d["e"][1]), boundarySize))
     dClosure = Stencil((0,boundarySize-1), pad_tuple(stringToTuple(Float64, d["d1"][1]), boundarySize))
 
     d2 = D2(
         quadratureClosure,
+        inverseQuadratureClosure,
         innerStencil,
         closureStencils,
         eClosure,
