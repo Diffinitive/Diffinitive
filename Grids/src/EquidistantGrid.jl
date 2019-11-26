@@ -10,14 +10,16 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
     size::NTuple{Dim, Int} # First coordinate direction stored first
     limit_lower::NTuple{Dim, T}
     limit_upper::NTuple{Dim, T}
-    inverse_spacing::NTuple{Dim, T} # The reciprocal of the grid spacing
+    spacing::NTuple{Dim, T} # Grid spacing
+    inverse_spacing::NTuple{Dim, T} # Reciprocal of grid spacing
 
     # General constructor
     function EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}) where Dim where T
         @assert all(size.>0)
         @assert all(limit_upper.-limit_lower .!= 0)
-        inverse_spacing = (size.-1)./abs.(limit_upper.-limit_lower)
-        return new{Dim,T}(size, limit_lower, limit_upper, inverse_spacing)
+        spacing = abs.(limit_upper.-limit_lower)./(size.-1)
+        inverse_spacing = 1.0./spacing
+        return new{Dim,T}(size, limit_lower, limit_upper, spacing, inverse_spacing)
     end
 end
 
@@ -35,10 +37,18 @@ function dimension(grid::EquidistantGrid)
     return length(grid.size)
 end
 
-# Returns the spacing of the grid
+# TODO: Keep the below functions or just use properties?
+# Returns the reciprocal of the spacing of the grid
+#
+function inverse_spacing(grid::EquidistantGrid)
+    return grid.inverse_spacing
+end
+export inverse_spacing
+
+# Returns the reciprocal of the spacing of the grid
 #
 function spacing(grid::EquidistantGrid)
-    return 1.0./grid.inverse_spacing
+    return grid.spacing
 end
 export spacing
 
