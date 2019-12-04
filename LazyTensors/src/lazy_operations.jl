@@ -42,26 +42,26 @@ Base.:*(a::TensorMapping{T,R,D}, b::TensorMapping{T,D,K}, args::Union{TensorMapp
     LazyElementwiseOperation{T,D,Op,T1,T2} <: LazyArray{T,D}
 Struct allowing for lazy evaluation of elementwise operations on AbstractArrays.
 
-A LazyElementwiseOperation contains two AbstractArrays of equal size,
-together with an operation. The operations are carried out when the
-LazyElementwiseOperation is indexed.
+A LazyElementwiseOperation contains two datatypes T1, and T2, together with an operation,
+where at least one of T1 and T2 is an AbstractArray, and one may be a Real.
+The operations are carried out when the LazyElementwiseOperation is indexed.
 """
-struct LazyElementwiseOperation{T,D,Op, T1, T2} <: LazyArray{T,D}
+struct LazyElementwiseOperation{T,D,Op,T1,T2} <: LazyArray{T,D}
     a::T1
     b::T2
 
-    @inline function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op, T1<:AbstractArray{T,D}, T2<:AbstractArray{T,D}}
+    @inline function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op,T1<:AbstractArray{T,D},T2<:AbstractArray{T,D}}
         @boundscheck if size(a) != size(b)
             throw(DimensionMismatch("dimensions must match"))
         end
         return new{T,D,Op,T1,T2}(a,b)
     end
 
-    @inline function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op, T1<:AbstractArray{T,D}, T2<:Real}
+    @inline function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op,T1<:AbstractArray{T,D},T2<:Real}
         return new{T,D,Op,T1,T2}(a,b)
     end
 
-    @inline function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op, T1<:Real, T2<:AbstractArray{T,D}}
+    @inline function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op,T1<:Real,T2<:AbstractArray{T,D}}
         return new{T,D,Op,T1,T2}(a,b)
     end
 end
