@@ -110,19 +110,40 @@ end
     # Test lazy operations
     v1 = [1, 2.3, 4]
     v2 = [1., 2, 3]
-    r_add = v1 .+ v2
-    r_sub = v1 .- v2
-    r_times = v1 .* v2
-    r_div = v1 ./ v2
+    s = 3.4
+    r_add_v = v1 .+ v2
+    r_sub_v = v1 .- v2
+    r_times_v = v1 .* v2
+    r_div_v = v1 ./ v2
+    r_add_s = v1 .+ s
+    r_sub_s = v1 .- s
+    r_times_s = v1 .* s
+    r_div_s = v1 ./ s
     @test isa(v1 +̃ v2, LazyArray)
     @test isa(v1 -̃ v2, LazyArray)
     @test isa(v1 *̃ v2, LazyArray)
     @test isa(v1 /̃ v2, LazyArray)
+    @test isa(v1 +̃ s, LazyArray)
+    @test isa(v1 -̃ s, LazyArray)
+    @test isa(v1 *̃ s, LazyArray)
+    @test isa(v1 /̃ s, LazyArray)
+    @test isa(s +̃ v1, LazyArray)
+    @test isa(s -̃ v1, LazyArray)
+    @test isa(s *̃ v1, LazyArray)
+    @test isa(s /̃ v1, LazyArray)
     for i ∈ eachindex(v1)
-        @test (v1 +̃ v2)[i] == r_add[i]
-        @test (v1 -̃ v2)[i] == r_sub[i]
-        @test (v1 *̃ v2)[i] == r_times[i]
-        @test (v1 /̃ v2)[i] == r_div[i]
+        @test (v1 +̃ v2)[i] == r_add_v[i]
+        @test (v1 -̃ v2)[i] == r_sub_v[i]
+        @test (v1 *̃ v2)[i] == r_times_v[i]
+        @test (v1 /̃ v2)[i] == r_div_v[i]
+        @test (v1 +̃ s)[i] == r_add_s[i]
+        @test (v1 -̃ s)[i] == r_sub_s[i]
+        @test (v1 *̃ s)[i] == r_times_s[i]
+        @test (v1 /̃ s)[i] == r_div_s[i]
+        @test (s +̃ v1)[i] == r_add_s[i]
+        @test (s -̃ v1)[i] == -r_sub_s[i]
+        @test (s *̃ v1)[i] == r_times_s[i]
+        @test (s /̃ v1)[i] == 1/r_div_s[i]
     end
     @test_throws BoundsError (v1 +̃  v2)[4]
     v2 = [1., 2, 3, 4]
@@ -137,8 +158,8 @@ end
     @test isa(v1 - v2, LazyArray)
     @test isa(v2 - v1, LazyArray)
     for i ∈ eachindex(v2)
-        @test (v1 + v2)[i] == (v2 + v1)[i] == r_add[i]
-        @test (v1 - v2)[i] == -(v2 - v1)[i] == r_sub[i]
+        @test (v1 + v2)[i] == (v2 + v1)[i] == r_add_v[i]
+        @test (v1 - v2)[i] == -(v2 - v1)[i] == r_sub_v[i]
     end
     @test_throws BoundsError (v1 + v2)[4]
     v2 = [1., 2, 3, 4]
