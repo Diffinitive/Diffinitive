@@ -181,12 +181,11 @@ LazyTensors.apply_transpose(q::BoundaryQuadrature{T}, v::AbstractArray{T,1}, I::
 struct Neumann{Bid<:BoundaryIdentifier} <: BoundaryCondition end
 
 function sat(L::Laplace{2,T}, bc::Neumann{Bid}, v::AbstractArray{T,2}, g::AbstractVector{T}, I::CartesianIndex{2}) where {T,Bid}
-    e = boundary_value(L.op, Bid())
-    d = normal_derivative(L.op, Bid())
-    Hᵧ = boundary_quadrature(L.op, Bid())
-
-    return -L.Hi*e*Hᵧ*(d'*v - g)
-    # Need to handle d'*v - g so that it is an AbstractArray that TensorMappings can act on
+    e = boundary_value(L, Bid())
+    d = normal_derivative(L, Bid())
+    Hᵧ = boundary_quadrature(L, Bid())
+    H⁻¹ = inverse_quadrature(L)
+    return (-H⁻¹*e*Hᵧ*(d'*v - g))[I]
 end
 
 struct Dirichlet{Bid<:BoundaryIdentifier} <: BoundaryCondition
@@ -194,11 +193,11 @@ struct Dirichlet{Bid<:BoundaryIdentifier} <: BoundaryCondition
 end
 
 function sat(L::Laplace{2,T}, bc::Dirichlet{Bid}, v::AbstractArray{T,2}, g::AbstractVector{T}, i::CartesianIndex{2}) where {T,Bid}
-    e = boundary_value(L.op, Bid())
-    d = normal_derivative(L.op, Bid())
-    Hᵧ = boundary_quadrature(L.op, Bid())
-
-    return -L.Hi*(tau/h*e + d)*Hᵧ*(e'*v - g)
+    e = boundary_value(L, Bid())
+    d = normal_derivative(L, Bid())
+    Hᵧ = boundary_quadrature(L, Bid())
+    H⁻¹ = inverse_quadrature(L)
+    return (-H⁻¹*(tau/h*e + d)*Hᵧ*(e'*v - g))[I]
     # Need to handle scalar multiplication and addition of TensorMapping
 end
 
