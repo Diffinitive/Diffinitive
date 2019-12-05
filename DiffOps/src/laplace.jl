@@ -10,17 +10,17 @@ end
 
 # u = L*v
 function apply(L::Laplace{1}, v::AbstractVector, i::Int)
-    uᵢ = L.a * SbpOperators.apply(L.op, inverse_spacing(L.grid)[1], v, i)
+    uᵢ = L.a * SbpOperators.apply_2nd_derivative(L.op, inverse_spacing(L.grid)[1], v, i)
     return uᵢ
 end
 
 @inline function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}}) where {R1, R2}
     # 2nd x-derivative
     @inbounds vx = view(v, :, Int(I[2]))
-    @inbounds uᵢ = L.a*SbpOperators.apply(L.op, inverse_spacing(L.grid)[1], vx , I[1])
+    @inbounds uᵢ = L.a*SbpOperators.apply_2nd_derivative(L.op, inverse_spacing(L.grid)[1], vx , I[1])
     # 2nd y-derivative
     @inbounds vy = view(v, Int(I[1]), :)
-    @inbounds uᵢ += L.a*SbpOperators.apply(L.op, inverse_spacing(L.grid)[2], vy, I[2])
+    @inbounds uᵢ += L.a*SbpOperators.apply_2nd_derivative(L.op, inverse_spacing(L.grid)[2], vy, I[2])
     # NOTE: the package qualifier 'SbpOperators' can problably be removed once all "applying" objects use LazyTensors
     return uᵢ
 end
@@ -113,12 +113,12 @@ function LazyTensors.apply(e::BoundaryValue, v::AbstractArray, I::NTuple{2,Int})
     i = I[dim(e.bId)]
     j = I[3-dim(e.bId)]
     N_i = size(e.grid)[dim(e.bId)]
-    return apply_e(e.op, v[j], N_i, i, region(e.bId))
+    return apply_boundary_value(e.op, v[j], N_i, i, region(e.bId))
 end
 
 function LazyTensors.apply_transpose(e::BoundaryValue, v::AbstractArray, I::NTuple{1,Int})
     u = selectdim(v,3-dim(e.bId),I[1])
-    return apply_e_T(e.op, u, region(e.bId))
+    return apply_boundary_value_transpose(e.op, u, region(e.bId))
 end
 
 """
@@ -145,12 +145,12 @@ function LazyTensors.apply(d::NormalDerivative, v::AbstractArray, I::NTuple{2,In
     j = I[3-dim(d.bId)]
     N_i = size(d.grid)[dim(d.bId)]
     h_inv = inverse_spacing(d.grid)[dim(d.bId)]
-    return apply_d(d.op, h_inv, v[j], N_i, i, region(d.bId))
+    return apply_normal_derivative(d.op, h_inv, v[j], N_i, i, region(d.bId))
 end
 
 function LazyTensors.apply_transpose(d::NormalDerivative, v::AbstractArray, I::NTuple{1,Int})
     u = selectdim(v,3-dim(d.bId),I[1])
-    return apply_d_T(d.op, inverse_spacing(d.grid)[dim(d.bId)], u, region(d.bId))
+    return apply_normal_derivative_transpose(d.op, inverse_spacing(d.grid)[dim(d.bId)], u, region(d.bId))
 end
 
 """
