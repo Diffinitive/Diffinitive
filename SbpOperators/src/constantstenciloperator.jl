@@ -15,20 +15,10 @@ end
 end
 
 @inline function apply_2nd_derivative(op::ConstantStencilOperator, h_inv::Real, v::AbstractVector, index::Index{Unknown})
-    cSize = closuresize(op)
     N = length(v)
-
-    i = Int(index)
-
-    if 0 < i <= cSize
-        return apply_2nd_derivative(op, h_inv, v, Index{Lower}(i))
-    elseif cSize < i <= N-cSize
-        return apply_2nd_derivative(op, h_inv, v, Index{Interior}(i))
-    elseif N-cSize < i <= N
-        return apply_2nd_derivative(op, h_inv, v, Index{Upper}(i))
-    else
-        error("Bounds error") # TODO: Make this more standard
-    end
+    r = getregion(Int(index), closuresize(op), N)
+    i = Index(Int(index), r)
+    return apply_2nd_derivative(op, h_inv, v, i)
 end
 
 # Wrapper functions for using regular indecies without specifying regions
@@ -37,27 +27,36 @@ end
 end
 export apply_2nd_derivative
 
-# TODO: Dispatch on Index{R}?
-apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Integer, N::Integer, ::Type{Lower}) where T = v*h*op.quadratureClosure[i]
-apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Integer, N::Integer, ::Type{Upper}) where T = v*h*op.quadratureClosure[N-i+1]
-apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Integer, N::Integer, ::Type{Interior}) where T = v*h
+apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Index{Lower}, N::Integer) where T = v*h*op.quadratureClosure[Int(i)]
+apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Index{Upper}, N::Integer) where T = v*h*op.quadratureClosure[N-Int(i)+1]
+apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Index{Interior}, N::Integer) where T = v*h
 
-# TODO: Avoid branching in inner loops
+function apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, index::Index{Unknown}, N::Integer) where T
+    r = getregion(Int(index), closuresize(op), N)
+    i = Index(Int(index), r)
+    return apply_quadrature(op, h, v, i, N)
+end
+
+# Wrapper functions for using regular indecies without specifying regions
 function apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Integer, N::Integer) where T
-    r = getregion(i, closuresize(op), N)
-    return apply_quadrature(op, h, v, i, N, r)
+    return apply_quadrature(op, h, v, Index{Unknown}(i), N)
 end
 export apply_quadrature
 
-# TODO: Dispatch on Index{R}?
-apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T, i::Integer, N::Integer, ::Type{Lower}) where T = v*h_inv*op.inverseQuadratureClosure[i]
-apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T, i::Integer, N::Integer, ::Type{Upper}) where T = v*h_inv*op.inverseQuadratureClosure[N-i+1]
-apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T, i::Integer, N::Integer, ::Type{Interior}) where T = v*h_inv
+# TODO: Evaluate if divisions affect performance
+apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T, i::Index{Lower}, N::Integer) where T = h_inv*v/op.quadratureClosure[Int(i)]
+apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T, i::Index{Upper}, N::Integer) where T = h_inv*v/op.quadratureClosure[N-Int(i)+1]
+apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T, i::Index{Interior}, N::Integer) where T = v*h_inv
 
-# TODO: Avoid branching in inner loops
-function apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T, i::Integer, N::Integer) where T
-    r = getregion(i, closuresize(op), N)
-    return apply_inverse_quadrature(op, h_inv, v, i, N, r)
+function apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T, index::Index{Unknown}, N::Integer) where T
+    r = getregion(Int(index), closuresize(op), N)
+    i = Index(Int(index), r)
+    return apply_inverse_quadrature(op, h_inv, v, i, N)
+end
+
+# Wrapper functions for using regular indecies without specifying regions
+function apply_inverse_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Integer, N::Integer) where T
+    return apply_inverse_quadrature(op, h, v, Index{Unknown}(i), N)
 end
 export apply_inverse_quadrature
 
