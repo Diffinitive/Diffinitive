@@ -10,17 +10,17 @@ end
 
 # u = L*v
 function apply(L::Laplace{1}, v::AbstractVector, i::Int)
-    uᵢ = L.a * SbpOperators.apply(L.op, L.grid.spacing[1], v, i)
+    uᵢ = L.a * SbpOperators.apply(L.op, inverse_spacing(L.grid)[1], v, i)
     return uᵢ
 end
 
 @inline function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}}) where {R1, R2}
     # 2nd x-derivative
     @inbounds vx = view(v, :, Int(I[2]))
-    @inbounds uᵢ = L.a*SbpOperators.apply(L.op, L.grid.inverse_spacing[1], vx , I[1])
+    @inbounds uᵢ = L.a*SbpOperators.apply(L.op, inverse_spacing(L.grid)[1], vx , I[1])
     # 2nd y-derivative
     @inbounds vy = view(v, Int(I[1]), :)
-    @inbounds uᵢ += L.a*SbpOperators.apply(L.op, L.grid.inverse_spacing[2], vy, I[2])
+    @inbounds uᵢ += L.a*SbpOperators.apply(L.op, inverse_spacing(L.grid)[2], vy, I[2])
     # NOTE: the package qualifier 'SbpOperators' can problably be removed once all "applying" objects use LazyTensors
     return uᵢ
 end
@@ -56,9 +56,9 @@ LazyTensors.domain_size(H::Quadrature{2}, range_size::NTuple{2,Integer}) where T
     I = CartesianIndex(I);
     N = size(H.grid)
     # Quadrature in x direction
-    @inbounds q = apply_quadrature(H.op, H.grid.spacing[1], v[I] , I[1], N[1])
+    @inbounds q = apply_quadrature(H.op, spacing(H.grid)[1], v[I] , I[1], N[1])
     # Quadrature in y-direction
-    @inbounds q = apply_quadrature(H.op, H.grid.spacing[2], q, I[2], N[2])
+    @inbounds q = apply_quadrature(H.op, spacing(H.grid)[2], q, I[2], N[2])
     return q
 end
 
@@ -83,9 +83,9 @@ LazyTensors.domain_size(H_inv::InverseQuadrature{2}, range_size::NTuple{2,Intege
     I = CartesianIndex(I);
     N = size(H_inv.grid)
     # Inverse quadrature in x direction
-    @inbounds q_inv = apply_inverse_quadrature(H_inv.op, H_inv.grid.inverse_spacing[1], v[I] , I[1], N[1])
+    @inbounds q_inv = apply_inverse_quadrature(H_inv.op, inverse_spacing(H_inv.grid)[1], v[I] , I[1], N[1])
     # Inverse quadrature in y-direction
-    @inbounds q_inv = apply_inverse_quadrature(H_inv.op, H_inv.grid.inverse_spacing[2], q_inv, I[2], N[2])
+    @inbounds q_inv = apply_inverse_quadrature(H_inv.op, inverse_spacing(H_inv.grid)[2], q_inv, I[2], N[2])
     return q_inv
 end
 
@@ -144,13 +144,13 @@ function LazyTensors.apply(d::NormalDerivative, v::AbstractArray, I::NTuple{2,In
     i = I[dim(d.bId)]
     j = I[3-dim(d.bId)]
     N_i = size(d.grid)[dim(d.bId)]
-    h_inv = d.grid.inverse_spacing[dim(d.bId)]
+    h_inv = inverse_spacing(d.grid)[dim(d.bId)]
     return apply_d(d.op, h_inv, v[j], N_i, i, region(d.bId))
 end
 
 function LazyTensors.apply_transpose(d::NormalDerivative, v::AbstractArray, I::NTuple{1,Int})
     u = selectdim(v,3-dim(d.bId),I[1])
-    return apply_d_T(d.op, d.grid.inverse_spacing[dim(d.bId)], u, region(d.bId))
+    return apply_d_T(d.op, inverse_spacing(d.grid)[dim(d.bId)], u, region(d.bId))
 end
 
 """
@@ -168,7 +168,7 @@ export BoundaryQuadrature
 # TODO: Make this independent of dimension
 # TODO: Dispatch directly on Index{R}?
 function LazyTensors.apply(q::BoundaryQuadrature{T}, v::AbstractArray{T,1}, I::NTuple{1,Int}) where T
-    h = q.grid.spacing[3-dim(q.bId)]
+    h = spacing(q.grid)[3-dim(q.bId)]
     N = size(v)
     return apply_quadrature(q.op, h, v[I[1]], I[1], N[1])
 end
