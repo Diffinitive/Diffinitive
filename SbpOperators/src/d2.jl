@@ -7,7 +7,6 @@ end
 
 struct D2{T,N,M,K} <: ConstantStencilOperator
     quadratureClosure::NTuple{M,T}
-    inverseQuadratureClosure::NTuple{M,T}
     innerStencil::Stencil{T,N}
     closureStencils::NTuple{M,Stencil{T,K}}
     eClosure::Stencil{T,M}
