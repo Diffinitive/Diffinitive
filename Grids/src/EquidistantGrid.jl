@@ -44,6 +44,7 @@ export inverse_spacing
 
 # Returns the reciprocal of the spacing of the grid
 #
+# TODO: Evaluate if divisions affect performance
 function spacing(grid::EquidistantGrid)
     return 1.0./grid.inverse_spacing
 end
