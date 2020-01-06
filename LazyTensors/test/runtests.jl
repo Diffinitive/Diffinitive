@@ -19,18 +19,19 @@ end
 @testset "Mapping transpose" begin
     struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
 
-    LazyTensors.apply(m::DummyMapping{T,R,D}, v, i::NTuple{R,Int}) where {T,R,D} = :apply
-    LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, i::NTuple{D,Int}) where {T,R,D} = :apply_transpose
+    LazyTensors.apply(m::DummyMapping{T,R,D}, v, I::NTuple{R,Index{<:Region}}) where {T,R,D} = :apply
+    LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, I::NTuple{D,Index{<:Region}}) where {T,R,D} = :apply_transpose
 
     LazyTensors.range_size(m::DummyMapping{T,R,D}, domain_size::NTuple{D,Integer}) where {T,R,D} = :range_size
     LazyTensors.domain_size(m::DummyMapping{T,R,D}, range_size::NTuple{R,Integer}) where {T,R,D} = :domain_size
 
     m = DummyMapping{Float64,2,3}()
+    I = Index{Unknown}(0)
     @test m' isa TensorMapping{Float64, 3,2}
     @test m'' == m
-    @test apply(m',zeros(Float64,(0,0)), (0,0,0)) == :apply_transpose
-    @test apply(m'',zeros(Float64,(0,0,0)),(0,0)) == :apply
-    @test apply_transpose(m', zeros(Float64,(0,0,0)),(0,0)) == :apply
+    @test apply(m',zeros(Float64,(0,0)), (I,I,I)) == :apply_transpose
+    @test apply(m'',zeros(Float64,(0,0,0)),(I,I)) == :apply
+    @test apply_transpose(m', zeros(Float64,(0,0,0)),(I,I)) == :apply
 
     @test range_size(m', (0,0)) == :domain_size
     @test domain_size(m', (0,0,0)) == :range_size
