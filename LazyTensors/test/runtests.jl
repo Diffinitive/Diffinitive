@@ -63,10 +63,15 @@ end
     @test_broken BoundsError == (m*m*v)[0]
     @test_broken BoundsError == (m*m*v)[7]
 
-    A = DummyMapping{Int, 2, 1}()
+    m = DummyMapping{Int, 2, 1}()
+    @test_throws MethodError m*ones(Int,2,2)
+    @test_throws MethodError m*m*v
 
-    @test_throws MethodError A*ones(Int,2,2)
-    @test_throws MethodError A*A*v
+    m = DummyMapping{Float64, 2, 2}()
+    v = ones(3,3)
+    I = (Index{Lower}(1),Index{Interior}(2));
+    @test size(m*v) == 2 .*size(v)
+    @test (m*v)[I...] == (:apply,v,I)
 
     struct ScalingOperator{T,D} <: TensorOperator{T,D}
         λ::T
@@ -74,10 +79,10 @@ end
 
     LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Tuple{Index{<:Region}}) where {T,D} = m.λ*v[I...]
 
-    A = ScalingOperator{Int,1}(2)
+    m = ScalingOperator{Int,1}(2)
 
-    @test A*[1,2,3] isa AbstractVector
-    @test A*[1,2,3] == [2,4,6]
+    @test m*[1,2,3] isa AbstractVector
+    @test m*[1,2,3] == [2,4,6]
 end
 
 @testset "TensorMapping binary operations" begin
