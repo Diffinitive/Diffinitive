@@ -31,6 +31,7 @@ Base.convert(::Type{CartesianIndex}, I::NTuple{N,Index} where N) = CartesianInde
 
 Base.Int(I::Index) = I.i
 Base.to_index(I::Index) = Int(I) #How to get this to work for all cases??
+Base.getindex(A::AbstractArray{T,N}, I::NTuple{N,Index}) where {T,N} = A[I...] #Is this ok??
 
 function Index(i::Integer, boundary_width::Integer, dim_size::Integer)
     return Index{getregion(i,boundary_width,dim_size)}(i)

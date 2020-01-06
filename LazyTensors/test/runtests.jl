@@ -71,7 +71,7 @@ end
     v = ones(3,3)
     I = (Index{Lower}(1),Index{Interior}(2));
     @test size(m*v) == 2 .*size(v)
-    @test (m*v)[I...] == (:apply,v,I)
+    @test (m*v)[I] == (:apply,v,I)
 
     struct ScalingOperator{T,D} <: TensorOperator{T,D}
         λ::T
