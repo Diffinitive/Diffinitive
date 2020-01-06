@@ -52,8 +52,7 @@ LazyTensors.range_size(H::Quadrature{2}, domain_size::NTuple{2,Integer}) where T
 LazyTensors.domain_size(H::Quadrature{2}, range_size::NTuple{2,Integer}) where T = size(H.grid)
 
 # TODO: Dispatch on Tuple{Index{R1},Index{R2}}?
-@inline function LazyTensors.apply(H::Quadrature{2}, v::AbstractArray{T,2} where T, I::NTuple{2,Integer})
-    I = CartesianIndex(I);
+@inline function LazyTensors.apply(H::Quadrature{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}}) where {R1, R2}
     N = size(H.grid)
     # Quadrature in x direction
     @inbounds q = apply_quadrature(H.op, spacing(H.grid)[1], v[I] , I[1], N[1])
@@ -62,7 +61,17 @@ LazyTensors.domain_size(H::Quadrature{2}, range_size::NTuple{2,Integer}) where T
     return q
 end
 
-LazyTensors.apply_transpose(H::Quadrature{2}, v::AbstractArray{T,2} where T, I::NTuple{2,Integer}) = LazyTensors.apply(H,v,I)
+function LazyTensors.apply(H::Quadrature{2}, v::AbstractArray{T,2} where T, i::NTuple{2,Integer})
+    I = Index{Unknown}.(i)
+    LazyTensors.apply(H, v, I)
+end
+
+LazyTensors.apply_transpose(H::Quadrature{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}} where {R1, R2}) = LazyTensors.apply(H,v,I)
+
+function LazyTensors.apply_transpose(H::Quadrature{2}, v::AbstractArray{T,2} where T, i::NTuple{2,Integer})
+    I = Index{Unknown}.(i)
+    LazyTensors.apply_transpose(H, v, I)
+end
 
 """
     InverseQuadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
