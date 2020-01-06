@@ -1,12 +1,13 @@
 using Test
 using LazyTensors
+using RegionIndices
 
 @testset "Generic Mapping methods" begin
     struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
-    LazyTensors.apply(m::DummyMapping{T,R,D}, v, i::NTuple{R,Int}) where {T,R,D} = :apply
+    LazyTensors.apply(m::DummyMapping{T,R,D}, v, i::NTuple{R,Index{<:Region}}) where {T,R,D} = :apply
     @test range_dim(DummyMapping{Int,2,3}()) == 2
     @test domain_dim(DummyMapping{Int,2,3}()) == 3
-    @test apply(DummyMapping{Int,2,3}(), zeros(Int, (0,0,0)),(0,0)) == :apply
+    @test apply(DummyMapping{Int,2,3}(), zeros(Int, (0,0,0)),(Index{Unknown}(0),Index{Unknown}(0))) == :apply
 end
 
 @testset "Generic Operator methods" begin
@@ -38,7 +39,7 @@ end
 @testset "TensorApplication" begin
     struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
 
-    LazyTensors.apply(m::DummyMapping{T,R,D}, v, i::NTuple{R,Int}) where {T,R,D} = (:apply,v,i)
+    LazyTensors.apply(m::DummyMapping{T,R,D}, v, i::NTuple{R,Index{<:Region}}) where {T,R,D} = (:apply,v,i)
     LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, i::NTuple{D,Int}) where {T,R,D} = :apply_transpose
 
     LazyTensors.range_size(m::DummyMapping{T,R,D}, domain_size::NTuple{D,Integer}) where {T,R,D} = 2 .* domain_size
@@ -49,11 +50,15 @@ end
     v = [0,1,2]
     @test m*v isa AbstractVector{Int}
     @test size(m*v) == 2 .*size(v)
-    @test (m*v)[0] == (:apply,v,(0,))
+    @test (m*v)[Index{Upper}(0)] == (:apply,v,(Index{Upper}(0),))
+    @test (m*v)[0] == (:apply,v,(Index{Unknown}(0),))
     @test m*m*v isa AbstractVector{Int}
-    @test (m*m*v)[1] == (:apply,m*v,(1,))
-    @test (m*m*v)[3] == (:apply,m*v,(3,))
-    @test (m*m*v)[6] == (:apply,m*v,(6,))
+    @test (m*m*v)[Index{Upper}(1)] == (:apply,m*v,(Index{Upper}(1),))
+    @test (m*m*v)[1] == (:apply,m*v,(Index{Unknown}(1),))
+    @test (m*m*v)[Index{Interior}(3)] == (:apply,m*v,(Index{Interior}(3),))
+    @test (m*m*v)[3] == (:apply,m*v,(Index{Unknown}(3),))
+    @test (m*m*v)[Index{Lower}(6)] == (:apply,m*v,(Index{Lower}(6),))
+    @test (m*m*v)[6] == (:apply,m*v,(Index{Unknown}(6),))
     @test_broken BoundsError == (m*m*v)[0]
     @test_broken BoundsError == (m*m*v)[7]
 
@@ -66,7 +71,7 @@ end
         λ::T
     end
 
-    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Tuple{Int}) where {T,D} = m.λ*v[I...]
+    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Tuple{Index{<:Region}}) where {T,D} = m.λ*v[I...]
 
     A = ScalingOperator{Int,1}(2)
 
@@ -79,7 +84,7 @@ end
         λ::T
     end
 
-    LazyTensors.apply(m::ScalarMapping{T,R,D}, v, i) where {T,R,D} = m.λ*v[i]
+    LazyTensors.apply(m::ScalarMapping{T,R,D}, v, I::Tuple{Index{<:Region}}) where {T,R,D} = m.λ*v[I...]
     LazyTensors.range_size(m::ScalarMapping, domain_size) = domain_size
     LazyTensors.domain_size(m::ScalarMapping, range_sizes) = range_sizes
 
@@ -87,7 +92,6 @@ end
     B = ScalarMapping{Float64,1,1}(3.0)
 
     v = [1.1,1.2,1.3]
-
     for i ∈ eachindex(v)
         @test ((A+B)*v)[i] == 2*v[i] + 3*v[i]
     end

@@ -24,6 +24,7 @@ deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[LazyTensors]]
+deps = ["RegionIndices"]
 path = "LazyTensors"
 uuid = "62fbed2c-918d-11e9-279b-eb3a325b37d3"
 version = "0.1.0"
@@ -36,16 +37,16 @@ deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[OffsetArrays]]
-git-tree-sha1 = "1af2f79c7eaac3e019a0de41ef63335ff26a0a57"
+git-tree-sha1 = "87d0a91efe29352d5caaa271ae3927083c096e33"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "0.11.1"
+version = "0.11.4"
 
 [[Random]]
 deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[RegionIndices]]
-path = "RegionIndices"
+path = "/Users/vidar/dev/hg/sbpteam/sbplib_julia/RegionIndices"
 uuid = "5d527584-97f1-11e9-084c-4540c7ecf219"
 version = "0.1.0"
 

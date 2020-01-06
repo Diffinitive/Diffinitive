@@ -8,9 +8,16 @@ Kolla att vi har @inline på rätt ställen
 
 Profilera
 
-Konvertera till paket
 Skriv tester
 
 Specificera operatorer i TOML eller något liknande?
 
-Ska TensorMapping hantera regionerna? Abstraktion utanför?
+Borde det finns motsvarande apply_stencil för apply_quadrature,
+apply_boundary_value och apply_normal_derivative?
+
+Borde man alltid skicka in N som parameter i apply_2nd_derivative, t.ex som i
+apply_quadrature?
+
+Just nu agerar apply_normal_derivative, apply_boundary_value på inte på v som
+en vektor, utan randvärdet plockas ut utanför. Känns inte konsistent med övrig
+design
