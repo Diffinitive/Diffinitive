@@ -41,8 +41,6 @@ end
     struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
 
     LazyTensors.apply(m::DummyMapping{T,R,D}, v, i::NTuple{R,Index{<:Region}}) where {T,R,D} = (:apply,v,i)
-    LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, i::NTuple{D,Int}) where {T,R,D} = :apply_transpose
-
     LazyTensors.range_size(m::DummyMapping{T,R,D}, domain_size::NTuple{D,Integer}) where {T,R,D} = 2 .* domain_size
     LazyTensors.domain_size(m::DummyMapping{T,R,D}, range_size::NTuple{R,Integer}) where {T,R,D} = range_size.÷2
 
@@ -77,12 +75,18 @@ end
         λ::T
     end
 
-    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Tuple{Index{<:Region}}) where {T,D} = m.λ*v[I...]
+    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::NTuple{D, Index}) where {T,D} = m.λ*v[I]
 
     m = ScalingOperator{Int,1}(2)
+    v = [1,2,3]
+    @test m*v isa AbstractVector
+    @test m*v == [2,4,6]
 
-    @test m*[1,2,3] isa AbstractVector
-    @test m*[1,2,3] == [2,4,6]
+    m = ScalingOperator{Int,2}(2)
+    v = [[1 2];[3 4]]
+    @test m*v == [[2 4];[6 8]]
+    I = (Index{Upper}(2),Index{Lower}(1))
+    @test (m*v)[I] == 6
 end
 
 @testset "TensorMapping binary operations" begin
