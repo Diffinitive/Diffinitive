@@ -20,11 +20,6 @@ end
     i = Index(Int(index), r)
     return apply_2nd_derivative(op, h_inv, v, i)
 end
-
-# Wrapper functions for using regular indecies without specifying regions
-@inline function apply_2nd_derivative(op::ConstantStencilOperator, h_inv::Real, v::AbstractVector, i::Int)
-    return apply_2nd_derivative(op, h_inv, v, Index{Unknown}(i))
-end
 export apply_2nd_derivative
 
 apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Index{Lower}, N::Integer) where T = v*h*op.quadratureClosure[Int(i)]
@@ -35,11 +30,6 @@ function apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, index::Ind
     r = getregion(Int(index), closuresize(op), N)
     i = Index(Int(index), r)
     return apply_quadrature(op, h, v, i, N)
-end
-
-# Wrapper functions for using regular indecies without specifying regions
-function apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Integer, N::Integer) where T
-    return apply_quadrature(op, h, v, Index{Unknown}(i), N)
 end
 export apply_quadrature
 
@@ -54,10 +44,6 @@ function apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T
     return apply_inverse_quadrature(op, h_inv, v, i, N)
 end
 
-# Wrapper functions for using regular indecies without specifying regions
-function apply_inverse_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Integer, N::Integer) where T
-    return apply_inverse_quadrature(op, h, v, Index{Unknown}(i), N)
-end
 export apply_inverse_quadrature
 
 function apply_boundary_value_transpose(op::ConstantStencilOperator, v::AbstractVector, ::Type{Lower})
@@ -75,18 +61,18 @@ function apply_boundary_value_transpose(op::ConstantStencilOperator, v::Abstract
 end
 export apply_boundary_value_transpose
 
-function apply_boundary_value(op::ConstantStencilOperator, v::Number, N::Integer, i::Integer, ::Type{Lower})
-    @boundscheck if !(0<length(i) <= N)
+function apply_boundary_value(op::ConstantStencilOperator, v::Number, i::Index, N::Integer, ::Type{Lower})
+    @boundscheck if !(0<length(Int(i)) <= N)
         throw(BoundsError())
     end
-    op.eClosure[i-1]*v
+    op.eClosure[Int(i)-1]*v
 end
 
-function apply_boundary_value(op::ConstantStencilOperator, v::Number, N::Integer, i::Integer, ::Type{Upper})
-    @boundscheck if !(0<length(i) <= N)
+function apply_boundary_value(op::ConstantStencilOperator, v::Number, i::Index,  N::Integer, ::Type{Upper})
+    @boundscheck if !(0<length(Int(i)) <= N)
         throw(BoundsError())
     end
-    op.eClosure[N-i]*v
+    op.eClosure[N-Int(i)]*v
 end
 export apply_boundary_value
 
@@ -106,18 +92,18 @@ end
 
 export apply_normal_derivative_transpose
 
-function apply_normal_derivative(op::ConstantStencilOperator, h_inv::Real, v::Number, N::Integer, i::Integer, ::Type{Lower})
-    @boundscheck if !(0<length(i) <= N)
+function apply_normal_derivative(op::ConstantStencilOperator, h_inv::Real, v::Number, i::Index, N::Integer, ::Type{Lower})
+    @boundscheck if !(0<length(Int(i)) <= N)
         throw(BoundsError())
     end
-    h_inv*op.dClosure[i-1]*v
+    h_inv*op.dClosure[Int(i)-1]*v
 end
 
-function apply_normal_derivative(op::ConstantStencilOperator, h_inv::Real, v::Number, N::Integer, i::Integer, ::Type{Upper})
-    @boundscheck if !(0<length(i) <= N)
+function apply_normal_derivative(op::ConstantStencilOperator, h_inv::Real, v::Number, i::Index, N::Integer, ::Type{Upper})
+    @boundscheck if !(0<length(Int(i)) <= N)
         throw(BoundsError())
     end
-    -h_inv*op.dClosure[N-i]*v
+    -h_inv*op.dClosure[N-Int(i)]*v
 end
 
 export apply_normal_derivative
