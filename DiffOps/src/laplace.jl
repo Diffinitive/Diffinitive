@@ -33,6 +33,7 @@ inverse_quadrature(L::Laplace) = InverseQuadrature(L.op, L.grid)
 boundary_value(L::Laplace, bId::CartesianBoundary) = BoundaryValue(L.op, L.grid, bId)
 normal_derivative(L::Laplace, bId::CartesianBoundary) = NormalDerivative(L.op, L.grid, bId)
 boundary_quadrature(L::Laplace, bId::CartesianBoundary) = BoundaryQuadrature(L.op, L.grid, bId)
+export quadrature
 
 """
     Quadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
@@ -158,7 +159,6 @@ end
 export BoundaryQuadrature
 
 # TODO: Make this independent of dimension
-# TODO: Dispatch directly on Index{R}?
 function LazyTensors.apply(q::BoundaryQuadrature{T}, v::AbstractArray{T,1}, I::NTuple{1,Index}) where T
     h = spacing(q.grid)[3-dim(q.bId)]
     N = size(v)

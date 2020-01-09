@@ -9,16 +9,17 @@ using LazyTensors
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     Lx = 3.5
     Ly = 7.2
-    g = EquidistantGrid((21,42), (0.0, 0.0), (Lx,Ly))
+    g = EquidistantGrid((42,41), (0.0, 0.0), (Lx,Ly))
     L = Laplace(g, 1., op)
+    H = quadrature(L)
 
     f0(x::Float64,y::Float64) = 2.
     f1(x::Float64,y::Float64) = x+y
     f2(x::Float64,y::Float64) = 1/2*x^2 + 1/2*y^2
     f3(x::Float64,y::Float64) = 1/6*x^3 + 1/6*y^3
     f4(x::Float64,y::Float64) = 1/24*x^4 + 1/24*y^4
-    f5(x::Float64,y::Float64) = x^5 + 2*y^3 + 3/2*x^2 + y + 7
-    f5ₓₓ(x::Float64,y::Float64) = 20*x^3 + 12*y + 3
+    f5(x::Float64,y::Float64) = sin(x) + cos(y)
+    f5ₓₓ(x::Float64,y::Float64) = -f5(x,y)
 
     v0 = evalOn(g,f0)
     v1 = evalOn(g,f1)
@@ -30,17 +31,24 @@ using LazyTensors
 
     @test L isa TensorOperator{T,2} where T
     @test L' isa TensorMapping{T,2,2} where T
+
     # TODO: Should perhaps set tolerance level for isapporx instead?
-    equalitytol = 0.5*1e-11
-    accuracytol = 1e-4
-    @test all(collect(L*v0) .<= equalitytol)
-    @test all(collect(L*v1) .<= equalitytol)
+    #       Are these tolerance levels resonable or should tests be constructed
+    #       differently?
+    equalitytol = 0.5*1e-10
+    accuracytol = 0.5*1e-3
+    # 4th order interior stencil, 2nd order boundary stencil,
+    # implies that L*v should be exact for v - monomial up to order 3.
+    # Exact differentiation is measured point-wise. For other grid functions
+    # the error is measured in the H-norm.
+    @test all(abs.(collect(L*v0)) .<= equalitytol)
+    @test all(abs.(collect(L*v1)) .<= equalitytol)
     @test all(collect(L*v2) .≈ v0) # Seems to be more accurate
-    @test all((collect(L*v3) - v1) .<= equalitytol)
-    @show maximum(abs.(collect(L*v4) - v2))
-    @show maximum(abs.(collect(L*v5) - v5ₓₓ))
-    @test_broken all((collect(L*v4) - v2) .<= accuracytol) #TODO: Should be equality?
-    @test_broken all((collect(L*v5) - v5ₓₓ) .<= accuracytol) #TODO: This is just wrong
+    @test all(abs.((collect(L*v3) - v1)) .<= equalitytol)
+    e4 = collect(L*v4) - v2
+    e5 = collect(L*v5) - v5ₓₓ
+    @test sum(collect(H*e4.^2)) <= accuracytol
+    @test sum(collect(H*e5.^2)) <= accuracytol
 end
 
 @testset "Quadrature" begin
