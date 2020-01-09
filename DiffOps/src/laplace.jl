@@ -1,34 +1,31 @@
-struct Laplace{Dim,T<:Real,N,M,K} <: DiffOpCartesian{Dim}
+struct Laplace{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
     grid::EquidistantGrid{Dim,T}
-    a::T
-    op::D2{Float64,N,M,K}
+    a::T # TODO: Better name?
+    op::D2{T,N,M,K}
 end
+export Laplace
 
-function apply(L::Laplace{Dim}, v::AbstractArray{T,Dim} where T, I::CartesianIndex{Dim}) where Dim
+LazyTensors.domain_size(H::Laplace{Dim}, range_size::NTuple{Dim,Integer}) where Dim = size(L.grid)
+
+function LazyTensors.apply(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::NTuple{Dim,Index}) where {T,Dim}
     error("not implemented")
 end
 
 # u = L*v
-function apply(L::Laplace{1}, v::AbstractVector, i::Int)
-    uᵢ = L.a * SbpOperators.apply_2nd_derivative(L.op, inverse_spacing(L.grid)[1], v, i)
+function LazyTensors.apply(L::Laplace{1,T}, v::AbstractVector{T}, I::NTuple{1,Index}) where T
+    uᵢ = L.a*apply_2nd_derivative(L.op, inverse_spacing(L.grid)[1], v, I[1])
     return uᵢ
 end
 
-@inline function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, I::Tuple{Index{R1}, Index{R2}}) where {R1, R2}
+
+@inline function LazyTensors.apply(L::Laplace{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T
     # 2nd x-derivative
     @inbounds vx = view(v, :, Int(I[2]))
-    @inbounds uᵢ = L.a*SbpOperators.apply_2nd_derivative(L.op, inverse_spacing(L.grid)[1], vx , I[1])
+    @inbounds uᵢ = L.a*apply_2nd_derivative(L.op, inverse_spacing(L.grid)[1], vx , I[1])
     # 2nd y-derivative
     @inbounds vy = view(v, Int(I[1]), :)
-    @inbounds uᵢ += L.a*SbpOperators.apply_2nd_derivative(L.op, inverse_spacing(L.grid)[2], vy, I[2])
-    # NOTE: the package qualifier 'SbpOperators' can problably be removed once all "applying" objects use LazyTensors
+    @inbounds uᵢ += L.a*apply_2nd_derivative(L.op, inverse_spacing(L.grid)[2], vy, I[2])
     return uᵢ
-end
-
-# Slow but maybe convenient?
-function apply(L::Laplace{2}, v::AbstractArray{T,2} where T, i::CartesianIndex{2})
-    I = Index{Unknown}.(Tuple(i))
-    apply(L, v, I)
 end
 
 quadrature(L::Laplace) = Quadrature(L.op, L.grid)

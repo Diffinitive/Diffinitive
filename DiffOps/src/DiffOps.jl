@@ -98,7 +98,5 @@ abstract type BoundaryCondition end
 
 
 include("laplace.jl")
-export Laplace
-
 
 end # module

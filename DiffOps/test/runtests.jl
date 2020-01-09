@@ -5,6 +5,44 @@ using SbpOperators
 using RegionIndices
 using LazyTensors
 
+@testset "Laplace2D" begin
+    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    Lx = 3.5
+    Ly = 7.2
+    g = EquidistantGrid((21,42), (0.0, 0.0), (Lx,Ly))
+    L = Laplace(g, 1., op)
+
+    f0(x::Float64,y::Float64) = 2.
+    f1(x::Float64,y::Float64) = x+y
+    f2(x::Float64,y::Float64) = 1/2*x^2 + 1/2*y^2
+    f3(x::Float64,y::Float64) = 1/6*x^3 + 1/6*y^3
+    f4(x::Float64,y::Float64) = 1/24*x^4 + 1/24*y^4
+    f5(x::Float64,y::Float64) = x^5 + 2*y^3 + 3/2*x^2 + y + 7
+    f5ₓₓ(x::Float64,y::Float64) = 20*x^3 + 12*y + 3
+
+    v0 = evalOn(g,f0)
+    v1 = evalOn(g,f1)
+    v2 = evalOn(g,f2)
+    v3 = evalOn(g,f3)
+    v4 = evalOn(g,f4)
+    v5 = evalOn(g,f5)
+    v5ₓₓ = evalOn(g,f5ₓₓ)
+
+    @test L isa TensorOperator{T,2} where T
+    @test L' isa TensorMapping{T,2,2} where T
+    # TODO: Should perhaps set tolerance level for isapporx instead?
+    equalitytol = 0.5*1e-11
+    accuracytol = 1e-4
+    @test all(collect(L*v0) .<= equalitytol)
+    @test all(collect(L*v1) .<= equalitytol)
+    @test all(collect(L*v2) .≈ v0) # Seems to be more accurate
+    @test all((collect(L*v3) - v1) .<= equalitytol)
+    @show maximum(abs.(collect(L*v4) - v2))
+    @show maximum(abs.(collect(L*v5) - v5ₓₓ))
+    @test_broken all((collect(L*v4) - v2) .<= accuracytol) #TODO: Should be equality?
+    @test_broken all((collect(L*v5) - v5ₓₓ) .<= accuracytol) #TODO: This is just wrong
+end
+
 @testset "Quadrature" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     Lx = 2.3
@@ -13,7 +51,7 @@ using LazyTensors
     H = Quadrature(op,g)
     v = ones(Float64, size(g))
 
-    @test H isa TensorMapping{T,2,2} where T
+    @test H isa TensorOperator{T,2} where T
     @test H' isa TensorMapping{T,2,2} where T
     @test sum(collect(H*v)) ≈ (Lx*Ly)
     @test collect(H*v) == collect(H'*v)
@@ -28,7 +66,7 @@ end
     Hinv = InverseQuadrature(op,g)
     v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
 
-    @test Hinv isa TensorMapping{T,2,2} where T
+    @test Hinv isa TensorOperator{T,2} where T
     @test Hinv' isa TensorMapping{T,2,2} where T
     @test collect(Hinv*H*v)  ≈ v
     @test collect(Hinv*v) == collect(Hinv'*v)
@@ -141,7 +179,7 @@ end
         d_y_u[i] = -op.dClosure[length(d_y_u)-i]
     end
 
-    function ❓(x,y)
+    function prod_matrix(x,y)
         G = zeros(Float64, length(x), length(y))
         for I ∈ CartesianIndices(G)
             G[I] = x[I[1]]*y[I[2]]
@@ -153,10 +191,10 @@ end
     g_x = [1,2,3,4.0,5]
     g_y = [5,4,3,2,1.0,11]
 
-    G_w = ❓(d_x_l, g_y)
-    G_e = ❓(d_x_u, g_y)
-    G_s = ❓(g_x, d_y_l)
-    G_n = ❓(g_x, d_y_u)
+    G_w = prod_matrix(d_x_l, g_y)
+    G_e = prod_matrix(d_x_u, g_y)
+    G_s = prod_matrix(g_x, d_y_l)
+    G_n = prod_matrix(g_x, d_y_u)
 
 
     @test size(d_w*g_y) == (5,6)
