@@ -1,11 +1,13 @@
 struct Laplace{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
-    grid::EquidistantGrid{Dim,T}
+    grid::EquidistantGrid{Dim,T}  # TODO: Should this be here? Should probably be possible to applay a Laplace object to any size grid function
     a::T # TODO: Better name?
     op::D2{T,N,M,K}
 end
 export Laplace
 
-LazyTensors.domain_size(H::Laplace{Dim}, range_size::NTuple{Dim,Integer}) where Dim = size(L.grid)
+# At the moment the grid property is used all over. It could possibly be removed if we implement all the 1D operators as TensorMappings
+
+LazyTensors.domain_size(H::Laplace{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
 
 function LazyTensors.apply(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::NTuple{Dim,Index}) where {T,Dim}
     error("not implemented")
@@ -46,7 +48,7 @@ struct Quadrature{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
 end
 export Quadrature
 
-LazyTensors.domain_size(H::Quadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = size(H.grid)
+LazyTensors.domain_size(H::Quadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
 
 @inline function LazyTensors.apply(H::Quadrature{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T
     N = size(H.grid)
@@ -71,7 +73,7 @@ struct InverseQuadrature{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
 end
 export InverseQuadrature
 
-LazyTensors.domain_size(H_inv::InverseQuadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = size(H_inv.grid)
+LazyTensors.domain_size(H_inv::InverseQuadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
 
 @inline function LazyTensors.apply(H_inv::InverseQuadrature{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T
     N = size(H_inv.grid)
@@ -98,8 +100,15 @@ export BoundaryValue
 
 # TODO: This is obviouly strange. Is domain_size just discarded? Is there a way to avoid storing grid in BoundaryValue?
 # Can we give special treatment to TensorMappings that go to a higher dim?
-LazyTensors.range_size(e::BoundaryValue{T}, domain_size::NTuple{1,Integer}) where T = size(e.grid)
+function LazyTensors.range_size(e::BoundaryValue{T}, domain_size::NTuple{1,Integer}) where T
+    if dim(e.bId) == 1
+        return (missing, domain_size[1])
+    elseif dim(e.bId) == 2
+        return (domain_size[1], missing)
+    end
+end
 LazyTensors.domain_size(e::BoundaryValue{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],)
+# TODO: Make a nicer solution for 3-dim(e.bId)
 
 # TODO: Make this independent of dimension
 function LazyTensors.apply(e::BoundaryValue{T}, v::AbstractArray{T}, I::NTuple{2,Index}) where T
@@ -128,7 +137,13 @@ export NormalDerivative
 
 # TODO: This is obviouly strange. Is domain_size just discarded? Is there a way to avoid storing grid in BoundaryValue?
 # Can we give special treatment to TensorMappings that go to a higher dim?
-LazyTensors.range_size(e::NormalDerivative, domain_size::NTuple{1,Integer}) = size(e.grid)
+function LazyTensors.range_size(e::NormalDerivative, domain_size::NTuple{1,Integer})
+    if dim(e.bId) == 1
+        return (missing, domain_size[1])
+    elseif dim(e.bId) == 2
+        return (domain_size[1], missing)
+    end
+end
 LazyTensors.domain_size(e::NormalDerivative, range_size::NTuple{2,Integer}) = (range_size[3-dim(e.bId)],)
 
 # TODO: Not type stable D:<

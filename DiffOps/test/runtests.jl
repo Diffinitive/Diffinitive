@@ -129,15 +129,16 @@ end
     G_n = zeros(Float64, (4,5))
     G_n[:,5] = g_x
 
-    @test size(e_w*g_y) == (4,5)
-    @test size(e_e*g_y) == (4,5)
-    @test size(e_s*g_x) == (4,5)
-    @test size(e_n*g_x) == (4,5)
+    @test size(e_w*g_y) === (missing,5)
+    @test size(e_e*g_y) === (missing,5)
+    @test size(e_s*g_x) === (4,missing)
+    @test size(e_n*g_x) === (4,missing)
 
-    @test collect(e_w*g_y) == G_w
-    @test collect(e_e*g_y) == G_e
-    @test collect(e_s*g_x) == G_s
-    @test collect(e_n*g_x) == G_n
+    # These tests should be moved to where they are possible (i.e we know what the grid should be)
+    @test_broken collect(e_w*g_y) == G_w
+    @test_broken collect(e_e*g_y) == G_e
+    @test_broken collect(e_s*g_x) == G_s
+    @test_broken collect(e_n*g_x) == G_n
 end
 
 @testset "NormalDerivative" begin
@@ -205,15 +206,16 @@ end
     G_n = prod_matrix(g_x, d_y_u)
 
 
-    @test size(d_w*g_y) == (5,6)
-    @test size(d_e*g_y) == (5,6)
-    @test size(d_s*g_x) == (5,6)
-    @test size(d_n*g_x) == (5,6)
+    @test size(d_w*g_y) === (missing,6)
+    @test size(d_e*g_y) === (missing,6)
+    @test size(d_s*g_x) === (5,missing)
+    @test size(d_n*g_x) === (5,missing)
 
-    @test collect(d_w*g_y) ≈ G_w
-    @test collect(d_e*g_y) ≈ G_e
-    @test collect(d_s*g_x) ≈ G_s
-    @test collect(d_n*g_x) ≈ G_n
+    # These tests should be moved to where they are possible (i.e we know what the grid should be)
+    @test_broken collect(d_w*g_y) ≈ G_w
+    @test_broken collect(d_e*g_y) ≈ G_e
+    @test_broken collect(d_s*g_x) ≈ G_s
+    @test_broken collect(d_n*g_x) ≈ G_n
 end
 
 @testset "BoundaryQuadrature" begin
