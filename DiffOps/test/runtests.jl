@@ -129,10 +129,10 @@ end
     G_n = zeros(Float64, (4,5))
     G_n[:,5] = g_x
 
-    @test size(e_w*g_y) === (missing,5)
-    @test size(e_e*g_y) === (missing,5)
-    @test size(e_s*g_x) === (4,missing)
-    @test size(e_n*g_x) === (4,missing)
+    @test size(e_w*g_y) == (UnknownDim,5)
+    @test size(e_e*g_y) == (UnknownDim,5)
+    @test size(e_s*g_x) == (4,UnknownDim)
+    @test size(e_n*g_x) == (4,UnknownDim)
 
     # These tests should be moved to where they are possible (i.e we know what the grid should be)
     @test_broken collect(e_w*g_y) == G_w
@@ -206,10 +206,10 @@ end
     G_n = prod_matrix(g_x, d_y_u)
 
 
-    @test size(d_w*g_y) === (missing,6)
-    @test size(d_e*g_y) === (missing,6)
-    @test size(d_s*g_x) === (5,missing)
-    @test size(d_n*g_x) === (5,missing)
+    @test size(d_w*g_y) == (UnknownDim,6)
+    @test size(d_e*g_y) == (UnknownDim,6)
+    @test size(d_s*g_x) == (5,UnknownDim)
+    @test size(d_n*g_x) == (5,UnknownDim)
 
     # These tests should be moved to where they are possible (i.e we know what the grid should be)
     @test_broken collect(d_w*g_y) ≈ G_w

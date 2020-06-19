@@ -62,7 +62,12 @@ Return the resulting domain size for the mapping applied to a given range_size
 """
 function domain_size end
 
-export range_size, domain_size
+"""
+    Dummy type for representing dimensions of tensormappings when domain_size is unknown
+"""
+struct UnknownDim end
+export range_size, domain_size, TensorMappingDim, UnknownDim
+
 # TODO: Think about boundschecking!
 
 

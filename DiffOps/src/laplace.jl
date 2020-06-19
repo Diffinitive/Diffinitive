@@ -102,9 +102,9 @@ export BoundaryValue
 # Can we give special treatment to TensorMappings that go to a higher dim?
 function LazyTensors.range_size(e::BoundaryValue{T}, domain_size::NTuple{1,Integer}) where T
     if dim(e.bId) == 1
-        return (missing, domain_size[1])
+        return (UnknownDim, domain_size[1])
     elseif dim(e.bId) == 2
-        return (domain_size[1], missing)
+        return (domain_size[1], UnknownDim)
     end
 end
 LazyTensors.domain_size(e::BoundaryValue{T}, range_size::NTuple{2,Integer}) where T = (range_size[3-dim(e.bId)],)
@@ -139,9 +139,9 @@ export NormalDerivative
 # Can we give special treatment to TensorMappings that go to a higher dim?
 function LazyTensors.range_size(e::NormalDerivative, domain_size::NTuple{1,Integer})
     if dim(e.bId) == 1
-        return (missing, domain_size[1])
+        return (UnknownDim, domain_size[1])
     elseif dim(e.bId) == 2
-        return (domain_size[1], missing)
+        return (domain_size[1], UnknownDim)
     end
 end
 LazyTensors.domain_size(e::NormalDerivative, range_size::NTuple{2,Integer}) = (range_size[3-dim(e.bId)],)
