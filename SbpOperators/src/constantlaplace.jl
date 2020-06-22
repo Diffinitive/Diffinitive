@@ -10,7 +10,6 @@ in 1D dimension
 """
 struct ConstantLaplaceOperator{T<:Real,N,M,K} <: TensorOperator{T,1}
     h_inv::T # The grid spacing could be included in the stencil already. Preferable?
-    a::T # TODO: Better name?
     innerStencil::Stencil{T,N}
     closureStencils::NTuple{M,Stencil{T,K}}
     parity::Parity
@@ -30,16 +29,16 @@ end
 
 # Apply for different regions Lower/Interior/Upper or Unknown region
 @inline function LazyTensors.apply(L::ConstantLaplaceOperator, v::AbstractVector, i::Index{Lower})
-    return @inbounds L.a*L.h_inv*L.h_inv*apply_stencil(L.closureStencils[Int(i)], v, Int(i))
+    return @inbounds L.h_inv*L.h_inv*apply_stencil(L.closureStencils[Int(i)], v, Int(i))
 end
 
 @inline function LazyTensors.apply(L::ConstantLaplaceOperator, v::AbstractVector, i::Index{Interior})
-    return @inbounds L.a*L.h_inv*L.h_inv*apply_stencil(L.innerStencil, v, Int(i))
+    return @inbounds L.h_inv*L.h_inv*apply_stencil(L.innerStencil, v, Int(i))
 end
 
 @inline function LazyTensors.apply(L::ConstantLaplaceOperator, v::AbstractVector, i::Index{Upper})
     N = length(v) # TODO: Use domain_size here instead?
-    return @inbounds L.a*L.h_inv*L.h_inv*Int(L.parity)*apply_stencil_backwards(L.closureStencils[N-Int(i)+1], v, Int(i))
+    return @inbounds L.h_inv*L.h_inv*Int(L.parity)*apply_stencil_backwards(L.closureStencils[N-Int(i)+1], v, Int(i))
 end
 
 @inline function LazyTensors.apply(L::ConstantLaplaceOperator, v::AbstractVector, index::Index{Unknown})
