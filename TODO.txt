@@ -8,7 +8,26 @@ Kolla att vi har @inline på rätt ställen
 
 Profilera
 
-Konvertera till paket
 Skriv tester
 
 Specificera operatorer i TOML eller något liknande?
+
+Borde det finns motsvarande apply_stencil för apply_quadrature,
+apply_boundary_value och apply_normal_derivative?
+
+Borde man alltid skicka in N som parameter i apply_2nd_derivative, t.ex som i
+apply_quadrature?
+
+Just nu agerar apply_normal_derivative, apply_boundary_value på inte på v som
+en vektor, utan randvärdet plockas ut utanför. Känns inte konsistent med övrig
+design
+
+## TODO 2020-06-18
+ * Remove grid as a property of the Laplace tensor operator
+ * Add 1D operators (D1, D2, e, d ... ) as TensorOperators
+ * Move Laplace tensor operator to different package
+ * Add new Laplace opertor to DiffOps, probably named WaveEqOp(?!!?)
+ * Decide: Should there be some kind of collection struct for SBP operators (as TensorOperators), providing easy access to all parts (D2, e, d ,
+ H.. H_gamma etc.)
+ * Is "missing" a good value for unknown dimension sizes (of e*g for example)
+ * Formalize how range_size() and domain_size() are supposed to work in TensorMappings where dim(domain) != dim(range) (add tests or document)

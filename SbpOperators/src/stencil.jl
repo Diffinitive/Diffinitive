@@ -21,7 +21,7 @@ end
     return s.weights[1 + i - s.range[1]]
 end
 
-Base.@propagate_inbounds @inline function apply(s::Stencil{T,N}, v::AbstractVector, i::Int) where {T,N}
+Base.@propagate_inbounds @inline function apply_stencil(s::Stencil{T,N}, v::AbstractVector, i::Int) where {T,N}
     w = s.weights[1]*v[i + s.range[1]]
     @simd for k ∈ 2:N
         w += s.weights[k]*v[i + s.range[1] + k-1]
@@ -29,7 +29,7 @@ Base.@propagate_inbounds @inline function apply(s::Stencil{T,N}, v::AbstractVect
     return w
 end
 
-Base.@propagate_inbounds @inline function apply_backwards(s::Stencil{T,N}, v::AbstractVector, i::Int) where {T,N}
+Base.@propagate_inbounds @inline function apply_stencil_backwards(s::Stencil{T,N}, v::AbstractVector, i::Int) where {T,N}
     w = s.weights[N]*v[i - s.range[2]]
     @simd for k ∈ N-1:-1:1
         w += s.weights[k]*v[i - s.range[1] - k + 1]

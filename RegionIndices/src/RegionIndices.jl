@@ -30,6 +30,8 @@ Base.convert(::Type{T}, i::Index{R,T} where R) where T = i.i
 Base.convert(::Type{CartesianIndex}, I::NTuple{N,Index} where N) = CartesianIndex(convert.(Int, I))
 
 Base.Int(I::Index) = I.i
+Base.to_index(I::Index) = Int(I) #How to get this to work for all cases??
+Base.getindex(A::AbstractArray{T,N}, I::NTuple{N,Index}) where {T,N} = A[I...] #Is this ok??
 
 function Index(i::Integer, boundary_width::Integer, dim_size::Integer)
     return Index{getregion(i,boundary_width,dim_size)}(i)
@@ -64,6 +66,8 @@ function getregion(i::Integer, boundary_width::Integer, dim_size::Integer)
         error("Bounds error") # TODO: Make this more standard
     end
 end
+
+export getregion
 
 function getrange(gridsize::Integer, closuresize::Integer, region::DataType)
     if region == Lower
