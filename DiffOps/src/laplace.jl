@@ -1,13 +1,18 @@
+#TODO: move to sbpoperators.jl
+"""
+    Laplace{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
+
+Implements the Laplace operator `L` in Dim dimensions as a tensor operator
+The multi-dimensional tensor operator simply consists of a tuple of the 1D
+Laplace tensor operator as defined by ConstantLaplaceOperator.
+"""
 struct Laplace{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
-    grid::EquidistantGrid{Dim,T}  # TODO: Should this be here? Should probably be possible to applay a Laplace object to any size grid function
-    a::T # TODO: Better name?
-    op::D2{T,N,M,K}
+    tensorOps::NTuple(Dim,ConstantLaplaceOperator{T,N,M,K})
+    #TODO: Write a good constructor
 end
 export Laplace
 
-# At the moment the grid property is used all over. It could possibly be removed if we implement all the 1D operators as TensorMappings
-
-LazyTensors.domain_size(H::Laplace{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
+LazyTensors.domain_size(H::Laplace{Dim}, range_size::NTuple{Dim,Integer}) = range_size
 
 function LazyTensors.apply(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::NTuple{Dim,Index}) where {T,Dim}
     error("not implemented")
@@ -15,18 +20,19 @@ end
 
 # u = L*v
 function LazyTensors.apply(L::Laplace{1,T}, v::AbstractVector{T}, I::NTuple{1,Index}) where T
-    uᵢ = L.a*apply_2nd_derivative(L.op, inverse_spacing(L.grid)[1], v, I[1])
-    return uᵢ
+    return apply(L.tensorOps[1],v,I)
 end
 
 
 @inline function LazyTensors.apply(L::Laplace{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T
     # 2nd x-derivative
     @inbounds vx = view(v, :, Int(I[2]))
-    @inbounds uᵢ = L.a*apply_2nd_derivative(L.op, inverse_spacing(L.grid)[1], vx , I[1])
+    @inbounds uᵢ = apply(L.tensorOps[1], vx , (I[1],)) #Tuple conversion here is ugly. How to do it? Should we use indexing here?
+
     # 2nd y-derivative
     @inbounds vy = view(v, Int(I[1]), :)
-    @inbounds uᵢ += L.a*apply_2nd_derivative(L.op, inverse_spacing(L.grid)[2], vy, I[2])
+    @inbounds uᵢ += apply(L.tensorOps[2], vy , (I[2],)) #Tuple conversion here is ugly. How to do it?
+
     return uᵢ
 end
 
@@ -37,6 +43,7 @@ normal_derivative(L::Laplace, bId::CartesianBoundary) = NormalDerivative(L.op, L
 boundary_quadrature(L::Laplace, bId::CartesianBoundary) = BoundaryQuadrature(L.op, L.grid, bId)
 export quadrature
 
+# At the moment the grid property is used all over. It could possibly be removed if we implement all the 1D operators as TensorMappings
 """
     Quadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
 
