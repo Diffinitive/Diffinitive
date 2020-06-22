@@ -1,4 +1,3 @@
-#TODO: move to sbpoperators.jl
 """
     Laplace{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
 
@@ -7,7 +6,7 @@ The multi-dimensional tensor operator simply consists of a tuple of the 1D
 Laplace tensor operator as defined by ConstantLaplaceOperator.
 """
 struct Laplace{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
-    tensorOps::NTuple(Dim,ConstantLaplaceOperator{T,N,M,K})
+    D2::NTuple(Dim,SecondDerivative{T,N,M,K})
     #TODO: Write a good constructor
 end
 export Laplace
@@ -20,18 +19,18 @@ end
 
 # u = L*v
 function LazyTensors.apply(L::Laplace{1,T}, v::AbstractVector{T}, I::NTuple{1,Index}) where T
-    return apply(L.tensorOps[1],v,I)
+    return apply(L.D2[1],v,I)
 end
 
 
 @inline function LazyTensors.apply(L::Laplace{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T
     # 2nd x-derivative
     @inbounds vx = view(v, :, Int(I[2]))
-    @inbounds uᵢ = apply(L.tensorOps[1], vx , (I[1],)) #Tuple conversion here is ugly. How to do it? Should we use indexing here?
+    @inbounds uᵢ = apply(L.D2[1], vx , (I[1],)) #Tuple conversion here is ugly. How to do it? Should we use indexing here?
 
     # 2nd y-derivative
     @inbounds vy = view(v, Int(I[1]), :)
-    @inbounds uᵢ += apply(L.tensorOps[2], vy , (I[2],)) #Tuple conversion here is ugly. How to do it?
+    @inbounds uᵢ += apply(L.D2[2], vy , (I[2],)) #Tuple conversion here is ugly. How to do it?
 
     return uᵢ
 end
