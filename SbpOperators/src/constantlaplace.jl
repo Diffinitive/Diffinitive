@@ -14,6 +14,7 @@ struct ConstantLaplaceOperator{T<:Real,N,M,K} <: TensorOperator{T,1}
     innerStencil::Stencil{T,N}
     closureStencils::NTuple{M,Stencil{T,K}}
     parity::Parity
+    #TODO: Write a nice constructor
 end
 
 @enum Parity begin
@@ -24,30 +25,30 @@ end
 LazyTensors.domain_size(L::ConstantLaplaceOperator, range_size::NTuple{1,Integer}) = range_size
 
 function LazyTensors.apply(L::ConstantLaplaceOperator{T}, v::AbstractVector{T}, I::NTuple{1,Index}) where T
-    return L.a*apply_2nd_derivative(L, L.h_inv, v, I[1])
+    return apply(L, v, I[1])
 end
 
 # Apply for different regions Lower/Interior/Upper or Unknown region
-@inline function apply_2nd_derivative(L::ConstantLaplaceOperator, h_inv::Real, v::AbstractVector, i::Index{Lower})
-    return @inbounds h_inv*h_inv*apply_stencil(L.closureStencils[Int(i)], v, Int(i))
+@inline function LazyTensors.apply(L::ConstantLaplaceOperator, v::AbstractVector, i::Index{Lower})
+    return @inbounds L.a*L.h_inv*L.h_inv*apply_stencil(L.closureStencils[Int(i)], v, Int(i))
 end
 
-@inline function apply_2nd_derivative(L::ConstantLaplaceOperator, h_inv::Real, v::AbstractVector, i::Index{Interior})
-    return @inbounds h_inv*h_inv*apply_stencil(L.innerStencil, v, Int(i))
+@inline function LazyTensors.apply(L::ConstantLaplaceOperator, v::AbstractVector, i::Index{Interior})
+    return @inbounds L.a*L.h_inv*L.h_inv*apply_stencil(L.innerStencil, v, Int(i))
 end
 
-@inline function apply_2nd_derivative(L::ConstantLaplaceOperator, h_inv::Real, v::AbstractVector, i::Index{Upper})
-    N = length(v) # Can we use range_size here instead?
-    return @inbounds h_inv*h_inv*Int(L.parity)*apply_stencil_backwards(L.closureStencils[N-Int(i)+1], v, Int(i))
+@inline function LazyTensors.apply(L::ConstantLaplaceOperator, v::AbstractVector, i::Index{Upper})
+    N = length(v) # TODO: Use domain_size here instead?
+    return @inbounds L.a*L.h_inv*L.h_inv*Int(L.parity)*apply_stencil_backwards(L.closureStencils[N-Int(i)+1], v, Int(i))
 end
 
-@inline function apply_2nd_derivative(L::ConstantLaplaceOperator, h_inv::Real, v::AbstractVector, index::Index{Unknown})
-    N = length(v) # Can we use range_size here instead?
+@inline function LazyTensors.apply(L::ConstantLaplaceOperator, v::AbstractVector, index::Index{Unknown})
+    N = length(v)  # TODO: Use domain_size here instead?
     r = getregion(Int(index), closuresize(L), N)
     i = Index(Int(index), r)
-    return apply_2nd_derivative(op, h_inv, v, i)
+    return apply(L, v, i)
 end
 
-function closuresize(L::ConstantLaplaceOperator{T<:Real,N,M,K})::Int
+function closuresize(L::ConstantLaplaceOperator{T<:Real,N,M,K}) where T,N,M,K
     return M
 end
