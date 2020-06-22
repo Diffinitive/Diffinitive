@@ -22,6 +22,7 @@
  - [x] Should there be some kind of collection struct for SBP operators (as TensorOperators), providing easy access to all parts (D2, e, d , -> YES!
  H.. H_gamma etc.)
  - [x] Is "missing" a good value for unknown dimension sizes (of `e*g` for example)
+ - [] Add traits for symmetric tensor mappings such that apply_transpoe = apply for all such mappings
 
 # Wrap up task
 
