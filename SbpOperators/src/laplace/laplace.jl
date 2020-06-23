@@ -45,31 +45,6 @@ normal_derivative(L::Laplace, bId::CartesianBoundary) = NormalDerivative(L.op, L
 boundary_quadrature(L::Laplace, bId::CartesianBoundary) = BoundaryQuadrature(L.op, L.grid, bId)
 export quadrature
 
-
-"""
-    InverseQuadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
-
-Implements the inverse quadrature operator `inv(H)` of Dim dimension as a TensorMapping
-"""
-struct InverseQuadrature{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
-    op::D2{T,N,M,K}
-    grid::EquidistantGrid{Dim,T}
-end
-export InverseQuadrature
-
-LazyTensors.domain_size(H_inv::InverseQuadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
-
-@inline function LazyTensors.apply(H_inv::InverseQuadrature{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T
-    N = size(H_inv.grid)
-    # Inverse quadrature in x direction
-    @inbounds q_inv = apply_inverse_quadrature(H_inv.op, inverse_spacing(H_inv.grid)[1], v[I] , I[1], N[1])
-    # Inverse quadrature in y-direction
-    @inbounds q_inv = apply_inverse_quadrature(H_inv.op, inverse_spacing(H_inv.grid)[2], q_inv, I[2], N[2])
-    return q_inv
-end
-
-LazyTensors.apply_transpose(H_inv::InverseQuadrature{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T = LazyTensors.apply(H_inv,v,I)
-
 """
     BoundaryValue{T,N,M,K} <: TensorMapping{T,2,1}
 
