@@ -6,10 +6,10 @@ Implements the quadrature operator `Q` of Dim dimension as a TensorMapping
 The multi-dimensional tensor operator consists of a tuple of 1D DiagonalNorm H
 tensor operators.
 """
+export Quadrature
 struct Quadrature{Dim,T<:Real,N,M} <: TensorOperator{T,Dim}
     H::NTuple{Dim,DiagonalNorm{T,N,M}}
 end
-export Quadrature
 
 LazyTensors.domain_size(Q::Quadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
 
@@ -39,6 +39,7 @@ end
 
 Implements the diagnoal norm operator `H` of Dim dimension as a TensorMapping
 """
+export DiagonalNorm, closuresize, LazyTensors.apply
 struct DiagonalNorm{T<:Real,N,M} <: TensorOperator{T,1}
     h::T # The grid spacing could be included in the stencil already. Preferable?
     closure::NTuple{M,T}
@@ -69,7 +70,6 @@ function LazyTensors.apply(H::DiagonalNorm,  v::AbstractVector{T}, index::Index{
     i = Index(Int(index), r)
     return LazyTensors.apply(H, v, i)
 end
-export LazyTensors.apply
 
 function closuresize(H::DiagonalNorm{T<:Real,N,M}) where {T,N,M}
     return M

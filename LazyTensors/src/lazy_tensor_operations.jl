@@ -14,8 +14,8 @@ end
 export LazyTensorMappingApplication
 
 Base.:*(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = LazyTensorMappingApplication(tm,o)
-Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Index,R}) where {T,R,D} = apply(ta.t, ta.o, I)
-Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Int,R}) where {T,R,D} = apply(ta.t, ta.o, Index{Unknown}.(I))
+Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Index,R}) where {T,R,D} = apply(ta.t, ta.o, I...)
+Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Int,R}) where {T,R,D} = apply(ta.t, ta.o, Index{Unknown}.(I)...)
 Base.size(ta::LazyTensorMappingApplication{T,R,D}) where {T,R,D} = range_size(ta.t,size(ta.o))
 # TODO: What else is needed to implement the AbstractArray interface?
 
@@ -44,8 +44,8 @@ export LazyTensorMappingTranspose
 Base.adjoint(tm::TensorMapping) = LazyTensorMappingTranspose(tm)
 Base.adjoint(tmt::LazyTensorMappingTranspose) = tmt.tm
 
-apply(tmt::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::NTuple{D,Index}) where {T,R,D} = apply_transpose(tmt.tm, v, I)
-apply_transpose(tmt::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::NTuple{R,Index}) where {T,R,D} = apply(tmt.tm, v, I)
+apply(tmt::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::Vararg{Index,D}) where {T,R,D} = apply_transpose(tmt.tm, v, I...)
+apply_transpose(tmt::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index,R}) where {T,R,D} = apply(tmt.tm, v, I...)
 
 range_size(tmt::LazyTensorMappingTranspose{T,R,D}, d_size::NTuple{R,Integer}) where {T,R,D} = domain_size(tmt.tm, d_size)
 domain_size(tmt::LazyTensorMappingTranspose{T,R,D}, r_size::NTuple{D,Integer}) where {T,R,D} = range_size(tmt.tm, r_size)
@@ -62,8 +62,8 @@ struct LazyTensorMappingBinaryOperation{Op,T,R,D,T1<:TensorMapping{T,R,D},T2<:Te
     end
 end
 
-apply(tmBinOp::LazyTensorMappingBinaryOperation{:+,T,R,D}, v::AbstractArray{T,D}, I::NTuple{R,Index}) where {T,R,D} = apply(tmBinOp.tm1, v, I) + apply(tmBinOp.tm2, v, I)
-apply(tmBinOp::LazyTensorMappingBinaryOperation{:-,T,R,D}, v::AbstractArray{T,D}, I::NTuple{R,Index}) where {T,R,D} = apply(tmBinOp.tm1, v, I) - apply(tmBinOp.tm2, v, I)
+apply(tmBinOp::LazyTensorMappingBinaryOperation{:+,T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) + apply(tmBinOp.tm2, v, I...)
+apply(tmBinOp::LazyTensorMappingBinaryOperation{:-,T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) - apply(tmBinOp.tm2, v, I...)
 
 range_size(tmBinOp::LazyTensorMappingBinaryOperation{Op,T,R,D}, domain_size::NTuple{D,Integer}) where {Op,T,R,D} = range_size(tmBinOp.tm1, domain_size)
 domain_size(tmBinOp::LazyTensorMappingBinaryOperation{Op,T,R,D}, range_size::NTuple{R,Integer}) where {Op,T,R,D} = domain_size(tmBinOp.tm2, range_size)

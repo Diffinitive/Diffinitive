@@ -46,36 +46,6 @@ end
 
 export apply_inverse_quadrature
 
-function apply_boundary_value_transpose(op::ConstantStencilOperator, v::AbstractVector, ::Type{Lower})
-    @boundscheck if length(v) < closuresize(op)
-        throw(BoundsError())
-    end
-    apply_stencil(op.eClosure,v,1)
-end
-
-function apply_boundary_value_transpose(op::ConstantStencilOperator, v::AbstractVector, ::Type{Upper})
-    @boundscheck if length(v) < closuresize(op)
-        throw(BoundsError())
-    end
-    apply_stencil_backwards(op.eClosure,v,length(v))
-end
-export apply_boundary_value_transpose
-
-function apply_boundary_value(op::ConstantStencilOperator, v::Number, i::Index, N::Integer, ::Type{Lower})
-    @boundscheck if !(0<length(Int(i)) <= N)
-        throw(BoundsError())
-    end
-    op.eClosure[Int(i)-1]*v
-end
-
-function apply_boundary_value(op::ConstantStencilOperator, v::Number, i::Index,  N::Integer, ::Type{Upper})
-    @boundscheck if !(0<length(Int(i)) <= N)
-        throw(BoundsError())
-    end
-    op.eClosure[N-Int(i)]*v
-end
-export apply_boundary_value
-
 function apply_normal_derivative_transpose(op::ConstantStencilOperator, h_inv::Real, v::AbstractVector, ::Type{Lower})
     @boundscheck if length(v) < closuresize(op)
         throw(BoundsError())
