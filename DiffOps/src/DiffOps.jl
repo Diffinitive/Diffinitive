@@ -97,6 +97,4 @@ A BoundaryCondition should implement the method
 abstract type BoundaryCondition end
 
 
-include("laplace.jl")
-
 end # module
