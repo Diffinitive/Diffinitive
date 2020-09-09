@@ -10,8 +10,10 @@
  - [ ] Create a struct that bundles the necessary Tensor operators for solving the wave equation.
  - [ ] Use traits like IndexStyle, IndexLinear, IndexCartesian to differentiate
     TensorMappings that are flexible in size and those that are fixed in size
+ - [ ] Use traits for symmetric tensor mappings such that apply_transpoe = apply for all such mappings
  - [x] Move Laplace tensor operator to different package
  - [x] Remove grid as a property of the Laplace tensor operator
+ - [ ] Update how dependencies are handled for tests. This was updated in Julia v1.2 and would allow us to use test specific dev packages.
 
 ## Reasearch and thinking
  - [ ] Redo all Tensor applys to take Vararg instead of tuple of Index?
@@ -22,7 +24,7 @@
  - [x] Should there be some kind of collection struct for SBP operators (as TensorOperators), providing easy access to all parts (D2, e, d , -> YES!
  H.. H_gamma etc.)
  - [x] Is "missing" a good value for unknown dimension sizes (of `e*g` for example)
- - [] Add traits for symmetric tensor mappings such that apply_transpoe = apply for all such mappings
+ - [ ] Create a macro @lazy which replaces a binary op (+,-) by its lazy equivalent? Would be a neat way to indicate which evaluations are lazy without cluttering/confusing with special characters.
 
 # Wrap up task
 
