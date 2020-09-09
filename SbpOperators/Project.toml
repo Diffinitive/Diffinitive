@@ -4,10 +4,12 @@ authors = ["Jonatan Werpers <jonatan.werpers@it.uu.se>"]
 version = "0.1.0"
 
 [deps]
+LazyTensors = "62fbed2c-918d-11e9-279b-eb3a325b37d3"
 RegionIndices = "5d527584-97f1-11e9-084c-4540c7ecf219"
 
 [extras]
+Grids = "960fdf28-97ed-11e9-2a74-bd90bf2fab5a"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Test", "Grids"]
