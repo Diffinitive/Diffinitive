@@ -18,9 +18,11 @@ end
 
 LazyTensors.domain_size(D2::SecondDerivative, range_size::NTuple{1,Integer}) = range_size
 
-function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::NTuple{1,Index}) where T
-    return apply(D2, v, I[1])
+@inline function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::NTuple{1,Index}) where T
+    return @inbounds apply(D2, v, I[1])
 end
+
+function LazyTensors.apply_transpose(D2::SecondDerivative{T}, v::AbstractVector{T}, I::NTuple{1,Index}) where T = LazyTensors.apply(D2, v, I)
 
 # Apply for different regions Lower/Interior/Upper or Unknown region
 @inline function LazyTensors.apply(D2::SecondDerivative, v::AbstractVector, i::Index{Lower})
@@ -43,6 +45,6 @@ end
     return apply(D2, v, i)
 end
 
-function closuresize(D2::SecondDerivative{T<:Real,N,M,K}) where T,N,M,K
+function closuresize(D2::SecondDerivative{T<:Real,N,M,K}) where {T,N,M,K}
     return M
 end

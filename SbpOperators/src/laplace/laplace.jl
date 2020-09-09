@@ -2,8 +2,8 @@
     Laplace{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
 
 Implements the Laplace operator `L` in Dim dimensions as a tensor operator
-The multi-dimensional tensor operator simply consists of a tuple of the 1D
-Laplace tensor operator as defined by ConstantLaplaceOperator.
+The multi-dimensional tensor operator consists of a tuple of 1D SecondDerivative
+tensor operators.
 """
 struct Laplace{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
     D2::NTuple(Dim,SecondDerivative{T,N,M,K})
@@ -17,20 +17,23 @@ function LazyTensors.apply(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::NTuple
     error("not implemented")
 end
 
+function LazyTensors.apply_transpose(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::NTuple{Dim,Index}) where {T,Dim} = LazyTensors.apply(L, v, I)
+
 # u = L*v
 function LazyTensors.apply(L::Laplace{1,T}, v::AbstractVector{T}, I::NTuple{1,Index}) where T
-    return apply(L.D2[1],v,I)
+    @inbounds u = apply(L.D2[1],v,I)
+    return u
 end
 
 
 @inline function LazyTensors.apply(L::Laplace{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T
     # 2nd x-derivative
     @inbounds vx = view(v, :, Int(I[2]))
-    @inbounds uᵢ = apply(L.D2[1], vx , (I[1],)) #Tuple conversion here is ugly. How to do it? Should we use indexing here?
+    @inbounds uᵢ = apply(L.D2[1], vx , I[1])
 
     # 2nd y-derivative
     @inbounds vy = view(v, Int(I[1]), :)
-    @inbounds uᵢ += apply(L.D2[2], vy , (I[2],)) #Tuple conversion here is ugly. How to do it?
+    @inbounds uᵢ += apply(L.D2[2], vy , I[2])
 
     return uᵢ
 end
@@ -41,56 +44,6 @@ boundary_value(L::Laplace, bId::CartesianBoundary) = BoundaryValue(L.op, L.grid,
 normal_derivative(L::Laplace, bId::CartesianBoundary) = NormalDerivative(L.op, L.grid, bId)
 boundary_quadrature(L::Laplace, bId::CartesianBoundary) = BoundaryQuadrature(L.op, L.grid, bId)
 export quadrature
-
-# At the moment the grid property is used all over. It could possibly be removed if we implement all the 1D operators as TensorMappings
-"""
-    Quadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
-
-Implements the quadrature operator `H` of Dim dimension as a TensorMapping
-"""
-struct Quadrature{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
-    op::D2{T,N,M,K}
-    grid::EquidistantGrid{Dim,T}
-end
-export Quadrature
-
-LazyTensors.domain_size(H::Quadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
-
-@inline function LazyTensors.apply(H::Quadrature{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T
-    N = size(H.grid)
-    # Quadrature in x direction
-    @inbounds q = apply_quadrature(H.op, spacing(H.grid)[1], v[I] , I[1], N[1])
-    # Quadrature in y-direction
-    @inbounds q = apply_quadrature(H.op, spacing(H.grid)[2], q, I[2], N[2])
-    return q
-end
-
-LazyTensors.apply_transpose(H::Quadrature{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T = LazyTensors.apply(H,v,I)
-
-
-"""
-    InverseQuadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
-
-Implements the inverse quadrature operator `inv(H)` of Dim dimension as a TensorMapping
-"""
-struct InverseQuadrature{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
-    op::D2{T,N,M,K}
-    grid::EquidistantGrid{Dim,T}
-end
-export InverseQuadrature
-
-LazyTensors.domain_size(H_inv::InverseQuadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
-
-@inline function LazyTensors.apply(H_inv::InverseQuadrature{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T
-    N = size(H_inv.grid)
-    # Inverse quadrature in x direction
-    @inbounds q_inv = apply_inverse_quadrature(H_inv.op, inverse_spacing(H_inv.grid)[1], v[I] , I[1], N[1])
-    # Inverse quadrature in y-direction
-    @inbounds q_inv = apply_inverse_quadrature(H_inv.op, inverse_spacing(H_inv.grid)[2], q_inv, I[2], N[2])
-    return q_inv
-end
-
-LazyTensors.apply_transpose(H_inv::InverseQuadrature{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T = LazyTensors.apply(H_inv,v,I)
 
 """
     BoundaryValue{T,N,M,K} <: TensorMapping{T,2,1}
