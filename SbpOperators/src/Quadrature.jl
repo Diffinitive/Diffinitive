@@ -13,24 +13,24 @@ end
 
 LazyTensors.domain_size(Q::Quadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
 
-function LazyTensors.apply(Q::Quadrature{Dim,T}, v::AbstractArray{T,Dim}, I::NTuple{Dim,Index}) where {T,Dim}
+function LazyTensors.apply(Q::Quadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {T,Dim}
     error("not implemented")
 end
 
-LazyTensors.apply_transpose(Q::Quadrature{Dim,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where {Dim,T} = LazyTensors.apply(Q,v,I)
+LazyTensors.apply_transpose(Q::Quadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {Dim,T} = LazyTensors.apply(Q,v,I)
 
-@inline function LazyTensors.apply(Q::Quadrature{1,T}, v::AbstractVector{T}, I::NTuple{1,Index}) where T
-    @inbounds q = apply(Q.H[1], v , I[1])
+@inline function LazyTensors.apply(Q::Quadrature{1,T}, v::AbstractVector{T}, I::Index) where T
+    @inbounds q = apply(Q.H[1], v , I)
     return q
 end
 
-@inline function LazyTensors.apply(Q::Quadrature{2,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T
+@inline function LazyTensors.apply(Q::Quadrature{2,T}, v::AbstractArray{T,2}, I::Index, J::Index) where T
     # Quadrature in x direction
-    @inbounds vx = view(v, :, Int(I[2]))
-    @inbounds qx = apply(Q.H[1], vx , I[1])
+    @inbounds vx = view(v, :, Int(J))
+    @inbounds qx = apply(Q.H[1], vx , I)
     # Quadrature in y-direction
-    @inbounds vy = view(v, Int(I[1]), :)
-    @inbounds qy = apply(Q.H[2], vy, I[2])
+    @inbounds vy = view(v, Int(I), :)
+    @inbounds qy = apply(Q.H[2], vy, J)
     return qx*qy
 end
 
@@ -46,22 +46,22 @@ struct DiagonalNorm{T<:Real,N,M} <: TensorOperator{T,1}
     #TODO: Write a nice constructor
 end
 
-@inline function LazyTensors.apply(H::DiagonalNorm{T}, v::AbstractVector{T}, I::NTuple{1,Index}) where T
-    return @inbounds apply(H, v, I[1])
+@inline function LazyTensors.apply(H::DiagonalNorm{T}, v::AbstractVector{T}, I::Index) where T
+    return @inbounds apply(H, v, I)
 end
 
-LazyTensors.apply_transpose(H::Quadrature{Dim,T}, v::AbstractArray{T,2}, I::NTuple{2,Index}) where T = LazyTensors.apply(H,v,I)
+LazyTensors.apply_transpose(H::Quadrature{Dim,T}, v::AbstractArray{T,2}, I::Index) where T = LazyTensors.apply(H,v,I)
 
-@inline LazyTensors.apply(H::DiagonalNorm, v::AbstractVector{T}, i::Index{Lower}) where T
-    return @inbounds H.h*H.closure[Int(i)]*v[Int(i)]
+@inline LazyTensors.apply(H::DiagonalNorm, v::AbstractVector{T}, I::Index{Lower}) where T
+    return @inbounds H.h*H.closure[Int(I)]*v[Int(I)]
 end
-@inline LazyTensors.apply(H::DiagonalNorm,v::AbstractVector{T}, i::Index{Upper}) where T
+@inline LazyTensors.apply(H::DiagonalNorm,v::AbstractVector{T}, I::Index{Upper}) where T
     N = length(v);
-    return @inbounds H.h*H.closure[N-Int(i)+1]v[Int(i)]
+    return @inbounds H.h*H.closure[N-Int(I)+1]v[Int(I)]
 end
 
-@inline LazyTensors.apply(H::DiagonalNorm, v::AbstractVector{T}, i::Index{Interior}) where T
-    return @inbounds H.h*v[Int(i)]
+@inline LazyTensors.apply(H::DiagonalNorm, v::AbstractVector{T}, I::Index{Interior}) where T
+    return @inbounds H.h*v[Int(I)]
 end
 
 function LazyTensors.apply(H::DiagonalNorm,  v::AbstractVector{T}, index::Index{Unknown}) where T
