@@ -2,6 +2,10 @@
 
 ## Known size of range and domain?
 It might be a good idea let tensormappings know the size of their range and domain as a constant. This probably can't be enforced on the abstract type but maybe we should write our difference operators this way. Having this as default should clean up the thinking around adjoints of boundary operators. It could also simplify getting high performance out of repeated application of regioned TensorMappings.
+Is there any reason to use a trait to differentiate between fixed size and unknown size?
+
+## Test setup
+Once we figure out how to organize the subpackages we should update test folders to Project. As of writing this there seems to be and issue with this approach combined with dev'ed packages so we can't do it yet. It seems that Pkg might fix this in the future.
 
 ## Reasearch and thinking
  - [ ] Use a trait to indicate if a TensorMapping uses indices with regions.
@@ -15,7 +19,4 @@ It might be a good idea let tensormappings know the size of their range and doma
  - [ ] Formalize how range_size() and domain_size() are supposed to work in TensorMappings where dim(domain) != dim(range) (add tests or document)
  - [ ] Create a macro @lazy which replaces a binary op (+,-) by its lazy equivalent? Would be a neat way to indicate which evaluations are lazy without cluttering/confusing with special characters.
  - [ ] Specificera operatorer i TOML eller något liknande?
- - [x] Redo all Tensor applys to take Vararg instead of tuple of Index?
- - [x] Should there be some kind of collection struct for SBP operators (as TensorOperators), providing easy access to all parts (D2, e, d , -> YES!
  H.. H_gamma etc.)
- - [x] Is "missing" a good value for unknown dimension sizes (of `e*g` for example)
