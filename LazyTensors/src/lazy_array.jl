@@ -8,124 +8,54 @@ A subtype of `LazyArray` will use lazy version of `+`, `-`, `*`, `/`.
 abstract type LazyArray{T,D} <: AbstractArray{T,D} end
 export LazyArray
 
+struct LazyConstantArray{T,D} <: LazyArray{T,D}
+	val::T
+	size::NTuple{D,Int}
+end
+
+Base.size(lca::LazyConstantArray) = lca.size
+Base.getindex(lca::LazyConstantArray{T,D}, I::Vararg{Int,D}) where {T,D} = lca.val
+
 """
-    LazyElementwiseOperation{T,D,Op,T1,T2} <: LazyArray{T,D}
+    LazyElementwiseOperation{T,D,Op} <: LazyArray{T,D}
 Struct allowing for lazy evaluation of elementwise operations on AbstractArrays.
 
-A LazyElementwiseOperation contains two datatypes T1, and T2, together with an operation,
-where at least one of T1 and T2 is an AbstractArray, and one may be a Real.
+A LazyElementwiseOperation contains two arrays together with an operation.
 The operations are carried out when the LazyElementwiseOperation is indexed.
 """
-struct LazyElementwiseOperation{T,D,Op,T1,T2} <: LazyArray{T,D}
-    a::T1
-    b::T2
+struct LazyElementwiseOperation{T,D,Op} <: LazyArray{T,D}
+    a::AbstractArray{T,D}
+    b::AbstractArray{T,D}
 
-    @inline function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op,T1<:AbstractArray{T,D},T2<:AbstractArray{T,D}}
+    function LazyElementwiseOperation{T,D,Op}(a::AbstractArray{T,D},b::AbstractArray{T,D}) where {T,D,Op}
         @boundscheck if size(a) != size(b)
             throw(DimensionMismatch("dimensions must match"))
         end
-        return new{T,D,Op,T1,T2}(a,b)
+        return new{T,D,Op}(a,b)
     end
 
-    @inline function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op,T1<:AbstractArray{T,D},T2<:Real}
-        return new{T,D,Op,T1,T2}(a,b)
-    end
-
-    @inline function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op,T1<:Real,T2<:AbstractArray{T,D}}
-        return new{T,D,Op,T1,T2}(a,b)
-    end
+	LazyElementwiseOperation{T,D,Op}(a::AbstractArray{T,D},b::T) where {T,D,Op} = new{T,D,Op}(a, LazyConstantArray(b, size(a)))
+	LazyElementwiseOperation{T,D,Op}(a::T,b::AbstractArray{T,D}) where {T,D,Op} = new{T,D,Op}(LazyConstantArray(a,  size(b)), b)
 end
 # TODO: Move Op to be the first parameter? Compare to Binary operations
 
 Base.size(v::LazyElementwiseOperation) = size(v.a)
+
+evaluate(leo::LazyElementwiseOperation{T,D,:+}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] + leo.b[I...]
+evaluate(leo::LazyElementwiseOperation{T,D,:-}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] - leo.b[I...]
+evaluate(leo::LazyElementwiseOperation{T,D,:*}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] * leo.b[I...]
+evaluate(leo::LazyElementwiseOperation{T,D,:/}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] / leo.b[I...]
 
 # TODO: Make sure boundschecking is done properly and that the lenght of the vectors are equal
 # NOTE: Boundschecking in getindex functions now assumes that the size of the
 # vectors in the LazyElementwiseOperation are the same size. If we remove the
 # size assertion in the constructor we might have to handle
 # boundschecking differently.
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:+,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:AbstractArray{T,D},T2<:AbstractArray{T,D}}
-    @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],I...))
+Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D}, I::Vararg{Int,D}) where {T,D}
+    @boundscheck if !checkbounds(Bool, leo.a, I...)
+        throw(BoundsError([leo], I...))
     end
-    return leo.a[I...] + leo.b[I...]
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:-,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:AbstractArray{T,D},T2<:AbstractArray{T,D}}
-    @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a[I...] - leo.b[I...]
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:*,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:AbstractArray{T,D},T2<:AbstractArray{T,D}}
-    @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a[I...] * leo.b[I...]
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:/,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:AbstractArray{T,D},T2<:AbstractArray{T,D}}
-    @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a[I...] / leo.b[I...]
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:+,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:AbstractArray{T,D},T2<:Real}
-    @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a[I...] + leo.b
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:-,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:AbstractArray{T,D},T2<:Real}
-    @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a[I...] - leo.b
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:*,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:AbstractArray{T,D},T2<:Real}
-    @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a[I...] * leo.b
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:/,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:AbstractArray{T,D},T2<:Real}
-    @boundscheck if !checkbounds(Bool,leo.a,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a[I...] / leo.b
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:+,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:Real,T2<:AbstractArray{T,D}}
-    @boundscheck if !checkbounds(Bool,leo.b,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a + leo.b[I...]
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:-,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:Real,T2<:AbstractArray{T,D}}
-    @boundscheck if !checkbounds(Bool,leo.b,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a - leo.b[I...]
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:*,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:Real,T2<:AbstractArray{T,D}}
-    @boundscheck if !checkbounds(Bool,leo.b,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a * leo.b[I...]
-end
-
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D,:/,T1,T2}, I::Vararg{Int,D}) where {T,D,T1<:Real,T2<:AbstractArray{T,D}}
-    @boundscheck if !checkbounds(Bool,leo.b,I...)
-        throw(BoundsError([leo],I...))
-    end
-    return leo.a / leo.b[I...]
+    return evaluate(leo, I...)
 end
 
 # Define lazy operations for AbstractArrays. Operations constructs a LazyElementwiseOperation which
@@ -135,15 +65,15 @@ Base.@propagate_inbounds -̃(a::AbstractArray{T,D}, b::AbstractArray{T,D}) where
 Base.@propagate_inbounds *̃(a::AbstractArray{T,D}, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:*}(a,b)
 Base.@propagate_inbounds /̃(a::AbstractArray{T,D}, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:/}(a,b)
 
-Base.@propagate_inbounds +̃(a::AbstractArray{T,D}, b::Real) where {T,D} = LazyElementwiseOperation{T,D,:+}(a,b)
-Base.@propagate_inbounds -̃(a::AbstractArray{T,D}, b::Real) where {T,D} = LazyElementwiseOperation{T,D,:-}(a,b)
-Base.@propagate_inbounds *̃(a::AbstractArray{T,D}, b::Real) where {T,D} = LazyElementwiseOperation{T,D,:*}(a,b)
-Base.@propagate_inbounds /̃(a::AbstractArray{T,D}, b::Real) where {T,D} = LazyElementwiseOperation{T,D,:/}(a,b)
+Base.@propagate_inbounds +̃(a::AbstractArray{T,D}, b::T) where {T,D} = LazyElementwiseOperation{T,D,:+}(a,b)
+Base.@propagate_inbounds -̃(a::AbstractArray{T,D}, b::T) where {T,D} = LazyElementwiseOperation{T,D,:-}(a,b)
+Base.@propagate_inbounds *̃(a::AbstractArray{T,D}, b::T) where {T,D} = LazyElementwiseOperation{T,D,:*}(a,b)
+Base.@propagate_inbounds /̃(a::AbstractArray{T,D}, b::T) where {T,D} = LazyElementwiseOperation{T,D,:/}(a,b)
 
-Base.@propagate_inbounds +̃(a::Real, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:+}(a,b)
-Base.@propagate_inbounds -̃(a::Real, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:-}(a,b)
-Base.@propagate_inbounds *̃(a::Real, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:*}(a,b)
-Base.@propagate_inbounds /̃(a::Real, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:/}(a,b)
+Base.@propagate_inbounds +̃(a::T, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:+}(a,b)
+Base.@propagate_inbounds -̃(a::T, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:-}(a,b)
+Base.@propagate_inbounds *̃(a::T, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:*}(a,b)
+Base.@propagate_inbounds /̃(a::T, b::AbstractArray{T,D}) where {T,D} = LazyElementwiseOperation{T,D,:/}(a,b)
 
 
 
