@@ -20,32 +20,26 @@ LazyTensors.domain_size(D2::SecondDerivative, range_size::NTuple{1,Integer}) = r
 #      I thought I::Vararg{Index,R} fell back to just Index for R = 1
 
 # Apply for different regions Lower/Interior/Upper or Unknown region
-@inline function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Lower}) where T
+function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Lower}) where T
     return @inbounds D2.h_inv*D2.h_inv*apply_stencil(D2.closureStencils[Int(I)], v, Int(I))
 end
 
-@inline function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Interior}) where T
+function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Interior}) where T
     return @inbounds D2.h_inv*D2.h_inv*apply_stencil(D2.innerStencil, v, Int(I))
 end
 
-@inline function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Upper}) where T
+function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Upper}) where T
     N = length(v) # TODO: Use domain_size here instead? N = domain_size(D2,size(v))
     return @inbounds D2.h_inv*D2.h_inv*Int(D2.parity)*apply_stencil_backwards(D2.closureStencils[N-Int(I)+1], v, Int(I))
 end
 
-@inline function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, index::Index{Unknown}) where T
+function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, index::Index{Unknown}) where T
     N = length(v)  # TODO: Use domain_size here instead?
     r = getregion(Int(index), closuresize(D2), N)
     I = Index(Int(index), r)
     return LazyTensors.apply(D2, v, I)
 end
 
+LazyTensors.apply_transpose(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index) where {T} = LazyTensors.apply(D2, v, I)
 
-@inline function LazyTensors.apply_transpose(D2::SecondDerivative, v::AbstractVector, I::Index)
-    return LazyTensors.apply(D2, v, I)
-end
-
-
-function closuresize(D2::SecondDerivative{T,N,M,K}) where {T<:Real,N,M,K}
-    return M
-end
+closuresize(D2::SecondDerivative{T,N,M,K}) where {T<:Real,N,M,K} = M

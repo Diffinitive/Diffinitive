@@ -34,9 +34,9 @@ end
 end
 
 """
-    InverseQuadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
+    DiagonalNorm{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
 
-Implements the quadrature operator `Hi` of Dim dimension as a TensorMapping
+Implements the inverse diagnoal norm operator `Hi` of Dim dimension as a TensorMapping
 """
 export InverseDiagonalNorm, closuresize
 struct InverseDiagonalNorm{T<:Real,N,M} <: TensorOperator{T,1}

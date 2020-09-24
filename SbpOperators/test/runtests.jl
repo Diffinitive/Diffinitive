@@ -119,20 +119,39 @@ end
     @test sqrt(prod(h)*sum(collect(e4.^2))) <= accuracytol
     @test sqrt(prod(h)*sum(collect(e5.^2))) <= accuracytol
 end
-#
-# @testset "Quadrature" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
-#     Lx = 2.3
-#     Ly = 5.2
-#     g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
-#     H = Quadrature(op,g)
-#     v = ones(Float64, size(g))
-#
-#     @test H isa TensorOperator{T,2} where T
-#     @test H' isa TensorMapping{T,2,2} where T
-#     @test sum(collect(H*v)) ≈ (Lx*Ly)
-#     @test collect(H*v) == collect(H'*v)
-# end
+
+@testset "DiagonalInnerProduct" begin
+    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    L = 2.3
+    g = EquidistantGrid((77,), (0.0,), (L,))
+    h = spacing(g)
+    H = DiagonalInnerProduct(h[1],op.quadratureClosure)
+    v = ones(Float64, size(g))
+
+    @test H isa TensorOperator{T,1} where T
+    @test H' isa TensorMapping{T,1,1} where T
+    @test sum(collect(H*v)) ≈ L
+    @test collect(H*v) == collect(H'*v)
+end
+
+@testset "Quadrature" begin
+    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    Lx = 2.3
+    Ly = 5.2
+    g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+
+    h = spacing(g)
+    Hx = DiagonalInnerProduct(h[1],op.quadratureClosure);
+    Hy = DiagonalInnerProduct(h[2],op.quadratureClosure);
+    Q = Quadrature((Hx,Hy))
+
+    v = ones(Float64, size(g))
+
+    @test Q isa TensorOperator{T,2} where T
+    @test Q' isa TensorMapping{T,2,2} where T
+    @test sum(collect(Q*v)) ≈ (Lx*Ly)
+    @test collect(Q*v) == collect(Q'*v)
+end
 #
 # @testset "InverseQuadrature" begin
 #     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")

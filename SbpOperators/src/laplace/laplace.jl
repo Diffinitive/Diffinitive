@@ -12,7 +12,7 @@ struct Laplace{Dim,T,N,M,K} <: TensorOperator{T,Dim}
     #TODO: Write a good constructor
 end
 
-LazyTensors.domain_size(H::Laplace{Dim}, range_size::NTuple{Dim,Integer}) where {Dim} = range_size
+LazyTensors.domain_size(L::Laplace{Dim}, range_size::NTuple{Dim,Integer}) where {Dim} = range_size
 
 function LazyTensors.apply(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {T,Dim}
     error("not implemented")
@@ -24,8 +24,7 @@ function LazyTensors.apply(L::Laplace{1,T}, v::AbstractVector{T}, I::Index) wher
     return u
 end
 
-# TODO: Fix dispatch on tuples!
-@inline function LazyTensors.apply(L::Laplace{2,T}, v::AbstractArray{T,2}, I::Index, J::Index) where T
+function LazyTensors.apply(L::Laplace{2,T}, v::AbstractArray{T,2}, I::Index, J::Index) where T
     # 2nd x-derivative
     @inbounds vx = view(v, :, Int(J))
     @inbounds uᵢ = LazyTensors.apply(L.D2[1], vx , I)
@@ -37,9 +36,7 @@ end
     return uᵢ
 end
 
-@inline function LazyTensors.apply_transpose(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {T,Dim}
-    return LazyTensors.apply(L, v, I)
-end
+LazyTensors.apply_transpose(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {T,Dim} = LazyTensors.apply(L, v, I...)
 
 # quadrature(L::Laplace) = Quadrature(L.op, L.grid)
 # inverse_quadrature(L::Laplace) = InverseQuadrature(L.op, L.grid)
