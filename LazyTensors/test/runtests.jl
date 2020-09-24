@@ -19,8 +19,8 @@ end
 @testset "Mapping transpose" begin
     struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
 
-    LazyTensors.apply(m::DummyMapping{T,R,D}, v, I::NTuple{R,Index{<:Region}}) where {T,R,D} = :apply
-    LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, I::NTuple{D,Index{<:Region}}) where {T,R,D} = :apply_transpose
+    LazyTensors.apply(m::DummyMapping{T,R,D}, v, I::Vararg{Index{<:Region},R}) where {T,R,D} = :apply
+    LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, I::Vararg{Index{<:Region},D}) where {T,R,D} = :apply_transpose
 
     LazyTensors.range_size(m::DummyMapping{T,R,D}, domain_size::NTuple{D,Integer}) where {T,R,D} = :range_size
     LazyTensors.domain_size(m::DummyMapping{T,R,D}, range_size::NTuple{R,Integer}) where {T,R,D} = :domain_size
@@ -29,9 +29,9 @@ end
     I = Index{Unknown}(0)
     @test m' isa TensorMapping{Float64, 3,2}
     @test m'' == m
-    @test apply(m',zeros(Float64,(0,0)), (I,I,I)) == :apply_transpose
-    @test apply(m'',zeros(Float64,(0,0,0)),(I,I)) == :apply
-    @test apply_transpose(m', zeros(Float64,(0,0,0)),(I,I)) == :apply
+    @test apply(m',zeros(Float64,(0,0)), I, I, I) == :apply_transpose
+    @test apply(m'',zeros(Float64,(0,0,0)), I, I) == :apply
+    @test apply_transpose(m', zeros(Float64,(0,0,0)), I, I) == :apply
 
     @test range_size(m', (0,0)) == :domain_size
     @test domain_size(m', (0,0,0)) == :range_size
@@ -40,7 +40,7 @@ end
 @testset "TensorApplication" begin
     struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
 
-    LazyTensors.apply(m::DummyMapping{T,R,D}, v, i::NTuple{R,Index{<:Region}}) where {T,R,D} = (:apply,v,i)
+    LazyTensors.apply(m::DummyMapping{T,R,D}, v, i::Vararg{Index{<:Region},R}) where {T,R,D} = (:apply,v,i)
     LazyTensors.range_size(m::DummyMapping{T,R,D}, domain_size::NTuple{D,Integer}) where {T,R,D} = 2 .* domain_size
     LazyTensors.domain_size(m::DummyMapping{T,R,D}, range_size::NTuple{R,Integer}) where {T,R,D} = range_size.÷2
 
@@ -75,7 +75,7 @@ end
         λ::T
     end
 
-    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::NTuple{D, Index}) where {T,D} = m.λ*v[I]
+    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Vararg{Index,D}) where {T,D} = m.λ*v[I]
 
     m = ScalingOperator{Int,1}(2)
     v = [1,2,3]
@@ -94,7 +94,7 @@ end
         λ::T
     end
 
-    LazyTensors.apply(m::ScalarMapping{T,R,D}, v, I::Tuple{Index{<:Region}}) where {T,R,D} = m.λ*v[I...]
+    LazyTensors.apply(m::ScalarMapping{T,R,D}, v, I::Vararg{Index{<:Region}}) where {T,R,D} = m.λ*v[I...]
     LazyTensors.range_size(m::ScalarMapping, domain_size) = domain_size
     LazyTensors.domain_size(m::ScalarMapping, range_sizes) = range_sizes
 
