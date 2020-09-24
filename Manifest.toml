@@ -46,7 +46,7 @@ deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[RegionIndices]]
-path = "/Users/vidar/dev/hg/sbpteam/sbplib_julia/RegionIndices"
+path = "RegionIndices"
 uuid = "5d527584-97f1-11e9-084c-4540c7ecf219"
 version = "0.1.0"
 
