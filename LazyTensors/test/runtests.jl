@@ -115,6 +115,15 @@ end
 end
 
 @testset "LazyArray" begin
+	@testset "LazyConstantArray" begin
+	    @test LazyTensors.LazyConstantArray(3,(3,2)) isa LazyArray{Int,2}
+
+	    lca = LazyTensors.LazyConstantArray(3.0,(3,2))
+	    @test eltype(lca) == Float64
+	    @test ndims(lca) == 2
+	    @test size(lca) == (3,2)
+	    @test lca[2] == 3.0
+	end
     struct DummyArray{T,D, T1<:AbstractArray{T,D}} <: LazyArray{T,D}
         data::T1
     end

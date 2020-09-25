@@ -21,6 +21,10 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
     end
 end
 
+function EquidistantGrid(size::Int, limit_lower::T, limit_upper::T) where T
+	return EquidistantGrid((size,),(limit_lower,),(limit_upper,))
+end
+
 function Base.eachindex(grid::EquidistantGrid)
     CartesianIndices(grid.size)
 end
