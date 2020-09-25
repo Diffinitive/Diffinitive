@@ -1,2 +1,12 @@
 # This file is machine-generated - editing it directly is not advised
 
+[[OffsetArrays]]
+git-tree-sha1 = "9011c7c98769c451f83869a4d66461e2f23bc80b"
+uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
+version = "1.2.1"
+
+[[TiledIteration]]
+deps = ["OffsetArrays"]
+git-tree-sha1 = "98693daea9bb49aba71eaad6b168b152d2310358"
+uuid = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
+version = "0.2.4"
