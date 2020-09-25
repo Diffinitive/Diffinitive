@@ -76,5 +76,5 @@ function pad_tuple(t::NTuple{N, T}, n::Integer) where {N,T}
     end
 end
 
-sbp_operators_path() = (@__DIR__) * "/../operators/"
+sbp_operators_path() = (@__DIR__) * "/operators/"
 export sbp_operators_path
