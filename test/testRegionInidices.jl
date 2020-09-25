@@ -1,4 +1,6 @@
 using Sbplib.RegionIndices
 using Test
 
-@test_broken false
+@testset "RegionIndices" begin
+	@test_broken false
+end

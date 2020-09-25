@@ -5,6 +5,8 @@ using Sbplib.SbpOperators
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 
+@testset "DiffOps" begin
+
 @testset "Laplace2D" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     Lx = 3.5
@@ -266,4 +268,6 @@ end
     @test collect(H_e'*v_e) == collect(H_e'*v_e)
     @test collect(H_s'*v_s) == collect(H_s'*v_s)
     @test collect(H_n'*v_n) == collect(H_n'*v_n)
+end
+
 end

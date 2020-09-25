@@ -2,6 +2,8 @@ using Test
 using Sbplib.LazyTensors
 using Sbplib.RegionIndices
 
+@testset "LazyTensors" begin
+
 @testset "Generic Mapping methods" begin
     struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
     LazyTensors.apply(m::DummyMapping{T,R,D}, v, i::NTuple{R,Index{<:Region}}) where {T,R,D} = :apply
@@ -188,4 +190,6 @@ end
     v2 = [1., 2, 3, 4]
     # Test that size of arrays is asserted when not specified inbounds
     @test_throws DimensionMismatch v1 + v2
+end
+
 end
