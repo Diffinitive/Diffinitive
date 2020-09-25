@@ -23,20 +23,20 @@ Struct allowing for lazy evaluation of elementwise operations on AbstractArrays.
 A LazyElementwiseOperation contains two arrays together with an operation.
 The operations are carried out when the LazyElementwiseOperation is indexed.
 """
-struct LazyElementwiseOperation{T,D,Op} <: LazyArray{T,D}
-    a::AbstractArray{T,D}
-    b::AbstractArray{T,D}
+struct LazyElementwiseOperation{T,D,Op,T1<:AbstractArray{T,D},T2<:AbstractArray{T,D}} <: LazyArray{T,D}
+    a::T1
+    b::T2
 
-    function LazyElementwiseOperation{T,D,Op}(a::AbstractArray{T,D},b::AbstractArray{T,D}) where {T,D,Op}
+    function LazyElementwiseOperation{T,D,Op}(a::T1,b::T2) where {T,D,Op,T1<:AbstractArray{T,D},T2<:AbstractArray{T,D}}
         @boundscheck if size(a) != size(b)
             throw(DimensionMismatch("dimensions must match"))
         end
-        return new{T,D,Op}(a,b)
+        return new{T,D,Op,T1,T2}(a,b)
     end
 
-	LazyElementwiseOperation{T,D,Op}(a::AbstractArray{T,D},b::T) where {T,D,Op} = new{T,D,Op}(a, LazyConstantArray(b, size(a)))
-	LazyElementwiseOperation{T,D,Op}(a::T,b::AbstractArray{T,D}) where {T,D,Op} = new{T,D,Op}(LazyConstantArray(a,  size(b)), b)
 end
+LazyElementwiseOperation{T,D,Op}(a::AbstractArray{T,D},b::T) where {T,D,Op} = LazyElementwiseOperation{T,D,Op}(a, LazyConstantArray(b, size(a)))
+LazyElementwiseOperation{T,D,Op}(a::T,b::AbstractArray{T,D}) where {T,D,Op} = LazyElementwiseOperation{T,D,Op}(LazyConstantArray(a,  size(b)), b)
 # TODO: Move Op to be the first parameter? Compare to Binary operations
 
 Base.size(v::LazyElementwiseOperation) = size(v.a)
