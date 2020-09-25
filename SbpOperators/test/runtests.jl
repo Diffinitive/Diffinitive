@@ -152,21 +152,46 @@ end
     @test sum(collect(Q*v)) ≈ (Lx*Ly)
     @test collect(Q*v) == collect(Q'*v)
 end
-#
-# @testset "InverseQuadrature" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
-#     Lx = 7.3
-#     Ly = 8.2
-#     g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
-#     H = Quadrature(op,g)
-#     Hinv = InverseQuadrature(op,g)
-#     v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
-#
-#     @test Hinv isa TensorOperator{T,2} where T
-#     @test Hinv' isa TensorMapping{T,2,2} where T
-#     @test collect(Hinv*H*v)  ≈ v
-#     @test collect(Hinv*v) == collect(Hinv'*v)
-# end
+
+@testset "InverseDiagonalInnerProduct" begin
+    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    L = 2.3
+    g = EquidistantGrid((77,), (0.0,), (L,))
+    h = spacing(g)
+    H = DiagonalInnerProduct(h[1],op.quadratureClosure)
+
+    h_i = inverse_spacing(g)
+    Hi = InverseDiagonalInnerProduct(h_i[1],1 ./ op.quadratureClosure)
+    v = evalOn(g, x->sin(x))
+
+    @test Hi isa TensorOperator{T,1} where T
+    @test Hi' isa TensorMapping{T,1,1} where T
+    @test collect(Hi*H*v)  ≈ v
+    @test collect(Hi*v) == collect(Hi'*v)
+end
+
+@testset "InverseQuadrature" begin
+    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    Lx = 7.3
+    Ly = 8.2
+    g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+
+    h = spacing(g)
+    Hx = DiagonalInnerProduct(h[1], op.quadratureClosure);
+    Hy = DiagonalInnerProduct(h[2], op.quadratureClosure);
+    Q = Quadrature((Hx,Hy))
+
+    hi = inverse_spacing(g)
+    Hix = InverseDiagonalInnerProduct(hi[1], 1 ./ op.quadratureClosure);
+    Hiy = InverseDiagonalInnerProduct(hi[2], 1 ./ op.quadratureClosure);
+    Qinv = InverseQuadrature((Hix,Hiy))
+    v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
+
+    @test Qinv isa TensorOperator{T,2} where T
+    @test Qinv' isa TensorMapping{T,2,2} where T
+    @test collect(Qinv*Q*v)  ≈ v
+    @test collect(Qinv*v) == collect(Qinv'*v)
+end
 #
 # @testset "BoundaryValue" begin
 #     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
