@@ -7,6 +7,8 @@ Is there any reason to use a trait to differentiate between fixed size and unkno
 ## Test setup
 Once we figure out how to organize the subpackages we should update test folders to Project. As of writing this there seems to be and issue with this approach combined with dev'ed packages so we can't do it yet. It seems that Pkg might fix this in the future.
 
+Some steps to imporve the situation right now is to combine everything to one package and use the `@includetests` macro from [TestSetExtensions](https://github.com/ssfrr/TestSetExtensions.jl) together with `Pkg.test(test_args="...")` to selectively run tests.
+
 ## Reasearch and thinking
  - [ ] Use a trait to indicate if a TensorMapping uses indices with regions.
     The default should be that they do NOT.
@@ -20,3 +22,5 @@ Once we figure out how to organize the subpackages we should update test folders
  - [ ] Create a macro @lazy which replaces a binary op (+,-) by its lazy equivalent? Would be a neat way to indicate which evaluations are lazy without cluttering/confusing with special characters.
  - [ ] Specificera operatorer i TOML eller något liknande?
  H.. H_gamma etc.)
+ - [ ] Dispatch in Lower() instead of the type Lower so `::Lower` instead of `::Type{Lower}` ???
+ 	Seems better unless there is some specific reason to use the type instead of the value.

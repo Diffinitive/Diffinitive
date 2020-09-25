@@ -10,6 +10,8 @@
  - [ ] Create a struct that bundles the necessary Tensor operators for solving the wave equation.
  - [ ] Add a quick and simple way of running all tests for all subpackages.
 
+## Other
+ - [ ] Add Vidar to the authors list
 
 # Wrap up tasks
  - [ ] Kolla att vi har @inbounds och @propagate_inbounds på rätt ställen
