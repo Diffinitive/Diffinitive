@@ -88,7 +88,9 @@ function apply(D::DiffOp, v::AbstractVector)::AbstractVector
     return u
 end
 
-export apply
+# TODO: This conflicts with LazyTensors. Shouldn't DiffOps be LazyTensorOperators and use that apply?
+# export apply
+
 
 """
 A BoundaryCondition should implement the method
