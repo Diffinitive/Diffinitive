@@ -1,4 +1,4 @@
-using Grids
+using Sbplib.Grids
 using Test
 
 @testset "EquidistantGrid" begin

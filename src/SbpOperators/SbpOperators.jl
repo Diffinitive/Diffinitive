@@ -1,7 +1,7 @@
 module SbpOperators
 
-using RegionIndices
-using LazyTensors
+using Sbplib.RegionIndices
+using Sbplib.LazyTensors
 
 include("stencil.jl")
 include("constantstenciloperator.jl")

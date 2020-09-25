@@ -1,15 +1,15 @@
 module Sbplib
 
-include("DiffOps/DiffOps.jl")
-include("Grids/Grids.jl")
-include("LazyTensors/LazyTensors.jl")
 include("RegionIndices/RegionIndices.jl")
+include("LazyTensors/LazyTensors.jl")
+include("Grids/Grids.jl")
 include("SbpOperators/SbpOperators.jl")
+include("DiffOps/DiffOps.jl")
 
-export DiffOps
-export Grids
-export LazyTensors
 export RegionIndices
+export LazyTensors
+export Grids
 export SbpOperators
+export DiffOps
 
 end

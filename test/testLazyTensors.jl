@@ -1,6 +1,6 @@
 using Test
-using LazyTensors
-using RegionIndices
+using Sbplib.LazyTensors
+using Sbplib.RegionIndices
 
 @testset "Generic Mapping methods" begin
     struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end

@@ -1,9 +1,9 @@
 module sbp
 
-using Grids
-using RegionIndices
-using SbpOperators
-using DiffOps
+using Sbplib.Grids
+using Sbplib.RegionIndices
+using Sbplib.SbpOperators
+using Sbplib.DiffOps
 
 include("TimeStepper.jl")
 end  # module

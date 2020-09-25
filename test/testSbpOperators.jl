@@ -1,8 +1,8 @@
 using Test
-using SbpOperators
-using Grids
-using RegionIndices
-using LazyTensors
+using Sbplib.SbpOperators
+using Sbplib.Grids
+using Sbplib.RegionIndices
+using Sbplib.LazyTensors
 
 # @testset "apply_quadrature" begin
 #     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
