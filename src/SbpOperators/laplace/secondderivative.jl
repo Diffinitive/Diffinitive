@@ -4,7 +4,7 @@ Implements the Laplace tensor operator `L` with constant grid spacing and coeffi
 in 1D dimension
 """
 
-struct SecondDerivative{T,N,M,K} <: TensorOperator{T,1}
+struct SecondDerivative{T,N,M,K} <: TensorMapping{T,1,1}
     h_inv::T # The grid spacing could be included in the stencil already. Preferable?
     innerStencil::Stencil{T,N}
     closureStencils::NTuple{M,Stencil{T,K}}

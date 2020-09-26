@@ -11,12 +11,13 @@ struct LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
     t::TensorMapping{T,R,D}
     o::AbstractArray{T,D}
 end
+# TODO: Do boundschecking on creation!
 export LazyTensorMappingApplication
 
 Base.:*(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = LazyTensorMappingApplication(tm,o)
 Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Index,R}) where {T,R,D} = apply(ta.t, ta.o, I...)
 Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Int,R}) where {T,R,D} = apply(ta.t, ta.o, Index{Unknown}.(I)...)
-Base.size(ta::LazyTensorMappingApplication{T,R,D}) where {T,R,D} = range_size(ta.t,size(ta.o))
+Base.size(ta::LazyTensorMappingApplication{T,R,D}) where {T,R,D} = range_size(ta.t)
 # TODO: What else is needed to implement the AbstractArray interface?
 
 # # We need the associativity to be a→b→c = a→(b→c), which is the case for '→'
@@ -41,16 +42,15 @@ end
 export LazyTensorMappingTranspose
 
 # # TBD: Should this be implemented on a type by type basis or through a trait to provide earlier errors?
+# Jonatan 2020-09-25: Is the problem that you can take the transpose of any TensorMapping even if it doesn't implement `apply_transpose`?
 Base.adjoint(tm::TensorMapping) = LazyTensorMappingTranspose(tm)
 Base.adjoint(tmt::LazyTensorMappingTranspose) = tmt.tm
 
 apply(tmt::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::Vararg{Index,D}) where {T,R,D} = apply_transpose(tmt.tm, v, I...)
 apply_transpose(tmt::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index,R}) where {T,R,D} = apply(tmt.tm, v, I...)
 
-range_size(tmt::LazyTensorMappingTranspose{T,R,D}, d_size::NTuple{R,Integer}) where {T,R,D} = domain_size(tmt.tm, d_size)
-domain_size(tmt::LazyTensorMappingTranspose{T,R,D}, r_size::NTuple{D,Integer}) where {T,R,D} = range_size(tmt.tm, r_size)
-
-
+range_size(tmt::LazyTensorMappingTranspose{T,R,D}) where {T,R,D} = domain_size(tmt.tm)
+domain_size(tmt::LazyTensorMappingTranspose{T,R,D}) where {T,R,D} = range_size(tmt.tm)
 
 
 struct LazyTensorMappingBinaryOperation{Op,T,R,D,T1<:TensorMapping{T,R,D},T2<:TensorMapping{T,R,D}} <: TensorMapping{T,D,R}
@@ -61,12 +61,13 @@ struct LazyTensorMappingBinaryOperation{Op,T,R,D,T1<:TensorMapping{T,R,D},T2<:Te
         return new{Op,T,R,D,T1,T2}(tm1,tm2)
     end
 end
+# TODO: Boundschecking in constructor.
 
 apply(tmBinOp::LazyTensorMappingBinaryOperation{:+,T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) + apply(tmBinOp.tm2, v, I...)
 apply(tmBinOp::LazyTensorMappingBinaryOperation{:-,T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) - apply(tmBinOp.tm2, v, I...)
 
-range_size(tmBinOp::LazyTensorMappingBinaryOperation{Op,T,R,D}, domain_size::NTuple{D,Integer}) where {Op,T,R,D} = range_size(tmBinOp.tm1, domain_size)
-domain_size(tmBinOp::LazyTensorMappingBinaryOperation{Op,T,R,D}, range_size::NTuple{R,Integer}) where {Op,T,R,D} = domain_size(tmBinOp.tm2, range_size)
+range_size(tmBinOp::LazyTensorMappingBinaryOperation{Op,T,R,D}) where {Op,T,R,D} = range_size(tmBinOp.tm1)
+domain_size(tmBinOp::LazyTensorMappingBinaryOperation{Op,T,R,D}) where {Op,T,R,D} = domain_size(tmBinOp.tm1)
 
 Base.:+(tm1::TensorMapping{T,R,D}, tm2::TensorMapping{T,R,D}) where {T,R,D} = LazyTensorMappingBinaryOperation{:+,T,R,D}(tm1,tm2)
 Base.:-(tm1::TensorMapping{T,R,D}, tm2::TensorMapping{T,R,D}) where {T,R,D} = LazyTensorMappingBinaryOperation{:-,T,R,D}(tm1,tm2)
