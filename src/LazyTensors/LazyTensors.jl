@@ -1,5 +1,5 @@
 module LazyTensors
-using RegionIndices
+using Sbplib.RegionIndices
 include("tensor_mapping.jl")
 include("lazy_array.jl")
 include("lazy_tensor_operations.jl")

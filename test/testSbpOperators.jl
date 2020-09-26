@@ -1,8 +1,10 @@
 using Test
-using SbpOperators
-using Grids
-using RegionIndices
-using LazyTensors
+using Sbplib.SbpOperators
+using Sbplib.Grids
+using Sbplib.RegionIndices
+using Sbplib.LazyTensors
+
+@testset "SbpOperators" begin
 
 # @testset "apply_quadrature" begin
 #     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
@@ -380,3 +382,5 @@ end
 #     @test collect(H_s'*v_s) == collect(H_s'*v_s)
 #     @test collect(H_n'*v_n) == collect(H_n'*v_n)
 # end
+
+end

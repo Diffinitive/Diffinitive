@@ -1,6 +1,6 @@
 module Grids
 
-using RegionIndices
+using Sbplib.RegionIndices
 
 export BoundaryIdentifier, CartesianBoundary
 
