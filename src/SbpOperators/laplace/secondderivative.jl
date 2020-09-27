@@ -9,11 +9,17 @@ struct SecondDerivative{T,N,M,K} <: TensorMapping{T,1,1}
     innerStencil::Stencil{T,N}
     closureStencils::NTuple{M,Stencil{T,K}}
     parity::Parity
-    #TODO: Write a nice constructor
+    size::NTuple{1,Int}
 end
 export SecondDerivative
 
-LazyTensors.domain_size(D2::SecondDerivative, range_size::NTuple{1,Integer}) = range_size
+function SecondDerivative(grid::EquidistantGrid{1}, innerStencil, closureStencils)
+    h_inv = grid.inverse_spacing[1]
+    return SecondDerivative(h_inv, innerStencil, closureStencils, even, size(grid))
+end
+
+LazyTensors.range_size(D2::SecondDerivative) = D2.size
+LazyTensors.domain_size(D2::SecondDerivative) = D2.size
 
 #TODO: The 1D tensor mappings should not have to dispatch on 1D tuples if we write LazyTensor.apply for vararg right?!?!
 #      Currently have to index the Tuple{Index} in each method in order to call the stencil methods which is ugly.

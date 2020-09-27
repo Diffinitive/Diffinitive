@@ -33,7 +33,7 @@ using Sbplib.LazyTensors
     g = EquidistantGrid((101,), (0.0,), (L,))
     h_inv = inverse_spacing(g)
     h = 1/h_inv[1];
-    Dₓₓ = SecondDerivative(h_inv[1],op.innerStencil,op.closureStencils,op.parity)
+    Dₓₓ = SecondDerivative(g,op.innerStencil,op.closureStencils)
 
     f0(x::Float64) = 1.
     f1(x::Float64) = x
@@ -50,7 +50,7 @@ using Sbplib.LazyTensors
     v4 = evalOn(g,f4)
     v5 = evalOn(g,f5)
 
-    @test Dₓₓ isa TensorOperator{T,1} where T
+    @test Dₓₓ isa TensorMapping{T,1,1} where T
     @test Dₓₓ' isa TensorMapping{T,1,1} where T
 
     # TODO: Should perhaps set tolerance level for isapporx instead?
@@ -77,12 +77,8 @@ end
     Lx = 1.5
     Ly = 3.2
     g = EquidistantGrid((102,131), (0.0, 0.0), (Lx,Ly))
+    L = Laplace(g, op.innerStencil, op.closureStencils)
 
-    h_inv = inverse_spacing(g)
-    h = spacing(g)
-    D_xx = SecondDerivative(h_inv[1],op.innerStencil,op.closureStencils,op.parity)
-    D_yy = SecondDerivative(h_inv[2],op.innerStencil,op.closureStencils,op.parity)
-    L = Laplace((D_xx,D_yy))
 
     f0(x::Float64,y::Float64) = 2.
     f1(x::Float64,y::Float64) = x+y
@@ -100,7 +96,7 @@ end
     v5 = evalOn(g,f5)
     v5ₓₓ = evalOn(g,f5ₓₓ)
 
-    @test L isa TensorOperator{T,2} where T
+    @test L isa TensorMapping{T,2,2} where T
     @test L' isa TensorMapping{T,2,2} where T
 
     # TODO: Should perhaps set tolerance level for isapporx instead?
@@ -118,6 +114,8 @@ end
     @test all(abs.((collect(L*v3) - v1)) .<= equalitytol)
     e4 = collect(L*v4) - v2
     e5 = collect(L*v5) - v5ₓₓ
+
+    h = spacing(g)
     @test sqrt(prod(h)*sum(collect(e4.^2))) <= accuracytol
     @test sqrt(prod(h)*sum(collect(e5.^2))) <= accuracytol
 end
@@ -126,11 +124,10 @@ end
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     L = 2.3
     g = EquidistantGrid((77,), (0.0,), (L,))
-    h = spacing(g)
-    H = DiagonalInnerProduct(h[1],op.quadratureClosure)
+    H = DiagonalInnerProduct(g,op.quadratureClosure)
     v = ones(Float64, size(g))
 
-    @test H isa TensorOperator{T,1} where T
+    @test H isa TensorMapping{T,1,1} where T
     @test H' isa TensorMapping{T,1,1} where T
     @test sum(collect(H*v)) ≈ L
     @test collect(H*v) == collect(H'*v)
@@ -142,14 +139,11 @@ end
     Ly = 5.2
     g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
 
-    h = spacing(g)
-    Hx = DiagonalInnerProduct(h[1],op.quadratureClosure);
-    Hy = DiagonalInnerProduct(h[2],op.quadratureClosure);
-    Q = Quadrature((Hx,Hy))
+    Q = Quadrature(g, op.quadratureClosure)
 
     v = ones(Float64, size(g))
 
-    @test Q isa TensorOperator{T,2} where T
+    @test Q isa TensorMapping{T,2,2} where T
     @test Q' isa TensorMapping{T,2,2} where T
     @test sum(collect(Q*v)) ≈ (Lx*Ly)
     @test collect(Q*v) == collect(Q'*v)
@@ -159,14 +153,11 @@ end
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     L = 2.3
     g = EquidistantGrid((77,), (0.0,), (L,))
-    h = spacing(g)
-    H = DiagonalInnerProduct(h[1],op.quadratureClosure)
-
-    h_i = inverse_spacing(g)
-    Hi = InverseDiagonalInnerProduct(h_i[1],1 ./ op.quadratureClosure)
+    H = DiagonalInnerProduct(g, op.quadratureClosure)
+    Hi = InverseDiagonalInnerProduct(g,op.quadratureClosure)
     v = evalOn(g, x->sin(x))
 
-    @test Hi isa TensorOperator{T,1} where T
+    @test Hi isa TensorMapping{T,1,1} where T
     @test Hi' isa TensorMapping{T,1,1} where T
     @test collect(Hi*H*v)  ≈ v
     @test collect(Hi*v) == collect(Hi'*v)
@@ -178,20 +169,13 @@ end
     Ly = 8.2
     g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
 
-    h = spacing(g)
-    Hx = DiagonalInnerProduct(h[1], op.quadratureClosure);
-    Hy = DiagonalInnerProduct(h[2], op.quadratureClosure);
-    Q = Quadrature((Hx,Hy))
-
-    hi = inverse_spacing(g)
-    Hix = InverseDiagonalInnerProduct(hi[1], 1 ./ op.quadratureClosure);
-    Hiy = InverseDiagonalInnerProduct(hi[2], 1 ./ op.quadratureClosure);
-    Qinv = InverseQuadrature((Hix,Hiy))
+    Q = Quadrature(g, op.quadratureClosure)
+    Qinv = InverseQuadrature(g, op.quadratureClosure)
     v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
 
-    @test Qinv isa TensorOperator{T,2} where T
+    @test Qinv isa TensorMapping{T,2,2} where T
     @test Qinv' isa TensorMapping{T,2,2} where T
-    @test collect(Qinv*Q*v)  ≈ v
+    @test collect(Qinv*(Q*v)) ≈ v
     @test collect(Qinv*v) == collect(Qinv'*v)
 end
 #

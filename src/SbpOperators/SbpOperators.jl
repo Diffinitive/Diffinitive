@@ -2,6 +2,7 @@ module SbpOperators
 
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
+using Sbplib.Grids
 
 include("stencil.jl")
 include("constantstenciloperator.jl")

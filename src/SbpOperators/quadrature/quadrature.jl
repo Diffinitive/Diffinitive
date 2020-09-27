@@ -6,11 +6,21 @@ Implements the quadrature operator `Q` of Dim dimension as a TensorMapping
 The multi-dimensional tensor operator consists of a tuple of 1D DiagonalInnerProduct H
 tensor operators.
 """
-struct Quadrature{Dim,T<:Real,M} <: TensorOperator{T,Dim}
+struct Quadrature{Dim,T<:Real,M} <: TensorMapping{T,Dim,Dim}
     H::NTuple{Dim,DiagonalInnerProduct{T,M}}
 end
 
-LazyTensors.domain_size(Q::Quadrature{Dim}, range_size::NTuple{Dim,Integer}) where {Dim} = range_size
+function Quadrature(g::EquidistantGrid{Dim}, quadratureClosure) where Dim
+    H = ()
+    for i ∈ 1:Dim
+        H = (H..., DiagonalInnerProduct(subgrid(g,i), quadratureClosure))
+    end
+
+    return Quadrature(H)
+end
+
+LazyTensors.range_size(H::Quadrature) = getindex.(range_size.(H.H),1)
+LazyTensors.domain_size(H::Quadrature) = getindex.(domain_size.(H.H),1)
 
 function LazyTensors.apply(Q::Quadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {T,Dim}
     error("not implemented")

@@ -1,18 +1,27 @@
 export Laplace
 """
-    Laplace{Dim,T<:Real,N,M,K} <: TensorOperator{T,Dim}
+    Laplace{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
 
 Implements the Laplace operator `L` in Dim dimensions as a tensor operator
 The multi-dimensional tensor operator consists of a tuple of 1D SecondDerivative
 tensor operators.
 """
 #export quadrature, inverse_quadrature, boundary_quadrature, boundary_value, normal_derivative
-struct Laplace{Dim,T,N,M,K} <: TensorOperator{T,Dim}
+struct Laplace{Dim,T,N,M,K} <: TensorMapping{T,Dim,Dim}
     D2::NTuple{Dim,SecondDerivative{T,N,M,K}}
-    #TODO: Write a good constructor
 end
 
-LazyTensors.domain_size(L::Laplace{Dim}, range_size::NTuple{Dim,Integer}) where {Dim} = range_size
+function Laplace(g::EquidistantGrid{Dim}, innerStencil, closureStencils) where Dim
+    D2 = ()
+    for i ∈ 1:Dim
+        D2 = (D2..., SecondDerivative(subgrid(g,i), innerStencil, closureStencils))
+    end
+
+    return Laplace(D2)
+end
+
+LazyTensors.range_size(L::Laplace) = getindex.(range_size.(L.D2),1)
+LazyTensors.domain_size(L::Laplace) = getindex.(domain_size.(L.D2),1)
 
 function LazyTensors.apply(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {T,Dim}
     error("not implemented")
