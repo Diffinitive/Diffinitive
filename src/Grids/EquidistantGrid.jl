@@ -66,6 +66,15 @@ function points(grid::EquidistantGrid)
     return broadcast(I -> grid.limit_lower .+ (I.-1).*h, indices)
 end
 
+function subgrid(grid::EquidistantGrid, dim::Integer)
+    size = grid.size[dim]
+    limit_lower = grid.limit_lower[dim]
+    limit_upper = grid.limit_upper[dim]
+
+    return EquidistantGrid(size, limit_lower, limit_upper)
+end
+export subgrid
+
 function pointsalongdim(grid::EquidistantGrid, dim::Integer)
     @assert dim<=dimension(grid)
     @assert dim>0
