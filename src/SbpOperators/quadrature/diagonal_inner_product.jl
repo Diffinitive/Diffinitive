@@ -4,25 +4,30 @@ export DiagonalInnerProduct, closuresize
 
 Implements the diagnoal norm operator `H` of Dim dimension as a TensorMapping
 """
-struct DiagonalInnerProduct{T,M} <: TensorOperator{T,1}
-    h::T # The grid spacing could be included in the stencil already. Preferable?
-    closure::NTuple{M,T}
-    #TODO: Write a nice constructor
+struct DiagonalInnerProduct{T,M} <: TensorMapping{T,1,1}
+    h::T
+    quadratureClosure::NTuple{M,T}
+    size::Tuple{Int}
 end
 
-LazyTensors.domain_size(H::DiagonalInnerProduct, range_size::NTuple{1,Integer}) = range_size
+function DiagonalInnerProduct(g::EquidistantGrid{1}, quadratureClosure)
+    return DiagonalInnerProduct(spacing(g)[1], quadratureClosure, size(g))
+end
+
+LazyTensors.range_size(H::DiagonalInnerProduct) = H.size
+LazyTensors.domain_size(H::DiagonalInnerProduct) = H.size
 
 function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index) where T
     return @inbounds apply(H, v, I)
 end
 
 function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Lower}) where T
-    return @inbounds H.h*H.closure[Int(I)]*v[Int(I)]
+    return @inbounds H.h*H.quadratureClosure[Int(I)]*v[Int(I)]
 end
 
 function LazyTensors.apply(H::DiagonalInnerProduct{T},v::AbstractVector{T}, I::Index{Upper}) where T
     N = length(v);
-    return @inbounds H.h*H.closure[N-Int(I)+1]v[Int(I)]
+    return @inbounds H.h*H.quadratureClosure[N-Int(I)+1]*v[Int(I)]
 end
 
 function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Interior}) where T

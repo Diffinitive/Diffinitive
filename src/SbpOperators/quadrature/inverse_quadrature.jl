@@ -2,13 +2,26 @@ export InverseQuadrature
 """
     InverseQuadrature{Dim,T<:Real,M,K} <: TensorMapping{T,Dim,Dim}
 
-Implements the inverse quadrature operator `Qi` of Dim dimension as a TensorOperator
+Implements the inverse quadrature operator `Qi` of Dim dimension as a TensorMapping
 The multi-dimensional tensor operator consists of a tuple of 1D InverseDiagonalInnerProduct
 tensor operators.
 """
-struct InverseQuadrature{Dim,T<:Real,M} <: TensorOperator{T,Dim}
+struct InverseQuadrature{Dim,T<:Real,M} <: TensorMapping{T,Dim,Dim}
     Hi::NTuple{Dim,InverseDiagonalInnerProduct{T,M}}
 end
+
+
+function InverseQuadrature(g::EquidistantGrid{Dim}, quadratureClosure) where Dim
+    Hi = ()
+    for i ∈ 1:Dim
+        Hi = (Hi..., InverseDiagonalInnerProduct(restrict(g,i), quadratureClosure))
+    end
+
+    return InverseQuadrature(Hi)
+end
+
+LazyTensors.range_size(Hi::InverseQuadrature) = getindex.(range_size.(Hi.Hi),1)
+LazyTensors.domain_size(Hi::InverseQuadrature) = getindex.(domain_size.(Hi.Hi),1)
 
 LazyTensors.domain_size(Qi::InverseQuadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
 

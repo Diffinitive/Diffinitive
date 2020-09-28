@@ -2,6 +2,7 @@ module SbpOperators
 
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
+using Sbplib.Grids
 
 include("stencil.jl")
 include("constantstenciloperator.jl")
@@ -13,4 +14,5 @@ include("quadrature/diagonal_inner_product.jl")
 include("quadrature/quadrature.jl")
 include("quadrature/inverse_diagonal_inner_product.jl")
 include("quadrature/inverse_quadrature.jl")
+
 end # module

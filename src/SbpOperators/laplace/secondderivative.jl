@@ -4,16 +4,22 @@ Implements the Laplace tensor operator `L` with constant grid spacing and coeffi
 in 1D dimension
 """
 
-struct SecondDerivative{T,N,M,K} <: TensorOperator{T,1}
+struct SecondDerivative{T,N,M,K} <: TensorMapping{T,1,1}
     h_inv::T # The grid spacing could be included in the stencil already. Preferable?
     innerStencil::Stencil{T,N}
     closureStencils::NTuple{M,Stencil{T,K}}
     parity::Parity
-    #TODO: Write a nice constructor
+    size::NTuple{1,Int}
 end
 export SecondDerivative
 
-LazyTensors.domain_size(D2::SecondDerivative, range_size::NTuple{1,Integer}) = range_size
+function SecondDerivative(grid::EquidistantGrid{1}, innerStencil, closureStencils)
+    h_inv = grid.inverse_spacing[1]
+    return SecondDerivative(h_inv, innerStencil, closureStencils, even, size(grid))
+end
+
+LazyTensors.range_size(D2::SecondDerivative) = D2.size
+LazyTensors.domain_size(D2::SecondDerivative) = D2.size
 
 #TODO: The 1D tensor mappings should not have to dispatch on 1D tuples if we write LazyTensor.apply for vararg right?!?!
 #      Currently have to index the Tuple{Index} in each method in order to call the stencil methods which is ugly.
@@ -39,7 +45,5 @@ function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, index:
     I = Index(Int(index), r)
     return LazyTensors.apply(D2, v, I)
 end
-
-LazyTensors.apply_transpose(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index) where {T} = LazyTensors.apply(D2, v, I)
 
 closuresize(D2::SecondDerivative{T,N,M,K}) where {T<:Real,N,M,K} = M

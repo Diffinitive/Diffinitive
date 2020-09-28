@@ -6,11 +6,11 @@ The action of the mapping is implemented through the method
 
     apply(t::TensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {R,D,T}
 
-The size of range tensor should be dependent on the size of the domain tensor
-and the type should implement the methods
+The size of the range and domain that the operator works with should be returned by
+the functions
 
-    range_size(::TensorMapping{T,R,D}, domain_size::NTuple{D,Integer}) where {T,R,D}
-    domain_size(::TensorMapping{T,R,D}, range_size::NTuple{R,Integer}) where {T,R,D}
+    range_size(::TensorMapping)
+    domain_size(::TensorMapping)
 
 to allow querying for one or the other.
 
@@ -49,35 +49,19 @@ domain_dim(::TensorMapping{T,R,D}) where {T,R,D} = D
 export range_dim, domain_dim
 
 """
-    range_size(M::TensorMapping, domain_size)
+    range_size(M::TensorMapping)
 
-Return the resulting range size for the mapping applied to a given domain_size
+Return the range size for the mapping.
 """
 function range_size end
 
 """
-    domain_size(M::TensorMapping, range_size)
+    domain_size(M::TensorMapping)
 
-Return the resulting domain size for the mapping applied to a given range_size
+Return the domain size for the mapping.
 """
 function domain_size end
 
-"""
-    Dummy type for representing dimensions of tensormappings when domain_size is unknown
-"""
-struct UnknownDim end
-export range_size, domain_size, TensorMappingDim, UnknownDim
+export range_size, domain_size
 
 # TODO: Think about boundschecking!
-
-
-"""
-    TensorOperator{T,D}
-
-A `TensorMapping{T,D,D}` where the range and domain tensor have the same number of
-dimensions and the same size.
-"""
-abstract type TensorOperator{T,D} <: TensorMapping{T,D,D} end
-export TensorOperator
-domain_size(::TensorOperator{T,D}, range_size::NTuple{D,Integer}) where {T,D} = range_size
-range_size(::TensorOperator{T,D}, domain_size::NTuple{D,Integer}) where {T,D} = domain_size
