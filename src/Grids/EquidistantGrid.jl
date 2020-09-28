@@ -67,18 +67,18 @@ function points(grid::EquidistantGrid)
 end
 
 """
-    subgrid(::EquidistantGrid, dim)
+    restrict(::EquidistantGrid, dim)
 
 Pick out given dimensions from the grid and return a grid for them
 """
-function subgrid(grid::EquidistantGrid, dim)
+function restrict(grid::EquidistantGrid, dim)
     size = grid.size[dim]
     limit_lower = grid.limit_lower[dim]
     limit_upper = grid.limit_upper[dim]
 
     return EquidistantGrid(size, limit_lower, limit_upper)
 end
-export subgrid
+export restrict
 
 function pointsalongdim(grid::EquidistantGrid, dim::Integer)
     @assert dim<=dimension(grid)
