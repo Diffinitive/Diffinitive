@@ -45,8 +45,6 @@ function LazyTensors.apply(L::Laplace{2,T}, v::AbstractArray{T,2}, I::Index, J::
     return uᵢ
 end
 
-LazyTensors.apply_transpose(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {T,Dim} = LazyTensors.apply(L, v, I...)
-
 # quadrature(L::Laplace) = Quadrature(L.op, L.grid)
 # inverse_quadrature(L::Laplace) = InverseQuadrature(L.op, L.grid)
 # boundary_value(L::Laplace, bId::CartesianBoundary) = BoundaryValue(L.op, L.grid, bId)

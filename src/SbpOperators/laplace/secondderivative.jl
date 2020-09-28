@@ -46,6 +46,4 @@ function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, index:
     return LazyTensors.apply(D2, v, I)
 end
 
-LazyTensors.apply_transpose(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index) where {T} = LazyTensors.apply(D2, v, I)
-
 closuresize(D2::SecondDerivative{T,N,M,K}) where {T<:Real,N,M,K} = M
