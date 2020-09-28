@@ -17,7 +17,7 @@ export LazyTensorMappingApplication
 Base.:*(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = LazyTensorMappingApplication(tm,o)
 Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Index,R}) where {T,R,D} = apply(ta.t, ta.o, I...)
 Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Int,R}) where {T,R,D} = apply(ta.t, ta.o, Index{Unknown}.(I)...)
-Base.size(ta::LazyTensorMappingApplication{T,R,D}) where {T,R,D} = range_size(ta.t)
+Base.size(ta::LazyTensorMappingApplication) = range_size(ta.t)
 # TODO: What else is needed to implement the AbstractArray interface?
 
 # # We need the associativity to be a→b→c = a→(b→c), which is the case for '→'
@@ -49,8 +49,8 @@ Base.adjoint(tmt::LazyTensorMappingTranspose) = tmt.tm
 apply(tmt::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,R}, I::Vararg{Index,D}) where {T,R,D} = apply_transpose(tmt.tm, v, I...)
 apply_transpose(tmt::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index,R}) where {T,R,D} = apply(tmt.tm, v, I...)
 
-range_size(tmt::LazyTensorMappingTranspose{T,R,D}) where {T,R,D} = domain_size(tmt.tm)
-domain_size(tmt::LazyTensorMappingTranspose{T,R,D}) where {T,R,D} = range_size(tmt.tm)
+range_size(tmt::LazyTensorMappingTranspose) = domain_size(tmt.tm)
+domain_size(tmt::LazyTensorMappingTranspose) = range_size(tmt.tm)
 
 
 struct LazyTensorMappingBinaryOperation{Op,T,R,D,T1<:TensorMapping{T,R,D},T2<:TensorMapping{T,R,D}} <: TensorMapping{T,D,R}
