@@ -14,7 +14,7 @@ end
 function InverseQuadrature(g::EquidistantGrid{Dim}, quadratureClosure) where Dim
     Hi = ()
     for i ∈ 1:Dim
-        Hi = (Hi..., InverseDiagonalInnerProduct(subgrid(g,i), quadratureClosure))
+        Hi = (Hi..., InverseDiagonalInnerProduct(restrict(g,i), quadratureClosure))
     end
 
     return InverseQuadrature(Hi)

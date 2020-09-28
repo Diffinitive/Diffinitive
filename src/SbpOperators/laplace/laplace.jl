@@ -14,7 +14,7 @@ end
 function Laplace(g::EquidistantGrid{Dim}, innerStencil, closureStencils) where Dim
     D2 = ()
     for i ∈ 1:Dim
-        D2 = (D2..., SecondDerivative(subgrid(g,i), innerStencil, closureStencils))
+        D2 = (D2..., SecondDerivative(restrict(g,i), innerStencil, closureStencils))
     end
 
     return Laplace(D2)

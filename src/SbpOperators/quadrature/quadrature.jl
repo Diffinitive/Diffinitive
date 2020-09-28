@@ -13,7 +13,7 @@ end
 function Quadrature(g::EquidistantGrid{Dim}, quadratureClosure) where Dim
     H = ()
     for i ∈ 1:Dim
-        H = (H..., DiagonalInnerProduct(subgrid(g,i), quadratureClosure))
+        H = (H..., DiagonalInnerProduct(restrict(g,i), quadratureClosure))
     end
 
     return Quadrature(H)
