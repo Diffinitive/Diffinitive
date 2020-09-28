@@ -6,12 +6,12 @@ Implements the diagnoal norm operator `H` of Dim dimension as a TensorMapping
 """
 struct DiagonalInnerProduct{T,M} <: TensorMapping{T,1,1}
     h::T
-    closure::NTuple{M,T}
+    quadratureClosure::NTuple{M,T}
     size::Tuple{Int}
 end
 
-function DiagonalInnerProduct(g::EquidistantGrid{1}, closure)
-    return DiagonalInnerProduct(spacing(g)[1], closure, size(g))
+function DiagonalInnerProduct(g::EquidistantGrid{1}, quadratureClosure)
+    return DiagonalInnerProduct(spacing(g)[1], quadratureClosure, size(g))
 end
 
 LazyTensors.range_size(H::DiagonalInnerProduct) = H.size
@@ -22,12 +22,12 @@ function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::
 end
 
 function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Lower}) where T
-    return @inbounds H.h*H.closure[Int(I)]*v[Int(I)]
+    return @inbounds H.h*H.quadratureClosure[Int(I)]*v[Int(I)]
 end
 
 function LazyTensors.apply(H::DiagonalInnerProduct{T},v::AbstractVector{T}, I::Index{Upper}) where T
     N = length(v);
-    return @inbounds H.h*H.closure[N-Int(I)+1]v[Int(I)]
+    return @inbounds H.h*H.quadratureClosure[N-Int(I)+1]*v[Int(I)]
 end
 
 function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Interior}) where T

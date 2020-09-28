@@ -24,7 +24,7 @@ end
 
 function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Upper}) where T
     N = length(v);
-    return @inbounds Hi.h_inv*Hi.inverseQuadratureClosure[N-Int(I)+1]v[Int(I)]
+    return @inbounds Hi.h_inv*Hi.inverseQuadratureClosure[N-Int(I)+1]*v[Int(I)]
 end
 
 function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Interior}) where T
