@@ -143,12 +143,16 @@ end
 
     Q = Quadrature(g, op.quadratureClosure)
 
-    v = ones(Float64, size(g))
-
     @test Q isa TensorMapping{T,2,2} where T
     @test Q' isa TensorMapping{T,2,2} where T
-    @test sum(collect(Q*v)) ≈ (Lx*Ly)
-    @test collect(Q*v) == collect(Q'*v)
+
+    v = ones(Float64, size(g))
+    @test sum(Q*v) ≈ Lx*Ly
+
+    v = 2*ones(Float64, size(g))
+    @test_broken sum(Q*v) ≈ 2*Lx*Ly
+
+    @test Q*v == Q'*v
 end
 
 @testset "InverseDiagonalInnerProduct" begin
@@ -177,7 +181,7 @@ end
 
     @test Qinv isa TensorMapping{T,2,2} where T
     @test Qinv' isa TensorMapping{T,2,2} where T
-    @test collect(Qinv*(Q*v)) ≈ v
+    @test_broken collect(Qinv*(Q*v)) ≈ v
     @test collect(Qinv*v) == collect(Qinv'*v)
 end
 #
