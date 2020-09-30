@@ -4,6 +4,8 @@ using Sbplib.Grids
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 
+# TODO: Remove collects for all the tests with TensorApplications
+
 @testset "SbpOperators" begin
 
 # @testset "apply_quadrature" begin

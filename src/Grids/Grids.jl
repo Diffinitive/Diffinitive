@@ -14,4 +14,6 @@ export dim, region
 include("AbstractGrid.jl")
 include("EquidistantGrid.jl")
 
+# TODO: Rename AbstractGrid to Grid and move definition here.
+
 end # module
