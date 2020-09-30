@@ -193,6 +193,9 @@ end
     @test_throws DimensionMismatch v1 + v2
 end
 
+end
+
+
 @testset "LazyFunctionArray" begin
     @test LazyFunctionArray(i->i^2, (3,)) == [1,4,9]
     @test LazyFunctionArray((i,j)->i*j, (3,2)) == [
@@ -210,6 +213,21 @@ end
     @test_throws BoundsError LazyFunctionArray((i,j)->i*j, (3,2))[4,2]
     @test_throws BoundsError LazyFunctionArray((i,j)->i*j, (3,2))[2,3]
 
+end
+
+@testset "LazyLinearMap" begin
+    A = rand(3,4)
+    B = rand(3,4,2)
+    v = rand(4)
+
+    @test LazyLinearMap(A, (1,), (2,)) isa LazyLinearMap{T,1,1} where T
+    @test LazyLinearMap(A, (1,), (2,)) isa TensorMapping{T,1,1} where T
+    @test LazyLinearMap(B, (1,2), (3,)) isa TensorMapping{T,2,1} where T
+    @test LazyLinearMap(B, (2), (3,1)) isa TensorMapping{T,1,2} where T
+
+
+    @test LazyLinearMap(A, (1,), (2,))*ones(4) == A*ones(4)
+    @test LazyLinearMap(A, (1,), (2,))*v == A*v
 end
 
 end

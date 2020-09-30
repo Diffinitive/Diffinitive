@@ -100,3 +100,30 @@ Base.:-(tm1::TensorMapping{T,R,D}, tm2::TensorMapping{T,R,D}) where {T,R,D} = La
 # # Have i gone too crazy with the type parameters? Maybe they aren't all needed?
 
 # export →
+"""
+    LazyLinearMap{T,R,D,...}(A, range_indicies, )
+
+TensorMapping defined by the AbstractArray A. `range_indicies` and `domain_indicies` define which indicies of A should
+be considerd the range and domain of the TensorMapping.
+"""
+struct LazyLinearMap{T,R,D, RD, AA<:AbstractArray{T,RD}} <: TensorMapping{T,R,D}
+    A::AA
+    range_indicies::NTuple{R,Int}
+    domain_indicies::NTuple{D,Int}
+end
+export LazyLinearMap
+
+range_size(llm::LazyLinearMap) = size(llm.A)[llm.range_indicies...]
+domain_size(llm::LazyLinearMap) = size(llm.A)[llm.domain_indicies...]
+
+function apply(llm::LazyLinearMap{T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index,R}) where {T,R,D}
+    view_index = ntuple(i->:,ndims(llm.A))
+    for i ∈ 1:R
+        view_index = Base.setindex(view_index, Int(I[i]), llm.range_indicies[i])
+    end
+
+    A_view = @view llm.A[view_index...]
+
+    return sum(A_view.*v)
+end
+
