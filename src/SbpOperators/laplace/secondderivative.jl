@@ -8,14 +8,13 @@ struct SecondDerivative{T,N,M,K} <: TensorMapping{T,1,1}
     h_inv::T # The grid spacing could be included in the stencil already. Preferable?
     innerStencil::Stencil{T,N}
     closureStencils::NTuple{M,Stencil{T,K}}
-    parity::Parity
     size::NTuple{1,Int}
 end
 export SecondDerivative
 
 function SecondDerivative(grid::EquidistantGrid{1}, innerStencil, closureStencils)
     h_inv = grid.inverse_spacing[1]
-    return SecondDerivative(h_inv, innerStencil, closureStencils, even, size(grid))
+    return SecondDerivative(h_inv, innerStencil, closureStencils, size(grid))
 end
 
 LazyTensors.range_size(D2::SecondDerivative) = D2.size
@@ -36,7 +35,7 @@ end
 
 function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Upper}) where T
     N = length(v) # TODO: Use domain_size here instead? N = domain_size(D2,size(v))
-    return @inbounds D2.h_inv*D2.h_inv*Int(D2.parity)*apply_stencil_backwards(D2.closureStencils[N-Int(I)+1], v, Int(I))
+    return @inbounds D2.h_inv*D2.h_inv*apply_stencil_backwards(D2.closureStencils[N-Int(I)+1], v, Int(I))
 end
 
 function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, index::Index{Unknown}) where T
