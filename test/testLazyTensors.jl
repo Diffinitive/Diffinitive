@@ -193,4 +193,23 @@ end
     @test_throws DimensionMismatch v1 + v2
 end
 
+@testset "LazyFunctionArray" begin
+    @test LazyFunctionArray(i->i^2, (3,)) == [1,4,9]
+    @test LazyFunctionArray((i,j)->i*j, (3,2)) == [
+        1 2;
+        2 4;
+        3 6;
+    ]
+
+    @test size(LazyFunctionArray(i->i^2, (3,))) == (3,)
+    @test size(LazyFunctionArray((i,j)->i*j, (3,2))) == (3,2)
+
+    @inferred LazyFunctionArray(i->i^2, (3,))[2]
+
+    @test_throws BoundsError LazyFunctionArray(i->i^2, (3,))[4]
+    @test_throws BoundsError LazyFunctionArray((i,j)->i*j, (3,2))[4,2]
+    @test_throws BoundsError LazyFunctionArray((i,j)->i*j, (3,2))[2,3]
+
+end
+
 end

@@ -17,6 +17,30 @@ Base.size(lca::LazyConstantArray) = lca.size
 Base.getindex(lca::LazyConstantArray{T,D}, I::Vararg{Int,D}) where {T,D} = lca.val
 
 """
+    LazyFunctionArray{F<:Function,T, D} <: LazyArray{T,D}
+
+A lazy array where each element is defined by a function f(i,j,...)
+"""
+struct LazyFunctionArray{F<:Function,T, D} <: LazyArray{T,D}
+    f::F
+    size::NTuple{D,Int}
+end
+export LazyFunctionArray
+
+function LazyFunctionArray(f::F, size::NTuple{D,Int}) where {F<:Function,D}
+    T = typeof(f(ones(D)...))
+    return LazyFunctionArray{F,T,D}(f,size)
+end
+
+Base.size(lfa::LazyFunctionArray) = lfa.size
+
+function Base.getindex(lfa::LazyFunctionArray{F,T,D}, I::Vararg{Int,D}) where {F,T,D}
+    @boundscheck checkbounds(lfa, I...)
+    return lfa.f(I...)
+end
+
+
+"""
     LazyElementwiseOperation{T,D,Op} <: LazyArray{T,D}
 Struct allowing for lazy evaluation of elementwise operations on AbstractArrays.
 
