@@ -13,7 +13,7 @@ end
 export SecondDerivative
 
 function SecondDerivative(grid::EquidistantGrid{1}, innerStencil, closureStencils)
-    h_inv = grid.inverse_spacing[1]
+    h_inv = inverse_spacing(grid)[1]
     return SecondDerivative(h_inv, innerStencil, closureStencils, size(grid))
 end
 

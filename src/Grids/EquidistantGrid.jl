@@ -7,17 +7,15 @@
 export EquidistantGrid
 
 struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
-    size::NTuple{Dim, Int} # First coordinate direction stored first
+    size::NTuple{Dim, Int}
     limit_lower::NTuple{Dim, T}
     limit_upper::NTuple{Dim, T}
-    inverse_spacing::NTuple{Dim, T} # Reciprocal of grid spacing
 
     # General constructor
     function EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}) where Dim where T
         @assert all(size.>0)
         @assert all(limit_upper.-limit_lower .!= 0)
-        inverse_spacing = (size.-1)./ abs.(limit_upper.-limit_lower)
-        return new{Dim,T}(size, limit_lower, limit_upper, inverse_spacing)
+        return new{Dim,T}(size, limit_lower, limit_upper)
     end
 end
 
@@ -39,20 +37,23 @@ function dimension(grid::EquidistantGrid)
     return length(grid.size)
 end
 
-# Returns the reciprocal of the spacing of the grid
-#
-function inverse_spacing(grid::EquidistantGrid)
-    return grid.inverse_spacing
-end
-export inverse_spacing
 
-# Returns the reciprocal of the spacing of the grid
-#
+"""
+    spacing(grid::EquidistantGrid)
+
+The spacing between the grid points of the grid.
+"""
+spacing(grid::EquidistantGrid) = abs.(grid.limit_upper.-grid.limit_lower)./(grid.size.-1)
 # TODO: Evaluate if divisions affect performance
-function spacing(grid::EquidistantGrid)
-    return 1.0./grid.inverse_spacing
-end
 export spacing
+
+"""
+    spacing(grid::EquidistantGrid)
+
+The reciprocal of the spacing between the grid points of the grid.
+"""
+inverse_spacing(grid::EquidistantGrid) = 1 ./ spacing(grid)
+export inverse_spacing
 
 # Computes the points of an EquidistantGrid as an array of tuples with
 # the same dimension as the grid.
@@ -79,9 +80,3 @@ function restrict(grid::EquidistantGrid, dim)
     return EquidistantGrid(size, limit_lower, limit_upper)
 end
 export restrict
-
-function pointsalongdim(grid::EquidistantGrid, dim::Integer)
-    @assert dim<=dimension(grid)
-    @assert dim>0
-    points = collect(range(grid.limit_lower[dim],stop=grid.limit_upper[dim],length=grid.size[dim]))
-end
