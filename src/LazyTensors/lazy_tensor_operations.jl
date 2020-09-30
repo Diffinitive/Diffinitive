@@ -7,9 +7,9 @@ Allows the result of a `TensorMapping` applied to a vector to be treated as an `
 With a mapping `m` and a vector `v` the LazyTensorMappingApplication object can be created by `m*v`.
 The actual result will be calcualted when indexing into `m*v`.
 """
-struct LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
-    t::TensorMapping{T,R,D}
-    o::AbstractArray{T,D}
+struct LazyTensorMappingApplication{T,R,D, TM<:TensorMapping{T,R,D}, AA<:AbstractArray{T,D}} <: LazyArray{T,R}
+    t::TM
+    o::AA
 end
 # TODO: Do boundschecking on creation!
 export LazyTensorMappingApplication
