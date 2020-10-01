@@ -64,14 +64,14 @@ using Sbplib.LazyTensors
     # implies that L*v should be exact for v - monomial up to order 3.
     # Exact differentiation is measured point-wise. For other grid functions
     # the error is measured in the l2-norm.
-    @test all(abs.(collect(Dₓₓ*v0)) .<= equalitytol)
-    @test all(abs.(collect(Dₓₓ*v1)) .<= equalitytol)
-    @test all(abs.((collect(Dₓₓ*v2) - v0)) .<= equalitytol)
-    @test all(abs.((collect(Dₓₓ*v3) - v1)) .<= equalitytol)
-    e4 = collect(Dₓₓ*v4) - v2
-    e5 = collect(Dₓₓ*v5) + v5
-    @test sqrt(h*sum(collect(e4.^2))) <= accuracytol
-    @test sqrt(h*sum(collect(e5.^2))) <= accuracytol
+    @test all(abs.(Dₓₓ*v0) .<= equalitytol)
+    @test all(abs.(Dₓₓ*v1) .<= equalitytol)
+    @test all(abs.((Dₓₓ*v2 - v0)) .<= equalitytol)
+    @test all(abs.((Dₓₓ*v3 - v1)) .<= equalitytol)
+    e4 = Dₓₓ*v4 - v2
+    e5 = Dₓₓ*v5 + v5
+    @test sqrt(h*sum(e4.^2)) <= accuracytol
+    @test sqrt(h*sum(e5.^2)) <= accuracytol
 end
 
 @testset "Laplace2D" begin
@@ -110,16 +110,16 @@ end
     # implies that L*v should be exact for v - monomial up to order 3.
     # Exact differentiation is measured point-wise. For other grid functions
     # the error is measured in the H-norm.
-    @test all(abs.(collect(L*v0)) .<= equalitytol)
-    @test all(abs.(collect(L*v1)) .<= equalitytol)
-    @test all(collect(L*v2) .≈ v0) # Seems to be more accurate
-    @test all(abs.((collect(L*v3) - v1)) .<= equalitytol)
-    e4 = collect(L*v4) - v2
-    e5 = collect(L*v5) - v5ₓₓ
+    @test all(abs.(L*v0) .<= equalitytol)
+    @test all(abs.(L*v1) .<= equalitytol)
+    @test all(L*v2 .≈ v0) # Seems to be more accurate
+    @test all(abs.((L*v3 - v1)) .<= equalitytol)
+    e4 = L*v4 - v2
+    e5 = L*v5 - v5ₓₓ
 
     h = spacing(g)
-    @test sqrt(prod(h)*sum(collect(e4.^2))) <= accuracytol
-    @test sqrt(prod(h)*sum(collect(e5.^2))) <= accuracytol
+    @test sqrt(prod(h)*sum(e4.^2)) <= accuracytol
+    @test sqrt(prod(h)*sum(e5.^2)) <= accuracytol
 end
 
 @testset "DiagonalInnerProduct" begin
@@ -131,8 +131,8 @@ end
 
     @test H isa TensorMapping{T,1,1} where T
     @test H' isa TensorMapping{T,1,1} where T
-    @test sum(collect(H*v)) ≈ L
-    @test collect(H*v) == collect(H'*v)
+    @test sum(H*v) ≈ L
+    @test H*v == H'*v
 end
 
 @testset "Quadrature" begin
@@ -165,8 +165,8 @@ end
 
     @test Hi isa TensorMapping{T,1,1} where T
     @test Hi' isa TensorMapping{T,1,1} where T
-    @test collect(Hi*H*v)  ≈ v
-    @test collect(Hi*v) == collect(Hi'*v)
+    @test Hi*H*v  ≈ v
+    @test Hi*v == Hi'*v
 end
 
 @testset "InverseQuadrature" begin
@@ -181,8 +181,8 @@ end
 
     @test Qinv isa TensorMapping{T,2,2} where T
     @test Qinv' isa TensorMapping{T,2,2} where T
-    @test_broken collect(Qinv*(Q*v)) ≈ v
-    @test collect(Qinv*v) == collect(Qinv'*v)
+    @test_broken Qinv*(Q*v) ≈ v
+    @test Qinv*v == Qinv'*v
 end
 #
 # @testset "BoundaryValue" begin
@@ -214,10 +214,10 @@ end
 #     @test size(e_s'*v) == (4,)
 #     @test size(e_n'*v) == (4,)
 #
-#     @test collect(e_w'*v) == [10,7,4,1.0,1]
-#     @test collect(e_e'*v) == [13,10,7,4,4.0]
-#     @test collect(e_s'*v) == [10,11,12,13.0]
-#     @test collect(e_n'*v) == [1,2,3,4.0]
+#     @test e_w'*v == [10,7,4,1.0,1]
+#     @test e_e'*v == [13,10,7,4,4.0]
+#     @test e_s'*v == [10,11,12,13.0]
+#     @test e_n'*v == [1,2,3,4.0]
 #
 #     g_x = [1,2,3,4.0]
 #     g_y = [5,4,3,2,1.0]
@@ -240,10 +240,10 @@ end
 #     @test size(e_n*g_x) == (4,UnknownDim)
 #
 #     # These tests should be moved to where they are possible (i.e we know what the grid should be)
-#     @test_broken collect(e_w*g_y) == G_w
-#     @test_broken collect(e_e*g_y) == G_e
-#     @test_broken collect(e_s*g_x) == G_s
-#     @test_broken collect(e_n*g_x) == G_n
+#     @test_broken e_w*g_y == G_w
+#     @test_broken e_e*g_y == G_e
+#     @test_broken e_s*g_x == G_s
+#     @test_broken e_n*g_x == G_n
 # end
 #
 # @testset "NormalDerivative" begin
@@ -273,10 +273,10 @@ end
 #     @test size(d_s'*v) == (5,)
 #     @test size(d_n'*v) == (5,)
 #
-#     @test collect(d_w'*v) ≈ v∂x[1,:]
-#     @test collect(d_e'*v) ≈ v∂x[5,:]
-#     @test collect(d_s'*v) ≈ v∂y[:,1]
-#     @test collect(d_n'*v) ≈ v∂y[:,6]
+#     @test d_w'*v ≈ v∂x[1,:]
+#     @test d_e'*v ≈ v∂x[5,:]
+#     @test d_s'*v ≈ v∂y[:,1]
+#     @test d_n'*v ≈ v∂y[:,6]
 #
 #
 #     d_x_l = zeros(Float64, 5)
@@ -317,10 +317,10 @@ end
 #     @test size(d_n*g_x) == (5,UnknownDim)
 #
 #     # These tests should be moved to where they are possible (i.e we know what the grid should be)
-#     @test_broken collect(d_w*g_y) ≈ G_w
-#     @test_broken collect(d_e*g_y) ≈ G_e
-#     @test_broken collect(d_s*g_x) ≈ G_s
-#     @test_broken collect(d_n*g_x) ≈ G_n
+#     @test_broken d_w*g_y ≈ G_w
+#     @test_broken d_e*g_y ≈ G_e
+#     @test_broken d_s*g_x ≈ G_s
+#     @test_broken d_n*g_x ≈ G_n
 # end
 #
 # @testset "BoundaryQuadrature" begin
@@ -362,15 +362,15 @@ end
 #     @test size(H_s*v_s) == (10,)
 #     @test size(H_n*v_n) == (10,)
 #
-#     @test collect(H_w*v_w) ≈ q_y.*v_w
-#     @test collect(H_e*v_e) ≈ q_y.*v_e
-#     @test collect(H_s*v_s) ≈ q_x.*v_s
-#     @test collect(H_n*v_n) ≈ q_x.*v_n
+#     @test H_w*v_w ≈ q_y.*v_w
+#     @test H_e*v_e ≈ q_y.*v_e
+#     @test H_s*v_s ≈ q_x.*v_s
+#     @test H_n*v_n ≈ q_x.*v_n
 #
-#     @test collect(H_w'*v_w) == collect(H_w'*v_w)
-#     @test collect(H_e'*v_e) == collect(H_e'*v_e)
-#     @test collect(H_s'*v_s) == collect(H_s'*v_s)
-#     @test collect(H_n'*v_n) == collect(H_n'*v_n)
+#     @test H_w'*v_w == H_w'*v_w
+#     @test H_e'*v_e == H_e'*v_e
+#     @test H_s'*v_s == H_s'*v_s
+#     @test H_n'*v_n == H_n'*v_n
 # end
 
 end
