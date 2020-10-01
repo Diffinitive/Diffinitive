@@ -65,11 +65,10 @@ using Sbplib.LazyTensors
     @test Dₓₓ*v2 ≈ v0 atol=5e-11
     @test Dₓₓ*v3 ≈ v1 atol=5e-11
 
-    e4 = Dₓₓ*v4 - v2
-    e5 = Dₓₓ*v5 + v5
     h = spacing(g)[1];
-    @test sqrt(h*sum(e4.^2)) ≈ 0 atol=5e-4
-    @test sqrt(h*sum(e5.^2)) ≈ 0 atol=5e-4
+    l2(v) = sqrt(h*sum(v.^2))
+    @test Dₓₓ*v4 ≈ v2  atol=5e-4 norm=l2
+    @test Dₓₓ*v5 ≈ -v5 atol=5e-4 norm=l2
 end
 
 
@@ -108,12 +107,11 @@ end
     @test_broken L*v1 ≈ 0 atol=5e-11
     @test L*v2 ≈ v0 # Seems to be more accurate
     @test L*v3 ≈ v1 atol=5e-10
-    e4 = L*v4 - v2
-    e5 = L*v5 - v5ₓₓ
 
     h = spacing(g)
-    @test sqrt(prod(h)*sum(e4.^2)) ≈ 0 atol=5e-4
-    @test sqrt(prod(h)*sum(e5.^2)) ≈ 0 atol=5e-4
+    l2(v) = sqrt(prod(h)*sum(v.^2))
+    @test L*v4 ≈ v2   atol=5e-4 norm=l2
+    @test L*v5 ≈ v5ₓₓ atol=5e-4 norm=l2
 end
 
 @testset "DiagonalInnerProduct" begin
