@@ -32,9 +32,7 @@ using Sbplib.LazyTensors
 @testset "SecondDerivative" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     L = 3.5
-    g = EquidistantGrid((101,), (0.0,), (L,))
-    h_inv = inverse_spacing(g)
-    h = 1/h_inv[1];
+    g = EquidistantGrid(101, 0.0, L)
     Dₓₓ = SecondDerivative(g,op.innerStencil,op.closureStencils)
 
     f0(x::Float64) = 1.
@@ -66,8 +64,10 @@ using Sbplib.LazyTensors
     @test_broken Dₓₓ*v1 ≈ 0.0 atol=5e-11
     @test Dₓₓ*v2 ≈ v0 atol=5e-11
     @test Dₓₓ*v3 ≈ v1 atol=5e-11
+
     e4 = Dₓₓ*v4 - v2
     e5 = Dₓₓ*v5 + v5
+    h = spacing(g)[1];
     @test sqrt(h*sum(e4.^2)) ≈ 0 atol=5e-4
     @test sqrt(h*sum(e5.^2)) ≈ 0 atol=5e-4
 end
@@ -119,7 +119,7 @@ end
 @testset "DiagonalInnerProduct" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     L = 2.3
-    g = EquidistantGrid((77,), (0.0,), (L,))
+    g = EquidistantGrid(77, 0.0, L)
     H = DiagonalInnerProduct(g,op.quadratureClosure)
     v = ones(Float64, size(g))
 
@@ -152,7 +152,7 @@ end
 @testset "InverseDiagonalInnerProduct" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     L = 2.3
-    g = EquidistantGrid((77,), (0.0,), (L,))
+    g = EquidistantGrid(77, 0.0, L)
     H = DiagonalInnerProduct(g, op.quadratureClosure)
     Hi = InverseDiagonalInnerProduct(g,op.quadratureClosure)
     v = evalOn(g, x->sin(x))
