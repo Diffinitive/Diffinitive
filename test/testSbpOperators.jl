@@ -58,20 +58,18 @@ using Sbplib.LazyTensors
     # TODO: Should perhaps set tolerance level for isapporx instead?
     #       Are these tolerance levels resonable or should tests be constructed
     #       differently?
-    equalitytol = 0.5*1e-10
-    accuracytol = 0.5*1e-3
     # 4th order interior stencil, 2nd order boundary stencil,
     # implies that L*v should be exact for v - monomial up to order 3.
     # Exact differentiation is measured point-wise. For other grid functions
     # the error is measured in the l2-norm.
-    @test all(abs.(Dₓₓ*v0) .<= equalitytol)
-    @test all(abs.(Dₓₓ*v1) .<= equalitytol)
-    @test all(abs.((Dₓₓ*v2 - v0)) .<= equalitytol)
-    @test all(abs.((Dₓₓ*v3 - v1)) .<= equalitytol)
+    @test all(abs.(Dₓₓ*v0) .<= 5e-11)
+    @test all(abs.(Dₓₓ*v1) .<= 5e-11)
+    @test all(abs.((Dₓₓ*v2 - v0)) .<= 5e-11)
+    @test all(abs.((Dₓₓ*v3 - v1)) .<= 5e-11)
     e4 = Dₓₓ*v4 - v2
     e5 = Dₓₓ*v5 + v5
-    @test sqrt(h*sum(e4.^2)) <= accuracytol
-    @test sqrt(h*sum(e5.^2)) <= accuracytol
+    @test sqrt(h*sum(e4.^2)) <= 5e-4
+    @test sqrt(h*sum(e5.^2)) <= 5e-4
 end
 
 @testset "Laplace2D" begin
@@ -104,22 +102,20 @@ end
     # TODO: Should perhaps set tolerance level for isapporx instead?
     #       Are these tolerance levels resonable or should tests be constructed
     #       differently?
-    equalitytol = 5e-11
-    accuracytol = 5e-4
     # 4th order interior stencil, 2nd order boundary stencil,
     # implies that L*v should be exact for v - monomial up to order 3.
     # Exact differentiation is measured point-wise. For other grid functions
     # the error is measured in the H-norm.
-    @test all(abs.(L*v0) .<= equalitytol)
-    @test all(abs.(L*v1) .<= equalitytol)
+    @test all(abs.(L*v0) .<= 5e-11)
+    @test all(abs.(L*v1) .<= 5e-11)
     @test all(L*v2 .≈ v0) # Seems to be more accurate
-    @test all(abs.((L*v3 - v1)) .<= equalitytol)
+    @test all(abs.((L*v3 - v1)) .<= 5e-11)
     e4 = L*v4 - v2
     e5 = L*v5 - v5ₓₓ
 
     h = spacing(g)
-    @test sqrt(prod(h)*sum(e4.^2)) <= accuracytol
-    @test sqrt(prod(h)*sum(e5.^2)) <= accuracytol
+    @test sqrt(prod(h)*sum(e4.^2)) <= 5e-4
+    @test sqrt(prod(h)*sum(e5.^2)) <= 5e-4
 end
 
 @testset "DiagonalInnerProduct" begin
