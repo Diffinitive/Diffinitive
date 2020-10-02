@@ -193,8 +193,6 @@ end
     @test_throws DimensionMismatch v1 + v2
 end
 
-end
-
 
 @testset "LazyFunctionArray" begin
     @test LazyFunctionArray(i->i^2, (3,)) == [1,4,9]
@@ -217,17 +215,24 @@ end
 
 @testset "LazyLinearMap" begin
     A = rand(3,4)
-    B = rand(3,4,2)
+	B = rand(3,4,2)
     v = rand(4)
 
-    @test LazyLinearMap(A, (1,), (2,)) isa LazyLinearMap{T,1,1} where T
-    @test LazyLinearMap(A, (1,), (2,)) isa TensorMapping{T,1,1} where T
-    @test LazyLinearMap(B, (1,2), (3,)) isa TensorMapping{T,2,1} where T
-    @test LazyLinearMap(B, (2), (3,1)) isa TensorMapping{T,1,2} where T
+	Ã = LazyLinearMap(A, (1,), (2,))
+    @test Ã isa LazyLinearMap{T,1,1} where T
+    @test Ã isa TensorMapping{T,1,1} where T
 
+	@test Ã*ones(4) ≈ A*ones(4) atol=5e-13
+	@test Ã*v ≈ A*v atol=5e-13
 
-    @test LazyLinearMap(A, (1,), (2,))*ones(4) == A*ones(4)
-    @test LazyLinearMap(A, (1,), (2,))*v == A*v
+	B̃_21 = LazyLinearMap(B, (1,2), (3,))
+	B̃_12 = LazyLinearMap(B, (2,), (3,1))
+	@test B̃_21 isa TensorMapping{T,2,1} where T
+    @test B̃_12 isa TensorMapping{T,1,2} where T
+	@test B̃_21*ones(2) ≈ B[:,:,1] + B[:,:,2] atol=5e-13
+	@test B̃_12*ones(3,2) ≈ B[1,:,1] + B[2,:,1] + B[3,:,1] +
+						   B[1,:,2] + B[2,:,2] + B[3,:,2] atol=5e-13
+
 end
 
 end

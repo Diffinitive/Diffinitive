@@ -113,8 +113,8 @@ struct LazyLinearMap{T,R,D, RD, AA<:AbstractArray{T,RD}} <: TensorMapping{T,R,D}
 end
 export LazyLinearMap
 
-range_size(llm::LazyLinearMap) = size(llm.A)[llm.range_indicies...]
-domain_size(llm::LazyLinearMap) = size(llm.A)[llm.domain_indicies...]
+range_size(llm::LazyLinearMap) = size(llm.A)[[llm.range_indicies...]]
+domain_size(llm::LazyLinearMap) = size(llm.A)[[llm.domain_indicies...]]
 
 function apply(llm::LazyLinearMap{T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index,R}) where {T,R,D}
     view_index = ntuple(i->:,ndims(llm.A))
@@ -126,4 +126,3 @@ function apply(llm::LazyLinearMap{T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index
 
     return sum(A_view.*v)
 end
-
