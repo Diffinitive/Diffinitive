@@ -118,15 +118,15 @@ end
 end
 
 @testset "LazyArray" begin
-	@testset "LazyConstantArray" begin
-	    @test LazyTensors.LazyConstantArray(3,(3,2)) isa LazyArray{Int,2}
+    @testset "LazyConstantArray" begin
+        @test LazyTensors.LazyConstantArray(3,(3,2)) isa LazyArray{Int,2}
 
-	    lca = LazyTensors.LazyConstantArray(3.0,(3,2))
-	    @test eltype(lca) == Float64
-	    @test ndims(lca) == 2
-	    @test size(lca) == (3,2)
-	    @test lca[2] == 3.0
-	end
+        lca = LazyTensors.LazyConstantArray(3.0,(3,2))
+        @test eltype(lca) == Float64
+        @test ndims(lca) == 2
+        @test size(lca) == (3,2)
+        @test lca[2] == 3.0
+    end
     struct DummyArray{T,D, T1<:AbstractArray{T,D}} <: LazyArray{T,D}
         data::T1
     end
@@ -214,24 +214,35 @@ end
 end
 
 @testset "LazyLinearMap" begin
+    # Test a standard matrix-vector product
+    # mapping vectors of size 4 to vectors of size 3.
     A = rand(3,4)
-	B = rand(3,4,2)
     v = rand(4)
 
-	Ã = LazyLinearMap(A, (1,), (2,))
+    Ã = LazyLinearMap(A, (1,), (2,))
     @test Ã isa LazyLinearMap{T,1,1} where T
     @test Ã isa TensorMapping{T,1,1} where T
 
-	@test Ã*ones(4) ≈ A*ones(4) atol=5e-13
-	@test Ã*v ≈ A*v atol=5e-13
+    @test Ã*ones(4) ≈ A*ones(4) atol=5e-13
+    @test Ã*v ≈ A*v atol=5e-13
 
-	B̃_21 = LazyLinearMap(B, (1,2), (3,))
-	B̃_12 = LazyLinearMap(B, (2,), (3,1))
-	@test B̃_21 isa TensorMapping{T,2,1} where T
-    @test B̃_12 isa TensorMapping{T,1,2} where T
-	@test B̃_21*ones(2) ≈ B[:,:,1] + B[:,:,2] atol=5e-13
-	@test B̃_12*ones(3,2) ≈ B[1,:,1] + B[2,:,1] + B[3,:,1] +
-						   B[1,:,2] + B[2,:,2] + B[3,:,2] atol=5e-13
+    # Test more exotic mappings
+    B = rand(3,4,2)
+    # Map vectors of size 2 to matrices of size (3,4)
+    v = rand(2)
+    B̃ = LazyLinearMap(B, (1,2), (3,))
+    @test B̃ isa TensorMapping{T,2,1} where T
+    @test B̃*ones(2) ≈ B[:,:,1] + B[:,:,2] atol=5e-13
+    @test B̃*v ≈ B[:,:,1]*v[1] + B[:,:,2]*v[2] atol=5e-13
+
+    # Map matrices of size (3,2) to vectors of size 4
+    B̃ = LazyLinearMap(B, (2,), (3,1))
+    v = rand(3,2)
+    @test B̃ isa TensorMapping{T,1,2} where T
+    @test B̃*ones(3,2) ≈ B[1,:,1] + B[2,:,1] + B[3,:,1] +
+                        B[1,:,2] + B[2,:,2] + B[3,:,2] atol=5e-13
+    @test B̃*v ≈ B[1,:,1]*v[1,1] + B[2,:,1]*v[2,1] + B[3,:,1]*v[3,1] +
+                B[1,:,2]v[1,2] + B[2,:,2]*v[2,2] + B[3,:,2]*v[3,2] atol=5e-13
 
 end
 

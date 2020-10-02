@@ -101,7 +101,7 @@ Base.:-(tm1::TensorMapping{T,R,D}, tm2::TensorMapping{T,R,D}) where {T,R,D} = La
 
 # export →
 """
-    LazyLinearMap{T,R,D,...}(A, range_indicies, )
+    LazyLinearMap{T,R,D,...}(A, range_indicies, domain_indicies)
 
 TensorMapping defined by the AbstractArray A. `range_indicies` and `domain_indicies` define which indicies of A should
 be considerd the range and domain of the TensorMapping.
@@ -121,8 +121,6 @@ function apply(llm::LazyLinearMap{T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index
     for i ∈ 1:R
         view_index = Base.setindex(view_index, Int(I[i]), llm.range_indicies[i])
     end
-
     A_view = @view llm.A[view_index...]
-
     return sum(A_view.*v)
 end
