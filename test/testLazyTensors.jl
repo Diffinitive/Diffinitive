@@ -217,11 +217,13 @@ end
     # Test a standard matrix-vector product
     # mapping vectors of size 4 to vectors of size 3.
     A = rand(3,4)
+    Ã = LazyLinearMap(A, (1,), (2,))
     v = rand(4)
 
-    Ã = LazyLinearMap(A, (1,), (2,))
     @test Ã isa LazyLinearMap{T,1,1} where T
     @test Ã isa TensorMapping{T,1,1} where T
+    @test range_size(Ã) == (3,)
+    @test domain_size(Ã) == (4,)
 
     @test Ã*ones(4) ≈ A*ones(4) atol=5e-13
     @test Ã*v ≈ A*v atol=5e-13
@@ -229,15 +231,21 @@ end
     # Test more exotic mappings
     B = rand(3,4,2)
     # Map vectors of size 2 to matrices of size (3,4)
-    v = rand(2)
     B̃ = LazyLinearMap(B, (1,2), (3,))
+    v = rand(2)
+
+    @test range_size(B̃) == (3,4)
+    @test domain_size(B̃) == (2,)
     @test B̃ isa TensorMapping{T,2,1} where T
     @test B̃*ones(2) ≈ B[:,:,1] + B[:,:,2] atol=5e-13
     @test B̃*v ≈ B[:,:,1]*v[1] + B[:,:,2]*v[2] atol=5e-13
 
     # Map matrices of size (3,2) to vectors of size 4
-    B̃ = LazyLinearMap(B, (2,), (3,1))
+    B̃ = LazyLinearMap(B, (2,), (1,3))
     v = rand(3,2)
+
+    @test range_size(B̃) == (4,)
+    @test domain_size(B̃) == (3,2)
     @test B̃ isa TensorMapping{T,1,2} where T
     @test B̃*ones(3,2) ≈ B[1,:,1] + B[2,:,1] + B[3,:,1] +
                         B[1,:,2] + B[2,:,2] + B[3,:,2] atol=5e-13
