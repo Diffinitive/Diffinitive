@@ -36,13 +36,13 @@ using LinearAlgebra
     g = EquidistantGrid(101, 0.0, L)
     Dₓₓ = SecondDerivative(g,op.innerStencil,op.closureStencils)
 
-    f0(x::Float64) = 1.
-    f1(x::Float64) = x
-    f2(x::Float64) = 1/2*x^2
-    f3(x::Float64) = 1/6*x^3
-    f4(x::Float64) = 1/24*x^4
-    f5(x::Float64) = sin(x)
-    f5ₓₓ(x::Float64) = -f5(x)
+    f0(x) = 1.
+    f1(x) = x
+    f2(x) = 1/2*x^2
+    f3(x) = 1/6*x^3
+    f4(x) = 1/24*x^4
+    f5(x) = sin(x)
+    f5ₓₓ(x) = -f5(x)
 
     v0 = evalOn(g,f0)
     v1 = evalOn(g,f1)
@@ -81,13 +81,13 @@ end
     L = Laplace(g, op.innerStencil, op.closureStencils)
 
 
-    f0(x::Float64,y::Float64) = 2.
-    f1(x::Float64,y::Float64) = x+y
-    f2(x::Float64,y::Float64) = 1/2*x^2 + 1/2*y^2
-    f3(x::Float64,y::Float64) = 1/6*x^3 + 1/6*y^3
-    f4(x::Float64,y::Float64) = 1/24*x^4 + 1/24*y^4
-    f5(x::Float64,y::Float64) = sin(x) + cos(y)
-    f5ₓₓ(x::Float64,y::Float64) = -f5(x,y)
+    f0(x,y) = 2.
+    f1(x,y) = x+y
+    f2(x,y) = 1/2*x^2 + 1/2*y^2
+    f3(x,y) = 1/6*x^3 + 1/6*y^3
+    f4(x,y) = 1/24*x^4 + 1/24*y^4
+    f5(x,y) = sin(x) + cos(y)
+    f5ₓₓ(x,y) = -f5(x,y)
 
     v0 = evalOn(g,f0)
     v1 = evalOn(g,f1)
