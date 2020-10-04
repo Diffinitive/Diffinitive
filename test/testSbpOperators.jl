@@ -3,6 +3,7 @@ using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
+using LinearAlgebra
 
 # TODO: Remove collects for all the tests with TensorApplications
 
@@ -60,8 +61,8 @@ using Sbplib.LazyTensors
     # implies that L*v should be exact for v - monomial up to order 3.
     # Exact differentiation is measured point-wise. For other grid functions
     # the error is measured in the l2-norm.
-    @test_broken Dₓₓ*v0 ≈ 0.0 atol=5e-11
-    @test_broken Dₓₓ*v1 ≈ 0.0 atol=5e-11
+    @test norm(Dₓₓ*v0) ≈ 0.0 atol=5e-10
+    @test norm(Dₓₓ*v1) ≈ 0.0 atol=5e-10
     @test Dₓₓ*v2 ≈ v0 atol=5e-11
     @test Dₓₓ*v3 ≈ v1 atol=5e-11
 
@@ -103,8 +104,8 @@ end
     # implies that L*v should be exact for v - monomial up to order 3.
     # Exact differentiation is measured point-wise. For other grid functions
     # the error is measured in the H-norm.
-    @test_broken L*v0 ≈ 0 atol=5e-11
-    @test_broken L*v1 ≈ 0 atol=5e-11
+    @test norm(L*v0) ≈ 0 atol=5e-10
+    @test norm(L*v1) ≈ 0 atol=5e-10
     @test L*v2 ≈ v0 # Seems to be more accurate
     @test L*v3 ≈ v1 atol=5e-10
 
