@@ -5,8 +5,6 @@ using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using LinearAlgebra
 
-# TODO: Remove collects for all the tests with TensorApplications
-
 @testset "SbpOperators" begin
 
 # @testset "apply_quadrature" begin
@@ -54,9 +52,6 @@ using LinearAlgebra
     @test Dₓₓ isa TensorMapping{T,1,1} where T
     @test Dₓₓ' isa TensorMapping{T,1,1} where T
 
-    # TODO: Should perhaps set tolerance level for isapporx instead?
-    #       Are these tolerance levels resonable or should tests be constructed
-    #       differently?
     # 4th order interior stencil, 2nd order boundary stencil,
     # implies that L*v should be exact for v - monomial up to order 3.
     # Exact differentiation is measured point-wise. For other grid functions
