@@ -228,6 +228,9 @@ end
     @test Ã*ones(4) ≈ A*ones(4) atol=5e-13
     @test Ã*v ≈ A*v atol=5e-13
 
+    A = rand(2,3,4)
+    @test_throws DomainError LazyLinearMap(A, (3,1), (2,))
+
     # Test more exotic mappings
     B = rand(3,4,2)
     # Map vectors of size 2 to matrices of size (3,4)

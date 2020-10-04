@@ -114,6 +114,14 @@ struct LazyLinearMap{T,R,D, RD, AA<:AbstractArray{T,RD}} <: TensorMapping{T,R,D}
     A::AA
     range_indicies::NTuple{R,Int}
     domain_indicies::NTuple{D,Int}
+
+    function LazyLinearMap(A::AA, range_indicies::NTuple{R,Int}, domain_indicies::NTuple{D,Int}) where {T,R,D, RD, AA<:AbstractArray{T,RD}}
+        if !issorted(range_indicies) || !issorted(domain_indicies)
+            throw(DomainError("range_indicies and domain_indicies must be sorted in ascending order"))
+        end
+
+        return new{T,R,D,RD,AA}(A,range_indicies,domain_indicies)
+    end
 end
 export LazyLinearMap
 
