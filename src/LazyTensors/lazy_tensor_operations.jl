@@ -104,11 +104,10 @@ Base.:-(tm1::TensorMapping{T,R,D}, tm2::TensorMapping{T,R,D}) where {T,R,D} = La
     LazyLinearMap{T,R,D,...}(A, range_indicies, domain_indicies)
 
 TensorMapping defined by the AbstractArray A. `range_indicies` and `domain_indicies` define which indicies of A should
-be considerd the range and domain of the TensorMapping.
+be considerd the range and domain of the TensorMapping. Each set of indices must be ordered in ascending order.
 
-When the LazyLinearMap is applied to a vector size domain_size the
-map sums over the dimensions orthogonal to those specified in range_indicies resulting
-in a vector of size range_size.
+For instance, if A is a m x n matrix, and range_size = (1,), domain_size = (2,), then the LazyLinearMap performs the
+standard matrix-vector product on vectors of size n.
 """
 struct LazyLinearMap{T,R,D, RD, AA<:AbstractArray{T,RD}} <: TensorMapping{T,R,D}
     A::AA
