@@ -13,8 +13,9 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
 
     # General constructor
     function EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}) where Dim where T
-        @assert all(size.>0)
-        @assert all(limit_upper.-limit_lower .!= 0)
+        all(size.>0) || throw(DomainError("size must be postive"))
+        # TODO: Is it reasonable to restrict side lengths to be positive?
+        all(limit_upper.-limit_lower .> 0) || throw(DomainError("side lengths must be postive"))
         return new{Dim,T}(size, limit_lower, limit_upper)
     end
 end
@@ -43,8 +44,8 @@ end
 
 The spacing between the grid points of the grid.
 """
+# TODO: If we restrict side lenghts to be positive, then we should remove the abs here.
 spacing(grid::EquidistantGrid) = abs.(grid.limit_upper.-grid.limit_lower)./(grid.size.-1)
-# TODO: Evaluate if divisions affect performance
 export spacing
 
 """
@@ -60,6 +61,7 @@ export inverse_spacing
 #
 # @Input: grid - an EquidistantGrid
 # @Return: points - the points of the grid.
+# TODO: Does not work if side lengths are allowed to be negative.
 function points(grid::EquidistantGrid)
     # TODO: Make this return an abstract array?
     indices = Tuple.(CartesianIndices(grid.size))
