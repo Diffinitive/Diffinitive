@@ -36,12 +36,9 @@ using Test
          (-0.5,0.)     (-0.5,7.11/2)  (-0.5,7.11);
          (-0.25,0.)    (-0.25,7.11/2) (-0.25,7.11);
          (0.,0.)       (0.,7.11/2)    (0.,7.11)]
-    approxequal = true;
     for i ∈ eachindex(gp)
-        approxequal=approxequal&&all(isapprox.(gp[i],p[i], atol=5e-13));
+        @test [gp[i]...] ≈ [p[i]...] atol=5e-13
     end
-    @test approxequal == true
-
 
     # restrict
     g = EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))
