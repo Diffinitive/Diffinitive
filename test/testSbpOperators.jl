@@ -3,8 +3,7 @@ using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
-
-# TODO: Remove collects for all the tests with TensorApplications
+using LinearAlgebra
 
 @testset "SbpOperators" begin
 
@@ -32,18 +31,16 @@ using Sbplib.LazyTensors
 @testset "SecondDerivative" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     L = 3.5
-    g = EquidistantGrid((101,), (0.0,), (L,))
-    h_inv = inverse_spacing(g)
-    h = 1/h_inv[1];
+    g = EquidistantGrid(101, 0.0, L)
     Dₓₓ = SecondDerivative(g,op.innerStencil,op.closureStencils)
 
-    f0(x::Float64) = 1.
-    f1(x::Float64) = x
-    f2(x::Float64) = 1/2*x^2
-    f3(x::Float64) = 1/6*x^3
-    f4(x::Float64) = 1/24*x^4
-    f5(x::Float64) = sin(x)
-    f5ₓₓ(x::Float64) = -f5(x)
+    f0(x) = 1.
+    f1(x) = x
+    f2(x) = 1/2*x^2
+    f3(x) = 1/6*x^3
+    f4(x) = 1/24*x^4
+    f5(x) = sin(x)
+    f5ₓₓ(x) = -f5(x)
 
     v0 = evalOn(g,f0)
     v1 = evalOn(g,f1)
@@ -55,24 +52,21 @@ using Sbplib.LazyTensors
     @test Dₓₓ isa TensorMapping{T,1,1} where T
     @test Dₓₓ' isa TensorMapping{T,1,1} where T
 
-    # TODO: Should perhaps set tolerance level for isapporx instead?
-    #       Are these tolerance levels resonable or should tests be constructed
-    #       differently?
-    equalitytol = 0.5*1e-10
-    accuracytol = 0.5*1e-3
     # 4th order interior stencil, 2nd order boundary stencil,
     # implies that L*v should be exact for v - monomial up to order 3.
     # Exact differentiation is measured point-wise. For other grid functions
     # the error is measured in the l2-norm.
-    @test all(abs.(collect(Dₓₓ*v0)) .<= equalitytol)
-    @test all(abs.(collect(Dₓₓ*v1)) .<= equalitytol)
-    @test all(abs.((collect(Dₓₓ*v2) - v0)) .<= equalitytol)
-    @test all(abs.((collect(Dₓₓ*v3) - v1)) .<= equalitytol)
-    e4 = collect(Dₓₓ*v4) - v2
-    e5 = collect(Dₓₓ*v5) + v5
-    @test sqrt(h*sum(collect(e4.^2))) <= accuracytol
-    @test sqrt(h*sum(collect(e5.^2))) <= accuracytol
+    @test norm(Dₓₓ*v0) ≈ 0.0 atol=5e-10
+    @test norm(Dₓₓ*v1) ≈ 0.0 atol=5e-10
+    @test Dₓₓ*v2 ≈ v0 atol=5e-11
+    @test Dₓₓ*v3 ≈ v1 atol=5e-11
+
+    h = spacing(g)[1];
+    l2(v) = sqrt(h*sum(v.^2))
+    @test Dₓₓ*v4 ≈ v2  atol=5e-4 norm=l2
+    @test Dₓₓ*v5 ≈ -v5 atol=5e-4 norm=l2
 end
+
 
 @testset "Laplace2D" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
@@ -82,13 +76,13 @@ end
     L = Laplace(g, op.innerStencil, op.closureStencils)
 
 
-    f0(x::Float64,y::Float64) = 2.
-    f1(x::Float64,y::Float64) = x+y
-    f2(x::Float64,y::Float64) = 1/2*x^2 + 1/2*y^2
-    f3(x::Float64,y::Float64) = 1/6*x^3 + 1/6*y^3
-    f4(x::Float64,y::Float64) = 1/24*x^4 + 1/24*y^4
-    f5(x::Float64,y::Float64) = sin(x) + cos(y)
-    f5ₓₓ(x::Float64,y::Float64) = -f5(x,y)
+    f0(x,y) = 2.
+    f1(x,y) = x+y
+    f2(x,y) = 1/2*x^2 + 1/2*y^2
+    f3(x,y) = 1/6*x^3 + 1/6*y^3
+    f4(x,y) = 1/24*x^4 + 1/24*y^4
+    f5(x,y) = sin(x) + cos(y)
+    f5ₓₓ(x,y) = -f5(x,y)
 
     v0 = evalOn(g,f0)
     v1 = evalOn(g,f1)
@@ -101,38 +95,32 @@ end
     @test L isa TensorMapping{T,2,2} where T
     @test L' isa TensorMapping{T,2,2} where T
 
-    # TODO: Should perhaps set tolerance level for isapporx instead?
-    #       Are these tolerance levels resonable or should tests be constructed
-    #       differently?
-    equalitytol = 0.5*1e-10
-    accuracytol = 0.5*1e-3
     # 4th order interior stencil, 2nd order boundary stencil,
     # implies that L*v should be exact for v - monomial up to order 3.
     # Exact differentiation is measured point-wise. For other grid functions
     # the error is measured in the H-norm.
-    @test all(abs.(collect(L*v0)) .<= equalitytol)
-    @test all(abs.(collect(L*v1)) .<= equalitytol)
-    @test all(collect(L*v2) .≈ v0) # Seems to be more accurate
-    @test all(abs.((collect(L*v3) - v1)) .<= equalitytol)
-    e4 = collect(L*v4) - v2
-    e5 = collect(L*v5) - v5ₓₓ
+    @test norm(L*v0) ≈ 0 atol=5e-10
+    @test norm(L*v1) ≈ 0 atol=5e-10
+    @test L*v2 ≈ v0 # Seems to be more accurate
+    @test L*v3 ≈ v1 atol=5e-10
 
     h = spacing(g)
-    @test sqrt(prod(h)*sum(collect(e4.^2))) <= accuracytol
-    @test sqrt(prod(h)*sum(collect(e5.^2))) <= accuracytol
+    l2(v) = sqrt(prod(h)*sum(v.^2))
+    @test L*v4 ≈ v2   atol=5e-4 norm=l2
+    @test L*v5 ≈ v5ₓₓ atol=5e-4 norm=l2
 end
 
 @testset "DiagonalInnerProduct" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     L = 2.3
-    g = EquidistantGrid((77,), (0.0,), (L,))
+    g = EquidistantGrid(77, 0.0, L)
     H = DiagonalInnerProduct(g,op.quadratureClosure)
     v = ones(Float64, size(g))
 
     @test H isa TensorMapping{T,1,1} where T
     @test H' isa TensorMapping{T,1,1} where T
-    @test sum(collect(H*v)) ≈ L
-    @test collect(H*v) == collect(H'*v)
+    @test sum(H*v) ≈ L
+    @test H*v == H'*v
 end
 
 @testset "Quadrature" begin
@@ -158,15 +146,15 @@ end
 @testset "InverseDiagonalInnerProduct" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
     L = 2.3
-    g = EquidistantGrid((77,), (0.0,), (L,))
+    g = EquidistantGrid(77, 0.0, L)
     H = DiagonalInnerProduct(g, op.quadratureClosure)
     Hi = InverseDiagonalInnerProduct(g,op.quadratureClosure)
     v = evalOn(g, x->sin(x))
 
     @test Hi isa TensorMapping{T,1,1} where T
     @test Hi' isa TensorMapping{T,1,1} where T
-    @test collect(Hi*H*v)  ≈ v
-    @test collect(Hi*v) == collect(Hi'*v)
+    @test Hi*H*v ≈ v
+    @test Hi*v == Hi'*v
 end
 
 @testset "InverseQuadrature" begin
@@ -181,8 +169,8 @@ end
 
     @test Qinv isa TensorMapping{T,2,2} where T
     @test Qinv' isa TensorMapping{T,2,2} where T
-    @test_broken collect(Qinv*(Q*v)) ≈ v
-    @test collect(Qinv*v) == collect(Qinv'*v)
+    @test_broken Qinv*(Q*v) ≈ v
+    @test Qinv*v == Qinv'*v
 end
 #
 # @testset "BoundaryValue" begin
@@ -214,10 +202,10 @@ end
 #     @test size(e_s'*v) == (4,)
 #     @test size(e_n'*v) == (4,)
 #
-#     @test collect(e_w'*v) == [10,7,4,1.0,1]
-#     @test collect(e_e'*v) == [13,10,7,4,4.0]
-#     @test collect(e_s'*v) == [10,11,12,13.0]
-#     @test collect(e_n'*v) == [1,2,3,4.0]
+#     @test e_w'*v == [10,7,4,1.0,1]
+#     @test e_e'*v == [13,10,7,4,4.0]
+#     @test e_s'*v == [10,11,12,13.0]
+#     @test e_n'*v == [1,2,3,4.0]
 #
 #     g_x = [1,2,3,4.0]
 #     g_y = [5,4,3,2,1.0]
@@ -240,10 +228,10 @@ end
 #     @test size(e_n*g_x) == (4,UnknownDim)
 #
 #     # These tests should be moved to where they are possible (i.e we know what the grid should be)
-#     @test_broken collect(e_w*g_y) == G_w
-#     @test_broken collect(e_e*g_y) == G_e
-#     @test_broken collect(e_s*g_x) == G_s
-#     @test_broken collect(e_n*g_x) == G_n
+#     @test_broken e_w*g_y == G_w
+#     @test_broken e_e*g_y == G_e
+#     @test_broken e_s*g_x == G_s
+#     @test_broken e_n*g_x == G_n
 # end
 #
 # @testset "NormalDerivative" begin
@@ -273,10 +261,10 @@ end
 #     @test size(d_s'*v) == (5,)
 #     @test size(d_n'*v) == (5,)
 #
-#     @test collect(d_w'*v) ≈ v∂x[1,:]
-#     @test collect(d_e'*v) ≈ v∂x[5,:]
-#     @test collect(d_s'*v) ≈ v∂y[:,1]
-#     @test collect(d_n'*v) ≈ v∂y[:,6]
+#     @test d_w'*v .≈ v∂x[1,:]
+#     @test d_e'*v .≈ v∂x[5,:]
+#     @test d_s'*v .≈ v∂y[:,1]
+#     @test d_n'*v .≈ v∂y[:,6]
 #
 #
 #     d_x_l = zeros(Float64, 5)
@@ -317,10 +305,10 @@ end
 #     @test size(d_n*g_x) == (5,UnknownDim)
 #
 #     # These tests should be moved to where they are possible (i.e we know what the grid should be)
-#     @test_broken collect(d_w*g_y) ≈ G_w
-#     @test_broken collect(d_e*g_y) ≈ G_e
-#     @test_broken collect(d_s*g_x) ≈ G_s
-#     @test_broken collect(d_n*g_x) ≈ G_n
+#     @test_broken d_w*g_y .≈ G_w
+#     @test_broken d_e*g_y .≈ G_e
+#     @test_broken d_s*g_x .≈ G_s
+#     @test_broken d_n*g_x .≈ G_n
 # end
 #
 # @testset "BoundaryQuadrature" begin
@@ -362,15 +350,15 @@ end
 #     @test size(H_s*v_s) == (10,)
 #     @test size(H_n*v_n) == (10,)
 #
-#     @test collect(H_w*v_w) ≈ q_y.*v_w
-#     @test collect(H_e*v_e) ≈ q_y.*v_e
-#     @test collect(H_s*v_s) ≈ q_x.*v_s
-#     @test collect(H_n*v_n) ≈ q_x.*v_n
+#     @test H_w*v_w .≈ q_y.*v_w
+#     @test H_e*v_e .≈ q_y.*v_e
+#     @test H_s*v_s .≈ q_x.*v_s
+#     @test H_n*v_n .≈ q_x.*v_n
 #
-#     @test collect(H_w'*v_w) == collect(H_w'*v_w)
-#     @test collect(H_e'*v_e) == collect(H_e'*v_e)
-#     @test collect(H_s'*v_s) == collect(H_s'*v_s)
-#     @test collect(H_n'*v_n) == collect(H_n'*v_n)
+#     @test H_w'*v_w == H_w'*v_w
+#     @test H_e'*v_e == H_e'*v_e
+#     @test H_s'*v_s == H_s'*v_s
+#     @test H_n'*v_n == H_n'*v_n
 # end
 
 end
