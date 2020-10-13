@@ -1,11 +1,12 @@
-# EquidistantGrid is a grid with equidistant grid spacing per coordinat
-# direction. The domain is defined through the two points P1 = x̄₁, P2 = x̄₂
-# by the exterior product of the vectors obtained by projecting (x̄₂-x̄₁) onto
-# the coordinate directions. E.g for a 2D grid with x̄₁=(-1,0) and x̄₂=(1,2)
-# the domain is defined as (-1,1)x(0,2).
+"""
+    EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}
 
-export EquidistantGrid
-
+EquidistantGrid is a grid with equidistant grid spacing per coordinat direction.
+The domain is defined through the two points P1 = x̄₁, P2 = x̄₂ by the exterior
+product of the vectors obtained by projecting (x̄₂-x̄₁) onto the coordinate
+directions. E.g for a 2D grid with x̄₁=(-1,0) and x̄₂=(1,2) the domain is defined
+as (-1,1)x(0,2). The side lengths of the grid are not allowed to be negative
+"""
 struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
     size::NTuple{Dim, Int}
     limit_lower::NTuple{Dim, T}
@@ -13,13 +14,23 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
 
     # General constructor
     function EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}) where Dim where T
-        all(size.>0) || throw(DomainError("size must be postive"))
-        # TODO: Is it reasonable to restrict side lengths to be positive?
-        all(limit_upper.-limit_lower .> 0) || throw(DomainError("side lengths must be postive"))
+        if any(size .<= 0)
+            throw(DomainError("all components of size must be postive"))
+        end
+        if any(limit_upper.-limit_lower .<= 0)
+            throw(DomainError("all side lengths must be postive"))
+        end
         return new{Dim,T}(size, limit_lower, limit_upper)
     end
 end
+export EquidistantGrid
 
+
+"""
+    EquidistantGrid(size::Int, limit_lower::T, limit_upper::T)
+
+Convenience constructor for 1D grids.
+"""
 function EquidistantGrid(size::Int, limit_lower::T, limit_upper::T) where T
 	return EquidistantGrid((size,),(limit_lower,),(limit_upper,))
 end
@@ -30,10 +41,11 @@ end
 
 Base.size(g::EquidistantGrid) = g.size
 
-# Returns the number of dimensions of an EquidistantGrid.
-#
-# @Input: grid - an EquidistantGrid
-# @Return: dimension - The dimension of the grid
+"""
+    dimension(grid::EquidistantGrid)
+
+The dimension of the grid.
+"""
 function dimension(grid::EquidistantGrid)
     return length(grid.size)
 end
@@ -44,26 +56,27 @@ end
 
 The spacing between the grid points of the grid.
 """
-# TODO: If we restrict side lenghts to be positive, then we should remove the abs here.
-spacing(grid::EquidistantGrid) = abs.(grid.limit_upper.-grid.limit_lower)./(grid.size.-1)
+spacing(grid::EquidistantGrid) = (grid.limit_upper.-grid.limit_lower)./(grid.size.-1)
 export spacing
 
 """
-    spacing(grid::EquidistantGrid)
+    inverse_spacing(grid::EquidistantGrid)
 
 The reciprocal of the spacing between the grid points of the grid.
 """
 inverse_spacing(grid::EquidistantGrid) = 1 ./ spacing(grid)
 export inverse_spacing
 
-# Computes the points of an EquidistantGrid as an array of tuples with
-# the same dimension as the grid.
-#
-# @Input: grid - an EquidistantGrid
-# @Return: points - the points of the grid.
-# TODO: Does not work if side lengths are allowed to be negative.
+"""
+    points(grid::EquidistantGrid)
+
+The point of the grid as an array of tuples with the same dimension as the grid.
+The points are stored as [(x1,y1), (x1,y2), … (x1,yn);
+						  (x2,y1), (x2,y2), … (x2,yn);
+						  	⋮		 ⋮            ⋮
+						  (xm,y1), (xm,y2), … (xm,yn)]
+"""
 function points(grid::EquidistantGrid)
-    # TODO: Make this return an abstract array?
     indices = Tuple.(CartesianIndices(grid.size))
     h = spacing(grid)
     return broadcast(I -> grid.limit_lower .+ (I.-1).*h, indices)

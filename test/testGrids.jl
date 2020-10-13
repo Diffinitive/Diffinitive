@@ -9,7 +9,7 @@ using Test
     # constuctor
     @test_throws DomainError EquidistantGrid(0,0.0,1.0)
     @test_throws DomainError EquidistantGrid(1,1.0,1.0)
-    @test_throws DomainError EquidistantGrid(1,1.0,-1.0) # TODO: Remove if we allow side lengths to be negative.
+    @test_throws DomainError EquidistantGrid(1,1.0,-1.0)
     @test EquidistantGrid(4,0.0,1.0) == EquidistantGrid((4,),(0.0,),(1.0,))
 
     # size
@@ -23,14 +23,10 @@ using Test
     # spacing
     @test [spacing(EquidistantGrid(4,0.0,1.0))...] ≈ [(1. /3,)...] atol=5e-13
     @test [spacing(EquidistantGrid((5,3), (0.0,-1.0), (2.0,1.0)))...] ≈ [(0.5, 1.)...] atol=5e-13
-    # TODO: Include below if we allow side lengths to be negative.
-    #@test [spacing(EquidistantGrid((5,3), (0.0,1.0), (-1.0,-2.0)))...] ≈ [(0.25, 1.5)...] atol=5e-13
 
     # inverse_spacing
     @test [inverse_spacing(EquidistantGrid(4,0.0,1.0))...] ≈ [(3.,)...] atol=5e-13
     @test [inverse_spacing(EquidistantGrid((5,3), (0.0,-1.0), (2.0,1.0)))...] ≈ [(2, 1.)...] atol=5e-13
-    # TODO: Include below if we allow side lengths to be negative.
-    #@test [inverse_spacing(EquidistantGrid((5,3), (0.0,1.0), (-1.0,-2.0)))...] ≈ [(4., 2. /3)...] atol=5e-13
 
     # points
     g = EquidistantGrid((5,3), (-1.0,0.0), (0.0,7.11))
@@ -42,7 +38,7 @@ using Test
          (0.,0.)       (0.,7.11/2)    (0.,7.11)]
     approxequal = true;
     for i ∈ eachindex(gp)
-        approxequal=approxequal*all(isapprox.(gp[i],p[i], atol=5e-13));
+        approxequal=approxequal&&all(isapprox.(gp[i],p[i], atol=5e-13));
     end
     @test approxequal == true
 
