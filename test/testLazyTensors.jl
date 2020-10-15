@@ -213,6 +213,25 @@ end
 
 end
 
+@testset "TensorMappingComposition" begin
+    A = rand(2,3)
+    B = rand(3,4)
+
+    Ã = LazyLinearMap(A, (1,), (2,))
+    B̃ = LazyLinearMap(B, (1,), (2,))
+
+    @test Ã∘B̃ isa TensorMappingComposition
+    @test range_size(Ã∘B̃) == (2,)
+    @test domain_size(Ã∘B̃) == (4,)
+    # @test_throws DimensionMismatch B̃∘Ã
+
+    v = rand(4)
+    @test Ã∘B̃*v ≈ A*B*v
+
+    v = rand(2)
+    @test_broken (Ã∘B̃)'*v ≈ B'*A'*v
+end
+
 @testset "LazyLinearMap" begin
     # Test a standard matrix-vector product
     # mapping vectors of size 4 to vectors of size 3.
