@@ -27,3 +27,73 @@ When do we need to know the size of the range and domain?
  - [ ] How do we handle mixes of periodic and non-periodic grids? Seems it should be supported on the grid level and on the 1d operator level. Between there it should be transparent.
  - [ ] Can we have a trait to tell if a TensorMapping is transposable?
  - [ ] Is it ok to have "Constructors" for abstract types which create subtypes? For example a Grids() functions that gives different kind of grids based on input?
+
+## Vector valued grid functions
+Från slack konversation:
+
+Jonatan Werpers:
+Med vektorvärda gridfunktioner vill vi ju fortfarande att grid funktionen ska vara till exempel AbstractArray{LitenVektor,2}
+Och att man ska kunna göra allt man vill med LitenVektor
+typ addera, jämföra osv
+Och då borde points returnera AbstractArray{LitenVektor{Float,2},2} för ett 2d nät
+Men det kanske bara ska vara Static arrays?
+
+Vidar Stiernström:
+Ja, jag vet inte riktigt vad som är en rimlig representation
+Du menar en vektor av static arrays då?
+
+Jonatan Werpers:
+Ja, att LitenVektor är en StaticArray
+
+Vidar Stiernström:
+Tuplar känns typ rätt inuitivt för att representera värdet i en punkt
+men
+det suger att man inte har + och - för dem
+
+Jonatan Werpers:
+Ja precis
+
+Vidar Stiernström:
+så kanske är bra med static arrays i detta fall
+
+Jonatan Werpers:
+Man vill ju kunna köra en Operator rakt på och vara klar eller?
+
+Vidar Stiernström:
+Har inte alls tänkt på hur det vi gör funkar mot vektorvärda funktioner
+men känns som staticarrays är hur man vill göra det
+tuplar är ju immutable också
+blir jobbigt om man bara agerar på en komponent då
+
+Jonatan Werpers:
+Hm…
+Tål att tänkas på
+Men det lär ju bli mer indirektion med mutables eller?
+Hur fungerar det?
+Det finns ju hur som helst både SVector och MVector i StaticArrays
+
+Vidar Stiernström:
+När vi jobbat i c/c++ och kollat runt lite hur man brukar göra så lagrar man i princip alla sina obekanta i en lång vektor och så får man specificera i funktioerna vilken komponent man agerar på och till vilken man skriver
+så man lagrar grejer enl: w = [u1, v1, u2, v2, …] i 1D.
+Men alltså har ingen aning hur julia hanterar detta
+
+Jonatan Werpers:
+Det vi är ute efter kanske är att en grid funcktion är en AbstractArray{T,2} where T<:NågotSomViKanRäknaMed
+Och så får den typen var lite vad som helst.
+
+Vidar Stiernström:
+Tror det kan vara farligt att ha nåt som är AbstractArray{LitenArray{NDof},Dim}
+Jag gissar att det kompilatorn vill ha är en stor array med doubles
+
+Jonatan Werpers:
+Och sen är det upp till den som använder grejerna att vara smart
+Vill man vara trixig kan man väl då imlementera SuperHaxxorGridFunction <: AbstractArray{Array{…},2} som lagrar allt linjärt eller något sånt
+Det kommer väl lösa sig när man börjar implementera vektorvärda saker
+Euler nästa!
+New
+Vidar Stiernström:
+Det vore skönt att inte behöva skriva såhär varje gång man testar mot en tupel :smile: @test [gp[i]...] ≈ [p[i]...] atol=5e-13
+
+Jonatan Werpers:
+https://github.com/JuliaArrays/ArraysOfArrays.jl
+https://github.com/jw3126/Setfield.jl
