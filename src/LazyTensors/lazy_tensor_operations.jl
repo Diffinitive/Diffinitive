@@ -135,3 +135,7 @@ function apply(llm::LazyLinearMap{T,R,D}, v::AbstractArray{T,D}, I::Vararg{Index
     A_view = @view llm.A[view_index...]
     return sum(A_view.*v)
 end
+
+function apply_transpose(llm::LazyLinearMap{T,R,D}, v::AbstractArray{T,R}, I::Vararg{Index,D}) where {T,R,D}
+    apply(LazyLinearMap(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
+end
