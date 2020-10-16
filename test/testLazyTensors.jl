@@ -223,7 +223,9 @@ end
     @test Ã∘B̃ isa TensorMappingComposition
     @test range_size(Ã∘B̃) == (2,)
     @test domain_size(Ã∘B̃) == (4,)
-    # @test_throws DimensionMismatch B̃∘Ã
+    @test_throws DimensionMismatch B̃∘Ã
+
+    # @test @inbounds B̃∘Ã # Should not error even though dimensions don't match. (Since ]test runs with forced boundschecking this is currently not testable 2020-10-16)
 
     v = rand(4)
     @test Ã∘B̃*v ≈ A*B*v

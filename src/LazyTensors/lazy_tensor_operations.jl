@@ -83,6 +83,12 @@ struct TensorMappingComposition{T,R,K,D, TM1<:TensorMapping{T,R,K}, TM2<:TensorM
     t1::TM1
     t2::TM2
 
+    @inline function TensorMappingComposition(t1::TensorMapping{T,R,K}, t2::TensorMapping{T,K,D}) where {T,R,K,D}
+        @boundscheck if domain_size(t1) != range_size(t2)
+            throw(DimensionMismatch("The first argument has domain size $(domain_size(t1)) while the second has range size $(range_size(t2)) "))
+        end
+        return new{T,R,K,D, typeof(t1), typeof(t2)}(t1,t2)
+    end
     # Add check for matching sizes as a boundscheck
 end
 export TensorMappingComposition
@@ -98,7 +104,7 @@ function apply_transpose(c::TensorMappingComposition{T,R,K,D}, v::AbstractArray{
     apply_transpose(c.t2, LazyTensorMappingApplication(c.t1',v), I...)
 end
 
-Base.:∘(s::TensorMapping, t::TensorMapping) = TensorMappingComposition(s,t)
+Base.@propagate_inbounds Base.:∘(s::TensorMapping, t::TensorMapping) = TensorMappingComposition(s,t)
 
 """
     LazyLinearMap{T,R,D,...}(A, range_indicies, domain_indicies)
