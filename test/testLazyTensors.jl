@@ -229,7 +229,7 @@ end
     @test Ã∘B̃*v ≈ A*B*v
 
     v = rand(2)
-    @test_broken (Ã∘B̃)'*v ≈ B'*A'*v
+    @test (Ã∘B̃)'*v ≈ B'*A'*v
 end
 
 @testset "LazyLinearMap" begin
