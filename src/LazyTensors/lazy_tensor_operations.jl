@@ -97,11 +97,11 @@ range_size(tm::TensorMappingComposition) = range_size(tm.t1)
 domain_size(tm::TensorMappingComposition) = domain_size(tm.t2)
 
 function apply(c::TensorMappingComposition{T,R,K,D}, v::AbstractArray{T,D}, I::Vararg{S,R} where S) where {T,R,K,D}
-    apply(c.t1, LazyTensorMappingApplication(c.t2,v), I...)
+    apply(c.t1, c.t2*v, I...)
 end
 
 function apply_transpose(c::TensorMappingComposition{T,R,K,D}, v::AbstractArray{T,R}, I::Vararg{S,D} where S) where {T,R,K,D}
-    apply_transpose(c.t2, LazyTensorMappingApplication(c.t1',v), I...)
+    apply_transpose(c.t2, c.t1'*v, I...)
 end
 
 Base.@propagate_inbounds Base.:∘(s::TensorMapping, t::TensorMapping) = TensorMappingComposition(s,t)
