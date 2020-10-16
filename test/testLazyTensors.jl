@@ -219,6 +219,7 @@ end
     A = rand(3,4)
     Ã = LazyLinearMap(A, (1,), (2,))
     v = rand(4)
+    w = rand(3)
 
     @test Ã isa LazyLinearMap{T,1,1} where T
     @test Ã isa TensorMapping{T,1,1} where T
@@ -227,6 +228,7 @@ end
 
     @test Ã*ones(4) ≈ A*ones(4) atol=5e-13
     @test Ã*v ≈ A*v atol=5e-13
+    @test Ã'*w ≈ A'*w
 
     A = rand(2,3,4)
     @test_throws DomainError LazyLinearMap(A, (3,1), (2,))
