@@ -58,6 +58,7 @@ end
     @test (m*m*v)[6] == (:apply,m*v,(Index{Unknown}(6),))
     @test_broken BoundsError == (m*m*v)[0]
     @test_broken BoundsError == (m*m*v)[7]
+    @test_throws MethodError m*m
 
     m = SizeDoublingMapping{Int, 2, 1}((3,))
     @test_throws MethodError m*ones(Int,2,2)
