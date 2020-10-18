@@ -259,4 +259,28 @@ end
 
 end
 
+
+@testset "LazyIdentity" begin
+    @test LazyIdentity{Float64}((4,5)) isa LazyIdentity{T,2} where T
+    @test LazyIdentity{Float64}((4,5)) isa TensorMapping{T,2,2} where T
+    A = rand(3,4)
+    Ã = LazyLinearMap(A, (1,), (2,))
+    v = rand(4)
+
+    for sz ∈ [(4,5),(3,),(5,6,4)]
+        I = LazyIdentity{Float64}(sz)
+        v = rand(sz...)
+        @test I*v == v
+        @test I'*v == v
+
+        @test range_size(I) == sz
+        @test domain_size(I) == sz
+    end
+
+    I = LazyIdentity{Float64}((4,5))
+    v = rand(4,5)
+    @inferred (I*v)[3,2]
+    @inferred range_size(I)
+end
+
 end

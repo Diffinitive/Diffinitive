@@ -141,3 +141,24 @@ end
 function apply_transpose(llm::LazyLinearMap{T,R,D}, v::AbstractArray{T,R}, I::Vararg{Index,D}) where {T,R,D}
     apply(LazyLinearMap(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
 end
+
+
+"""
+    LazyIdentity{T,D} <: TensorMapping{T,D,D}
+
+The lazy identity TensorMapping for a given size. Usefull for building up higher dimensional tensor mappings from lower
+dimensional ones through outer products. Also used in the Implementation for InflatedTensorMapping.
+"""
+struct LazyIdentity{T,D} <: TensorMapping{T,D,D}
+    size::NTuple{D,Int}
+end
+export LazyIdentity
+
+LazyIdentity{T}(size::NTuple{D,Int}) where {T,D} = LazyIdentity{T,D}(size)
+
+range_size(tmi::LazyIdentity) = tmi.size
+domain_size(tmi::LazyIdentity) = tmi.size
+
+apply(tmi::LazyIdentity{T,D}, v::AbstractArray{T,D}, I::Vararg{Index,D}) where {T,D} = v[Int.(I)...]
+apply_transpose(tmi::LazyIdentity{T,D}, v::AbstractArray{T,D}, I::Vararg{Index,D}) where {T,D} = v[Int.(I)...]
+
