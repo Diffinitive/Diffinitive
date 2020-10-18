@@ -97,3 +97,9 @@ Det vore skönt att inte behöva skriva såhär varje gång man testar mot en tu
 Jonatan Werpers:
 https://github.com/JuliaArrays/ArraysOfArrays.jl
 https://github.com/jw3126/Setfield.jl
+
+### Test-applikationer
+div och grad operationer
+
+### Alternativ:
+Låta alla saker ta in AbstractArray{T,2} where T. Där T kan vara lite vad som helst, tillexemel en SVector eller Array. Men Differens-opertorerna bryr sig inte om det.
