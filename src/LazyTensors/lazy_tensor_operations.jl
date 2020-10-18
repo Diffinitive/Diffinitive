@@ -85,7 +85,7 @@ struct TensorMappingComposition{T,R,K,D, TM1<:TensorMapping{T,R,K}, TM2<:TensorM
 
     @inline function TensorMappingComposition(t1::TensorMapping{T,R,K}, t2::TensorMapping{T,K,D}) where {T,R,K,D}
         @boundscheck if domain_size(t1) != range_size(t2)
-            throw(DimensionMismatch("The first argument has domain size $(domain_size(t1)) while the second has range size $(range_size(t2)) "))
+            throw(DimensionMismatch("the first argument has domain size $(domain_size(t1)) while the second has range size $(range_size(t2)) "))
         end
         return new{T,R,K,D, typeof(t1), typeof(t2)}(t1,t2)
     end
