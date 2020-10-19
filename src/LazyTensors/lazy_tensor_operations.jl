@@ -166,9 +166,9 @@ domain_size(tmi::IdentityMapping) = tmi.size
 apply(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 apply_transpose(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 
-struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after} <: TensorMapping{T,R,D}
+struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after, TM<:TensorMapping{T,R_middle,D_middle}} <: TensorMapping{T,R,D}
     before::IdentityMapping{T,D_before}
-    tm::TensorMapping{T,R_middle,D_middle}
+    tm::TM
     after::IdentityMapping{T,D_after}
 
     function InflatedTensorMapping(before, tm::TensorMapping{T}, after) where T
@@ -181,7 +181,7 @@ struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after} <: Tensor
         D_middle = domain_dim(tm)
         D_after = domain_dim(after)
         D = D_before+D_middle+D_after
-        return new{T,R,D,D_before,R_middle,D_middle,D_after}(before, tm, after)
+        return new{T,R,D,D_before,R_middle,D_middle,D_after, typeof(tm)}(before, tm, after)
     end
 end
 
