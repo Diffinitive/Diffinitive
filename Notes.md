@@ -97,3 +97,73 @@ Det vore skönt att inte behöva skriva såhär varje gång man testar mot en tu
 Jonatan Werpers:
 https://github.com/JuliaArrays/ArraysOfArrays.jl
 https://github.com/jw3126/Setfield.jl
+
+### Test-applikationer
+div och grad operationer
+
+### Alternativ:
+
+#### 1.Använda tuplar
+Fördelar:
+
+Nackdelar:
+
+Syntax:
+```
+f(x,y) = x^2 + y^2
+gf = eval_on_grid(g,f)
+gf[2,3] # En tupel för en given gridpunkt
+gf[2,3][2] # Andra komponenten av vektor fältet i en punkt.
+
+```
+
+#### 2.AbstractArray{T,2} where T
+Låta alla saker ta in AbstractArray{T,2} where T. Där T kan vara lite vad som helst, tillexemel en SVector eller Array. Men Differens-opertorerna bryr sig inte om det.
+
+En nackdel kan var hur man ska få ut gridfunktionen för tex andra komponenten.
+
+Syntax:
+```
+gf = eval(...)
+gf[2,3] # Hela vektorn för en gridpunkt
+gf[2,3][2] # Andra komponenten av vektor fältet.
+```
+#### 3.AbstractArray{T,2+1} where T
+Man låter helt enkelt arrayen ha en extra dimension. En fördel är att man har en väldigt "native" typ. En nackdel kan vara att det eventuellt blir rörigt vilken dimension olika operatorer ska agera på. I värsta fall behöver vi "kroneckra in" de tillagda dimensionerna. Vektorfältets index kommer också att bli det första eftersom vi vill att de ska lagras kontinuerligt i minnet pga chachen. (Går kanske att lösa med en custom typ men då krånglar man till det för sig). En fördel skulle vara att man enkelt får ut olika komponenter.
+
+Syntax:
+```
+gf = eval_on_grid(g,f)
+gf[:,2,3] # Hela vektorn för en gridpunkt
+gf[2,2,3] # Andra komponenten av vektor fältet i en punkt.
+gf[2,:,:] #
+```
+
+### Evaluering av funktioner på nät
+Hur ska man skriva funktioner som evalueras på nätet? `f(x,y) = ...` eller `f(x̄) = ...`? Eller båda? Kan eval_on_grid se skillnad eller får användaren specificera?
+
+```
+f(x,y) = [x^2, y^2]
+f(x̄) = [x̄[1]^2, x̄[2]^2]
+```
+
+Påverkas detta av hur vi förväntar oss kunna skapa lata gridfunktioner?
+
+### Komponenter som gridfunktioner
+För alternativ 1 och 2 har vi problemet hur vi får ut komponenter som vektorfält. Detta behöver antagligen kunna ske lazy.
+Det finns ett par olika lösningar:
+* Implementera en egen typ av view som tar hand om detta. Eller Accessors.jl?
+* Använda en TensorMapping
+* Någon typ av lazy-broadcast
+* En lazy array som applicerar en funktion för varje element.
+
+Skulle vara en fördel om det är hyffsat generiskt så att en eventuell användare kan utöka det enkelt om de har någon egen exotisk typ. Eller ska man vila helt på
+
+Syntax:
+```
+gf = eval(...)
+component(gf,2) # Andra komponenten av en vektor
+component(gf,2,3) # (2,3) elementet av en matris
+component(gf,:,2) # Andra kolumnen av en matris
+@ourview gf[:,:][2]
+```

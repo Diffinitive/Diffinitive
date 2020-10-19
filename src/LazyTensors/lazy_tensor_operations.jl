@@ -76,34 +76,38 @@ domain_size(tmBinOp::LazyTensorMappingBinaryOperation{Op,T,R,D}) where {Op,T,R,D
 Base.:+(tm1::TensorMapping{T,R,D}, tm2::TensorMapping{T,R,D}) where {T,R,D} = LazyTensorMappingBinaryOperation{:+,T,R,D}(tm1,tm2)
 Base.:-(tm1::TensorMapping{T,R,D}, tm2::TensorMapping{T,R,D}) where {T,R,D} = LazyTensorMappingBinaryOperation{:-,T,R,D}(tm1,tm2)
 
+"""
+    TensorMappingComposition{T,R,K,D}
 
-# TODO: Write tests and documentation for LazyTensorMappingComposition
-# struct LazyTensorMappingComposition{T,R,K,D} <: TensorMapping{T,R,D}
-#     t1::TensorMapping{T,R,K}
-#     t2::TensorMapping{T,K,D}
-# end
+Lazily compose two TensorMappings, so that they can be handled as a single TensorMapping.
+"""
+struct TensorMappingComposition{T,R,K,D, TM1<:TensorMapping{T,R,K}, TM2<:TensorMapping{T,K,D}} <: TensorMapping{T,R,D}
+    t1::TM1
+    t2::TM2
 
-# Base.:∘(s::TensorMapping{T,R,K}, t::TensorMapping{T,K,D}) where {T,R,K,D} = LazyTensorMappingComposition(s,t)
+    @inline function TensorMappingComposition(t1::TensorMapping{T,R,K}, t2::TensorMapping{T,K,D}) where {T,R,K,D}
+        @boundscheck if domain_size(t1) != range_size(t2)
+            throw(DimensionMismatch("the first argument has domain size $(domain_size(t1)) while the second has range size $(range_size(t2)) "))
+        end
+        return new{T,R,K,D, typeof(t1), typeof(t2)}(t1,t2)
+    end
+    # Add check for matching sizes as a boundscheck
+end
+export TensorMappingComposition
 
-# function range_size(tm::LazyTensorMappingComposition{T,R,K,D}, domain_size::NTuple{D,Integer}) where {T,R,K,D}
-#     range_size(tm.t1, domain_size(tm.t2, domain_size))
-# end
+range_size(tm::TensorMappingComposition) = range_size(tm.t1)
+domain_size(tm::TensorMappingComposition) = domain_size(tm.t2)
 
-# function domain_size(tm::LazyTensorMappingComposition{T,R,K,D}, range_size::NTuple{R,Integer}) where {T,R,K,D}
-#     domain_size(tm.t1, domain_size(tm.t2, range_size))
-# end
+function apply(c::TensorMappingComposition{T,R,K,D}, v::AbstractArray{T,D}, I::Vararg{S,R} where S) where {T,R,K,D}
+    apply(c.t1, c.t2*v, I...)
+end
 
-# function apply(c::LazyTensorMappingComposition{T,R,K,D}, v::AbstractArray{T,D}, I::NTuple{R,Int}) where {T,R,K,D}
-#     apply(c.t1, LazyTensorMappingApplication(c.t2,v), I...)
-# end
+function apply_transpose(c::TensorMappingComposition{T,R,K,D}, v::AbstractArray{T,R}, I::Vararg{S,D} where S) where {T,R,K,D}
+    apply_transpose(c.t2, c.t1'*v, I...)
+end
 
-# function apply_transpose(c::LazyTensorMappingComposition{T,R,K,D}, v::AbstractArray{T,D}, I::NTuple{D,Int}) where {T,R,K,D}
-#     apply_transpose(c.t2, LazyTensorMappingApplication(c.t1',v), I...)
-# end
+Base.@propagate_inbounds Base.:∘(s::TensorMapping, t::TensorMapping) = TensorMappingComposition(s,t)
 
-# # Have i gone too crazy with the type parameters? Maybe they aren't all needed?
-
-# export →
 """
     LazyLinearMap{T,R,D,...}(A, range_indicies, domain_indicies)
 
