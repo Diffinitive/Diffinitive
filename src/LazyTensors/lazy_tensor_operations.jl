@@ -161,6 +161,7 @@ end
 export IdentityMapping
 
 IdentityMapping{T}(size::NTuple{D,Int}) where {T,D} = IdentityMapping{T,D}(size)
+IdentityMapping{T}(size::Vararg{Int,D}) where {T,D} = IdentityMapping{T,D}(size)
 
 range_size(tmi::IdentityMapping) = tmi.size
 domain_size(tmi::IdentityMapping) = tmi.size

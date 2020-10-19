@@ -285,6 +285,7 @@ end
 @testset "IdentityMapping" begin
     @test IdentityMapping{Float64}((4,5)) isa IdentityMapping{T,2} where T
     @test IdentityMapping{Float64}((4,5)) isa TensorMapping{T,2,2} where T
+    @test IdentityMapping{Float64}((4,5)) == IdentityMapping{Float64}(4,5)
 
     for sz ∈ [(4,5),(3,),(5,6,4)]
         I = IdentityMapping{Float64}(sz)
