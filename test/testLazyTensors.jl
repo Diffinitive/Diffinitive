@@ -299,7 +299,7 @@ end
     I = IdentityMapping{Float64}((4,5))
     v = rand(4,5)
     @inferred (I*v)[3,2]
-    @test_broken @inferred (I'*v)[3,2] # TODO: Should fix the index typing before investigating this
+    @inferred (I'*v)[3,2]
     @inferred range_size(I)
 end
 
