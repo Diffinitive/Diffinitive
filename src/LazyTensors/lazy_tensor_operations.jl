@@ -188,6 +188,7 @@ struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after, TM<:Tenso
         return new{T,R,D,D_before,R_middle,D_middle,D_after, typeof(tm)}(before, tm, after)
     end
 end
+export InflatedTensorMapping
 
 # TODO: Implement constructors where one of `before` or `after` is missing
 

@@ -307,6 +307,27 @@ end
 end
 
 @testset "InflatedTensorMapping" begin
+    I(sz...) = IdentityMapping(sz...)
+    A = LazyLinearMap(rand(4,2),(1,),(2,))
+    B = LazyLinearMap(rand(4,2,3),(1,2),(3,))
+    C = LazyLinearMap(rand(4,2,3),(1,),(2,3))
+
+    @test InflatedTensorMapping(I(3,2), A, I(4)) isa TensorMapping{Float64, 4, 4}
+    @test InflatedTensorMapping(I(3,2), B, I(4)) isa TensorMapping{Float64, 5, 4}
+    @test InflatedTensorMapping(I(3), C, I(2,3)) isa TensorMapping{Float64, 4, 5}
+
+    @test range_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,4,4)
+    @test domain_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,2,4)
+
+    @test range_size(InflatedTensorMapping(I(3,2), B, I(4))) == (3,2,4,2,4)
+    @test domain_size(InflatedTensorMapping(I(3,2), B, I(4))) == (3,2,3,4)
+
+    @test range_size(InflatedTensorMapping(I(3), C, I(2,3))) == (3,4,2,3)
+    @test domain_size(InflatedTensorMapping(I(3), C, I(2,3))) == (3,2,3,2,3)
+
+    @inferred range_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,4,4)
+    @inferred domain_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,2,4)
+
 
 end
 
