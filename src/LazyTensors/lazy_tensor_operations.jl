@@ -159,6 +159,6 @@ LazyIdentity{T}(size::NTuple{D,Int}) where {T,D} = LazyIdentity{T,D}(size)
 range_size(tmi::LazyIdentity) = tmi.size
 domain_size(tmi::LazyIdentity) = tmi.size
 
-apply(tmi::LazyIdentity{T,D}, v::AbstractArray{T,D}, I::Vararg{Index,D}) where {T,D} = v[Int.(I)...]
-apply_transpose(tmi::LazyIdentity{T,D}, v::AbstractArray{T,D}, I::Vararg{Index,D}) where {T,D} = v[Int.(I)...]
+apply(tmi::LazyIdentity{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
+apply_transpose(tmi::LazyIdentity{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 
