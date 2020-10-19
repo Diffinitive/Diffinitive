@@ -213,6 +213,27 @@ end
 
 end
 
+@testset "TensorMappingComposition" begin
+    A = rand(2,3)
+    B = rand(3,4)
+
+    Ã = LazyLinearMap(A, (1,), (2,))
+    B̃ = LazyLinearMap(B, (1,), (2,))
+
+    @test Ã∘B̃ isa TensorMappingComposition
+    @test range_size(Ã∘B̃) == (2,)
+    @test domain_size(Ã∘B̃) == (4,)
+    @test_throws DimensionMismatch B̃∘Ã
+
+    # @test @inbounds B̃∘Ã # Should not error even though dimensions don't match. (Since ]test runs with forced boundschecking this is currently not testable 2020-10-16)
+
+    v = rand(4)
+    @test Ã∘B̃*v ≈ A*B*v rtol=1e-14
+
+    v = rand(2)
+    @test (Ã∘B̃)'*v ≈ B'*A'*v rtol=1e-14
+end
+
 @testset "LazyLinearMap" begin
     # Test a standard matrix-vector product
     # mapping vectors of size 4 to vectors of size 3.
@@ -260,15 +281,12 @@ end
 end
 
 
-@testset "LazyIdentity" begin
-    @test LazyIdentity{Float64}((4,5)) isa LazyIdentity{T,2} where T
-    @test LazyIdentity{Float64}((4,5)) isa TensorMapping{T,2,2} where T
-    A = rand(3,4)
-    Ã = LazyLinearMap(A, (1,), (2,))
-    v = rand(4)
+@testset "IdentityMapping" begin
+    @test IdentityMapping{Float64}((4,5)) isa IdentityMapping{T,2} where T
+    @test IdentityMapping{Float64}((4,5)) isa TensorMapping{T,2,2} where T
 
     for sz ∈ [(4,5),(3,),(5,6,4)]
-        I = LazyIdentity{Float64}(sz)
+        I = IdentityMapping{Float64}(sz)
         v = rand(sz...)
         @test I*v == v
         @test I'*v == v
@@ -277,9 +295,10 @@ end
         @test domain_size(I) == sz
     end
 
-    I = LazyIdentity{Float64}((4,5))
+    I = IdentityMapping{Float64}((4,5))
     v = rand(4,5)
     @inferred (I*v)[3,2]
+    @test_broken @inferred (I'*v)[3,2] # TODO: Should fix the index typing before investigating this
     @inferred range_size(I)
 end
 
