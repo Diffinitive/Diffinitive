@@ -281,12 +281,12 @@ end
 end
 
 
-@testset "LazyIdentity" begin
-    @test LazyIdentity{Float64}((4,5)) isa LazyIdentity{T,2} where T
-    @test LazyIdentity{Float64}((4,5)) isa TensorMapping{T,2,2} where T
+@testset "IdentityMapping" begin
+    @test IdentityMapping{Float64}((4,5)) isa IdentityMapping{T,2} where T
+    @test IdentityMapping{Float64}((4,5)) isa TensorMapping{T,2,2} where T
 
     for sz ∈ [(4,5),(3,),(5,6,4)]
-        I = LazyIdentity{Float64}(sz)
+        I = IdentityMapping{Float64}(sz)
         v = rand(sz...)
         @test I*v == v
         @test I'*v == v
@@ -295,7 +295,7 @@ end
         @test domain_size(I) == sz
     end
 
-    I = LazyIdentity{Float64}((4,5))
+    I = IdentityMapping{Float64}((4,5))
     v = rand(4,5)
     @inferred (I*v)[3,2]
     @test_broken @inferred (I'*v)[3,2] # TODO: Should fix the index typing before investigating this

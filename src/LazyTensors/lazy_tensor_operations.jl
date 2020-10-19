@@ -148,21 +148,21 @@ end
 
 
 """
-    LazyIdentity{T,D} <: TensorMapping{T,D,D}
+    IdentityMapping{T,D} <: TensorMapping{T,D,D}
 
 The lazy identity TensorMapping for a given size. Usefull for building up higher dimensional tensor mappings from lower
 dimensional ones through outer products. Also used in the Implementation for InflatedTensorMapping.
 """
-struct LazyIdentity{T,D} <: TensorMapping{T,D,D}
+struct IdentityMapping{T,D} <: TensorMapping{T,D,D}
     size::NTuple{D,Int}
 end
-export LazyIdentity
+export IdentityMapping
 
-LazyIdentity{T}(size::NTuple{D,Int}) where {T,D} = LazyIdentity{T,D}(size)
+IdentityMapping{T}(size::NTuple{D,Int}) where {T,D} = IdentityMapping{T,D}(size)
 
-range_size(tmi::LazyIdentity) = tmi.size
-domain_size(tmi::LazyIdentity) = tmi.size
+range_size(tmi::IdentityMapping) = tmi.size
+domain_size(tmi::IdentityMapping) = tmi.size
 
-apply(tmi::LazyIdentity{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
-apply_transpose(tmi::LazyIdentity{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
+apply(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
+apply_transpose(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 
