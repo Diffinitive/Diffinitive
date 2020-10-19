@@ -212,8 +212,8 @@ function domain_size(itm::InflatedTensorMapping)
     )
 end
 
-function apply(itm::InflatedTensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vararg{S,R} where S) where {T,R,D}
-    view_index, inner_index = split_index(I...)
+function apply(itm::InflatedTensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vararg{Any,R}) where {T,R,D}
+    view_index, inner_index = split_index(itm, I...)
 
     v_inner = view(v, view_index...)
     return apply(itm.tm, v_inner, inner_index...)
@@ -229,16 +229,14 @@ Eg.
 (1,2,3,4) -> (1,:,:,4), (2,3)
 ```
 """
-function split_index(itm::InflatedTensorMapping{T,R,D}, I::Vararg{S,R} where S) where {T,R,D}
+function split_index(itm::InflatedTensorMapping{T,R,D}, I::Vararg{Any,R}) where {T,R,D}
     I_before = I[1:range_dim(itm.before)]
     I_after = I[(end-range_dim(itm.after)+1):end]
 
     view_index = (I_before..., ntuple((i)->:,domain_dim(itm.tm))..., I_after...)
-    A_view = @view llm.A[view_index...]
     inner_index = I[range_dim(itm.before)+1:end-range_dim(itm.after)]
 
     return (view_index, inner_index)
-    return sum(A_view.*v)
 end
 
 flatten_tuple(t::NTuple{N, Number} where N) = t

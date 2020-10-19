@@ -2,6 +2,8 @@ using Test
 using Sbplib.LazyTensors
 using Sbplib.RegionIndices
 
+using Tullio
+
 @testset "LazyTensors" begin
 
 @testset "Generic Mapping methods" begin
@@ -308,9 +310,14 @@ end
 
 @testset "InflatedTensorMapping" begin
     I(sz...) = IdentityMapping(sz...)
-    A = LazyLinearMap(rand(4,2),(1,),(2,))
-    B = LazyLinearMap(rand(4,2,3),(1,2),(3,))
-    C = LazyLinearMap(rand(4,2,3),(1,),(2,3))
+
+    Ã = rand(4,2)
+    B̃ = rand(4,2,3)
+    C̃ = rand(4,2,3)
+
+    A = LazyLinearMap(Ã,(1,),(2,))
+    B = LazyLinearMap(B̃,(1,2),(3,))
+    C = LazyLinearMap(C̃,(1,),(2,3))
 
     @test InflatedTensorMapping(I(3,2), A, I(4)) isa TensorMapping{Float64, 4, 4}
     @test InflatedTensorMapping(I(3,2), B, I(4)) isa TensorMapping{Float64, 5, 4}
@@ -328,6 +335,11 @@ end
     @inferred range_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,4,4)
     @inferred domain_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,2,4)
 
+    tm = InflatedTensorMapping(I(3,2), A, I(4))
+    v = rand(domain_size(tm)...)
+
+    @tullio IAIv[a,b,c,d] := Ã[c,i]*v[a,b,i,d]
+    @test tm*v ≈ IAIv rtol=1e-14
 
 end
 
