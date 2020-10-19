@@ -167,9 +167,9 @@ apply(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where 
 apply_transpose(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 
 struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after} <: TensorMapping{T,R,D}
-    before::LazyIdentity{T,D_before}
+    before::IdentityMapping{T,D_before}
     tm::TensorMapping{T,R_middle,D_middle}
-    after::LazyIdentity{T,D_after}
+    after::IdentityMapping{T,D_after}
 
     function InflatedTensorMapping(before, tm::TensorMapping{T}, after) where T
         R_before = range_dim(before)
@@ -182,11 +182,12 @@ struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after} <: Tensor
         D_after = domain_dim(after)
         D = D_before+D_middle+D_after
         return new{T,R,D,D_before,R_middle,D_middle,D_after}(before, tm, after)
+    end
 end
 
 # TODO: Implement constructors where one of `before` or `after` is missing
 
-# TODO: Implement syntax and constructors for products of different combinations of InflatedTensorMapping and LazyIdentity
+# TODO: Implement syntax and constructors for products of different combinations of InflatedTensorMapping and IdentityMapping
 
 # TODO: Implement some pretty printing in terms of ⊗. E.g InflatedTensorMapping(I(3),B,I(2)) -> I(3)⊗B⊗I(2)
 

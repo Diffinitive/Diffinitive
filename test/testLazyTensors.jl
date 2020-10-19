@@ -302,4 +302,8 @@ end
     @inferred range_size(I)
 end
 
+@testset "InflatedTensorMapping" begin
+
+end
+
 end
