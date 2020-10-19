@@ -58,6 +58,7 @@ end
     @test (m*m*v)[6] == (:apply,m*v,(Index{Unknown}(6),))
     @test_broken BoundsError == (m*m*v)[0]
     @test_broken BoundsError == (m*m*v)[7]
+    @test_throws MethodError m*m
 
     m = SizeDoublingMapping{Int, 2, 1}((3,))
     @test_throws MethodError m*ones(Int,2,2)
@@ -284,6 +285,9 @@ end
 @testset "IdentityMapping" begin
     @test IdentityMapping{Float64}((4,5)) isa IdentityMapping{T,2} where T
     @test IdentityMapping{Float64}((4,5)) isa TensorMapping{T,2,2} where T
+    @test IdentityMapping{Float64}((4,5)) == IdentityMapping{Float64}(4,5)
+
+    @test IdentityMapping(3,2) isa IdentityMapping{Float64,2}
 
     for sz ∈ [(4,5),(3,),(5,6,4)]
         I = IdentityMapping{Float64}(sz)
@@ -298,7 +302,7 @@ end
     I = IdentityMapping{Float64}((4,5))
     v = rand(4,5)
     @inferred (I*v)[3,2]
-    @test_broken @inferred (I'*v)[3,2] # TODO: Should fix the index typing before investigating this
+    @inferred (I'*v)[3,2]
     @inferred range_size(I)
 end
 

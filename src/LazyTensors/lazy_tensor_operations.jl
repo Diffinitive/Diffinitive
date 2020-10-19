@@ -16,14 +16,16 @@ export LazyTensorMappingApplication
 
 # TODO: Go through and remove unneccerary type parameters on functions
 
-Base.:*(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = LazyTensorMappingApplication(tm,o)
 Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Index,R}) where {T,R,D} = apply(ta.t, ta.o, I...)
 Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Int,R}) where {T,R,D} = apply(ta.t, ta.o, Index{Unknown}.(I)...)
 Base.size(ta::LazyTensorMappingApplication) = range_size(ta.t)
 # TODO: What else is needed to implement the AbstractArray interface?
 
+Base.:*(a::TensorMapping, v::AbstractArray) = LazyTensorMappingApplication(a,v)
+Base.:*(a::TensorMapping, b::TensorMapping) = throw(MethodError(Base.:*,(a,b)))
+Base.:*(a::TensorMapping, args::Union{TensorMapping, AbstractArray}...) = foldr(*,(a,args...))
+
 # # We need the associativity to be a→b→c = a→(b→c), which is the case for '→'
-Base.:*(a::TensorMapping{T,R,D}, b::TensorMapping{T,D,K}, args::Union{TensorMapping{T}, AbstractArray{T}}...) where {T,R,D,K} = foldr(*,(a,b,args...))
 # # Should we overload some other infix binary opesrator?
 # →(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = LazyTensorMappingApplication(tm,o)
 # TODO: We need to be really careful about good error messages.
@@ -38,8 +40,8 @@ If a mapping implements the the `apply_transpose` method this allows working wit
 the transpose of mapping `m` by using `m'`. `m'` will work as a regular TensorMapping lazily calling
 the appropriate methods of `m`.
 """
-struct LazyTensorMappingTranspose{T,R,D} <: TensorMapping{T,D,R}
-    tm::TensorMapping{T,R,D}
+struct LazyTensorMappingTranspose{T,R,D, TM<:TensorMapping{T,R,D}} <: TensorMapping{T,D,R}
+    tm::TM
 end
 export LazyTensorMappingTranspose
 
@@ -159,6 +161,8 @@ end
 export IdentityMapping
 
 IdentityMapping{T}(size::NTuple{D,Int}) where {T,D} = IdentityMapping{T,D}(size)
+IdentityMapping{T}(size::Vararg{Int,D}) where {T,D} = IdentityMapping{T,D}(size)
+IdentityMapping(size::Vararg{Int,D}) where D = IdentityMapping{Float64,D}(size)
 
 range_size(tmi::IdentityMapping) = tmi.size
 domain_size(tmi::IdentityMapping) = tmi.size
