@@ -40,8 +40,8 @@ If a mapping implements the the `apply_transpose` method this allows working wit
 the transpose of mapping `m` by using `m'`. `m'` will work as a regular TensorMapping lazily calling
 the appropriate methods of `m`.
 """
-struct LazyTensorMappingTranspose{T,R,D} <: TensorMapping{T,D,R}
-    tm::TensorMapping{T,R,D}
+struct LazyTensorMappingTranspose{T,R,D, TM<:TensorMapping{T,R,D}} <: TensorMapping{T,D,R}
+    tm::TM
 end
 export LazyTensorMappingTranspose
 
