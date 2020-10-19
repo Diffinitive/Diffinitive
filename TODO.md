@@ -10,8 +10,9 @@
  - [ ] Create a struct that bundles the necessary Tensor operators for solving the wave equation.
  - [ ] Add a quick and simple way of running all tests for all subpackages.
  - [ ] Replace getindex hack for flatteing tuples with flatten_tuple.
- - [ ] Fix indexing signatures. We should make sure we are not too specific. For the "inbetween" layers we don't know what type of index is coming so we should use `I...` instead of `I::Vararg{Int,R}`
+ - [ ] Fix indexing signatures. We should make sure we are not too specific. For the "inbetween" layers we don't know what type of index is coming so we should use `I...` instead of `I::Vararg{Int,R}` or probably better `I::Vararg{Any,R}`
  - [ ] Use `@inferred` in a lot of tests.
+ - [ ] Make sure we are setting tolerances in tests in a consistent way
 
 ## Repo
  - [ ] Add Vidar to the authors list
