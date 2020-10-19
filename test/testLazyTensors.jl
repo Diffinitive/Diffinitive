@@ -228,10 +228,10 @@ end
     # @test @inbounds B̃∘Ã # Should not error even though dimensions don't match. (Since ]test runs with forced boundschecking this is currently not testable 2020-10-16)
 
     v = rand(4)
-    @test Ã∘B̃*v ≈ A*B*v
+    @test Ã∘B̃*v ≈ A*B*v rtol=1e-16
 
     v = rand(2)
-    @test (Ã∘B̃)'*v ≈ B'*A'*v
+    @test (Ã∘B̃)'*v ≈ B'*A'*v rtol=1e-16
 end
 
 @testset "LazyLinearMap" begin
