@@ -306,6 +306,9 @@ end
     @inferred (I*v)[3,2]
     @inferred (I'*v)[3,2]
     @inferred range_size(I)
+
+    @inferred range_dim(I)
+    @inferred domain_dim(I)
 end
 
 @testset "InflatedTensorMapping" begin
@@ -340,6 +343,9 @@ end
 
     @tullio IAIv[a,b,c,d] := Ã[c,i]*v[a,b,i,d]
     @test tm*v ≈ IAIv rtol=1e-14
+
+    @inferred LazyTensors.split_index(tm,1,1,1,1)
+    @inferred (tm*v)[1,1,1,1]
 
 end
 
