@@ -231,12 +231,16 @@ Eg.
 """
 function split_index(itm::InflatedTensorMapping{T,R,D}, I::Vararg{Any,R}) where {T,R,D}
     I_before = I[1:range_dim(itm.before)]
-    I_after = I[(end-range_dim(itm.after)+1):end]
+    I_after = slice_tuple(I,Val(R-range_dim(itm.after)+1),Val(R))
 
     view_index = (I_before..., ntuple((i)->:,domain_dim(itm.tm))..., I_after...)
-    inner_index = I[range_dim(itm.before)+1:end-range_dim(itm.after)]
+    inner_index = slice_tuple(I, Val(range_dim(itm.before)+1), Val(R-range_dim(itm.after)))
 
     return (view_index, inner_index)
+end
+
+function slice_tuple(t,::Val{L},::Val{U}) where {L,U}
+    return ntuple(i->t[i+L-1], U-L+1)
 end
 
 flatten_tuple(t::NTuple{N, Number} where N) = t
