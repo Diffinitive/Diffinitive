@@ -349,7 +349,21 @@ end
 
     @inferred LazyTensors.split_index(tm,1,1,1,1)
 
-    @inferred (tm*v)[1,1,1,1]
+    struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
+        λ::T
+        size::NTuple{D,Int}
+    end
+
+    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Vararg{Index,D}) where {T,D} = m.λ*v[I]
+    LazyTensors.range_size(m::ScalingOperator) = m.size
+    LazyTensors.domain_size(m::ScalingOperator) = m.size
+
+    tm = InflatedTensorMapping(I(2,3),ScalingOperator(2.0, (3,2)),I(3,4))
+    v = rand(domain_size(tm)...)
+
+    @inferred LazyTensors.split_index(tm,1,2,3,2,2,4)
+    @inferred apply(tm,v,Index{Unknown}.((1,2,3,2,2,4))...)
+    @inferred (tm*v)[1,2,3,2,2,4]
 
 end
 
