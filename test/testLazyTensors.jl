@@ -351,4 +351,11 @@ end
 
 end
 
+@testset "slice_tuple" begin
+    @test LazyTensors.slice_tuple((1,2,3),Val(1), Val(3)) == (1,2,3)
+    @test LazyTensors.slice_tuple((1,2,3,4,5,6),Val(2), Val(5)) == (2,3,4,5)
+    @test LazyTensors.slice_tuple((1,2,3,4,5,6),Val(1), Val(3)) == (1,2,3)
+    @test LazyTensors.slice_tuple((1,2,3,4,5,6),Val(4), Val(6)) == (4,5,6)
+end
+
 end

@@ -239,6 +239,16 @@ function split_index(itm::InflatedTensorMapping{T,R,D}, I::Vararg{Any,R}) where 
     return (view_index, inner_index)
 end
 
+# TODO: Can this be replaced by something more elegant while still being type stable? 2020-10-21
+# See:
+# https://github.com/JuliaLang/julia/issues/34884
+# https://github.com/JuliaLang/julia/issues/30386
+"""
+    slice_tuple(t, Val(l), Val(u))
+
+Get a slice of a tuple in a type stable way.
+Equivalent to t[l:u] but type stable.
+"""
 function slice_tuple(t,::Val{L},::Val{U}) where {L,U}
     return ntuple(i->t[i+L-1], U-L+1)
 end
