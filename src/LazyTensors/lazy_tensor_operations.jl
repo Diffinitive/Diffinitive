@@ -170,22 +170,23 @@ domain_size(tmi::IdentityMapping) = tmi.size
 apply(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 apply_transpose(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 
+
 """
     InflatedTensorMapping{T,R,D} <: TensorMapping{T,R,D}
 
 An inflated `TensorMapping` with dimensions added before and afer its actual dimensions.
 
----
-
-    InflatedTensorMapping(before, tm, after)
-
-The outer product of `before`, `tm` and `after`, where `before` and `after` are `IndentityMapping`s.
 """
 struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after, TM<:TensorMapping{T,R_middle,D_middle}} <: TensorMapping{T,R,D}
     before::IdentityMapping{T,D_before}
     tm::TM
     after::IdentityMapping{T,D_after}
 
+    ```
+        InflatedTensorMapping(before, tm, after)
+
+    The outer product of `before`, `tm` and `after`, where `before` and `after` are `IndentityMapping`s.
+    ```
     function InflatedTensorMapping(before, tm::TensorMapping{T}, after) where T
         R_before = range_dim(before)
         R_middle = range_dim(tm)
