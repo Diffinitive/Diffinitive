@@ -253,6 +253,11 @@ function slice_tuple(t,::Val{L},::Val{U}) where {L,U}
     return ntuple(i->t[i+L-1], U-L+1)
 end
 
+"""
+    flatten_tuple(t)
+
+Takes a nested tuple and flattens the whole structure
+"""
 flatten_tuple(t::NTuple{N, Number} where N) = t
 flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
 flatten_tuple(ts::Vararg) = flatten_tuple(ts)
