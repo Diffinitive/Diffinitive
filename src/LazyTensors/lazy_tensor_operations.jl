@@ -190,7 +190,27 @@ struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after, TM<:Tenso
 end
 export InflatedTensorMapping
 
-# TODO: Implement constructors where one of `before` or `after` is missing
+"""
+    InflatedTensorMapping(before,tm)
+
+Constructs the InflatedTensorMapping where InflatedTensorMapping.after is the empty IdentityMapping
+"""
+InflatedTensorMapping(before::IdentityMapping, tm::TensorMapping{T}) where T = InflatedTensorMapping(before,tm,IdentityMapping{T}())
+
+"""
+    InflatedTensorMapping(tm,after)
+
+Constructs the InflatedTensorMapping where InflatedTensorMapping.before is the empty IdentityMapping
+"""
+InflatedTensorMapping(tm::TensorMapping{T}, after::IdentityMapping) where T = InflatedTensorMapping(IdentityMapping{T}(),tm,after)
+
+"""
+    InflatedTensorMapping(I1,I2)
+
+Specialized constructor for InflatedTensorMapping where `I1`,`I2` are IdentityMappings (required to resolve ambiguities).
+Calls InflatedTensorMapping(before, tm)
+"""
+InflatedTensorMapping(I1::IdentityMapping{T}, I2::IdentityMapping{T}) where T = InflatedTensorMapping(I1,I2,IdentityMapping{T}())
 
 # TODO: Implement syntax and constructors for products of different combinations of InflatedTensorMapping and IdentityMapping
 
