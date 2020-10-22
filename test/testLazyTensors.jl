@@ -382,4 +382,10 @@ end
     @test LazyTensors.flatten_tuple(((1,2),(3,4),(5,),6)) == (1,2,3,4,5,6)
 end
 
+
+@testset "LazyIdentityOuterProduct" begin
+
+
+end
+
 end

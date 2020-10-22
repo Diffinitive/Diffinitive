@@ -273,3 +273,55 @@ Takes a nested tuple and flattens the whole structure
 flatten_tuple(t::NTuple{N, Number} where N) = t
 flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
 flatten_tuple(ts::Vararg) = flatten_tuple(ts)
+
+
+"""
+   LazyOuterProduct(tms...)
+
+Creates a `TensorComposition` for the outerproduct of `tms...`.
+This is done by separating the outer product into regular products of outer products involving only identity mappings and one non-identity mapping.
+
+First let
+```math
+A = A_{I,J}
+B = B_{M,N}
+C = C_{P,Q}
+```
+
+where ``I``, ``M``, ``P`` are  multi-indexes for the ranges of ``A``, ``B``, ``C``, and ``J``, ``N``, ``Q`` are multi-indexes of the domains.
+
+We use ``⊗`` to denote the outer product
+```math
+(A⊗B)_{IM,JN} = A_{I,J}B_{M,N}
+```
+
+We note that
+```math
+A⊗B⊗C = (A⊗B⊗C)_{IMP,JNQ} = A_{I,J}B_{M,N}C_{P,Q}
+```
+And that
+```math
+A⊗B⊗C = (A⊗I_{|M|}⊗I_{|P|})(I_{|J|}⊗B⊗I_{|P|})(I_{|J|}⊗I_{|N|}⊗C)
+```
+where |.| of a multi-index is a vector of sizes for each dimension. ``I_v`` denotes the identity tensor of size ``v[i]`` in each direction
+To apply ``A⊗B⊗C`` we evaluate
+
+(A⊗B⊗C)v = [(A⊗I_{|M|}⊗I_{|P|})  [(I_{|J|}⊗B⊗I_{|P|}) [(I_{|J|}⊗I_{|N|}⊗C)v]]]
+"""
+function LazyOuterProduct end
+export LazyOuterProduct
+
+function LazyOuterProduct(tm1::TensorMapping, tm2::TensorMapping)
+    itm1 = InflatedTensorMapping(tm1, IdentityMapping(range_size(tm2)))
+    itm2 = InflatedTensorMapping(IdentityMapping(domain_size(tm1)),tm2)
+
+    return itm1∘itm2
+end
+
+# length(tms) is always >= 1 since the two argument method is more specific. Right??
+LazyOuterProduct(tm::TensorMapping, tms::Vararg{TensorMapping}) = tm∘LazyOuterProduct(tms...)
+
+⊗(a::TensorMapping,b::TensorMapping) = LazyOuterProduct(a,b)
+⊗(a,b,cs::Vararg{TensorMapping}) = ⊗(a⊗b, cs...)
+
+# TODO: Can we implement compositions and kroneckers of LazyIdentities to just return new LazyIdentities?
