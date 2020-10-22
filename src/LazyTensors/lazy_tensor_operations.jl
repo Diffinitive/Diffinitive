@@ -197,31 +197,17 @@ end
 export InflatedTensorMapping
 """
     InflatedTensorMapping(before, tm, after)
-
-The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityMapping`s.
-"""
-InflatedTensorMapping(::IdentityMapping, ::TensorMapping, ::IdentityMapping)
-
-"""
     InflatedTensorMapping(before,tm)
-
-The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityMapping`s and `after` is empty.
-"""
-InflatedTensorMapping(before::IdentityMapping, tm::TensorMapping{T}) where T = InflatedTensorMapping(before,tm,IdentityMapping{T}())
-
-"""
     InflatedTensorMapping(tm,after)
 
-The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityMapping`s and `before` is empty.
+The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityMapping`s.
+
+If one of `before` or `after` is left out, a 0-dimensional `IdentityMapping` is used as the default value.
 """
+InflatedTensorMapping(::IdentityMapping, ::TensorMapping, ::IdentityMapping)
+InflatedTensorMapping(before::IdentityMapping, tm::TensorMapping{T}) where T = InflatedTensorMapping(before,tm,IdentityMapping{T}())
 InflatedTensorMapping(tm::TensorMapping{T}, after::IdentityMapping) where T = InflatedTensorMapping(IdentityMapping{T}(),tm,after)
-
-"""
-    InflatedTensorMapping(I1,I2)
-
-Specialized constructor for InflatedTensorMapping where `I1`,`I2` are IdentityMappings (required to resolve ambiguities).
-Calls InflatedTensorMapping(before, tm)
-"""
+# Resolve ambiguity between the two previous methods
 InflatedTensorMapping(I1::IdentityMapping{T}, I2::IdentityMapping{T}) where T = InflatedTensorMapping(I1,I2,IdentityMapping{T}())
 
 # TODO: Implement syntax and constructors for products of different combinations of InflatedTensorMapping and IdentityMapping
