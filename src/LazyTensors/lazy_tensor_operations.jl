@@ -195,23 +195,24 @@ struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after, TM<:Tenso
     end
 end
 export InflatedTensorMapping
-
 """
-InflatedTensorMapping(before, tm, after)
+    InflatedTensorMapping(before, tm, after)
 
 The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityMapping`s.
 """
+InflatedTensorMapping(::IdentityMapping, ::TensorMapping, ::IdentityMapping)
+
 """
     InflatedTensorMapping(before,tm)
 
-Constructs the InflatedTensorMapping where InflatedTensorMapping.after is the empty IdentityMapping
+The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityMapping`s and `after` is empty.
 """
 InflatedTensorMapping(before::IdentityMapping, tm::TensorMapping{T}) where T = InflatedTensorMapping(before,tm,IdentityMapping{T}())
 
 """
     InflatedTensorMapping(tm,after)
 
-Constructs the InflatedTensorMapping where InflatedTensorMapping.before is the empty IdentityMapping
+The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityMapping`s and `before` is empty.
 """
 InflatedTensorMapping(tm::TensorMapping{T}, after::IdentityMapping) where T = InflatedTensorMapping(IdentityMapping{T}(),tm,after)
 
