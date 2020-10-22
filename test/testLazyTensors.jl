@@ -328,6 +328,9 @@ end
     @test InflatedTensorMapping(I(3,2), A, I(4)) isa TensorMapping{Float64, 4, 4}
     @test InflatedTensorMapping(I(3,2), B, I(4)) isa TensorMapping{Float64, 5, 4}
     @test InflatedTensorMapping(I(3), C, I(2,3)) isa TensorMapping{Float64, 4, 5}
+    @test InflatedTensorMapping(C, I(2,3)) isa TensorMapping{Float64, 3, 4}
+    @test InflatedTensorMapping(I(3), C) isa TensorMapping{Float64, 2, 3}
+    @test InflatedTensorMapping(I(3), I(2,3)) isa TensorMapping{Float64, 3, 3}
 
     @test range_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,4,4)
     @test domain_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,2,4)
