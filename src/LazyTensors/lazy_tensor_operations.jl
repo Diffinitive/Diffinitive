@@ -317,17 +317,16 @@ To apply ``A⊗B⊗C`` we evaluate
 function LazyOuterProduct end
 export LazyOuterProduct
 
-function LazyOuterProduct(tm1::TensorMapping, tm2::TensorMapping)
-    itm1 = InflatedTensorMapping(tm1, IdentityMapping(range_size(tm2)))
-    itm2 = InflatedTensorMapping(IdentityMapping(domain_size(tm1)),tm2)
+function LazyOuterProduct(tm1::TensorMapping{T}, tm2::TensorMapping{T}) where T
+    itm1 = InflatedTensorMapping(tm1, IdentityMapping{T}(range_size(tm2)))
+    itm2 = InflatedTensorMapping(IdentityMapping{T}(domain_size(tm1)),tm2)
 
     return itm1∘itm2
 end
 
-# length(tms) is always >= 1 since the two argument method is more specific. Right??
-LazyOuterProduct(tm::TensorMapping, tms::Vararg{TensorMapping}) = tm∘LazyOuterProduct(tms...)
+LazyOuterProduct(tms::Vararg{TensorMapping}) = foldl(LazyOuterProduct, tms)
 
-⊗(a::TensorMapping,b::TensorMapping) = LazyOuterProduct(a,b)
-⊗(a,b,cs::Vararg{TensorMapping}) = ⊗(a⊗b, cs...)
+⊗(tms::Vararg{TensorMapping}) = LazyOuterProduct(tms...)
+export ⊗
 
 # TODO: Can we implement compositions and kroneckers of LazyIdentities to just return new LazyIdentities?

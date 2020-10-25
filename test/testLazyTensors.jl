@@ -387,7 +387,37 @@ end
 
 
 @testset "LazyIdentityOuterProduct" begin
+    struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
+        λ::T
+        size::NTuple{D,Int}
+    end
 
+    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Vararg{Index,D}) where {T,D} = m.λ*v[I]
+    LazyTensors.range_size(m::ScalingOperator) = m.size
+    LazyTensors.domain_size(m::ScalingOperator) = m.size
+
+    A = ScalingOperator(2.0, (5,))
+    B = ScalingOperator(3.0, (3,))
+    C = ScalingOperator(5.0, (3,2))
+
+    AB = LazyOuterProduct(A,B)
+    @test AB isa TensorMapping{T,2,2} where T
+    @test range_size(AB) == (5,3)
+    @test domain_size(AB) == (5,3)
+
+    v = rand(range_size(AB)...)
+    @test AB*v == 6*v
+
+    ABC = LazyOuterProduct(A,B,C)
+
+    @test ABC isa TensorMapping{T,4,4} where T
+    @test range_size(ABC) == (5,3,3,2)
+    @test domain_size(ABC) == (5,3,3,2)
+
+    @test A⊗B == AB
+    @test A⊗B⊗C == ABC
+
+    # TODO: Include some tests where the domain has different size and dimension
 
 end
 
