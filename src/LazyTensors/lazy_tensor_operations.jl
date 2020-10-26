@@ -329,4 +329,4 @@ LazyOuterProduct(tms::Vararg{TensorMapping}) = foldl(LazyOuterProduct, tms)
 ⊗(a::TensorMapping, b::TensorMapping) = LazyOuterProduct(a,b)
 export ⊗
 
-# TODO: Can we implement compositions and kroneckers of LazyIdentities to just return new LazyIdentities?
+# TBD: Should we implement simplifications for outer products of LazyIdentities other LazyIdentities or Inflated tensormappings?
