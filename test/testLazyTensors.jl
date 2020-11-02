@@ -344,13 +344,26 @@ end
     @inferred range_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,4,4)
     @inferred domain_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,2,4)
 
+    # Test InflatedTensorMapping mapping w. before and after
     tm = InflatedTensorMapping(I(3,2), A, I(4))
     v = rand(domain_size(tm)...)
-
     @tullio IAIv[a,b,c,d] := Ã[c,i]*v[a,b,i,d]
     @test tm*v ≈ IAIv rtol=1e-14
-
     @inferred LazyTensors.split_index(tm,1,1,1,1)
+
+    # Test InflatedTensorMapping mapping w. before
+    tm = InflatedTensorMapping(I(3,2), A)
+    v = rand(domain_size(tm)...)
+    @tullio IAIv[a,b,c] := Ã[c,i]*v[a,b,i]
+    @test tm*v ≈ IAIv rtol=1e-14
+    @inferred LazyTensors.split_index(tm,1,1,1)
+
+    # Test InflatedTensorMapping mapping w. after
+    tm = InflatedTensorMapping(A,I(4))
+    v = rand(domain_size(tm)...)
+    @tullio IAIv[c,d] := Ã[c,i]*v[i,d]
+    @test tm*v ≈ IAIv rtol=1e-14
+    @inferred LazyTensors.split_index(tm,1,1)
 
     struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
         λ::T
