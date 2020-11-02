@@ -2,6 +2,8 @@ using Test
 using Sbplib.LazyTensors
 using Sbplib.RegionIndices
 
+using Tullio
+
 @testset "LazyTensors" begin
 
 @testset "Generic Mapping methods" begin
@@ -279,6 +281,9 @@ end
     @test B̃*v ≈ B[1,:,1]*v[1,1] + B[2,:,1]*v[2,1] + B[3,:,1]*v[3,1] +
                 B[1,:,2]v[1,2] + B[2,:,2]*v[2,2] + B[3,:,2]*v[3,2] atol=5e-13
 
+
+    # TODO:
+    # @inferred (B̃*v)[2]
 end
 
 
@@ -304,6 +309,93 @@ end
     @inferred (I*v)[3,2]
     @inferred (I'*v)[3,2]
     @inferred range_size(I)
+
+    @inferred range_dim(I)
+    @inferred domain_dim(I)
+end
+
+@testset "InflatedTensorMapping" begin
+    I(sz...) = IdentityMapping(sz...)
+
+    Ã = rand(4,2)
+    B̃ = rand(4,2,3)
+    C̃ = rand(4,2,3)
+
+    A = LazyLinearMap(Ã,(1,),(2,))
+    B = LazyLinearMap(B̃,(1,2),(3,))
+    C = LazyLinearMap(C̃,(1,),(2,3))
+
+    @test InflatedTensorMapping(I(3,2), A, I(4)) isa TensorMapping{Float64, 4, 4}
+    @test InflatedTensorMapping(I(3,2), B, I(4)) isa TensorMapping{Float64, 5, 4}
+    @test InflatedTensorMapping(I(3), C, I(2,3)) isa TensorMapping{Float64, 4, 5}
+    @test InflatedTensorMapping(C, I(2,3)) isa TensorMapping{Float64, 3, 4}
+    @test InflatedTensorMapping(I(3), C) isa TensorMapping{Float64, 2, 3}
+    @test InflatedTensorMapping(I(3), I(2,3)) isa TensorMapping{Float64, 3, 3}
+
+    @test range_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,4,4)
+    @test domain_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,2,4)
+
+    @test range_size(InflatedTensorMapping(I(3,2), B, I(4))) == (3,2,4,2,4)
+    @test domain_size(InflatedTensorMapping(I(3,2), B, I(4))) == (3,2,3,4)
+
+    @test range_size(InflatedTensorMapping(I(3), C, I(2,3))) == (3,4,2,3)
+    @test domain_size(InflatedTensorMapping(I(3), C, I(2,3))) == (3,2,3,2,3)
+
+    @inferred range_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,4,4)
+    @inferred domain_size(InflatedTensorMapping(I(3,2), A, I(4))) == (3,2,2,4)
+
+    # Test InflatedTensorMapping mapping w. before and after
+    tm = InflatedTensorMapping(I(3,2), A, I(4))
+    v = rand(domain_size(tm)...)
+    @tullio IAIv[a,b,c,d] := Ã[c,i]*v[a,b,i,d]
+    @test tm*v ≈ IAIv rtol=1e-14
+    @inferred LazyTensors.split_index(tm,1,1,1,1)
+
+    # Test InflatedTensorMapping mapping w. before
+    tm = InflatedTensorMapping(I(3,2), A)
+    v = rand(domain_size(tm)...)
+    @tullio IAIv[a,b,c] := Ã[c,i]*v[a,b,i]
+    @test tm*v ≈ IAIv rtol=1e-14
+    @inferred LazyTensors.split_index(tm,1,1,1)
+
+    # Test InflatedTensorMapping mapping w. after
+    tm = InflatedTensorMapping(A,I(4))
+    v = rand(domain_size(tm)...)
+    @tullio IAIv[c,d] := Ã[c,i]*v[i,d]
+    @test tm*v ≈ IAIv rtol=1e-14
+    @inferred LazyTensors.split_index(tm,1,1)
+
+    struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
+        λ::T
+        size::NTuple{D,Int}
+    end
+
+    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Vararg{Index,D}) where {T,D} = m.λ*v[I]
+    LazyTensors.range_size(m::ScalingOperator) = m.size
+    LazyTensors.domain_size(m::ScalingOperator) = m.size
+
+    tm = InflatedTensorMapping(I(2,3),ScalingOperator(2.0, (3,2)),I(3,4))
+    v = rand(domain_size(tm)...)
+
+    @inferred LazyTensors.split_index(tm,1,2,3,2,2,4)
+    @inferred apply(tm,v,Index{Unknown}.((1,2,3,2,2,4))...)
+    @inferred (tm*v)[1,2,3,2,2,4]
+
+end
+
+@testset "slice_tuple" begin
+    @test LazyTensors.slice_tuple((1,2,3),Val(1), Val(3)) == (1,2,3)
+    @test LazyTensors.slice_tuple((1,2,3,4,5,6),Val(2), Val(5)) == (2,3,4,5)
+    @test LazyTensors.slice_tuple((1,2,3,4,5,6),Val(1), Val(3)) == (1,2,3)
+    @test LazyTensors.slice_tuple((1,2,3,4,5,6),Val(4), Val(6)) == (4,5,6)
+end
+
+@testset "flatten_tuple" begin
+    @test LazyTensors.flatten_tuple((1,)) == (1,)
+    @test LazyTensors.flatten_tuple((1,2,3,4,5,6)) == (1,2,3,4,5,6)
+    @test LazyTensors.flatten_tuple((1,2,(3,4),5,6)) == (1,2,3,4,5,6)
+    @test LazyTensors.flatten_tuple((1,2,(3,(4,5)),6)) == (1,2,3,4,5,6)
+    @test LazyTensors.flatten_tuple(((1,2),(3,4),(5,),6)) == (1,2,3,4,5,6)
 end
 
 end
