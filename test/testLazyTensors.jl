@@ -399,7 +399,7 @@ end
 end
 
 
-@testset "LazyIdentityOuterProduct" begin
+@testset "LazyOuterProduct" begin
     struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
         λ::T
         size::NTuple{D,Int}
@@ -430,7 +430,22 @@ end
     @test A⊗B == AB
     @test A⊗B⊗C == ABC
 
-    # TODO: Include some tests where the domain has different size and dimension
+    A = rand(3,2)
+    B = rand(2,4,3)
+
+    v₁ = rand(2,4,3)
+    v₂ = rand(4,3,2)
+
+    Ã = LazyLinearMap(A,(1,),(2,))
+    B̃ = LazyLinearMap(B,(1,),(2,3))
+
+    ÃB̃ = LazyOuterProduct(Ã,B̃)
+    @tullio ABv[i,k] := A[i,j]*B[k,l,m]*v₁[j,l,m]
+    @test ÃB̃*v₁ ≈ ABv
+
+    B̃Ã = LazyOuterProduct(B̃,Ã)
+    @tullio BAv[k,i] := A[i,j]*B[k,l,m]*v₂[l,m,j]
+    @test B̃Ã*v₂ ≈ BAv
 
 end
 
