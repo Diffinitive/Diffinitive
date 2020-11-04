@@ -177,7 +177,7 @@ apply_transpose(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,
 Base.:∘(tm, tmi)
 Base.:∘(tmi, tm)
 
-Composes a `Tensormapping`s `tm` with an `IdentityMapping`s `tmi`, by returning `tm`
+Composes a `Tensormapping` `tm` with an `IdentityMapping` `tmi`, by returning `tm`
 """
 @inline function Base.:∘(tm::TensorMapping{T,R,D}, tmi::IdentityMapping{T,D}) where {T,R,D}
     @boundscheck check_matching_size(tm::TensorMapping, tmi::TensorMapping)
