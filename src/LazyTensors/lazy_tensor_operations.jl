@@ -86,14 +86,17 @@ struct TensorMappingComposition{T,R,K,D, TM1<:TensorMapping{T,R,K}, TM2<:TensorM
     t2::TM2
 
     @inline function TensorMappingComposition(t1::TensorMapping{T,R,K}, t2::TensorMapping{T,K,D}) where {T,R,K,D}
-        @boundscheck if domain_size(t1) != range_size(t2)
-            throw(DimensionMismatch("the first argument has domain size $(domain_size(t1)) while the second has range size $(range_size(t2)) "))
-        end
+        @boundscheck check_matching_size(t1::TensorMapping, t2::TensorMapping)
         return new{T,R,K,D, typeof(t1), typeof(t2)}(t1,t2)
     end
-    # Add check for matching sizes as a boundscheck
 end
 export TensorMappingComposition
+
+function check_matching_size(t1::TensorMapping, t2::TensorMapping)
+    if domain_size(t1) != range_size(t2)
+        throw(DimensionMismatch("the first argument has domain size $(domain_size(t1)) while the second has range size $(range_size(t2)) "))
+    end
+end
 
 range_size(tm::TensorMappingComposition) = range_size(tm.t1)
 domain_size(tm::TensorMappingComposition) = domain_size(tm.t2)
@@ -169,6 +172,27 @@ domain_size(tmi::IdentityMapping) = tmi.size
 
 apply(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 apply_transpose(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
+
+"""
+Base.:∘(tm, tmi)
+Base.:∘(tmi, tm)
+
+Composes a `Tensormapping`s `tm` with an `IdentityMapping`s `tmi`, by returning `tm`
+"""
+@inline function Base.:∘(tm::TensorMapping{T,R,D}, tmi::IdentityMapping{T,D}) where {T,R,D}
+    @boundscheck check_matching_size(tm::TensorMapping, tmi::TensorMapping)
+    return tm
+end
+
+@inline function Base.:∘(tmi::IdentityMapping{T,R}, tm::TensorMapping{T,R,D}) where {T,R,D}
+    @boundscheck check_matching_size(tmi::TensorMapping, tm::TensorMapping)
+    return tm
+end
+# Specialization for the case where tm is an IdentityMapping. Required to resolve ambiguity.
+@inline function Base.:∘(tm::IdentityMapping{T,D}, tmi::IdentityMapping{T,D}) where {T,D}
+    @boundscheck check_matching_size(tm::TensorMapping, tmi::TensorMapping)
+    return tmi
+end
 
 
 """

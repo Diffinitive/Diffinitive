@@ -312,6 +312,17 @@ end
 
     @inferred range_dim(I)
     @inferred domain_dim(I)
+
+    Ã = rand(4,2)
+    A = LazyLinearMap(Ã,(1,),(2,))
+    I1 = IdentityMapping{Float64}(2)
+    I2 = IdentityMapping{Float64}(4)
+    @test A∘I1 == A
+    @test I2∘A == A
+    @test I1∘I1 == I1
+    @test_throws DimensionMismatch I1∘A
+    @test_throws DimensionMismatch A∘I2
+    @test_throws DimensionMismatch I1∘I2
 end
 
 @testset "InflatedTensorMapping" begin
