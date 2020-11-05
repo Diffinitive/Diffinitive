@@ -92,24 +92,6 @@ struct TensorMappingComposition{T,R,K,D, TM1<:TensorMapping{T,R,K}, TM2<:TensorM
 end
 export TensorMappingComposition
 
-function check_domain_size(tm::TensorMapping, sz)
-    if domain_size(tm) != sz
-        throw(SizeMismatch(tm,sz))
-    end
-end
-
-struct SizeMismatch <: Exception
-    tm::TensorMapping
-    sz
-end
-export SizeMismatch
-
-function Base.showerror(io::IO, err::SizeMismatch)
-    print(io, "SizeMismatch: ")
-    print(io, "attempt to apply TensorMapping with domain size $(domain_size(err.tm)) to a domain of size $(err.sz)")
-end
-
-
 range_size(tm::TensorMappingComposition) = range_size(tm.t1)
 domain_size(tm::TensorMappingComposition) = domain_size(tm.t2)
 
@@ -315,3 +297,20 @@ Takes a nested tuple and flattens the whole structure
 flatten_tuple(t::NTuple{N, Number} where N) = t
 flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
 flatten_tuple(ts::Vararg) = flatten_tuple(ts)
+
+function check_domain_size(tm::TensorMapping, sz)
+    if domain_size(tm) != sz
+        throw(SizeMismatch(tm,sz))
+    end
+end
+
+struct SizeMismatch <: Exception
+    tm::TensorMapping
+    sz
+end
+export SizeMismatch
+
+function Base.showerror(io::IO, err::SizeMismatch)
+    print(io, "SizeMismatch: ")
+    print(io, "domain size $(domain_size(err.tm)) of TensorMapping not matching size $(err.sz)")
+end
