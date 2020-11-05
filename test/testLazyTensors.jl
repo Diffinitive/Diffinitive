@@ -12,6 +12,8 @@ using Tullio
     @test range_dim(DummyMapping{Int,2,3}()) == 2
     @test domain_dim(DummyMapping{Int,2,3}()) == 3
     @test apply(DummyMapping{Int,2,3}(), zeros(Int, (0,0,0)),(Index{Unknown}(0),Index{Unknown}(0))) == :apply
+    @test eltype(DummyMapping{Int,2,3}()) == Int
+    @test eltype(DummyMapping{Float64,2,3}()) == Float64
 end
 
 @testset "Mapping transpose" begin
