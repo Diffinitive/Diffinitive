@@ -12,6 +12,8 @@ using Tullio
     @test range_dim(DummyMapping{Int,2,3}()) == 2
     @test domain_dim(DummyMapping{Int,2,3}()) == 3
     @test apply(DummyMapping{Int,2,3}(), zeros(Int, (0,0,0)),(Index{Unknown}(0),Index{Unknown}(0))) == :apply
+    @test eltype(DummyMapping{Int,2,3}()) == Int
+    @test eltype(DummyMapping{Float64,2,3}()) == Float64
 end
 
 @testset "Mapping transpose" begin
@@ -177,6 +179,7 @@ end
     @test_throws BoundsError (v1 +̃  v2)[4]
     v2 = [1., 2, 3, 4]
     # Test that size of arrays is asserted when not specified inbounds
+    # TODO: Replace these errors with SizeMismatch
     @test_throws DimensionMismatch v1 +̃ v2
 
     # Test operations on LazyArray
@@ -193,6 +196,7 @@ end
     @test_throws BoundsError (v1 + v2)[4]
     v2 = [1., 2, 3, 4]
     # Test that size of arrays is asserted when not specified inbounds
+    # TODO: Replace these errors with SizeMismatch
     @test_throws DimensionMismatch v1 + v2
 end
 
@@ -226,7 +230,7 @@ end
     @test Ã∘B̃ isa TensorMappingComposition
     @test range_size(Ã∘B̃) == (2,)
     @test domain_size(Ã∘B̃) == (4,)
-    @test_throws DimensionMismatch B̃∘Ã
+    @test_throws SizeMismatch B̃∘Ã
 
     # @test @inbounds B̃∘Ã # Should not error even though dimensions don't match. (Since ]test runs with forced boundschecking this is currently not testable 2020-10-16)
 
@@ -312,6 +316,17 @@ end
 
     @inferred range_dim(I)
     @inferred domain_dim(I)
+
+    Ã = rand(4,2)
+    A = LazyLinearMap(Ã,(1,),(2,))
+    I1 = IdentityMapping{Float64}(2)
+    I2 = IdentityMapping{Float64}(4)
+    @test A∘I1 == A
+    @test I2∘A == A
+    @test I1∘I1 == I1
+    @test_throws SizeMismatch I1∘A
+    @test_throws SizeMismatch A∘I2
+    @test_throws SizeMismatch I1∘I2
 end
 
 @testset "InflatedTensorMapping" begin
@@ -380,6 +395,16 @@ end
     @inferred LazyTensors.split_index(tm,1,2,3,2,2,4)
     @inferred apply(tm,v,Index{Unknown}.((1,2,3,2,2,4))...)
     @inferred (tm*v)[1,2,3,2,2,4]
+
+    @testset "InflatedTensorMapping of InflatedTensorMapping" begin
+        A = ScalingOperator(2.0,(2,3))
+        itm = InflatedTensorMapping(I(3,2), A, I(4))
+        @test  InflatedTensorMapping(I(4), itm, I(2)) == InflatedTensorMapping(I(4,3,2), A, I(4,2))
+        @test  InflatedTensorMapping(itm, I(2)) == InflatedTensorMapping(I(3,2), A, I(4,2))
+        @test  InflatedTensorMapping(I(4), itm) == InflatedTensorMapping(I(4,3,2), A, I(4))
+
+        @test InflatedTensorMapping(I(2), I(2), I(2)) isa InflatedTensorMapping # The constructor should always return its type.
+    end
 
 end
 

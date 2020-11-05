@@ -86,12 +86,9 @@ struct TensorMappingComposition{T,R,K,D, TM1<:TensorMapping{T,R,K}, TM2<:TensorM
     t2::TM2
 
     @inline function TensorMappingComposition(t1::TensorMapping{T,R,K}, t2::TensorMapping{T,K,D}) where {T,R,K,D}
-        @boundscheck if domain_size(t1) != range_size(t2)
-            throw(DimensionMismatch("the first argument has domain size $(domain_size(t1)) while the second has range size $(range_size(t2)) "))
-        end
+        @boundscheck check_domain_size(t1, range_size(t2))
         return new{T,R,K,D, typeof(t1), typeof(t2)}(t1,t2)
     end
-    # Add check for matching sizes as a boundscheck
 end
 export TensorMappingComposition
 
@@ -170,6 +167,27 @@ domain_size(tmi::IdentityMapping) = tmi.size
 apply(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 apply_transpose(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 
+"""
+Base.:∘(tm, tmi)
+Base.:∘(tmi, tm)
+
+Composes a `Tensormapping` `tm` with an `IdentityMapping` `tmi`, by returning `tm`
+"""
+@inline function Base.:∘(tm::TensorMapping{T,R,D}, tmi::IdentityMapping{T,D}) where {T,R,D}
+    @boundscheck check_domain_size(tm, range_size(tmi))
+    return tm
+end
+
+@inline function Base.:∘(tmi::IdentityMapping{T,R}, tm::TensorMapping{T,R,D}) where {T,R,D}
+    @boundscheck check_domain_size(tmi, range_size(tm))
+    return tm
+end
+# Specialization for the case where tm is an IdentityMapping. Required to resolve ambiguity.
+@inline function Base.:∘(tm::IdentityMapping{T,D}, tmi::IdentityMapping{T,D}) where {T,D}
+    @boundscheck check_domain_size(tm, range_size(tmi))
+    return tmi
+end
+
 
 """
     InflatedTensorMapping{T,R,D} <: TensorMapping{T,R,D}
@@ -203,8 +221,20 @@ export InflatedTensorMapping
 The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityMapping`s.
 
 If one of `before` or `after` is left out, a 0-dimensional `IdentityMapping` is used as the default value.
+
+If `tm` already is an `InflatedTensorMapping`, `before` and `after` will be extended instead of
+creating a nested `InflatedTensorMapping`.
 """
 InflatedTensorMapping(::IdentityMapping, ::TensorMapping, ::IdentityMapping)
+
+function InflatedTensorMapping(before, itm::InflatedTensorMapping, after)
+    return InflatedTensorMapping(
+        IdentityMapping(before.size...,  itm.before.size...),
+        itm.tm,
+        IdentityMapping(itm.after.size..., after.size...),
+    )
+end
+
 InflatedTensorMapping(before::IdentityMapping, tm::TensorMapping{T}) where T = InflatedTensorMapping(before,tm,IdentityMapping{T}())
 InflatedTensorMapping(tm::TensorMapping{T}, after::IdentityMapping) where T = InflatedTensorMapping(IdentityMapping{T}(),tm,after)
 # Resolve ambiguity between the two previous methods
@@ -280,7 +310,6 @@ flatten_tuple(t::NTuple{N, Number} where N) = t
 flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
 flatten_tuple(ts::Vararg) = flatten_tuple(ts)
 
-
 """
    LazyOuterProduct(tms...)
 
@@ -334,3 +363,20 @@ LazyOuterProduct(tms::Vararg{TensorMapping}) = foldl(LazyOuterProduct, tms)
 export ⊗
 
 # TBD: Should we implement simplifications for outer products of LazyIdentities other LazyIdentities or Inflated tensormappings?
+
+function check_domain_size(tm::TensorMapping, sz)
+    if domain_size(tm) != sz
+        throw(SizeMismatch(tm,sz))
+    end
+end
+
+struct SizeMismatch <: Exception
+    tm::TensorMapping
+    sz
+end
+export SizeMismatch
+
+function Base.showerror(io::IO, err::SizeMismatch)
+    print(io, "SizeMismatch: ")
+    print(io, "domain size $(domain_size(err.tm)) of TensorMapping not matching size $(err.sz)")
+end
