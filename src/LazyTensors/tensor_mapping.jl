@@ -64,4 +64,11 @@ function domain_size end
 
 export range_size, domain_size
 
+"""
+    eltype(::TensorMapping{T})
+
+The type of elements the TensorMapping acts on.
+"""
+Base.eltype(::TensorMapping{T}) where T = T
+
 # TODO: Think about boundschecking!
