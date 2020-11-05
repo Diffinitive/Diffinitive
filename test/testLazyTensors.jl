@@ -396,6 +396,16 @@ end
     @inferred apply(tm,v,Index{Unknown}.((1,2,3,2,2,4))...)
     @inferred (tm*v)[1,2,3,2,2,4]
 
+    @testset "InflatedTensorMapping of InflatedTensorMapping" begin
+        A = ScalingOperator(2.0,(2,3))
+        itm = InflatedTensorMapping(I(3,2), A, I(4))
+        @test  InflatedTensorMapping(I(4), itm, I(2)) == InflatedTensorMapping(I(4,3,2), A, I(4,2))
+        @test  InflatedTensorMapping(itm, I(2)) == InflatedTensorMapping(I(3,2), A, I(4,2))
+        @test  InflatedTensorMapping(I(4), itm) == InflatedTensorMapping(I(4,3,2), A, I(4))
+
+        @test InflatedTensorMapping(I(2), I(2), I(2)) isa InflatedTensorMapping # The constructor should always return its type.
+    end
+
 end
 
 @testset "slice_tuple" begin

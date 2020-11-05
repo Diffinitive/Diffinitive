@@ -221,8 +221,20 @@ export InflatedTensorMapping
 The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityMapping`s.
 
 If one of `before` or `after` is left out, a 0-dimensional `IdentityMapping` is used as the default value.
+
+If `tm` already is an `InflatedTensorMapping`, `before` and `after` will be extended instead of
+creating a nested `InflatedTensorMapping`.
 """
 InflatedTensorMapping(::IdentityMapping, ::TensorMapping, ::IdentityMapping)
+
+function InflatedTensorMapping(before, itm::InflatedTensorMapping, after)
+    return InflatedTensorMapping(
+        IdentityMapping(before.size...,  itm.before.size...),
+        itm.tm,
+        IdentityMapping(itm.after.size..., after.size...),
+    )
+end
+
 InflatedTensorMapping(before::IdentityMapping, tm::TensorMapping{T}) where T = InflatedTensorMapping(before,tm,IdentityMapping{T}())
 InflatedTensorMapping(tm::TensorMapping{T}, after::IdentityMapping) where T = InflatedTensorMapping(IdentityMapping{T}(),tm,after)
 # Resolve ambiguity between the two previous methods
