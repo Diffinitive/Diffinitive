@@ -362,7 +362,6 @@ LazyOuterProduct(tms::Vararg{TensorMapping}) = foldl(LazyOuterProduct, tms)
 ⊗(a::TensorMapping, b::TensorMapping) = LazyOuterProduct(a,b)
 export ⊗
 
-# TBD: Should we implement simplifications for outer products of LazyIdentities other LazyIdentities or Inflated tensormappings?
 
 function check_domain_size(tm::TensorMapping, sz)
     if domain_size(tm) != sz
