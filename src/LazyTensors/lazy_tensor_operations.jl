@@ -313,7 +313,7 @@ flatten_tuple(ts::Vararg) = flatten_tuple(ts)
 """
    LazyOuterProduct(tms...)
 
-Creates a `TensorComposition` for the outerproduct of `tms...`.
+Creates a `TensorMappingComposition` for the outerproduct of `tms...`.
 This is done by separating the outer product into regular products of outer products involving only identity mappings and one non-identity mapping.
 
 First let
