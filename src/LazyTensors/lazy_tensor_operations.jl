@@ -98,6 +98,17 @@ function check_matching_size(t1::TensorMapping, t2::TensorMapping)
     end
 end
 
+struct SizeMismatch <: Exception
+    tm::TensorMapping
+    sz::NTuple{N,Int}
+end
+
+function showerror(io::IO, err::SizeMismatch)
+    print(io, "SizeMismatch: ")
+    print(io, "attempt to apply TensorMapping with domain size $(domain_size(tm)) to a domain of size $sz")
+end
+
+
 range_size(tm::TensorMappingComposition) = range_size(tm.t1)
 domain_size(tm::TensorMappingComposition) = domain_size(tm.t2)
 
