@@ -86,15 +86,15 @@ struct TensorMappingComposition{T,R,K,D, TM1<:TensorMapping{T,R,K}, TM2<:TensorM
     t2::TM2
 
     @inline function TensorMappingComposition(t1::TensorMapping{T,R,K}, t2::TensorMapping{T,K,D}) where {T,R,K,D}
-        @boundscheck check_matching_size(t1::TensorMapping, t2::TensorMapping)
+        @boundscheck check_domain_size(t1, range_size(t2))
         return new{T,R,K,D, typeof(t1), typeof(t2)}(t1,t2)
     end
 end
 export TensorMappingComposition
 
-function check_matching_size(t1::TensorMapping, t2::TensorMapping)
-    if domain_size(t1) != range_size(t2)
-        throw(DimensionMismatch("the first argument has domain size $(domain_size(t1)) while the second has range size $(range_size(t2)) "))
+function check_domain_size(tm::TensorMapping, sz)
+    if domain_size(tm) != sz
+        throw(SizeMismatch(tm,sz))
     end
 end
 
@@ -192,17 +192,17 @@ Base.:∘(tmi, tm)
 Composes a `Tensormapping` `tm` with an `IdentityMapping` `tmi`, by returning `tm`
 """
 @inline function Base.:∘(tm::TensorMapping{T,R,D}, tmi::IdentityMapping{T,D}) where {T,R,D}
-    @boundscheck check_matching_size(tm::TensorMapping, tmi::TensorMapping)
+    @boundscheck check_domain_size(tm, range_size(tmi))
     return tm
 end
 
 @inline function Base.:∘(tmi::IdentityMapping{T,R}, tm::TensorMapping{T,R,D}) where {T,R,D}
-    @boundscheck check_matching_size(tmi::TensorMapping, tm::TensorMapping)
+    @boundscheck check_domain_size(tmi, range_size(tm))
     return tm
 end
 # Specialization for the case where tm is an IdentityMapping. Required to resolve ambiguity.
 @inline function Base.:∘(tm::IdentityMapping{T,D}, tmi::IdentityMapping{T,D}) where {T,D}
-    @boundscheck check_matching_size(tm::TensorMapping, tmi::TensorMapping)
+    @boundscheck check_domain_size(tm, range_size(tmi))
     return tmi
 end
 

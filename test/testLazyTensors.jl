@@ -226,7 +226,7 @@ end
     @test Ã∘B̃ isa TensorMappingComposition
     @test range_size(Ã∘B̃) == (2,)
     @test domain_size(Ã∘B̃) == (4,)
-    @test_throws DimensionMismatch B̃∘Ã
+    @test_throws SizeMismatch B̃∘Ã
 
     # @test @inbounds B̃∘Ã # Should not error even though dimensions don't match. (Since ]test runs with forced boundschecking this is currently not testable 2020-10-16)
 
@@ -320,9 +320,9 @@ end
     @test A∘I1 == A
     @test I2∘A == A
     @test I1∘I1 == I1
-    @test_throws DimensionMismatch I1∘A
-    @test_throws DimensionMismatch A∘I2
-    @test_throws DimensionMismatch I1∘I2
+    @test_throws SizeMismatch I1∘A
+    @test_throws SizeMismatch A∘I2
+    @test_throws SizeMismatch I1∘I2
 end
 
 @testset "InflatedTensorMapping" begin
