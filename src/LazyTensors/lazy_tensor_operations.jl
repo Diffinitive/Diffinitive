@@ -100,12 +100,12 @@ end
 
 struct SizeMismatch <: Exception
     tm::TensorMapping
-    sz::NTuple{N,Int}
+    sz
 end
 
 function showerror(io::IO, err::SizeMismatch)
     print(io, "SizeMismatch: ")
-    print(io, "attempt to apply TensorMapping with domain size $(domain_size(tm)) to a domain of size $sz")
+    print(io, "attempt to apply TensorMapping with domain size $(domain_size(err.tm)) to a domain of size $(err.sz)")
 end
 
 
