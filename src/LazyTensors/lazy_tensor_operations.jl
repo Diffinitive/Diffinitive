@@ -103,7 +103,7 @@ struct SizeMismatch <: Exception
     sz
 end
 
-function showerror(io::IO, err::SizeMismatch)
+function Base.showerror(io::IO, err::SizeMismatch)
     print(io, "SizeMismatch: ")
     print(io, "attempt to apply TensorMapping with domain size $(domain_size(err.tm)) to a domain of size $(err.sz)")
 end
