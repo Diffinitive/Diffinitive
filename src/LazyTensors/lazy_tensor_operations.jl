@@ -324,6 +324,10 @@ function LazyOuterProduct(tm1::TensorMapping{T}, tm2::TensorMapping{T}) where T
     return itm1∘itm2
 end
 
+LazyOuterProduct(t1::IdentityMapping{T}, t2::IdentityMapping{T}) where T = IdentityMapping{T}(t1.size...,t2.size...)
+LazyOuterProduct(t1::TensorMapping, t2::IdentityMapping) = InflatedTensorMapping(t1, t2)
+LazyOuterProduct(t1::IdentityMapping, t2::TensorMapping) = InflatedTensorMapping(t1, t2)
+
 LazyOuterProduct(tms::Vararg{TensorMapping}) = foldl(LazyOuterProduct, tms)
 
 ⊗(a::TensorMapping, b::TensorMapping) = LazyOuterProduct(a,b)

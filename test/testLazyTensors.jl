@@ -447,6 +447,14 @@ end
     @tullio BAv[k,i] := A[i,j]*B[k,l,m]*v₂[l,m,j]
     @test B̃Ã*v₂ ≈ BAv
 
+    @testset "Indentity mapping arguments" begin
+        @test LazyOuterProduct(IdentityMapping(3,2), IdentityMapping(1,2)) == IdentityMapping(3,2,1,2)
+
+        Ã = LazyLinearMap(A,(1,),(2,))
+        @test LazyOuterProduct(IdentityMapping(3,2), Ã) == InflatedTensorMapping(IdentityMapping(3,2),Ã)
+        @test LazyOuterProduct(Ã, IdentityMapping(3,2)) == InflatedTensorMapping(Ã,IdentityMapping(3,2))
+    end
+
 end
 
 end
