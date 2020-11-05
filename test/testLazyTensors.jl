@@ -478,6 +478,10 @@ end
         Ã = LazyLinearMap(A,(1,),(2,))
         @test LazyOuterProduct(IdentityMapping(3,2), Ã) == InflatedTensorMapping(IdentityMapping(3,2),Ã)
         @test LazyOuterProduct(Ã, IdentityMapping(3,2)) == InflatedTensorMapping(Ã,IdentityMapping(3,2))
+
+        I1 = IdentityMapping(3,2)
+        I2 = IdentityMapping(4)
+        @test I1⊗Ã⊗I2 == InflatedTensorMapping(I1, Ã, I2)
     end
 
 end
