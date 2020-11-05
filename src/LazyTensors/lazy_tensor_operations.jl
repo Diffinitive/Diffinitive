@@ -102,6 +102,7 @@ struct SizeMismatch <: Exception
     tm::TensorMapping
     sz
 end
+export SizeMismatch
 
 function Base.showerror(io::IO, err::SizeMismatch)
     print(io, "SizeMismatch: ")
