@@ -310,6 +310,59 @@ flatten_tuple(t::NTuple{N, Number} where N) = t
 flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
 flatten_tuple(ts::Vararg) = flatten_tuple(ts)
 
+"""
+   LazyOuterProduct(tms...)
+
+Creates a `TensorMappingComposition` for the outerproduct of `tms...`.
+This is done by separating the outer product into regular products of outer products involving only identity mappings and one non-identity mapping.
+
+First let
+```math
+A = A_{I,J}
+B = B_{M,N}
+C = C_{P,Q}
+```
+
+where ``I``, ``M``, ``P`` are  multi-indexes for the ranges of ``A``, ``B``, ``C``, and ``J``, ``N``, ``Q`` are multi-indexes of the domains.
+
+We use ``⊗`` to denote the outer product
+```math
+(A⊗B)_{IM,JN} = A_{I,J}B_{M,N}
+```
+
+We note that
+```math
+A⊗B⊗C = (A⊗B⊗C)_{IMP,JNQ} = A_{I,J}B_{M,N}C_{P,Q}
+```
+And that
+```math
+A⊗B⊗C = (A⊗I_{|M|}⊗I_{|P|})(I_{|J|}⊗B⊗I_{|P|})(I_{|J|}⊗I_{|N|}⊗C)
+```
+where |.| of a multi-index is a vector of sizes for each dimension. ``I_v`` denotes the identity tensor of size ``v[i]`` in each direction
+To apply ``A⊗B⊗C`` we evaluate
+
+(A⊗B⊗C)v = [(A⊗I_{|M|}⊗I_{|P|})  [(I_{|J|}⊗B⊗I_{|P|}) [(I_{|J|}⊗I_{|N|}⊗C)v]]]
+"""
+function LazyOuterProduct end
+export LazyOuterProduct
+
+function LazyOuterProduct(tm1::TensorMapping{T}, tm2::TensorMapping{T}) where T
+    itm1 = InflatedTensorMapping(tm1, IdentityMapping{T}(range_size(tm2)))
+    itm2 = InflatedTensorMapping(IdentityMapping{T}(domain_size(tm1)),tm2)
+
+    return itm1∘itm2
+end
+
+LazyOuterProduct(t1::IdentityMapping{T}, t2::IdentityMapping{T}) where T = IdentityMapping{T}(t1.size...,t2.size...)
+LazyOuterProduct(t1::TensorMapping, t2::IdentityMapping) = InflatedTensorMapping(t1, t2)
+LazyOuterProduct(t1::IdentityMapping, t2::TensorMapping) = InflatedTensorMapping(t1, t2)
+
+LazyOuterProduct(tms::Vararg{TensorMapping}) = foldl(LazyOuterProduct, tms)
+
+⊗(a::TensorMapping, b::TensorMapping) = LazyOuterProduct(a,b)
+export ⊗
+
+
 function check_domain_size(tm::TensorMapping, sz)
     if domain_size(tm) != sz
         throw(SizeMismatch(tm,sz))

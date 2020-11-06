@@ -423,4 +423,67 @@ end
     @test LazyTensors.flatten_tuple(((1,2),(3,4),(5,),6)) == (1,2,3,4,5,6)
 end
 
+
+@testset "LazyOuterProduct" begin
+    struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
+        λ::T
+        size::NTuple{D,Int}
+    end
+
+    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Vararg{Index,D}) where {T,D} = m.λ*v[I]
+    LazyTensors.range_size(m::ScalingOperator) = m.size
+    LazyTensors.domain_size(m::ScalingOperator) = m.size
+
+    A = ScalingOperator(2.0, (5,))
+    B = ScalingOperator(3.0, (3,))
+    C = ScalingOperator(5.0, (3,2))
+
+    AB = LazyOuterProduct(A,B)
+    @test AB isa TensorMapping{T,2,2} where T
+    @test range_size(AB) == (5,3)
+    @test domain_size(AB) == (5,3)
+
+    v = rand(range_size(AB)...)
+    @test AB*v == 6*v
+
+    ABC = LazyOuterProduct(A,B,C)
+
+    @test ABC isa TensorMapping{T,4,4} where T
+    @test range_size(ABC) == (5,3,3,2)
+    @test domain_size(ABC) == (5,3,3,2)
+
+    @test A⊗B == AB
+    @test A⊗B⊗C == ABC
+
+    A = rand(3,2)
+    B = rand(2,4,3)
+
+    v₁ = rand(2,4,3)
+    v₂ = rand(4,3,2)
+
+    Ã = LazyLinearMap(A,(1,),(2,))
+    B̃ = LazyLinearMap(B,(1,),(2,3))
+
+    ÃB̃ = LazyOuterProduct(Ã,B̃)
+    @tullio ABv[i,k] := A[i,j]*B[k,l,m]*v₁[j,l,m]
+    @test ÃB̃*v₁ ≈ ABv
+
+    B̃Ã = LazyOuterProduct(B̃,Ã)
+    @tullio BAv[k,i] := A[i,j]*B[k,l,m]*v₂[l,m,j]
+    @test B̃Ã*v₂ ≈ BAv
+
+    @testset "Indentity mapping arguments" begin
+        @test LazyOuterProduct(IdentityMapping(3,2), IdentityMapping(1,2)) == IdentityMapping(3,2,1,2)
+
+        Ã = LazyLinearMap(A,(1,),(2,))
+        @test LazyOuterProduct(IdentityMapping(3,2), Ã) == InflatedTensorMapping(IdentityMapping(3,2),Ã)
+        @test LazyOuterProduct(Ã, IdentityMapping(3,2)) == InflatedTensorMapping(Ã,IdentityMapping(3,2))
+
+        I1 = IdentityMapping(3,2)
+        I2 = IdentityMapping(4)
+        @test I1⊗Ã⊗I2 == InflatedTensorMapping(I1, Ã, I2)
+    end
+
+end
+
 end
