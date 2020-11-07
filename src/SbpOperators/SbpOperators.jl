@@ -10,9 +10,7 @@ include("d2.jl")
 include("readoperator.jl")
 include("laplace/secondderivative.jl")
 include("laplace/laplace.jl")
-include("quadrature/diagonal_inner_product.jl")
-include("quadrature/quadrature.jl")
-include("quadrature/inverse_diagonal_inner_product.jl")
-include("quadrature/inverse_quadrature.jl")
+include("quadrature/diagonal_quadrature.jl")
+include("quadrature/inverse_diagonal_quadrature.jl")
 
 end # module

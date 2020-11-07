@@ -110,67 +110,67 @@ end
     @test L*v5 ≈ v5ₓₓ atol=5e-4 norm=l2
 end
 
-@testset "DiagonalInnerProduct" begin
+@testset "DiagonalQuadrature" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
-    L = 2.3
-    g = EquidistantGrid(77, 0.0, L)
-    H = DiagonalInnerProduct(g,op.quadratureClosure)
+    Lx = 2.3
+    g = EquidistantGrid(77, 0.0, Lx)
+    H = DiagonalQuadrature(g,op.quadratureClosure)
     v = ones(Float64, size(g))
 
     @test H isa TensorMapping{T,1,1} where T
     @test H' isa TensorMapping{T,1,1} where T
-    @test sum(H*v) ≈ L
+    @test H == diagonal_quadrature(g,op.quadratureClosure)
+    @test sum(H*v) ≈ Lx
     @test H*v == H'*v
-end
+    @inferred H*v
 
-@testset "Quadrature" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
-    Lx = 2.3
+    # Test multiple dimension
     Ly = 5.2
     g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
 
-    Q = Quadrature(g, op.quadratureClosure)
+    H = diagonal_quadrature(g, op.quadratureClosure)
 
-    @test Q isa TensorMapping{T,2,2} where T
-    @test Q' isa TensorMapping{T,2,2} where T
+    @test H isa TensorMapping{T,2,2} where T
+    @test H' isa TensorMapping{T,2,2} where T
 
     v = ones(Float64, size(g))
-    @test sum(Q*v) ≈ Lx*Ly
+    @test sum(H*v) ≈ Lx*Ly
 
     v = 2*ones(Float64, size(g))
-    @test_broken sum(Q*v) ≈ 2*Lx*Ly
+    @test sum(H*v) ≈ 2*Lx*Ly
 
-    @test Q*v == Q'*v
+    @test_broken H*v == H'*v
+
+    @inferred H*v
 end
 
-@testset "InverseDiagonalInnerProduct" begin
+@testset "InverseDiagonalQuadrature" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
-    L = 2.3
-    g = EquidistantGrid(77, 0.0, L)
-    H = DiagonalInnerProduct(g, op.quadratureClosure)
-    Hi = InverseDiagonalInnerProduct(g,op.quadratureClosure)
+    Lx = 2.3
+    g = EquidistantGrid(77, 0.0, Lx)
+    H = DiagonalQuadrature(g, op.quadratureClosure)
+    Hi = InverseDiagonalQuadrature(g,op.quadratureClosure)
     v = evalOn(g, x->sin(x))
 
     @test Hi isa TensorMapping{T,1,1} where T
     @test Hi' isa TensorMapping{T,1,1} where T
+    @test Hi == inverse_diagonal_quadrature(g,op.quadratureClosure)
     @test Hi*H*v ≈ v
     @test Hi*v == Hi'*v
-end
+    @inferred Hi*v
 
-@testset "InverseQuadrature" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
-    Lx = 7.3
-    Ly = 8.2
+    # Test multiple dimension
+    Ly = 5.2
     g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
 
-    Q = Quadrature(g, op.quadratureClosure)
-    Qinv = InverseQuadrature(g, op.quadratureClosure)
+    H = diagonal_quadrature(g, op.quadratureClosure)
+    Hi = inverse_diagonal_quadrature(g, op.quadratureClosure)
     v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
 
-    @test Qinv isa TensorMapping{T,2,2} where T
-    @test Qinv' isa TensorMapping{T,2,2} where T
-    @test_broken Qinv*(Q*v) ≈ v
-    @test Qinv*v == Qinv'*v
+    @test Hi isa TensorMapping{T,2,2} where T
+    @test Hi' isa TensorMapping{T,2,2} where T
+    @test Hi*H*v ≈ v
+    @test_broken Hi*v == Hi'*v
 end
 #
 # @testset "BoundaryValue" begin
