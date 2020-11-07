@@ -60,7 +60,7 @@ end
 
 function LazyTensors.apply(H::DiagonalQuadrature{T},  v::AbstractVector{T}, index::Index{Unknown}) where T
     N = length(v);
-    r = getregion(Int(index), closuresize(H), N)
+    r = getregion(Int(index), closure_size(H), N)
     i = Index(Int(index), r)
     return LazyTensors.apply(H, v, i)
 end
@@ -68,8 +68,8 @@ end
 LazyTensors.apply_transpose(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index) where T = LazyTensors.apply(H,v,I)
 
 """
-    closuresize(H)
+    closure_size(H)
 Returns the size of the closure stencil of a DiagonalQuadrature `H`.
 """
-closuresize(H::DiagonalQuadrature{T,M}) where {T,M} = M
-export closuresize
+closure_size(H::DiagonalQuadrature{T,M}) where {T,M} = M
+export closure_size
