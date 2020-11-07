@@ -1,7 +1,7 @@
 """
 inverse_diagonal_quadrature(g,quadrature_closure)
 
-Constructs the diagonal quadrature inverse operator `Qi` on a grid of `Dim` dimensions as
+Constructs the diagonal quadrature inverse operator `Hi` on a grid of `Dim` dimensions as
 a `TensorMapping`. The one-dimensional operator is a InverseDiagonalQuadrature, while
 the multi-dimensional operator is the outer-product of the one-dimensional operators
 in each coordinate direction.
@@ -17,9 +17,10 @@ export inverse_diagonal_quadrature
 
 
 """
-    InverseDiagonalQuadrature{Dim,T<:Real,M} <: TensorMapping{T,1,1}
+    InverseDiagonalQuadrature{T,M} <: TensorMapping{T,1,1}
 
-Implements the inverse diagonal inner product operator `Hi` of as a 1D TensorOperator
+Implements the one-dimensional inverse diagonal quadrature operator as a `TensorMapping
+TODO: Elaborate on properties
 """
 struct InverseDiagonalQuadrature{T<:Real,M} <: TensorMapping{T,1,1}
     h_inv::T
@@ -59,6 +60,9 @@ end
 
 LazyTensors.apply_transpose(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, I::Index) where T = LazyTensors.apply(Hi,v,I)
 
-
+"""
+    closuresize(H)
+Returns the size of the closure stencil of a InverseDiagonalQuadrature `Hi`.
+"""
 closuresize(Hi::InverseDiagonalQuadrature{T,M}) where {T,M} =  M
 export closuresize

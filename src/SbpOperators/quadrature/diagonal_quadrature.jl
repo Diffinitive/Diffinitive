@@ -2,7 +2,7 @@
 diagonal_quadrature(g,quadrature_closure)
 
 Constructs the diagonal quadrature operator `H` on a grid of `Dim` dimensions as
-a `TensorMapping`. The one-dimensional operator is a DiagonalQuadrature, while
+a `TensorMapping`. The one-dimensional operator is a `DiagonalQuadrature`, while
 the multi-dimensional operator is the outer-product of the
 one-dimensional operators in each coordinate direction.
 """
@@ -16,9 +16,10 @@ end
 export diagonal_quadrature
 
 """
-    DiagonalQuadrature{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
+    DiagonalQuadrature{T,M} <: TensorMapping{T,1,1}
 
-Implements the diagonal quadrature operator `H` of Dim dimension as a TensorMapping
+Implements the one-dimensional diagonal quadrature operator as a `TensorMapping
+TODO: Elaborate on properties
 """
 struct DiagonalQuadrature{T,M} <: TensorMapping{T,1,1}
     h::T
@@ -27,6 +28,12 @@ struct DiagonalQuadrature{T,M} <: TensorMapping{T,1,1}
 end
 export DiagonalQuadrature
 
+"""
+    DiagonalQuadrature(g, quadrature_closure)
+
+Constructs the `DiagonalQuadrature` defined by the `EquidistantGrid` `g` and
+closure stencil `quadrature_closure`.
+"""
 function DiagonalQuadrature(g::EquidistantGrid{1}, quadrature_closure)
     return DiagonalQuadrature(spacing(g)[1], quadrature_closure, size(g))
 end
@@ -60,5 +67,9 @@ end
 
 LazyTensors.apply_transpose(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index) where T = LazyTensors.apply(H,v,I)
 
+"""
+    closuresize(H)
+Returns the size of the closure stencil of a DiagonalQuadrature `H`.
+"""
 closuresize(H::DiagonalQuadrature{T,M}) where {T,M} = M
 export closuresize
