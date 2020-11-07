@@ -139,7 +139,7 @@ end
     v = 2*ones(Float64, size(g))
     @test sum(H*v) ≈ 2*Lx*Ly
 
-    @test_broken H*v == H'*v
+    @test_broken H*v == H'*v # apply_transpose not implemented for InflatedTensorMapping!
 
     @inferred H*v
 end
@@ -170,7 +170,7 @@ end
     @test Hi isa TensorMapping{T,2,2} where T
     @test Hi' isa TensorMapping{T,2,2} where T
     @test Hi*H*v ≈ v
-    @test_broken Hi*v == Hi'*v
+    @test_broken Hi*v == Hi'*v # apply_transpose not implemented for InflatedTensorMapping!
 end
 #
 # @testset "BoundaryValue" begin
