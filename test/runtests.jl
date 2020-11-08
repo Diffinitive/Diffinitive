@@ -1,6 +1,6 @@
 using Test
 using TestSetExtensions
 
-@testset ExtendedTestSet "All" begin
+@testset "All" begin
     @includetests ARGS
 end
