@@ -172,67 +172,92 @@ end
     @test_broken Qinv*(Q*v) ≈ v
     @test Qinv*v == Qinv'*v
 end
-#
-# @testset "BoundaryValue" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
-#     g = EquidistantGrid((4,5), (0.0, 0.0), (1.0,1.0))
-#
-#     e_w = BoundaryValue(op, g, CartesianBoundary{1,Lower}())
-#     e_e = BoundaryValue(op, g, CartesianBoundary{1,Upper}())
-#     e_s = BoundaryValue(op, g, CartesianBoundary{2,Lower}())
-#     e_n = BoundaryValue(op, g, CartesianBoundary{2,Upper}())
-#
-#     v = zeros(Float64, 4, 5)
-#     v[:,5] = [1, 2, 3,4]
-#     v[:,4] = [1, 2, 3,4]
-#     v[:,3] = [4, 5, 6, 7]
-#     v[:,2] = [7, 8, 9, 10]
-#     v[:,1] = [10, 11, 12, 13]
-#
-#     @test e_w  isa TensorMapping{T,2,1} where T
-#     @test e_w' isa TensorMapping{T,1,2} where T
-#
-#     @test domain_size(e_w, (3,2)) == (2,)
-#     @test domain_size(e_e, (3,2)) == (2,)
-#     @test domain_size(e_s, (3,2)) == (3,)
-#     @test domain_size(e_n, (3,2)) == (3,)
-#
-#     @test size(e_w'*v) == (5,)
-#     @test size(e_e'*v) == (5,)
-#     @test size(e_s'*v) == (4,)
-#     @test size(e_n'*v) == (4,)
-#
-#     @test e_w'*v == [10,7,4,1.0,1]
-#     @test e_e'*v == [13,10,7,4,4.0]
-#     @test e_s'*v == [10,11,12,13.0]
-#     @test e_n'*v == [1,2,3,4.0]
-#
-#     g_x = [1,2,3,4.0]
-#     g_y = [5,4,3,2,1.0]
-#
-#     G_w = zeros(Float64, (4,5))
-#     G_w[1,:] = g_y
-#
-#     G_e = zeros(Float64, (4,5))
-#     G_e[4,:] = g_y
-#
-#     G_s = zeros(Float64, (4,5))
-#     G_s[:,1] = g_x
-#
-#     G_n = zeros(Float64, (4,5))
-#     G_n[:,5] = g_x
-#
-#     @test size(e_w*g_y) == (UnknownDim,5)
-#     @test size(e_e*g_y) == (UnknownDim,5)
-#     @test size(e_s*g_x) == (4,UnknownDim)
-#     @test size(e_n*g_x) == (4,UnknownDim)
-#
-#     # These tests should be moved to where they are possible (i.e we know what the grid should be)
-#     @test_broken e_w*g_y == G_w
-#     @test_broken e_e*g_y == G_e
-#     @test_broken e_s*g_x == G_s
-#     @test_broken e_n*g_x == G_n
-# end
+
+@testset "BoundaryRestrictrion" begin
+    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+
+    g = EquidistantGrid(4, 0.0, 1.0)
+
+    e_l = BoundaryRestriction(g,op.eClosure,Lower())
+    e_r = BoundaryRestriction(g,op.eClosure,Upper())
+
+    v = evalOn(g,x->1+x^2)
+    u = [3.124] #How to handle scalars having to be arrays? It's kind of ugly.
+
+    e_l*v isa LazyTensorMappingApplication
+    @test (e_l*v)[Index{Lower}(1)] == v[1]
+    @test (e_r*v)[Index{Upper}(4)] == v[end]
+    @test e_l'*u == [u[1], 0, 0, 0]
+    @test e_r'*u == [0, 0, 0, u[1]]
+    @test_throws BoundsError (e_l*v)[Index{Lower}(3)]
+    @test_throws BoundsError (e_r*v)[Index{Upper}(3)]
+
+
+
+
+
+    g = EquidistantGrid((4,5), (0.0, 0.0), (1.0,1.0))
+
+    e_w = boundary_restriction(g, op.eClosure, CartesianBoundary{1,Lower}())
+    e_e = boundary_restriction(g, op.eClosure, CartesianBoundary{1,Upper}())
+    e_s = boundary_restriction(g, op.eClosure, CartesianBoundary{2,Lower}())
+    e_n = boundary_restriction(g, op.eClosure, CartesianBoundary{2,Upper}())
+
+    v = zeros(Float64, 4, 5)
+    v[:,5] = [1, 2, 3,4]
+    v[:,4] = [1, 2, 3,4]
+    v[:,3] = [4, 5, 6, 7]
+    v[:,2] = [7, 8, 9, 10]
+    v[:,1] = [10, 11, 12, 13]
+
+    @test_broken e_w isa TensorMapping{T,1,2} where T
+    @test_broken e_w'  isa TensorMapping{T,2,1} where T
+
+
+
+    @test domain_size(e_w) == (4,5)
+    @test domain_size(e_e) == (4,5)
+    @test domain_size(e_s) == (4,5)
+    @test domain_size(e_n) == (4,5)
+
+    @test range_size(e_w) == (1,5)
+    @test range_size(e_e) == (1,5)
+    @test range_size(e_s) == (4,1)
+    @test range_size(e_n) == (4,1)
+
+    e_w*v isa LazyTensorMappingApplication
+
+    @test_broken e_w'*v == [10,7,4,1.0,1]
+    @test_broken e_e'*v == [13,10,7,4,4.0]
+    @test_broken e_s'*v == [10,11,12,13.0]
+    @test_broken e_n'*v == [1,2,3,4.0]
+
+    g_x = [1,2,3,4.0]
+    g_y = [5,4,3,2,1.0]
+
+    G_w = zeros(Float64, (4,5))
+    G_w[1,:] = g_y
+
+    G_e = zeros(Float64, (4,5))
+    G_e[4,:] = g_y
+
+    G_s = zeros(Float64, (4,5))
+    G_s[:,1] = g_x
+
+    G_n = zeros(Float64, (4,5))
+    G_n[:,5] = g_x
+
+    @test_broken size(e_w*g_y) == (UnknownDim,5)
+    @test_broken size(e_e*g_y) == (UnknownDim,5)
+    @test_broken size(e_s*g_x) == (4,UnknownDim)
+    @test_broken size(e_n*g_x) == (4,UnknownDim)
+
+    # These tests should be moved to where they are possible (i.e we know what the grid should be)
+    @test_broken e_w*g_y == G_w
+    @test_broken e_e*g_y == G_e
+    @test_broken e_s*g_x == G_s
+    @test_broken e_n*g_x == G_n
+end
 #
 # @testset "NormalDerivative" begin
 #     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
