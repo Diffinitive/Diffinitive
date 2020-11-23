@@ -369,21 +369,18 @@ end
         v = rand(domain_size(tm)...)
         @tullio IAIv[a,b,c,d] := Ã[c,i]*v[a,b,i,d]
         @test tm*v ≈ IAIv rtol=1e-14
-        @inferred LazyTensors.split_index(tm,1,1,1,1)
 
         # Test InflatedTensorMapping mapping w. before
         tm = InflatedTensorMapping(I(3,2), A)
         v = rand(domain_size(tm)...)
         @tullio IAIv[a,b,c] := Ã[c,i]*v[a,b,i]
         @test tm*v ≈ IAIv rtol=1e-14
-        @inferred LazyTensors.split_index(tm,1,1,1)
 
         # Test InflatedTensorMapping mapping w. after
         tm = InflatedTensorMapping(A,I(4))
         v = rand(domain_size(tm)...)
         @tullio IAIv[c,d] := Ã[c,i]*v[i,d]
         @test tm*v ≈ IAIv rtol=1e-14
-        @inferred LazyTensors.split_index(tm,1,1)
 
         @testset "Inference of application" begin
             struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
@@ -398,7 +395,6 @@ end
             tm = InflatedTensorMapping(I(2,3),ScalingOperator(2.0, (3,2)),I(3,4))
             v = rand(domain_size(tm)...)
 
-            @inferred LazyTensors.split_index(tm,1,2,3,2,2,4)
             @inferred apply(tm,v,Index{Unknown}.((1,2,3,2,2,4))...)
             @inferred (tm*v)[1,2,3,2,2,4]
         end
@@ -413,6 +409,20 @@ end
 
         @test InflatedTensorMapping(I(2), I(2), I(2)) isa InflatedTensorMapping # The constructor should always return its type.
     end
+end
+
+@testset "split_index" begin
+    @test LazyTensors.split_index(Val(2),Val(1),Val(2),Val(2),1,2,3,4,5,6) == ((1,2,:,5,6),(3,4))
+    @test LazyTensors.split_index(Val(2),Val(3),Val(2),Val(2),1,2,3,4,5,6) == ((1,2,:,:,:,5,6),(3,4))
+    @test LazyTensors.split_index(Val(3),Val(1),Val(1),Val(2),1,2,3,4,5,6) == ((1,2,3,:,5,6),(4,))
+    @test LazyTensors.split_index(Val(3),Val(2),Val(1),Val(2),1,2,3,4,5,6) == ((1,2,3,:,:,5,6),(4,))
+    @test LazyTensors.split_index(Val(1),Val(1),Val(2),Val(3),1,2,3,4,5,6) == ((1,:,4,5,6),(2,3))
+    @test LazyTensors.split_index(Val(1),Val(2),Val(2),Val(3),1,2,3,4,5,6) == ((1,:,:,4,5,6),(2,3))
+
+    @test LazyTensors.split_index(Val(0),Val(1),Val(3),Val(3),1,2,3,4,5,6) == ((:,4,5,6),(1,2,3))
+    @test LazyTensors.split_index(Val(3),Val(1),Val(3),Val(0),1,2,3,4,5,6) == ((1,2,3,:),(4,5,6))
+
+    @inferred LazyTensors.split_index(Val(2),Val(3),Val(2),Val(2),1,2,3,2,2,4)
 end
 
 @testset "slice_tuple" begin
