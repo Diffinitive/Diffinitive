@@ -1,17 +1,22 @@
-function boundary_restriction(grid::EquidistantGrid{2,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary) where {T,M}
+function boundary_restriction(grid::EquidistantGrid{1,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary{1}) where {T,M}
     r = region(boundary)
-    d = dim(boundary)
-    d_orth = 3-d # orthogonal dimension
-    e = BoundaryRestriction(restrict(grid, d), closureStencil, r())
-    I = IdentityMapping{T}(size(restrict(grid,d_orth)))
-    if d == 1
-        return e⊗I
-    elseif d == 2
-        return I⊗e
-    else
-        # throw error
-    end
+    return e = BoundaryRestriction(grid, closureStencil, r())
 end
+
+function boundary_restriction(grid::EquidistantGrid{2,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary{1}) where {T,M}
+    r = region(boundary)
+    e = BoundaryRestriction(restrict(grid, 1), closureStencil, r())
+    I = IdentityMapping{T}(size(restrict(grid,2)))
+    return e⊗I
+end
+
+function boundary_restriction(grid::EquidistantGrid{2,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary{2}) where {T,M}
+    r = region(boundary)
+    e = BoundaryRestriction(restrict(grid, 2), closureStencil, r())
+    I = IdentityMapping{T}(size(restrict(grid,1)))
+    return I⊗e
+end
+
 export boundary_restriction
 
 """
@@ -25,7 +30,7 @@ struct BoundaryRestriction{T,M,R<:Region} <: TensorMapping{T,1,1}
 end
 export BoundaryRestriction
 
-function BoundaryRestriction(grid::EquidistantGrid{1,T}, closureStencil::Stencil{T,M}, region::Region) where {T,M}
+function BoundaryRestriction(grid::EquidistantGrid{1,T}, closureStencil::Stencil{T,M}, region::Region) where {T,M,R}
     return BoundaryRestriction{T,M,typeof(region)}(closureStencil,size(grid))
 end
 

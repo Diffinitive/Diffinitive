@@ -192,10 +192,6 @@ end
     @test_throws BoundsError (e_l*v)[Index{Lower}(3)]
     @test_throws BoundsError (e_r*v)[Index{Upper}(3)]
 
-
-
-
-
     g = EquidistantGrid((4,5), (0.0, 0.0), (1.0,1.0))
 
     e_w = boundary_restriction(g, op.eClosure, CartesianBoundary{1,Lower}())
