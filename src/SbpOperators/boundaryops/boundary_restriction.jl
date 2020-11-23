@@ -1,3 +1,19 @@
+function boundary_restriction(grid::EquidistantGrid{2,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary) where {T,M}
+    r = region(boundary)
+    d = dim(boundary)
+    d_orth = 3-d # orthogonal dimension
+    e = BoundaryRestriction(restrict(grid, d), closureStencil, r)
+    I = IdentityMapping(size(restrict(g,d_orth)))
+    if r == Lower
+        return e⊗I
+    elseif r == Upper
+        return I⊗e
+    else
+        # throw error
+    end
+end
+export boundary_restriction
+
 """
     BoundaryRestriction{T,N,R} <: TensorMapping{T,1,1}
 
