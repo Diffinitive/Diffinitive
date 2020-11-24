@@ -15,9 +15,9 @@ end
 export LazyTensorMappingApplication
 
 # TODO: Go through and remove unneccerary type parameters on functions
-
-Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Index,R}) where {T,R,D} = apply(ta.t, ta.o, I...)
-Base.getindex(ta::LazyTensorMappingApplication{T,R,D}, I::Vararg{Int,R}) where {T,R,D} = apply(ta.t, ta.o, Index{Unknown}.(I)...)
+Base.getindex(ta::LazyTensorMappingApplication{T,0}, I::Index) where T = apply(ta.t, ta.o, I)
+Base.getindex(ta::LazyTensorMappingApplication{T,R}, I::Vararg{Index,R}) where {T,R} = apply(ta.t, ta.o, I...)
+Base.getindex(ta::LazyTensorMappingApplication{T,R}, I::Vararg{Int,R}) where {T,R} = apply(ta.t, ta.o, Index{Unknown}.(I)...)
 Base.size(ta::LazyTensorMappingApplication) = range_size(ta.t)
 # TODO: What else is needed to implement the AbstractArray interface?
 
