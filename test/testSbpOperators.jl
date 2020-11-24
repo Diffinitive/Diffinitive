@@ -184,7 +184,6 @@ end
     v = evalOn(g,x->1+x^2)
     u = fill(3.124)
 
-    e_l*v isa LazyTensorMappingApplication
     @test_broken (e_l*v)[Index{Lower}(1)] == v[1]
     @test_broken (e_r*v)[Index{Upper}(4)] == v[end]
     @test e_l'*u == [u[], 0, 0, 0]
@@ -209,24 +208,20 @@ end
     @test e_w isa TensorMapping{T,1,2} where T
     @test e_w'  isa TensorMapping{T,2,1} where T
 
-
-
     @test domain_size(e_w) == (4,5)
     @test domain_size(e_e) == (4,5)
     @test domain_size(e_s) == (4,5)
     @test domain_size(e_n) == (4,5)
 
-    @test range_size(e_w) == (1,5)
-    @test range_size(e_e) == (1,5)
-    @test range_size(e_s) == (4,1)
-    @test range_size(e_n) == (4,1)
+    @test range_size(e_w) == (5,)
+    @test range_size(e_e) == (5,)
+    @test range_size(e_s) == (4,)
+    @test range_size(e_n) == (4,)
 
-    e_w*v isa LazyTensorMappingApplication
-
-    @test_broken e_w'*v == [10,7,4,1.0,1]
-    @test_broken e_e'*v == [13,10,7,4,4.0]
-    @test_broken e_s'*v == [10,11,12,13.0]
-    @test_broken e_n'*v == [1,2,3,4.0]
+    @test_broken e_w*v == [10,7,4,1.0,1]
+    @test_broken e_e*v == [13,10,7,4,4.0]
+    @test_broken e_s*v == [10,11,12,13.0]
+    @test_broken e_n*v == [1,2,3,4.0]
 
     g_x = [1,2,3,4.0]
     g_y = [5,4,3,2,1.0]
@@ -243,16 +238,10 @@ end
     G_n = zeros(Float64, (4,5))
     G_n[:,5] = g_x
 
-    @test_broken size(e_w*g_y) == (UnknownDim,5)
-    @test_broken size(e_e*g_y) == (UnknownDim,5)
-    @test_broken size(e_s*g_x) == (4,UnknownDim)
-    @test_broken size(e_n*g_x) == (4,UnknownDim)
-
-    # These tests should be moved to where they are possible (i.e we know what the grid should be)
-    @test_broken e_w*g_y == G_w
-    @test_broken e_e*g_y == G_e
-    @test_broken e_s*g_x == G_s
-    @test_broken e_n*g_x == G_n
+    @test_broken e_w'*g_y == G_w
+    @test_broken e_e'*g_y == G_e
+    @test_broken e_s'*g_x == G_s
+    @test_broken e_n'*g_x == G_n
 end
 #
 # @testset "NormalDerivative" begin

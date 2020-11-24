@@ -38,7 +38,7 @@ function BoundaryRestriction(grid::EquidistantGrid{1,T}, closureStencil::Stencil
     return BoundaryRestriction{T,M,typeof(region)}(closureStencil,size(grid))
 end
 
-LazyTensors.range_size(e::BoundaryRestriction) = (0,)
+LazyTensors.range_size(e::BoundaryRestriction) = ()
 LazyTensors.domain_size(e::BoundaryRestriction) = e.size
 
 # TODO: Currently not working.
