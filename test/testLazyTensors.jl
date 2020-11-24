@@ -364,26 +364,27 @@ end
     end
 
     @testset "Application" begin
-        # Test InflatedTensorMapping mapping w. before and after
-        tm = InflatedTensorMapping(I(3,2), A, I(4))
-        v = rand(domain_size(tm)...)
-        @tullio IAIv[a,b,c,d] := Ã[c,i]*v[a,b,i,d]
-        @test tm*v ≈ IAIv rtol=1e-14
-        @inferred LazyTensors.split_index(tm,1,1,1,1)
+        tests = [
+            (
+                InflatedTensorMapping(I(3,2), A, I(4)),
+                (v-> @tullio res[a,b,c,d] := Ã[c,i]*v[a,b,i,d]),
+            ),
+            (
+                InflatedTensorMapping(I(3,2), A),
+                (v-> @tullio res[a,b,c] := Ã[c,i]*v[a,b,i]),
+            ),
+            (
+                InflatedTensorMapping(A,I(4)),
+                (v-> @tullio res[c,d] := Ã[c,i]*v[i,d]),
+            ),
+        ]
 
-        # Test InflatedTensorMapping mapping w. before
-        tm = InflatedTensorMapping(I(3,2), A)
-        v = rand(domain_size(tm)...)
-        @tullio IAIv[a,b,c] := Ã[c,i]*v[a,b,i]
-        @test tm*v ≈ IAIv rtol=1e-14
-        @inferred LazyTensors.split_index(tm,1,1,1)
-
-        # Test InflatedTensorMapping mapping w. after
-        tm = InflatedTensorMapping(A,I(4))
-        v = rand(domain_size(tm)...)
-        @tullio IAIv[c,d] := Ã[c,i]*v[i,d]
-        @test tm*v ≈ IAIv rtol=1e-14
-        @inferred LazyTensors.split_index(tm,1,1)
+        for i ∈ 1:length(tests)
+            tm = tests[i][1]
+            v = rand(domain_size(tm)...)
+            true_value = tests[i][2](v)
+            @test tm*v ≈ true_value rtol=1e-14
+        end
 
         @testset "Inference of application" begin
             struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
