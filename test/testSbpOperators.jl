@@ -182,13 +182,13 @@ end
     e_r = BoundaryRestriction(g,op.eClosure,Upper())
 
     v = evalOn(g,x->1+x^2)
-    u = [3.124] #How to handle scalars having to be arrays? It's kind of ugly.
+    u = fill(3.124)
 
     e_l*v isa LazyTensorMappingApplication
-    @test (e_l*v)[Index{Lower}(1)] == v[1]
-    @test (e_r*v)[Index{Upper}(4)] == v[end]
-    @test e_l'*u == [u[1], 0, 0, 0]
-    @test e_r'*u == [0, 0, 0, u[1]]
+    @test_broken (e_l*v)[Index{Lower}(1)] == v[1]
+    @test_broken (e_r*v)[Index{Upper}(4)] == v[end]
+    @test e_l'*u == [u[], 0, 0, 0]
+    @test e_r'*u == [0, 0, 0, u[]]
     @test_throws BoundsError (e_l*v)[Index{Lower}(3)]
     @test_throws BoundsError (e_r*v)[Index{Upper}(3)]
 
@@ -206,8 +206,8 @@ end
     v[:,2] = [7, 8, 9, 10]
     v[:,1] = [10, 11, 12, 13]
 
-    @test_broken e_w isa TensorMapping{T,1,2} where T
-    @test_broken e_w'  isa TensorMapping{T,2,1} where T
+    @test e_w isa TensorMapping{T,1,2} where T
+    @test e_w'  isa TensorMapping{T,2,1} where T
 
 
 
