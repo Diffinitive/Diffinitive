@@ -184,8 +184,8 @@ end
     v = evalOn(g,x->1+x^2)
     u = fill(3.124)
 
-    @test_broken (e_l*v)[Index{Lower}(1)] == v[1]
-    @test_broken (e_r*v)[Index{Upper}(4)] == v[end]
+    @test (e_l*v)[Index{Lower}(1)] == v[1]
+    @test (e_r*v)[Index{Upper}(4)] == v[end]
     @test e_l'*u == [u[], 0, 0, 0]
     @test e_r'*u == [0, 0, 0, u[]]
     @test_throws BoundsError (e_l*v)[Index{Lower}(3)]
