@@ -284,21 +284,22 @@ end
 
 
 """
-    split_index(:Val{A}, ::Val{B_view}, ::Val{B_middle}, ::Val{C}, I...)
+    split_index(::Val{A}, ::Val{B_view}, ::Val{B_middle}, ::Val{C}, I...)
 
-Splits the multi-index `I` into two parts. One part which is expected to be used as a view, which is expected to be used as an index.
+Splits the multi-index `I` into two parts. One part which is expected to be used as a view, and one which is expected to be used as an index.
 Eg.
 ```
 (1,2,3,4) -> (1,:,:,:,4), (2,3)
 ```
 
 `B_view` controls how many colons are in the view, and `B_middle` controls how many elements are extracted from the middle.
-`A` and `C` decides the length of the parts before and after the colons in the view index.
-length(I) == A+B_domain+C
-length(I_middle) == B_domain
-length(I_view) == A + B_range + C
+`A` and `C` decides the length of the index parts before and after the colons in the view index.
 
-TODO: Finish documentation.
+Arguments should satisfy `length(I) == A+B_domain+C`.
+
+The returned values satisfy
+ * `length(view_index) == A + B_view + C`
+ * `length(I_middle) == B_middle`
 """
 function split_index(::Val{A}, ::Val{B_view}, ::Val{B_middle}, ::Val{C}, I...) where {A,B_view, B_middle,C}
     I_before = slice_tuple(I, Val(1), Val(A))
