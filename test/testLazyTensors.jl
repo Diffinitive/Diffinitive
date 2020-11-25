@@ -367,47 +367,67 @@ end
         tests = [
             (
                 InflatedTensorMapping(I(3,2), A, I(4)),
-                (v-> @tullio res[a,b,c,d] := Ã[c,i]*v[a,b,i,d]),
+                (v-> @tullio res[a,b,c,d] := Ã[c,i]*v[a,b,i,d]), # Expected result of apply
+                (v-> @tullio res[a,b,c,d] := Ã[i,c]*v[a,b,i,d]), # Expected result of apply_transpose
             ),
             (
                 InflatedTensorMapping(I(3,2), B, I(4)),
                 (v-> @tullio res[a,b,c,d,e] := B̃[c,d,i]*v[a,b,i,e]),
+                (v-> @tullio res[a,b,c,d] := B̃[i,j,c]*v[a,b,i,j,d]),
             ),
             (
                 InflatedTensorMapping(I(3,2), C, I(4)),
                 (v-> @tullio res[a,b,c,d] := C̃[c,i,j]*v[a,b,i,j,d]),
+                (v-> @tullio res[a,b,c,d,e] := C̃[i,c,d]*v[a,b,i,e]),
             ),
             (
                 InflatedTensorMapping(I(3,2), A),
                 (v-> @tullio res[a,b,c] := Ã[c,i]*v[a,b,i]),
+                (v-> @tullio res[a,b,c] := Ã[i,c]*v[a,b,i]),
             ),
             (
                 InflatedTensorMapping(I(3,2), B),
                 (v-> @tullio res[a,b,c,d] := B̃[c,d,i]*v[a,b,i]),
+                (v-> @tullio res[a,b,c] := B̃[i,j,c]*v[a,b,i,j]),
             ),
             (
                 InflatedTensorMapping(I(3,2), C),
                 (v-> @tullio res[a,b,c] := C̃[c,i,j]*v[a,b,i,j]),
+                (v-> @tullio res[a,b,c,d] := C̃[i,c,d]*v[a,b,i]),
             ),
             (
                 InflatedTensorMapping(A,I(4)),
                 (v-> @tullio res[a,b] := Ã[a,i]*v[i,b]),
+                (v-> @tullio res[a,b] := Ã[i,a]*v[i,b]),
             ),
             (
                 InflatedTensorMapping(B,I(4)),
                 (v-> @tullio res[a,b,c] := B̃[a,b,i]*v[i,c]),
+                (v-> @tullio res[a,b] := B̃[i,j,a]*v[i,j,b]),
             ),
             (
                 InflatedTensorMapping(C,I(4)),
                 (v-> @tullio res[a,b] := C̃[a,i,j]*v[i,j,b]),
+                (v-> @tullio res[a,b,c] := C̃[i,a,b]*v[i,c]),
             ),
         ]
 
-        for i ∈ 1:length(tests)
-            tm = tests[i][1]
-            v = rand(domain_size(tm)...)
-            true_value = tests[i][2](v)
-            @test tm*v ≈ true_value rtol=1e-14
+        @testset "apply" begin
+            for i ∈ 1:length(tests)
+                tm = tests[i][1]
+                v = rand(domain_size(tm)...)
+                true_value = tests[i][2](v)
+                @test tm*v ≈ true_value rtol=1e-14
+            end
+        end
+
+        @testset "apply_transpose" begin
+            for i ∈ 1:length(tests)
+                tm = tests[i][1]
+                v = rand(range_size(tm)...)
+                true_value = tests[i][3](v)
+                @test tm'*v ≈ true_value rtol=1e-14
+            end
         end
 
         @testset "Inference of application" begin
