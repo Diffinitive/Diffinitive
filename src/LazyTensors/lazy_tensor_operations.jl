@@ -266,7 +266,7 @@ function apply(itm::InflatedTensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vara
     B_range = range_dim(itm.tm)
     C = range_dim(itm.after)
 
-    view_index, inner_index = split_index(Val(A), Val(B_range), Val(B_domain), Val(C), I...)
+    view_index, inner_index = split_index(Val(A), Val(B_domain), Val(B_range), Val(C), I...)
 
     v_inner = view(v, view_index...)
     return apply(itm.tm, v_inner, inner_index...)
