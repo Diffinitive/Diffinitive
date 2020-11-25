@@ -370,12 +370,36 @@ end
                 (v-> @tullio res[a,b,c,d] := Ã[c,i]*v[a,b,i,d]),
             ),
             (
+                InflatedTensorMapping(I(3,2), B, I(4)),
+                (v-> @tullio res[a,b,c,d,e] := B̃[c,d,i]*v[a,b,i,e]),
+            ),
+            (
+                InflatedTensorMapping(I(3,2), C, I(4)),
+                (v-> @tullio res[a,b,c,d] := C̃[c,i,j]*v[a,b,i,j,d]),
+            ),
+            (
                 InflatedTensorMapping(I(3,2), A),
                 (v-> @tullio res[a,b,c] := Ã[c,i]*v[a,b,i]),
             ),
             (
+                InflatedTensorMapping(I(3,2), B),
+                (v-> @tullio res[a,b,c,d] := B̃[c,d,i]*v[a,b,i]),
+            ),
+            (
+                InflatedTensorMapping(I(3,2), C),
+                (v-> @tullio res[a,b,c] := C̃[c,i,j]*v[a,b,i,j]),
+            ),
+            (
                 InflatedTensorMapping(A,I(4)),
-                (v-> @tullio res[c,d] := Ã[c,i]*v[i,d]),
+                (v-> @tullio res[a,b] := Ã[a,i]*v[i,b]),
+            ),
+            (
+                InflatedTensorMapping(B,I(4)),
+                (v-> @tullio res[a,b,c] := B̃[a,b,i]*v[i,c]),
+            ),
+            (
+                InflatedTensorMapping(C,I(4)),
+                (v-> @tullio res[a,b] := C̃[a,i,j]*v[i,j,b]),
             ),
         ]
 
