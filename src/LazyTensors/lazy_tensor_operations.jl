@@ -308,7 +308,6 @@ function split_index(::Val{A}, ::Val{B_view}, ::Val{B_middle}, ::Val{C}, I...) w
     I_after = slice_tuple(I, Val(A+B_middle+1), Val(A+B_middle+C))
 
     view_index = (I_before..., ntuple((i)->:, B_view)..., I_after...)
-    inner_index =
 
     return view_index, I_middle
 end
