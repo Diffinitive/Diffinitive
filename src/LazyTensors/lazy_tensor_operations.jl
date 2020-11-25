@@ -240,8 +240,6 @@ InflatedTensorMapping(tm::TensorMapping{T}, after::IdentityMapping) where T = In
 # Resolve ambiguity between the two previous methods
 InflatedTensorMapping(I1::IdentityMapping{T}, I2::IdentityMapping{T}) where T = InflatedTensorMapping(I1,I2,IdentityMapping{T}())
 
-# TODO: Implement syntax and constructors for products of different combinations of InflatedTensorMapping and IdentityMapping
-
 # TODO: Implement some pretty printing in terms of ⊗. E.g InflatedTensorMapping(I(3),B,I(2)) -> I(3)⊗B⊗I(2)
 
 function range_size(itm::InflatedTensorMapping)
