@@ -480,6 +480,32 @@ end
     @test LazyTensors.slice_tuple((1,2,3,4,5,6),Val(4), Val(6)) == (4,5,6)
 end
 
+@testset "split_tuple" begin
+    @testset "2 parts" begin
+        @test LazyTensors.split_tuple((),Val(0)) == ((),())
+        @test LazyTensors.split_tuple((1,),Val(0)) == ((),(1,))
+        @test LazyTensors.split_tuple((1,),Val(1)) == ((1,),())
+
+        @test LazyTensors.split_tuple((1,2,3,4),Val(0)) == ((),(1,2,3,4))
+        @test LazyTensors.split_tuple((1,2,3,4),Val(1)) == ((1,),(2,3,4))
+        @test LazyTensors.split_tuple((1,2,3,4),Val(2)) == ((1,2),(3,4))
+        @test LazyTensors.split_tuple((1,2,3,4),Val(3)) == ((1,2,3),(4,))
+        @test LazyTensors.split_tuple((1,2,3,4),Val(4)) == ((1,2,3,4),())
+
+        @inferred LazyTensors.split_tuple((1,2,3,4),Val(3))
+    end
+
+    @testset "3 parts" begin
+        @test LazyTensors.split_tuple((),Val(0),Val(0)) == ((),(),())
+        @test LazyTensors.split_tuple((1,2,3),Val(1), Val(1)) == ((1,),(2,),(3,))
+
+        @test LazyTensors.split_tuple((1,2,3,4,5,6),Val(1),Val(2)) == ((1,),(2,3),(4,5,6))
+        @test LazyTensors.split_tuple((1,2,3,4,5,6),Val(3),Val(2)) == ((1,2,3),(4,5),(6,))
+
+        @inferred LazyTensors.split_tuple((1,2,3,4,5,6),Val(3),Val(2))
+    end
+end
+
 @testset "flatten_tuple" begin
     @test LazyTensors.flatten_tuple((1,)) == (1,)
     @test LazyTensors.flatten_tuple((1,2,3,4,5,6)) == (1,2,3,4,5,6)
