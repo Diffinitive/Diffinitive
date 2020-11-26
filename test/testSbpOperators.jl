@@ -218,6 +218,15 @@ end
     @test range_size(e_s) == (4,)
     @test range_size(e_n) == (4,)
 
+    I_w = [(Index{Lower}(1),Index{Lower}(1)),
+           (Index{Lower}(1),Index{Interior}(2)),
+           (Index{Lower}(1),Index{Interior}(3)),
+           (Index{Lower}(1),Index{Interior}(4)),
+           (Index{Lower}(1),Index{Upper}(5))]
+    v_w = [10,7,4,1.0,1];
+    for i = 1:length(I_w)
+        @test_broken (e_w*v)[I_w[i]...] == v_w[i];
+    end
     @test_broken e_w*v == [10,7,4,1.0,1]
     @test_broken e_e*v == [13,10,7,4,4.0]
     @test_broken e_s*v == [10,11,12,13.0]
