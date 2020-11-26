@@ -284,27 +284,29 @@ end
 
 
 """
-    split_index(::Val{A}, ::Val{B_view}, ::Val{B_middle}, ::Val{C}, I...)
+    split_index(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val{dim_after}, I...)
 
-Splits the multi-index `I` into two parts. One part which is expected to be used as a view, and one which is expected to be used as an index.
+Splits the multi-index `I` into two parts. One part which is expected to be
+used as a view, and one which is expected to be used as an index.
 Eg.
 ```
 (1,2,3,4) -> (1,:,:,:,4), (2,3)
 ```
 
-`B_view` controls how many colons are in the view, and `B_middle` controls how many elements are extracted from the middle.
-`A` and `C` decides the length of the index parts before and after the colons in the view index.
+`dim_view` controls how many colons are in the view, and `dim_index` controls
+how many elements are extracted from the middle.
+`dim_before` and `dim_after` decides the length of the index parts before and after the colons in the view index.
 
-Arguments should satisfy `length(I) == A+B_domain+C`.
+Arguments should satisfy `length(I) == dim_before+B_domain+dim_after`.
 
 The returned values satisfy
- * `length(view_index) == A + B_view + C`
- * `length(I_middle) == B_middle`
+ * `length(view_index) == dim_before + dim_view + dim_after`
+ * `length(I_middle) == dim_index`
 """
-function split_index(::Val{A}, ::Val{B_view}, ::Val{B_middle}, ::Val{C}, I...) where {A,B_view, B_middle,C}
-    I_before, I_middle, I_after = split_tuple(I, Val(A), Val(B_middle))
+function split_index(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val{dim_after}, I...) where {dim_before,dim_view, dim_index,dim_after}
+    I_before, I_middle, I_after = split_tuple(I, Val(dim_before), Val(dim_index))
 
-    view_index = (I_before..., ntuple((i)->:, B_view)..., I_after...)
+    view_index = (I_before..., ntuple((i)->:, dim_view)..., I_after...)
 
     return view_index, I_middle
 end
@@ -347,7 +349,6 @@ function split_tuple(t::NTuple{N},::Val{M},::Val{K}) where {N,M,K}
     p2, p3 = split_tuple(tail, Val(K))
     return p1,p2,p3
 end
-
 
 
 """
