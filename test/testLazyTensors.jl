@@ -364,6 +364,8 @@ end
     end
 
     @testset "Application" begin
+        # Testing regular application and transposed application with inflation "before", "after" and "before and after".
+        # The inflated tensor mappings are chosen to preserve, reduce and increase the dimension of the result compared to the input.
         tests = [
             (
                 InflatedTensorMapping(I(3,2), A, I(4)),
