@@ -290,7 +290,7 @@ Splits the multi-index `I` into two parts. One part which is expected to be
 used as a view, and one which is expected to be used as an index.
 Eg.
 ```
-(1,2,3,4) -> (1,:,:,:,4), (2,3)
+split_index(Val(1),Val(3),Val(2),Val(1),(1,2,3,4)) -> (1,:,:,:,4), (2,3)
 ```
 
 `dim_view` controls how many colons are in the view, and `dim_index` controls
