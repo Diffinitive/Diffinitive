@@ -369,47 +369,67 @@ end
         tests = [
             (
                 InflatedTensorMapping(I(3,2), A, I(4)),
-                (v-> @tullio res[a,b,c,d] := Ã[c,i]*v[a,b,i,d]),
+                (v-> @tullio res[a,b,c,d] := Ã[c,i]*v[a,b,i,d]), # Expected result of apply
+                (v-> @tullio res[a,b,c,d] := Ã[i,c]*v[a,b,i,d]), # Expected result of apply_transpose
             ),
             (
                 InflatedTensorMapping(I(3,2), B, I(4)),
                 (v-> @tullio res[a,b,c,d,e] := B̃[c,d,i]*v[a,b,i,e]),
+                (v-> @tullio res[a,b,c,d] := B̃[i,j,c]*v[a,b,i,j,d]),
             ),
             (
                 InflatedTensorMapping(I(3,2), C, I(4)),
                 (v-> @tullio res[a,b,c,d] := C̃[c,i,j]*v[a,b,i,j,d]),
+                (v-> @tullio res[a,b,c,d,e] := C̃[i,c,d]*v[a,b,i,e]),
             ),
             (
                 InflatedTensorMapping(I(3,2), A),
                 (v-> @tullio res[a,b,c] := Ã[c,i]*v[a,b,i]),
+                (v-> @tullio res[a,b,c] := Ã[i,c]*v[a,b,i]),
             ),
             (
                 InflatedTensorMapping(I(3,2), B),
                 (v-> @tullio res[a,b,c,d] := B̃[c,d,i]*v[a,b,i]),
+                (v-> @tullio res[a,b,c] := B̃[i,j,c]*v[a,b,i,j]),
             ),
             (
                 InflatedTensorMapping(I(3,2), C),
                 (v-> @tullio res[a,b,c] := C̃[c,i,j]*v[a,b,i,j]),
+                (v-> @tullio res[a,b,c,d] := C̃[i,c,d]*v[a,b,i]),
             ),
             (
                 InflatedTensorMapping(A,I(4)),
                 (v-> @tullio res[a,b] := Ã[a,i]*v[i,b]),
+                (v-> @tullio res[a,b] := Ã[i,a]*v[i,b]),
             ),
             (
                 InflatedTensorMapping(B,I(4)),
                 (v-> @tullio res[a,b,c] := B̃[a,b,i]*v[i,c]),
+                (v-> @tullio res[a,b] := B̃[i,j,a]*v[i,j,b]),
             ),
             (
                 InflatedTensorMapping(C,I(4)),
                 (v-> @tullio res[a,b] := C̃[a,i,j]*v[i,j,b]),
+                (v-> @tullio res[a,b,c] := C̃[i,a,b]*v[i,c]),
             ),
         ]
 
-        for i ∈ 1:length(tests)
-            tm = tests[i][1]
-            v = rand(domain_size(tm)...)
-            true_value = tests[i][2](v)
-            @test tm*v ≈ true_value rtol=1e-14
+        @testset "apply" begin
+            for i ∈ 1:length(tests)
+                tm = tests[i][1]
+                v = rand(domain_size(tm)...)
+                true_value = tests[i][2](v)
+                @test tm*v ≈ true_value rtol=1e-14
+            end
+        end
+
+        @testset "apply_transpose" begin
+            for i ∈ 1:length(tests)
+                tm = tests[i][1]
+                v = rand(range_size(tm)...)
+                true_value = tests[i][3](v)
+                @test tm'*v ≈ true_value rtol=1e-14
+            end
         end
 
         @testset "Inference of application" begin
@@ -425,7 +445,6 @@ end
             tm = InflatedTensorMapping(I(2,3),ScalingOperator(2.0, (3,2)),I(3,4))
             v = rand(domain_size(tm)...)
 
-            @inferred LazyTensors.split_index(tm,1,2,3,2,2,4)
             @inferred apply(tm,v,Index{Unknown}.((1,2,3,2,2,4))...)
             @inferred (tm*v)[1,2,3,2,2,4]
         end
@@ -442,11 +461,51 @@ end
     end
 end
 
+@testset "split_index" begin
+    @test LazyTensors.split_index(Val(2),Val(1),Val(2),Val(2),1,2,3,4,5,6) == ((1,2,:,5,6),(3,4))
+    @test LazyTensors.split_index(Val(2),Val(3),Val(2),Val(2),1,2,3,4,5,6) == ((1,2,:,:,:,5,6),(3,4))
+    @test LazyTensors.split_index(Val(3),Val(1),Val(1),Val(2),1,2,3,4,5,6) == ((1,2,3,:,5,6),(4,))
+    @test LazyTensors.split_index(Val(3),Val(2),Val(1),Val(2),1,2,3,4,5,6) == ((1,2,3,:,:,5,6),(4,))
+    @test LazyTensors.split_index(Val(1),Val(1),Val(2),Val(3),1,2,3,4,5,6) == ((1,:,4,5,6),(2,3))
+    @test LazyTensors.split_index(Val(1),Val(2),Val(2),Val(3),1,2,3,4,5,6) == ((1,:,:,4,5,6),(2,3))
+
+    @test LazyTensors.split_index(Val(0),Val(1),Val(3),Val(3),1,2,3,4,5,6) == ((:,4,5,6),(1,2,3))
+    @test LazyTensors.split_index(Val(3),Val(1),Val(3),Val(0),1,2,3,4,5,6) == ((1,2,3,:),(4,5,6))
+
+    @inferred LazyTensors.split_index(Val(2),Val(3),Val(2),Val(2),1,2,3,2,2,4)
+end
+
 @testset "slice_tuple" begin
     @test LazyTensors.slice_tuple((1,2,3),Val(1), Val(3)) == (1,2,3)
     @test LazyTensors.slice_tuple((1,2,3,4,5,6),Val(2), Val(5)) == (2,3,4,5)
     @test LazyTensors.slice_tuple((1,2,3,4,5,6),Val(1), Val(3)) == (1,2,3)
     @test LazyTensors.slice_tuple((1,2,3,4,5,6),Val(4), Val(6)) == (4,5,6)
+end
+
+@testset "split_tuple" begin
+    @testset "2 parts" begin
+        @test LazyTensors.split_tuple((),Val(0)) == ((),())
+        @test LazyTensors.split_tuple((1,),Val(0)) == ((),(1,))
+        @test LazyTensors.split_tuple((1,),Val(1)) == ((1,),())
+
+        @test LazyTensors.split_tuple((1,2,3,4),Val(0)) == ((),(1,2,3,4))
+        @test LazyTensors.split_tuple((1,2,3,4),Val(1)) == ((1,),(2,3,4))
+        @test LazyTensors.split_tuple((1,2,3,4),Val(2)) == ((1,2),(3,4))
+        @test LazyTensors.split_tuple((1,2,3,4),Val(3)) == ((1,2,3),(4,))
+        @test LazyTensors.split_tuple((1,2,3,4),Val(4)) == ((1,2,3,4),())
+
+        @inferred LazyTensors.split_tuple((1,2,3,4),Val(3))
+    end
+
+    @testset "3 parts" begin
+        @test LazyTensors.split_tuple((),Val(0),Val(0)) == ((),(),())
+        @test LazyTensors.split_tuple((1,2,3),Val(1), Val(1)) == ((1,),(2,),(3,))
+
+        @test LazyTensors.split_tuple((1,2,3,4,5,6),Val(1),Val(2)) == ((1,),(2,3),(4,5,6))
+        @test LazyTensors.split_tuple((1,2,3,4,5,6),Val(3),Val(2)) == ((1,2,3),(4,5),(6,))
+
+        @inferred LazyTensors.split_tuple((1,2,3,4,5,6),Val(3),Val(2))
+    end
 end
 
 @testset "flatten_tuple" begin

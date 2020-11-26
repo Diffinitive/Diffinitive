@@ -240,8 +240,6 @@ InflatedTensorMapping(tm::TensorMapping{T}, after::IdentityMapping) where T = In
 # Resolve ambiguity between the two previous methods
 InflatedTensorMapping(I1::IdentityMapping{T}, I2::IdentityMapping{T}) where T = InflatedTensorMapping(I1,I2,IdentityMapping{T}())
 
-# TODO: Implement syntax and constructors for products of different combinations of InflatedTensorMapping and IdentityMapping
-
 # TODO: Implement some pretty printing in terms of ⊗. E.g InflatedTensorMapping(I(3),B,I(2)) -> I(3)⊗B⊗I(2)
 
 function range_size(itm::InflatedTensorMapping)
@@ -261,30 +259,56 @@ function domain_size(itm::InflatedTensorMapping)
 end
 
 function apply(itm::InflatedTensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vararg{Any,R}) where {T,R,D}
-    view_index, inner_index = split_index(itm, I...)
+    dim_before = range_dim(itm.before)
+    dim_domain = domain_dim(itm.tm)
+    dim_range = range_dim(itm.tm)
+    dim_after = range_dim(itm.after)
+
+    view_index, inner_index = split_index(Val(dim_before), Val(dim_domain), Val(dim_range), Val(dim_after), I...)
 
     v_inner = view(v, view_index...)
     return apply(itm.tm, v_inner, inner_index...)
 end
 
+function apply_transpose(itm::InflatedTensorMapping{T,R,D}, v::AbstractArray{T,R}, I::Vararg{Any,D}) where {T,R,D}
+    dim_before = range_dim(itm.before)
+    dim_domain = domain_dim(itm.tm)
+    dim_range = range_dim(itm.tm)
+    dim_after = range_dim(itm.after)
+
+    view_index, inner_index = split_index(Val(dim_before), Val(dim_range), Val(dim_domain), Val(dim_after), I...)
+
+    v_inner = view(v, view_index...)
+    return apply_transpose(itm.tm, v_inner, inner_index...)
+end
+
 
 """
-    split_index(...)
+    split_index(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val{dim_after}, I...)
 
-Splits the multi-index into two parts. One part for the view that the inner TensorMapping acts on, and one part for indexing the result
+Splits the multi-index `I` into two parts. One part which is expected to be
+used as a view, and one which is expected to be used as an index.
 Eg.
 ```
-(1,2,3,4) -> (1,:,:,4), (2,3)
+split_index(Val(1),Val(3),Val(2),Val(1),(1,2,3,4)) -> (1,:,:,:,4), (2,3)
 ```
+
+`dim_view` controls how many colons are in the view, and `dim_index` controls
+how many elements are extracted from the middle.
+`dim_before` and `dim_after` decides the length of the index parts before and after the colons in the view index.
+
+Arguments should satisfy `length(I) == dim_before+B_domain+dim_after`.
+
+The returned values satisfy
+ * `length(view_index) == dim_before + dim_view + dim_after`
+ * `length(I_middle) == dim_index`
 """
-function split_index(itm::InflatedTensorMapping{T,R,D}, I::Vararg{Any,R}) where {T,R,D}
-    I_before = slice_tuple(I, Val(1), Val(range_dim(itm.before)))
-    I_after = slice_tuple(I, Val(R-range_dim(itm.after)+1), Val(R))
+function split_index(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val{dim_after}, I...) where {dim_before,dim_view, dim_index,dim_after}
+    I_before, I_middle, I_after = split_tuple(I, Val(dim_before), Val(dim_index))
 
-    view_index = (I_before..., ntuple((i)->:,domain_dim(itm.tm))..., I_after...)
-    inner_index = slice_tuple(I, Val(range_dim(itm.before)+1), Val(R-range_dim(itm.after)))
+    view_index = (I_before..., ntuple((i)->:, dim_view)..., I_after...)
 
-    return (view_index, inner_index)
+    return view_index, I_middle
 end
 
 # TODO: Can this be replaced by something more elegant while still being type stable? 2020-10-21
@@ -300,6 +324,32 @@ Equivalent to t[l:u] but type stable.
 function slice_tuple(t,::Val{L},::Val{U}) where {L,U}
     return ntuple(i->t[i+L-1], U-L+1)
 end
+
+"""
+    split_tuple(t::Tuple{...}, ::Val{M}) where {N,M}
+
+Split the tuple `t` into two parts. the first part is `M` long.
+E.g
+```
+split_tuple((1,2,3,4),Val(3)) -> (1,2,3), (4,)
+```
+"""
+function split_tuple(t::NTuple{N},::Val{M}) where {N,M}
+    return slice_tuple(t,Val(1), Val(M)), slice_tuple(t,Val(M+1), Val(N))
+end
+
+"""
+    split_tuple(t::Tuple{...},::Val{M},::Val{K}) where {N,M,K}
+
+Same as `split_tuple(t::NTuple{N},::Val{M})` but splits the tuple in three parts. With the first
+two parts having lenght `M` and `K`.
+"""
+function split_tuple(t::NTuple{N},::Val{M},::Val{K}) where {N,M,K}
+    p1, tail = split_tuple(t, Val(M))
+    p2, p3 = split_tuple(tail, Val(K))
+    return p1,p2,p3
+end
+
 
 """
     flatten_tuple(t)
