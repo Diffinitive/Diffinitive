@@ -38,10 +38,10 @@ function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Ind
     return @inbounds D2.h_inv*D2.h_inv*apply_stencil_backwards(D2.closureStencils[N-Int(I)+1], v, Int(I))
 end
 
-function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, index::Index{Unknown}) where T
+function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, i) where T
     N = length(v)  # TODO: Use domain_size here instead?
-    r = getregion(Int(index), closuresize(D2), N)
-    I = Index(Int(index), r)
+    r = getregion(i, closuresize(D2), N)
+    I = Index(i, r)
     return LazyTensors.apply(D2, v, I)
 end
 

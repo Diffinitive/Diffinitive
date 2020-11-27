@@ -25,23 +25,23 @@ LazyTensors.domain_size(Hi::InverseQuadrature) = getindex.(domain_size.(Hi.Hi),1
 
 LazyTensors.domain_size(Qi::InverseQuadrature{Dim}, range_size::NTuple{Dim,Integer}) where Dim = range_size
 
-function LazyTensors.apply(Qi::InverseQuadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {T,Dim}
+function LazyTensors.apply(Qi::InverseQuadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Any,Dim}) where {T,Dim}
     error("not implemented")
 end
 
-@inline function LazyTensors.apply(Qi::InverseQuadrature{1,T}, v::AbstractVector{T}, I::Index) where T
-    @inbounds q = apply(Qi.Hi[1], v , I)
+@inline function LazyTensors.apply(Qi::InverseQuadrature{1,T}, v::AbstractVector{T}, i) where T
+    @inbounds q = apply(Qi.Hi[1], v , i)
     return q
 end
 
-@inline function LazyTensors.apply(Qi::InverseQuadrature{2,T}, v::AbstractArray{T,2}, I::Index, J::Index) where T
+@inline function LazyTensors.apply(Qi::InverseQuadrature{2,T}, v::AbstractArray{T,2}, i,j) where T
     # InverseQuadrature in x direction
-    @inbounds vx = view(v, :, Int(J))
-    @inbounds qx_inv = apply(Qi.Hi[1], vx , I)
+    @inbounds vx = view(v, :, Int(j))
+    @inbounds qx_inv = apply(Qi.Hi[1], vx , i)
     # InverseQuadrature in y-direction
-    @inbounds vy = view(v, Int(I), :)
-    @inbounds qy_inv = apply(Qi.Hi[2], vy, J)
+    @inbounds vy = view(v, Int(i), :)
+    @inbounds qy_inv = apply(Qi.Hi[2], vy, j)
     return qx_inv*qy_inv
 end
 
-LazyTensors.apply_transpose(Qi::InverseQuadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {Dim,T} = LazyTensors.apply(Qi,v,I...)
+LazyTensors.apply_transpose(Qi::InverseQuadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Any,Dim}) where {Dim,T} = LazyTensors.apply(Qi,v,I...)
