@@ -18,8 +18,10 @@ export diagonal_quadrature
 """
     DiagonalQuadrature{T,M} <: TensorMapping{T,1,1}
 
-Implements the one-dimensional diagonal quadrature operator as a `TensorMapping
-TODO: Elaborate on properties
+Implements the one-dimensional diagonal quadrature operator as a `TensorMapping`
+The quadrature is defined by the quadrature interval length `h`, the quadrature
+closure weights `closure` and the number of quadrature intervals `size`. The
+interior stencil has the weight 1.
 """
 struct DiagonalQuadrature{T,M} <: TensorMapping{T,1,1}
     h::T
@@ -31,8 +33,8 @@ export DiagonalQuadrature
 """
     DiagonalQuadrature(g, quadrature_closure)
 
-Constructs the `DiagonalQuadrature` defined by the `EquidistantGrid` `g` and
-closure stencil `quadrature_closure`.
+Constructs the `DiagonalQuadrature` `H` on the `EquidistantGrid` `g` with
+`H.closure` specified by  `quadrature_closure`.
 """
 function DiagonalQuadrature(g::EquidistantGrid{1}, quadrature_closure)
     return DiagonalQuadrature(spacing(g)[1], quadrature_closure, size(g))
@@ -41,10 +43,11 @@ end
 LazyTensors.range_size(H::DiagonalQuadrature) = H.size
 LazyTensors.domain_size(H::DiagonalQuadrature) = H.size
 
-function LazyTensors.apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index) where T
-    return @inbounds apply(H, v, I)
-end
-
+"""
+    apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index) where T
+Implements the application `(H*v)[i]` an `Index{R}` where `R` is one of the regions
+`Lower`,`Interior`,`Upper`,`Unknown`.
+"""
 function LazyTensors.apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index{Lower}) where T
     return @inbounds H.h*H.closure[Int(I)]*v[Int(I)]
 end
@@ -58,14 +61,18 @@ function LazyTensors.apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::In
     return @inbounds H.h*v[Int(I)]
 end
 
-function LazyTensors.apply(H::DiagonalQuadrature{T},  v::AbstractVector{T}, index::Index{Unknown}) where T
+function LazyTensors.apply(H::DiagonalQuadrature{T},  v::AbstractVector{T}, I::Index{Unknown}) where T
     N = length(v);
-    r = getregion(Int(index), closure_size(H), N)
-    i = Index(Int(index), r)
+    r = getregion(Int(I), closure_size(H), N)
+    i = Index(Int(I), r)
     return LazyTensors.apply(H, v, i)
 end
 
-LazyTensors.apply_transpose(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index) where T = LazyTensors.apply(H,v,I)
+"""
+    apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index) where T
+Implements the application (H'*v)[I]. The operator is self-adjoint.
+"""
+LazyTensors.apply_transpose(H::DiagonalQuadrature, v::AbstractVector, I) = LazyTensors.apply(H,v,I)
 
 """
     closure_size(H)
