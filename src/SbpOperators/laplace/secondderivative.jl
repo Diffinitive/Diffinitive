@@ -20,10 +20,6 @@ end
 LazyTensors.range_size(D2::SecondDerivative) = D2.size
 LazyTensors.domain_size(D2::SecondDerivative) = D2.size
 
-#TODO: The 1D tensor mappings should not have to dispatch on 1D tuples if we write LazyTensor.apply for vararg right?!?!
-#      Currently have to index the Tuple{Index} in each method in order to call the stencil methods which is ugly.
-#      I thought I::Vararg{Index,R} fell back to just Index for R = 1
-
 # Apply for different regions Lower/Interior/Upper or Unknown region
 function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Lower}) where T
     return @inbounds D2.h_inv*D2.h_inv*apply_stencil(D2.closureStencils[Int(I)], v, Int(I))

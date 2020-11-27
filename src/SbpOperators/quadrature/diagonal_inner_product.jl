@@ -17,11 +17,6 @@ end
 LazyTensors.range_size(H::DiagonalInnerProduct) = H.size
 LazyTensors.domain_size(H::DiagonalInnerProduct) = H.size
 
-# Behövs den här?
-function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index) where T
-    return @inbounds apply(H, v, I)
-end
-
 function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Lower}) where T
     return @inbounds H.h*H.quadratureClosure[Int(I)]*v[Int(I)]
 end

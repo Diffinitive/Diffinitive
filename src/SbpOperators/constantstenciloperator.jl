@@ -62,14 +62,14 @@ end
 
 export apply_normal_derivative_transpose
 
-function apply_normal_derivative(op::ConstantStencilOperator, h_inv::Real, v::Number, i::Index, N::Integer, ::Type{Lower})
+function apply_normal_derivative(op::ConstantStencilOperator, h_inv::Real, v::Number, i, N::Integer, ::Type{Lower})
     @boundscheck if !(0<length(Int(i)) <= N)
         throw(BoundsError())
     end
     h_inv*op.dClosure[Int(i)-1]*v
 end
 
-function apply_normal_derivative(op::ConstantStencilOperator, h_inv::Real, v::Number, i::Index, N::Integer, ::Type{Upper})
+function apply_normal_derivative(op::ConstantStencilOperator, h_inv::Real, v::Number, i, N::Integer, ::Type{Upper})
     @boundscheck if !(0<length(Int(i)) <= N)
         throw(BoundsError())
     end
