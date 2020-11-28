@@ -112,36 +112,57 @@ end
 
 @testset "DiagonalQuadrature" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
-    Lx = 2.3
-    g = EquidistantGrid(77, 0.0, Lx)
-    H = DiagonalQuadrature(g,op.quadratureClosure)
-    v = ones(Float64, size(g))
+    Lx = π/2.
+    Ly = Float64(π)
+    g_1D = EquidistantGrid(77, 0.0, Lx)
+    g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    @testset "Constructors" begin
+        # 1D
+        H_x = DiagonalQuadrature(spacing(g_1D)[1],op.quadratureClosure,size(g_1D));
+        @test H_x == DiagonalQuadrature(g_1D,op.quadratureClosure)
+        @test H_x == diagonal_quadrature(g_1D,op.quadratureClosure)
+        @test H_x isa TensorMapping{T,1,1} where T
+        @test H_x' isa TensorMapping{T,1,1} where T
 
-    @test H isa TensorMapping{T,1,1} where T
-    @test H' isa TensorMapping{T,1,1} where T
-    @test H == diagonal_quadrature(g,op.quadratureClosure)
-    @test sum(H*v) ≈ Lx
-    @test H*v == H'*v
-    @inferred H*v
+        # 2D
+        H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
+        @test H_xy isa TensorMappingComposition
+        @test H_xy isa TensorMapping{T,2,2} where T
+        @test H_xy' isa TensorMapping{T,2,2} where T
+    end
 
-    # Test multiple dimension
-    Ly = 5.2
-    g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    H_x = diagonal_quadrature(g_1D,op.quadratureClosure)
+    H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
+    @testset "Sizes" begin
+        # 1D
 
-    H = diagonal_quadrature(g, op.quadratureClosure)
+        # 2D
 
-    @test H isa TensorMapping{T,2,2} where T
-    @test H' isa TensorMapping{T,2,2} where T
+    end
+    a = 3.2
+    b = 2.1
+    v_1D = a*ones(Float64, size(g_1D))
+    v_2D = b*ones(Float64, size(g_2D))
+    u_1D = evalOn(g_1D,x->sin(x))
+    u_2D = evalOn(g_2D,(x,y)->sin(x)+cos(y))
+    integral(H,v) = sum(H*v)
+    @testset "Application" begin
+        # 1D
+        @test integral(H_x,v_1D) ≈ a*Lx rtol = 1e-13
+        @test integral(H_x,u_1D) ≈ 1. rtol = 1e-8
+        @test H_x*v_1D == H_x'*v_1D
+        # 2D
+        @test integral(H_xy,v_2D) ≈ b*Lx*Ly rtol = 1e-13
+        @test integral(H_xy,u_2D) ≈ π rtol = 1e-8
+        @test H_xy*v_2D ≈ H_xy'*v_2D rtol = 1e-16 #Failed for exact equality. Must differ in operation order for some reason?
+    end
 
-    v = ones(Float64, size(g))
-    @test sum(H*v) ≈ Lx*Ly
-
-    v = 2*ones(Float64, size(g))
-    @test sum(H*v) ≈ 2*Lx*Ly
-
-    @test_broken H*v == H'*v # apply_transpose not implemented for InflatedTensorMapping!
-
-    @inferred H*v
+    @testset "Inferred" begin
+        @inferred H_x*v_1D
+        @inferred H_x'*v_1D
+        @inferred H_xy*v_2D
+        @inferred H_xy'*v_2D
+    end
 end
 
 @testset "InverseDiagonalQuadrature" begin
