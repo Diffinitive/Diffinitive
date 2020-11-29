@@ -168,6 +168,7 @@ end
             f_i(x) = 1/factorial(i)*x^i
             v = (v...,evalOn(g_1D,f_i))
         end
+        # TODO: Bug in readOperator for 2nd order
         # # 2nd order
         # op2 = readOperator(sbp_operators_path()*"d2_2nd.txt",sbp_operators_path()*"h_2nd.txt")
         # H2 = diagonal_quadrature(g_1D,op2.quadratureClosure)
