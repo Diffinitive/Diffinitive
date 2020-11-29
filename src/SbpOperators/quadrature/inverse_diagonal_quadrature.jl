@@ -1,8 +1,8 @@
 """
 inverse_diagonal_quadrature(g,quadrature_closure)
 
-Constructs the diagonal quadrature inverse operator `Hi` on a grid of `Dim` dimensions as
-a `TensorMapping`. The one-dimensional operator is a InverseDiagonalQuadrature, while
+Constructs the inverse `Hi` of a `DiagonalQuadrature` on a grid of `Dim` dimensions as
+a `TensorMapping`. The one-dimensional operator is a `InverseDiagonalQuadrature`, while
 the multi-dimensional operator is the outer-product of the one-dimensional operators
 in each coordinate direction.
 """
@@ -19,8 +19,10 @@ export inverse_diagonal_quadrature
 """
     InverseDiagonalQuadrature{T,M} <: TensorMapping{T,1,1}
 
-Implements the one-dimensional inverse diagonal quadrature operator as a `TensorMapping
-TODO: Elaborate on properties
+Implements the inverse of a one-dimensional `DiagonalQuadrature` as a `TensorMapping`
+The operator is defined by the reciprocal of the quadrature interval length `h_inv`, the
+reciprocal of the quadrature closure weights `closure` and the number of quadrature intervals `size`. The
+interior stencil has the weight 1.
 """
 struct InverseDiagonalQuadrature{T<:Real,M} <: TensorMapping{T,1,1}
     h_inv::T
@@ -29,15 +31,36 @@ struct InverseDiagonalQuadrature{T<:Real,M} <: TensorMapping{T,1,1}
 end
 export InverseDiagonalQuadrature
 
+"""
+    InverseDiagonalQuadrature(g, quadrature_closure)
+
+Constructs the `InverseDiagonalQuadrature` on the `EquidistantGrid` `g` with
+closure given by the reciprocal of `quadrature_closure`.
+"""
 function InverseDiagonalQuadrature(g::EquidistantGrid{1}, quadrature_closure)
     return InverseDiagonalQuadrature(inverse_spacing(g)[1], 1 ./ quadrature_closure, size(g))
 end
 
+"""
+    domain_size(Hi::InverseDiagonalQuadrature)
 
+The size of an object in the range of `Hi`
+"""
 LazyTensors.range_size(Hi::InverseDiagonalQuadrature) = Hi.size
+
+"""
+    domain_size(Hi::InverseDiagonalQuadrature)
+
+The size of an object in the domain of `Hi`
+"""
 LazyTensors.domain_size(Hi::InverseDiagonalQuadrature) = Hi.size
 
-
+"""
+    apply(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, i) where T
+Implements the application `(Hi*v)[i]` an `Index{R}` where `R` is one of the regions
+`Lower`,`Interior`,`Upper`. If `i` is another type of index (e.g an `Int`) it will first
+be converted to an `Index{R}`.
+"""
 function LazyTensors.apply(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, I::Index{Lower}) where T
     return @inbounds Hi.h_inv*Hi.closure[Int(I)]*v[Int(I)]
 end
@@ -60,7 +83,7 @@ end
 LazyTensors.apply_transpose(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, i) where T = LazyTensors.apply(Hi,v,i)
 
 """
-    closure_size(H)
+    closure_size(Hi)
 Returns the size of the closure stencil of a InverseDiagonalQuadrature `Hi`.
 """
 closure_size(Hi::InverseDiagonalQuadrature{T,M}) where {T,M} =  M

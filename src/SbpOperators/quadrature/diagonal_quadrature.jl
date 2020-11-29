@@ -33,27 +33,39 @@ export DiagonalQuadrature
 """
     DiagonalQuadrature(g, quadrature_closure)
 
-Constructs the `DiagonalQuadrature` `H` on the `EquidistantGrid` `g` with
-`H.closure` specified by  `quadrature_closure`.
+Constructs the `DiagonalQuadrature` on the `EquidistantGrid` `g` with
+closure given by `quadrature_closure`.
 """
 function DiagonalQuadrature(g::EquidistantGrid{1}, quadrature_closure)
     return DiagonalQuadrature(spacing(g)[1], quadrature_closure, size(g))
 end
 
+"""
+    range_size(H::DiagonalQuadrature)
+
+The size of an object in the range of `H`
+"""
 LazyTensors.range_size(H::DiagonalQuadrature) = H.size
+
+"""
+    domain_size(H::DiagonalQuadrature)
+
+The size of an object in the domain of `H`
+"""
 LazyTensors.domain_size(H::DiagonalQuadrature) = H.size
 
 """
     apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, i) where T
 Implements the application `(H*v)[i]` an `Index{R}` where `R` is one of the regions
-`Lower`,`Interior`,`Upper`.
+`Lower`,`Interior`,`Upper`. If `i` is another type of index (e.g an `Int`) it will first
+be converted to an `Index{R}`.
 """
 function LazyTensors.apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, i::Index{Lower}) where T
     return @inbounds H.h*H.closure[Int(i)]*v[Int(i)]
 end
 
 function LazyTensors.apply(H::DiagonalQuadrature{T},v::AbstractVector{T}, i::Index{Upper}) where T
-    N = length(v);
+    N = length(v); #TODO: Use dim_size here?
     return @inbounds H.h*H.closure[N-Int(i)+1]*v[Int(i)]
 end
 
@@ -62,9 +74,8 @@ function LazyTensors.apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, i::In
 end
 
 function LazyTensors.apply(H::DiagonalQuadrature{T},  v::AbstractVector{T}, i) where T
-    N = length(v);
+    N = length(v); #TODO: Use dim_size here?
     r = getregion(i, closure_size(H), N)
-
     return LazyTensors.apply(H, v, Index(i, r))
 end
 
