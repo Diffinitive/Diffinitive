@@ -23,24 +23,24 @@ end
 LazyTensors.range_size(L::Laplace) = getindex.(range_size.(L.D2),1)
 LazyTensors.domain_size(L::Laplace) = getindex.(domain_size.(L.D2),1)
 
-function LazyTensors.apply(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {T,Dim}
+function LazyTensors.apply(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Any,Dim}) where {T,Dim}
     error("not implemented")
 end
 
 # u = L*v
-function LazyTensors.apply(L::Laplace{1,T}, v::AbstractVector{T}, I::Index) where T
-    @inbounds u = LazyTensors.apply(L.D2[1],v,I)
+function LazyTensors.apply(L::Laplace{1,T}, v::AbstractVector{T}, i) where T
+    @inbounds u = LazyTensors.apply(L.D2[1],v,i)
     return u
 end
 
-function LazyTensors.apply(L::Laplace{2,T}, v::AbstractArray{T,2}, I::Index, J::Index) where T
+function LazyTensors.apply(L::Laplace{2,T}, v::AbstractArray{T,2}, i, j) where T
     # 2nd x-derivative
-    @inbounds vx = view(v, :, Int(J))
-    @inbounds uᵢ = LazyTensors.apply(L.D2[1], vx , I)
+    @inbounds vx = view(v, :, Int(j))
+    @inbounds uᵢ = LazyTensors.apply(L.D2[1], vx , i)
 
     # 2nd y-derivative
-    @inbounds vy = view(v, Int(I), :)
-    @inbounds uᵢ += LazyTensors.apply(L.D2[2], vy , J)
+    @inbounds vy = view(v, Int(i), :)
+    @inbounds uᵢ += LazyTensors.apply(L.D2[2], vy , j)
 
     return uᵢ
 end

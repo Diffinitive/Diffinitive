@@ -51,18 +51,16 @@ function LazyTensors.apply(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T
     return @inbounds Hi.h_inv*v[Int(I)]
 end
 
-function LazyTensors.apply(Hi::InverseDiagonalQuadrature,  v::AbstractVector{T}, index::Index{Unknown}) where T
+function LazyTensors.apply(Hi::InverseDiagonalQuadrature{T},  v::AbstractVector{T}, i) where T
     N = length(v);
-    r = getregion(Int(index), closure_size(Hi), N)
-    i = Index(Int(index), r)
-    return LazyTensors.apply(Hi, v, i)
+    r = getregion(i, closure_size(Hi), N)
+    return LazyTensors.apply(Hi, v, Index(i, r))
 end
 
-LazyTensors.apply_transpose(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, I::Index) where T = LazyTensors.apply(Hi,v,I)
+LazyTensors.apply_transpose(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, i) where T = LazyTensors.apply(Hi,v,i)
 
 """
     closure_size(H)
 Returns the size of the closure stencil of a InverseDiagonalQuadrature `Hi`.
 """
 closure_size(Hi::InverseDiagonalQuadrature{T,M}) where {T,M} =  M
-export closure_size

@@ -4,9 +4,8 @@ abstract type Region end
 struct Interior <: Region end
 struct Lower    <: Region end
 struct Upper    <: Region end
-struct Unknown  <: Region end
 
-export Region, Interior, Lower, Upper, Unknown
+export Region, Interior, Lower, Upper
 
 struct Index{R<:Region, T<:Integer}
     i::T

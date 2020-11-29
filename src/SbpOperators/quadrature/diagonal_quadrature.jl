@@ -44,39 +44,38 @@ LazyTensors.range_size(H::DiagonalQuadrature) = H.size
 LazyTensors.domain_size(H::DiagonalQuadrature) = H.size
 
 """
-    apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index) where T
+    apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, i) where T
 Implements the application `(H*v)[i]` an `Index{R}` where `R` is one of the regions
-`Lower`,`Interior`,`Upper`,`Unknown`.
+`Lower`,`Interior`,`Upper`.
 """
-function LazyTensors.apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index{Lower}) where T
-    return @inbounds H.h*H.closure[Int(I)]*v[Int(I)]
+function LazyTensors.apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, i::Index{Lower}) where T
+    return @inbounds H.h*H.closure[Int(i)]*v[Int(i)]
 end
 
-function LazyTensors.apply(H::DiagonalQuadrature{T},v::AbstractVector{T}, I::Index{Upper}) where T
+function LazyTensors.apply(H::DiagonalQuadrature{T},v::AbstractVector{T}, i::Index{Upper}) where T
     N = length(v);
-    return @inbounds H.h*H.closure[N-Int(I)+1]*v[Int(I)]
+    return @inbounds H.h*H.closure[N-Int(i)+1]*v[Int(i)]
 end
 
-function LazyTensors.apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index{Interior}) where T
-    return @inbounds H.h*v[Int(I)]
+function LazyTensors.apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, i::Index{Interior}) where T
+    return @inbounds H.h*v[Int(i)]
 end
 
-function LazyTensors.apply(H::DiagonalQuadrature{T},  v::AbstractVector{T}, I::Index{Unknown}) where T
+function LazyTensors.apply(H::DiagonalQuadrature{T},  v::AbstractVector{T}, i) where T
     N = length(v);
-    r = getregion(Int(I), closure_size(H), N)
-    i = Index(Int(I), r)
-    return LazyTensors.apply(H, v, i)
+    r = getregion(i, closure_size(H), N)
+
+    return LazyTensors.apply(H, v, Index(i, r))
 end
 
 """
     apply(H::DiagonalQuadrature{T}, v::AbstractVector{T}, I::Index) where T
 Implements the application (H'*v)[I]. The operator is self-adjoint.
 """
-LazyTensors.apply_transpose(H::DiagonalQuadrature, v::AbstractVector, I) = LazyTensors.apply(H,v,I)
+LazyTensors.apply_transpose(H::DiagonalQuadrature{T}, v::AbstractVector{T}, i) where T = LazyTensors.apply(H,v,i)
 
 """
     closure_size(H)
 Returns the size of the closure stencil of a DiagonalQuadrature `H`.
 """
 closure_size(H::DiagonalQuadrature{T,M}) where {T,M} = M
-export closure_size
