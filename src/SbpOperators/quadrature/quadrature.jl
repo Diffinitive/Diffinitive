@@ -22,23 +22,23 @@ end
 LazyTensors.range_size(H::Quadrature) = getindex.(range_size.(H.H),1)
 LazyTensors.domain_size(H::Quadrature) = getindex.(domain_size.(H.H),1)
 
-function LazyTensors.apply(Q::Quadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {T,Dim}
+function LazyTensors.apply(Q::Quadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Any,Dim}) where {T,Dim}
     error("not implemented")
 end
 
-function LazyTensors.apply(Q::Quadrature{1,T}, v::AbstractVector{T}, I::Index) where T
-    @inbounds q = apply(Q.H[1], v , I)
+function LazyTensors.apply(Q::Quadrature{1,T}, v::AbstractVector{T}, i) where T
+    @inbounds q = apply(Q.H[1], v , i)
     return q
 end
 
-function LazyTensors.apply(Q::Quadrature{2,T}, v::AbstractArray{T,2}, I::Index, J::Index) where T
+function LazyTensors.apply(Q::Quadrature{2,T}, v::AbstractArray{T,2}, i, j) where T
     # Quadrature in x direction
-    @inbounds vx = view(v, :, Int(J))
-    @inbounds qx = apply(Q.H[1], vx , I)
+    @inbounds vx = view(v, :, Int(j))
+    @inbounds qx = apply(Q.H[1], vx , i)
     # Quadrature in y-direction
-    @inbounds vy = view(v, Int(I), :)
-    @inbounds qy = apply(Q.H[2], vy, J)
+    @inbounds vy = view(v, Int(i), :)
+    @inbounds qy = apply(Q.H[2], vy, j)
     return qx*qy
 end
 
-LazyTensors.apply_transpose(Q::Quadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Index,Dim}) where {Dim,T} = LazyTensors.apply(Q,v,I...)
+LazyTensors.apply_transpose(Q::Quadrature{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Any,Dim}) where {Dim,T} = LazyTensors.apply(Q,v,I...)

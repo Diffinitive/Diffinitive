@@ -31,14 +31,14 @@ function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector
     return @inbounds Hi.h_inv*v[Int(I)]
 end
 
-function LazyTensors.apply(Hi::InverseDiagonalInnerProduct,  v::AbstractVector{T}, index::Index{Unknown}) where T
+function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T},  v::AbstractVector{T}, i) where T
     N = length(v);
-    r = getregion(Int(index), closuresize(Hi), N)
-    i = Index(Int(index), r)
-    return LazyTensors.apply(Hi, v, i)
+    r = getregion(i, closuresize(Hi), N)
+    I = Index(i, r)
+    return LazyTensors.apply(Hi, v, I)
 end
 
-LazyTensors.apply_transpose(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index) where T = LazyTensors.apply(Hi,v,I)
+LazyTensors.apply_transpose(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, i) where T = LazyTensors.apply(Hi,v,i)
 
 
 closuresize(Hi::InverseDiagonalInnerProduct{T,M}) where {T,M} =  M

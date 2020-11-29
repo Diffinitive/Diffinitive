@@ -17,10 +17,6 @@ end
 LazyTensors.range_size(H::DiagonalInnerProduct) = H.size
 LazyTensors.domain_size(H::DiagonalInnerProduct) = H.size
 
-function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index) where T
-    return @inbounds apply(H, v, I)
-end
-
 function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Lower}) where T
     return @inbounds H.h*H.quadratureClosure[Int(I)]*v[Int(I)]
 end
@@ -34,13 +30,13 @@ function LazyTensors.apply(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::
     return @inbounds H.h*v[Int(I)]
 end
 
-function LazyTensors.apply(H::DiagonalInnerProduct{T},  v::AbstractVector{T}, index::Index{Unknown}) where T
+function LazyTensors.apply(H::DiagonalInnerProduct{T},  v::AbstractVector{T}, i) where T
     N = length(v);
-    r = getregion(Int(index), closuresize(H), N)
-    i = Index(Int(index), r)
-    return LazyTensors.apply(H, v, i)
+    r = getregion(i, closuresize(H), N)
+    I = Index(i, r)
+    return LazyTensors.apply(H, v, I)
 end
 
-LazyTensors.apply_transpose(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index) where T = LazyTensors.apply(H,v,I)
+LazyTensors.apply_transpose(H::DiagonalInnerProduct{T}, v::AbstractVector{T}, i) where T = LazyTensors.apply(H,v,i)
 
 closuresize(H::DiagonalInnerProduct{T,M}) where {T,M} = M
