@@ -135,9 +135,11 @@ end
     H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
     @testset "Sizes" begin
         # 1D
-
+        @test domain_size(H_x) == size(g_1D)
+        @test range_size(H_x) == size(g_1D)
         # 2D
-
+        @test domain_size(H_xy) == size(g_2D)
+        @test range_size(H_xy) == size(g_2D)
     end
     a = 3.2
     b = 2.1
