@@ -116,6 +116,7 @@ end
     Ly = Float64(π)
     g_1D = EquidistantGrid(77, 0.0, Lx)
     g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    integral(H,v) = sum(H*v)
     @testset "Constructors" begin
         # 1D
         H_x = DiagonalQuadrature(spacing(g_1D)[1],op.quadratureClosure,size(g_1D));
@@ -131,9 +132,9 @@ end
         @test H_xy' isa TensorMapping{T,2,2} where T
     end
 
-    H_x = diagonal_quadrature(g_1D,op.quadratureClosure)
-    H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
     @testset "Sizes" begin
+        H_x = diagonal_quadrature(g_1D,op.quadratureClosure)
+        H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
         # 1D
         @test domain_size(H_x) == size(g_1D)
         @test range_size(H_x) == size(g_1D)
@@ -141,14 +142,16 @@ end
         @test domain_size(H_xy) == size(g_2D)
         @test range_size(H_xy) == size(g_2D)
     end
-    a = 3.2
-    b = 2.1
-    v_1D = a*ones(Float64, size(g_1D))
-    v_2D = b*ones(Float64, size(g_2D))
-    u_1D = evalOn(g_1D,x->sin(x))
-    u_2D = evalOn(g_2D,(x,y)->sin(x)+cos(y))
-    integral(H,v) = sum(H*v)
+
     @testset "Application" begin
+        H_x = diagonal_quadrature(g_1D,op.quadratureClosure)
+        H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
+        a = 3.2
+        b = 2.1
+        v_1D = a*ones(Float64, size(g_1D))
+        v_2D = b*ones(Float64, size(g_2D))
+        u_1D = evalOn(g_1D,x->sin(x))
+        u_2D = evalOn(g_2D,(x,y)->sin(x)+cos(y))
         # 1D
         @test integral(H_x,v_1D) ≈ a*Lx rtol = 1e-13
         @test integral(H_x,u_1D) ≈ 1. rtol = 1e-8
@@ -159,7 +162,32 @@ end
         @test H_xy*v_2D ≈ H_xy'*v_2D rtol = 1e-16 #Failed for exact equality. Must differ in operation order for some reason?
     end
 
+    @testset "Accuracy" begin
+        v = ()
+        for i = 0:4
+            f_i(x) = 1/factorial(i)*x^i
+            v = (v...,evalOn(g_1D,f_i))
+        end
+        # # 2nd order
+        # op2 = readOperator(sbp_operators_path()*"d2_2nd.txt",sbp_operators_path()*"h_2nd.txt")
+        # H2 = diagonal_quadrature(g_1D,op2.quadratureClosure)
+        # for i = 1:3
+        #     @test integral(H4,v[i]) ≈ v[i+1] rtol = 1e-14
+        # end
+
+        # 4th order
+        op4 = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+        H4 = diagonal_quadrature(g_1D,op4.quadratureClosure)
+        for i = 1:4
+            @test integral(H4,v[i]) ≈ v[i+1][end] -  v[i+1][1] rtol = 1e-14
+        end
+    end
+
     @testset "Inferred" begin
+        H_x = diagonal_quadrature(g_1D,op.quadratureClosure)
+        H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
+        v_1D = ones(Float64, size(g_1D))
+        v_2D = ones(Float64, size(g_2D))
         @inferred H_x*v_1D
         @inferred H_x'*v_1D
         @inferred H_xy*v_2D
