@@ -21,24 +21,23 @@ LazyTensors.range_size(D2::SecondDerivative) = D2.size
 LazyTensors.domain_size(D2::SecondDerivative) = D2.size
 
 # Apply for different regions Lower/Interior/Upper or Unknown region
-function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Lower}) where T
-    return @inbounds D2.h_inv*D2.h_inv*apply_stencil(D2.closureStencils[Int(I)], v, Int(I))
+function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, i::Index{Lower}) where T
+    return @inbounds D2.h_inv*D2.h_inv*apply_stencil(D2.closureStencils[Int(i)], v, Int(i))
 end
 
-function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Interior}) where T
-    return @inbounds D2.h_inv*D2.h_inv*apply_stencil(D2.innerStencil, v, Int(I))
+function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, i::Index{Interior}) where T
+    return @inbounds D2.h_inv*D2.h_inv*apply_stencil(D2.innerStencil, v, Int(i))
 end
 
-function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, I::Index{Upper}) where T
+function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, i::Index{Upper}) where T
     N = length(v) # TODO: Use domain_size here instead? N = domain_size(D2,size(v))
-    return @inbounds D2.h_inv*D2.h_inv*apply_stencil_backwards(D2.closureStencils[N-Int(I)+1], v, Int(I))
+    return @inbounds D2.h_inv*D2.h_inv*apply_stencil_backwards(D2.closureStencils[N-Int(i)+1], v, Int(i))
 end
 
 function LazyTensors.apply(D2::SecondDerivative{T}, v::AbstractVector{T}, i) where T
     N = length(v)  # TODO: Use domain_size here instead?
     r = getregion(i, closuresize(D2), N)
-    I = Index(i, r)
-    return LazyTensors.apply(D2, v, I)
+    return LazyTensors.apply(D2, v, Index(i, r))
 end
 
 closuresize(D2::SecondDerivative{T,N,M,K}) where {T<:Real,N,M,K} = M

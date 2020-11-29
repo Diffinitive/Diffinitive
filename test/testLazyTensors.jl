@@ -19,11 +19,11 @@ end
 @testset "Mapping transpose" begin
     struct DummyMapping{T,R,D} <: TensorMapping{T,R,D} end
 
-    LazyTensors.apply(m::DummyMapping{T,R,D}, v, I::Vararg{Any,R}) where {T,R,D} = :apply
+    LazyTensors.apply(m::DummyMapping{T,R}, v, I::Vararg{Any,R}) where {T,R} = :apply
     LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, I::Vararg{Any,D}) where {T,R,D} = :apply_transpose
 
-    LazyTensors.range_size(m::DummyMapping{T,R,D}) where {T,R,D} = :range_size
-    LazyTensors.domain_size(m::DummyMapping{T,R,D}) where {T,R,D} = :domain_size
+    LazyTensors.range_size(m::DummyMapping) = :range_size
+    LazyTensors.domain_size(m::DummyMapping) = :domain_size
 
     m = DummyMapping{Float64,2,3}()
     @test m' isa TensorMapping{Float64, 3,2}
@@ -41,7 +41,7 @@ end
         domain_size::NTuple{D,Int}
     end
 
-    LazyTensors.apply(m::SizeDoublingMapping{T,R,D}, v, i::Vararg{Any,R}) where {T,R,D} = (:apply,v,i)
+    LazyTensors.apply(m::SizeDoublingMapping{T,R}, v, i::Vararg{Any,R}) where {T,R} = (:apply,v,i)
     LazyTensors.range_size(m::SizeDoublingMapping) = 2 .* m.domain_size
     LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
 
@@ -95,7 +95,7 @@ end
         domain_size::NTuple{D,Int}
     end
 
-    LazyTensors.apply(m::ScalarMapping{T,R,D}, v, I::Vararg{Any,R}) where {T,R,D} = m.λ*v[I...]
+    LazyTensors.apply(m::ScalarMapping{T,R}, v, I::Vararg{Any,R}) where {T,R} = m.λ*v[I...]
     LazyTensors.range_size(m::ScalarMapping) = m.domain_size
     LazyTensors.domain_size(m::ScalarMapping) = m.range_size
 
