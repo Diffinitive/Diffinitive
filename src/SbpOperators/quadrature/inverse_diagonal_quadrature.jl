@@ -61,17 +61,17 @@ Implements the application `(Hi*v)[i]` an `Index{R}` where `R` is one of the reg
 `Lower`,`Interior`,`Upper`. If `i` is another type of index (e.g an `Int`) it will first
 be converted to an `Index{R}`.
 """
-function LazyTensors.apply(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, I::Index{Lower}) where T
-    return @inbounds Hi.h_inv*Hi.closure[Int(I)]*v[Int(I)]
+function LazyTensors.apply(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, i::Index{Lower}) where T
+    return @inbounds Hi.h_inv*Hi.closure[Int(i)]*v[Int(i)]
 end
 
-function LazyTensors.apply(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, I::Index{Upper}) where T
+function LazyTensors.apply(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, i::Index{Upper}) where T
     N = length(v);
-    return @inbounds Hi.h_inv*Hi.closure[N-Int(I)+1]*v[Int(I)]
+    return @inbounds Hi.h_inv*Hi.closure[N-Int(i)+1]*v[Int(i)]
 end
 
-function LazyTensors.apply(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, I::Index{Interior}) where T
-    return @inbounds Hi.h_inv*v[Int(I)]
+function LazyTensors.apply(Hi::InverseDiagonalQuadrature{T}, v::AbstractVector{T}, i::Index{Interior}) where T
+    return @inbounds Hi.h_inv*v[Int(i)]
 end
 
 function LazyTensors.apply(Hi::InverseDiagonalQuadrature{T},  v::AbstractVector{T}, i) where T
