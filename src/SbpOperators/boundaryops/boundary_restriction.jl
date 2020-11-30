@@ -4,20 +4,17 @@
 Creates a BoundaryRestriction operator for the specified boundary
 """
 function boundary_restriction(grid::EquidistantGrid{1,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary{1}) where {T,M}
-    r = region(boundary)
-    return e = BoundaryRestriction(grid, closureStencil, r())
+    return e = BoundaryRestriction(grid, closureStencil, region(boundary))
 end
 
 function boundary_restriction(grid::EquidistantGrid{2,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary{1}) where {T,M}
-    r = region(boundary)
-    e = BoundaryRestriction(restrict(grid, 1), closureStencil, r())
+    e = BoundaryRestriction(restrict(grid, 1), closureStencil, region(boundary))
     I = IdentityMapping{T}(size(restrict(grid,2)))
     return e⊗I
 end
 
 function boundary_restriction(grid::EquidistantGrid{2,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary{2}) where {T,M}
-    r = region(boundary)
-    e = BoundaryRestriction(restrict(grid, 2), closureStencil, r())
+    e = BoundaryRestriction(restrict(grid, 2), closureStencil, region(boundary))
     I = IdentityMapping{T}(size(restrict(grid,1)))
     return I⊗e
 end
