@@ -18,24 +18,23 @@ LazyTensors.range_size(Hi::InverseDiagonalInnerProduct) = Hi.size
 LazyTensors.domain_size(Hi::InverseDiagonalInnerProduct) = Hi.size
 
 
-function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Lower}) where T
-    return @inbounds Hi.h_inv*Hi.inverseQuadratureClosure[Int(I)]*v[Int(I)]
+function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, i::Index{Lower}) where T
+    return @inbounds Hi.h_inv*Hi.inverseQuadratureClosure[Int(i)]*v[Int(i)]
 end
 
-function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Upper}) where T
+function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, i::Index{Upper}) where T
     N = length(v);
-    return @inbounds Hi.h_inv*Hi.inverseQuadratureClosure[N-Int(I)+1]*v[Int(I)]
+    return @inbounds Hi.h_inv*Hi.inverseQuadratureClosure[N-Int(i)+1]*v[Int(i)]
 end
 
-function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Interior}) where T
-    return @inbounds Hi.h_inv*v[Int(I)]
+function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, i::Index{Interior}) where T
+    return @inbounds Hi.h_inv*v[Int(i)]
 end
 
 function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T},  v::AbstractVector{T}, i) where T
     N = length(v);
     r = getregion(i, closuresize(Hi), N)
-    I = Index(i, r)
-    return LazyTensors.apply(Hi, v, I)
+    return LazyTensors.apply(Hi, v, Index(i, r))
 end
 
 LazyTensors.apply_transpose(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, i) where T = LazyTensors.apply(Hi,v,i)

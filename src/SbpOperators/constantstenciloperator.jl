@@ -28,8 +28,7 @@ apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i::Index{Interior},
 
 function apply_quadrature(op::ConstantStencilOperator, h::Real, v::T, i, N::Integer) where T
     r = getregion(i, closuresize(op), N)
-    i = Index(i, r)
-    return apply_quadrature(op, h, v, i, N)
+    return apply_quadrature(op, h, v, Index(i, r), N)
 end
 export apply_quadrature
 
@@ -40,8 +39,7 @@ apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T, i::Inde
 
 function apply_inverse_quadrature(op::ConstantStencilOperator, h_inv::Real, v::T, i, N::Integer) where T
     r = getregion(i, closuresize(op), N)
-    i = Index(i, r)
-    return apply_inverse_quadrature(op, h_inv, v, i, N)
+    return apply_inverse_quadrature(op, h_inv, v, Index(i, r), N)
 end
 
 export apply_inverse_quadrature
