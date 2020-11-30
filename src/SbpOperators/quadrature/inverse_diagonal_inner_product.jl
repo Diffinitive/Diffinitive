@@ -18,27 +18,26 @@ LazyTensors.range_size(Hi::InverseDiagonalInnerProduct) = Hi.size
 LazyTensors.domain_size(Hi::InverseDiagonalInnerProduct) = Hi.size
 
 
-function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Lower}) where T
-    return @inbounds Hi.h_inv*Hi.inverseQuadratureClosure[Int(I)]*v[Int(I)]
+function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, i::Index{Lower}) where T
+    return @inbounds Hi.h_inv*Hi.inverseQuadratureClosure[Int(i)]*v[Int(i)]
 end
 
-function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Upper}) where T
+function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, i::Index{Upper}) where T
     N = length(v);
-    return @inbounds Hi.h_inv*Hi.inverseQuadratureClosure[N-Int(I)+1]*v[Int(I)]
+    return @inbounds Hi.h_inv*Hi.inverseQuadratureClosure[N-Int(i)+1]*v[Int(i)]
 end
 
-function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index{Interior}) where T
-    return @inbounds Hi.h_inv*v[Int(I)]
+function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, i::Index{Interior}) where T
+    return @inbounds Hi.h_inv*v[Int(i)]
 end
 
-function LazyTensors.apply(Hi::InverseDiagonalInnerProduct,  v::AbstractVector{T}, index::Index{Unknown}) where T
+function LazyTensors.apply(Hi::InverseDiagonalInnerProduct{T},  v::AbstractVector{T}, i) where T
     N = length(v);
-    r = getregion(Int(index), closuresize(Hi), N)
-    i = Index(Int(index), r)
-    return LazyTensors.apply(Hi, v, i)
+    r = getregion(i, closuresize(Hi), N)
+    return LazyTensors.apply(Hi, v, Index(i, r))
 end
 
-LazyTensors.apply_transpose(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, I::Index) where T = LazyTensors.apply(Hi,v,I)
+LazyTensors.apply_transpose(Hi::InverseDiagonalInnerProduct{T}, v::AbstractVector{T}, i) where T = LazyTensors.apply(Hi,v,i)
 
 
 closuresize(Hi::InverseDiagonalInnerProduct{T,M}) where {T,M} =  M

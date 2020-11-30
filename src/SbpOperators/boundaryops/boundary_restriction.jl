@@ -41,24 +41,18 @@ end
 LazyTensors.range_size(e::BoundaryRestriction) = ()
 LazyTensors.domain_size(e::BoundaryRestriction) = e.size
 
-# TODO: Currently not working.
-# We need to handle getindex for LazyTensorMappingApplication such that we pass more #indices than the
-# range size of the TensorMapping. Or we need to be able to handle the case where we dont pass any index, for
-# 0-dimensional tensormappings.
+# TODO: Should we support indexing into the 0-dimensional lazyarray? This is
+# supported for arrays with linear index style (i.e for e.g
+# u = fill(1), u[] and u[1] are both valid.) This currently not supported by
+# LazyTensorMappingApplication.
 " Restricts a grid function v on a grid of size m to the scalar element v[1]"
-function LazyTensors.apply(e::BoundaryRestriction{T,M,Lower}, v::AbstractVector{T}, i::Index{Lower}) where {T,M}
-    @boundscheck if Int(i)!=1
-        throw(BoundsError())
-    end
-    apply_stencil(e.stencil,v,Int(i))
+function LazyTensors.apply(e::BoundaryRestriction{T,M,Lower}, v::AbstractVector{T}) where {T,M}
+    apply_stencil(e.stencil,v,1)
 end
 
 " Restricts a grid function v on a grid of size m to the scalar element v[m]"
-function LazyTensors.apply(e::BoundaryRestriction{T,M,Upper}, v::AbstractVector{T}, i::Index{Upper}) where {T,M}
-    @boundscheck if Int(i) != e.size[1]
-        throw(BoundsError())
-    end
-    apply_stencil_backwards(e.stencil,v,Int(i))
+function LazyTensors.apply(e::BoundaryRestriction{T,M,Upper}, v::AbstractVector{T}) where {T,M}
+    apply_stencil_backwards(e.stencil,v,e.size[1])
 end
 
 " Transpose of a restriction is an inflation or prolongation.

@@ -184,8 +184,8 @@ end
     v = evalOn(g,x->1+x^2)
     u = fill(3.124)
 
-    @test (e_l*v)[Index{Lower}(1)] == v[1]
-    @test (e_r*v)[Index{Upper}(4)] == v[end]
+    @test (e_l*v)[] == v[1]
+    @test (e_r*v)[] == v[end]
     @test e_l'*u == [u[], 0, 0, 0]
     @test e_r'*u == [0, 0, 0, u[]]
     @test_throws BoundsError (e_l*v)[Index{Lower}(3)]
@@ -218,19 +218,19 @@ end
     @test range_size(e_s) == (4,)
     @test range_size(e_n) == (4,)
 
-    I_w = [(Index{Lower}(1),Index{Lower}(1)),
-           (Index{Lower}(1),Index{Interior}(2)),
-           (Index{Lower}(1),Index{Interior}(3)),
-           (Index{Lower}(1),Index{Interior}(4)),
-           (Index{Lower}(1),Index{Upper}(5))]
+    I_w = [(Index{Lower}(1),),
+           (Index{Interior}(2),),
+           (Index{Interior}(3),),
+           (Index{Interior}(4),),
+           (Index{Upper}(5),)]
     v_w = [10,7,4,1.0,1];
     for i = 1:length(I_w)
-        @test_broken (e_w*v)[I_w[i]...] == v_w[i];
+        @test (e_w*v)[I_w[i]...] == v_w[i];
     end
-    @test_broken e_w*v == [10,7,4,1.0,1]
-    @test_broken e_e*v == [13,10,7,4,4.0]
-    @test_broken e_s*v == [10,11,12,13.0]
-    @test_broken e_n*v == [1,2,3,4.0]
+    @test e_w*v == [10,7,4,1.0,1]
+    @test e_e*v == [13,10,7,4,4.0]
+    @test e_s*v == [10,11,12,13.0]
+    @test e_n*v == [1,2,3,4.0]
 
     g_x = [1,2,3,4.0]
     g_y = [5,4,3,2,1.0]
@@ -247,10 +247,10 @@ end
     G_n = zeros(Float64, (4,5))
     G_n[:,5] = g_x
 
-    @test_broken e_w'*g_y == G_w
-    @test_broken e_e'*g_y == G_e
-    @test_broken e_s'*g_x == G_s
-    @test_broken e_n'*g_x == G_n
+    @test e_w'*g_y == G_w
+    @test e_e'*g_y == G_e
+    @test e_s'*g_x == G_s
+    @test e_n'*g_x == G_n
 end
 #
 # @testset "NormalDerivative" begin
