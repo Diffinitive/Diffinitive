@@ -35,6 +35,8 @@ struct BoundaryRestriction{T,R<:Region,N} <: TensorMapping{T,0,1}
 end
 export BoundaryRestriction
 
+BoundaryRestriction{R}(stencil::Stencil{T,N}, size::Int) where {T,R,N} = BoundaryRestriction{T,R,N}(stencil, size)
+
 function BoundaryRestriction(grid::EquidistantGrid{1}, closureStencil::Stencil{T,N}, region::Region) where {T,N}
     return BoundaryRestriction{T,typeof(region),N}(closureStencil,size(grid)[1])
 end

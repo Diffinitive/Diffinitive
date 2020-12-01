@@ -180,12 +180,12 @@ end
 
     @testset "Constructors" begin
         @testset "1D" begin
-            e_l = BoundaryRestriction{Float64,Lower,4}(op.eClosure,size(g_1D)[1])
+            e_l = BoundaryRestriction{Lower}(op.eClosure,size(g_1D)[1])
             @test e_l == BoundaryRestriction(g_1D,op.eClosure,Lower())
             @test e_l == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Lower}())
             @test e_l isa TensorMapping{T,0,1} where T
 
-            e_r = BoundaryRestriction{Float64,Upper,4}(op.eClosure,size(g_1D)[1])
+            e_r = BoundaryRestriction{Upper}(op.eClosure,size(g_1D)[1])
             @test e_r == BoundaryRestriction(g_1D,op.eClosure,Upper())
             @test e_r == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Upper}())
             @test e_r isa TensorMapping{T,0,1} where T
