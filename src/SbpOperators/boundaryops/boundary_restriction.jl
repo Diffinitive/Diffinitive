@@ -60,7 +60,7 @@ function LazyTensors.apply_transpose(e::BoundaryRestriction{T,Upper}, v::Abstrac
     return e.stencil[e.size[1] - Int(i)]*v[]
 end
 
-# Catch all combinations of Lower, Upper and Inner not caught by the two previous methods.
+# Catch all combinations of Lower, Upper and Interior not caught by the two previous methods.
 function LazyTensors.apply_transpose(e::BoundaryRestriction{T}, v::AbstractArray{T,0}, i::Index) where T
     return zero(T)
 end
