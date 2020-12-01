@@ -282,10 +282,25 @@ end
     @testset "Inferred" begin
         v = ones(Float64, 11)
         u = fill(1.)
-        @inferred (e_l*v)[] == 1
-        @inferred (e_r*v)[] == 1
-        @inferred e_l'*u == [1.; zeros(10)]
-        @inferred e_r'*u == [zeros(10); 1.]
+
+        # TBD: Are these testing what we want them to test, apply and apply_transpose,
+        #      or are they testing getindex of TensorMappingApplication?
+        @inferred (e_l*v)[]
+        @inferred (e_r*v)[]
+
+        @inferred (e_l'*u)[4]
+        @inferred (e_l'*u)[Index(1,Lower)]
+        @inferred (e_l'*u)[Index(2,Lower)]
+        @inferred (e_l'*u)[Index(6,Interior)]
+        @inferred (e_l'*u)[Index(10,Upper)]
+        @inferred (e_l'*u)[Index(11,Upper)]
+
+        @inferred (e_r'*u)[4]
+        @inferred (e_r'*u)[Index(1,Lower)]
+        @inferred (e_r'*u)[Index(2,Lower)]
+        @inferred (e_r'*u)[Index(6,Interior)]
+        @inferred (e_r'*u)[Index(10,Upper)]
+        @inferred (e_r'*u)[Index(11,Upper)]
     end
 
 end
