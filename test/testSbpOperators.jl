@@ -239,28 +239,30 @@ end
 
         # 2D
         v = zeros(Float64, 4, 5)
-        v[:,5] = [1, 2, 3,4]
-        v[:,4] = [1, 2, 3,4]
+        v[:,5] = [1, 2, 3, 4]
+        v[:,4] = [1, 2, 3, 4]
         v[:,3] = [4, 5, 6, 7]
         v[:,2] = [7, 8, 9, 10]
         v[:,1] = [10, 11, 12, 13]
 
-        @test e_w*v == [10,7,4,1.0,1]
-        @test e_e*v == [13,10,7,4,4.0]
-        @test e_s*v == [10,11,12,13.0]
-        @test e_n*v == [1,2,3,4.0]
+        @test e_w*v == v[1,:]
+        @test e_e*v == v[end,:]
+        @test e_s*v == v[:,1]
+        @test e_n*v == v[:,end]
 
-        I_w = [(Index{Lower}(1),),
-               (Index{Interior}(2),),
-               (Index{Interior}(3),),
-               (Index{Interior}(4),),
-               (Index{Upper}(5),)]
+        I_w = [
+            Index{Lower}(1),
+            Index{Interior}(2),
+            Index{Interior}(3),
+            Index{Interior}(4),
+            Index{Upper}(5),
+        ]
        for i = 1:length(I_w)
-           @test (e_w*v)[I_w[i]...] == [10,7,4,1.0,1][i];
+           @test (e_w*v)[I_w[i]] == v[1,i];
        end
 
-       g_x = [1,2,3,4.0]
-       g_y = [5,4,3,2,1.0]
+       g_x = [1., 2., 3., 4.]
+       g_y = [5., 4., 3., 2., 1.]
 
        G_w = zeros(Float64, (4,5))
        G_w[1,:] = g_y
