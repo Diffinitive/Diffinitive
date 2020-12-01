@@ -21,7 +21,7 @@ end
 export boundary_restriction
 
 """
-    BoundaryRestriction{T,N,R} <: TensorMapping{T,0,1}
+    BoundaryRestriction{T,R,N} <: TensorMapping{T,0,1}
 
 Implements the boundary operator `e` for 1D as a TensorMapping
 `e` is the restriction of a grid function to the boundary using some `closureStencil`.
@@ -29,36 +29,36 @@ The boundary to restrict to is determined by `R`.
 
 `e'` is the prolongation of a zero dimensional array to the whole grid using the same `closureStencil`.
 """
-struct BoundaryRestriction{T,N,R<:Region} <: TensorMapping{T,0,1}
+struct BoundaryRestriction{T,R<:Region,N} <: TensorMapping{T,0,1}
     stencil::Stencil{T,N}
-    size::NTuple{1,Int}
+    size::Int
 end
 export BoundaryRestriction
 
 function BoundaryRestriction(grid::EquidistantGrid{1}, closureStencil::Stencil{T,N}, region::Region) where {T,N}
-    return BoundaryRestriction{T,N,typeof(region)}(closureStencil,size(grid))
+    return BoundaryRestriction{T,typeof(region),N}(closureStencil,size(grid)[1])
 end
 
 LazyTensors.range_size(e::BoundaryRestriction) = ()
-LazyTensors.domain_size(e::BoundaryRestriction) = e.size
+LazyTensors.domain_size(e::BoundaryRestriction) = (e.size,)
 
-function LazyTensors.apply(e::BoundaryRestriction{T,N,Lower}, v::AbstractVector{T}) where {T,N}
+function LazyTensors.apply(e::BoundaryRestriction{T,Lower}, v::AbstractVector{T}) where T
     apply_stencil(e.stencil,v,1)
 end
 
-function LazyTensors.apply(e::BoundaryRestriction{T,N,Upper}, v::AbstractVector{T}) where {T,N}
-    apply_stencil_backwards(e.stencil,v,e.size[1])
+function LazyTensors.apply(e::BoundaryRestriction{T,Upper}, v::AbstractVector{T}) where T
+    apply_stencil_backwards(e.stencil,v,e.size)
 end
 
-function LazyTensors.apply_transpose(e::BoundaryRestriction{T,N,Lower}, v::AbstractArray{T,0}, i) where {T,N}
-    @boundscheck if !(0 < Int(i) <= e.size[1])
+function LazyTensors.apply_transpose(e::BoundaryRestriction{T,Lower}, v::AbstractArray{T,0}, i) where T
+    @boundscheck if !(0 < Int(i) <= e.size)
         throw(BoundsError())
     end
     return e.stencil[Int(i)-1]*v[]
 end
 
-function LazyTensors.apply_transpose(e::BoundaryRestriction{T,N,Upper}, v::AbstractArray{T,0}, i) where {T,N}
-    @boundscheck if !(0 < Int(i) <= e.size[1])
+function LazyTensors.apply_transpose(e::BoundaryRestriction{T,Upper}, v::AbstractArray{T,0}, i) where T
+    @boundscheck if !(0 < Int(i) <= e.size)
         throw(BoundsError())
     end
     return e.stencil[e.size[1] - Int(i)]*v[]
