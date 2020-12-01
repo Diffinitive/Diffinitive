@@ -263,6 +263,20 @@ end
        @test e_e'*g_y == G_e
        @test e_s'*g_x == G_s
        @test e_n'*g_x == G_n
+
+       @testset "Regions" begin
+           @test (e_l'*u)[Index(1,Lower)] == 3.124
+           @test (e_l'*u)[Index(2,Lower)] == 0
+           @test (e_l'*u)[Index(6,Interior)] == 0
+           @test (e_l'*u)[Index(10,Upper)] == 0
+           @test (e_l'*u)[Index(11,Upper)] == 0
+
+           @test (e_r'*u)[Index(1,Lower)] == 0
+           @test (e_r'*u)[Index(2,Lower)] == 0
+           @test (e_r'*u)[Index(6,Interior)] == 0
+           @test (e_r'*u)[Index(10,Upper)] == 0
+           @test (e_r'*u)[Index(11,Upper)] == 3.124
+       end
     end
 
     @testset "Inferred" begin
