@@ -250,16 +250,6 @@ end
         @test e_s*v == v[:,1]
         @test e_n*v == v[:,end]
 
-        I_w = [
-            Index{Lower}(1),
-            Index{Interior}(2),
-            Index{Interior}(3),
-            Index{Interior}(4),
-            Index{Upper}(5),
-        ]
-       for i = 1:length(I_w)
-           @test (e_w*v)[I_w[i]] == v[1,i];
-       end
 
        g_x = [1., 2., 3., 4.]
        g_y = [5., 4., 3., 2., 1.]
