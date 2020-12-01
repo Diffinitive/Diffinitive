@@ -175,8 +175,8 @@ end
 
 @testset "BoundaryRestrictrion" begin
     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
-    g_1D = EquidistantGrid(4, 0.0, 1.0)
-    g_2D = EquidistantGrid((4,5), (0.0, 0.0), (1.0,1.0))
+    g_1D = EquidistantGrid(11, 0.0, 1.0)
+    g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
 
     @testset "Constructors" begin
         # 1D
@@ -206,22 +206,22 @@ end
 
     @testset "Sizes" begin
         # 1D
-        @test domain_size(e_l) == (4,)
-        @test domain_size(e_r) == (4,)
+        @test domain_size(e_l) == (11,)
+        @test domain_size(e_r) == (11,)
 
         @test range_size(e_l) == ()
         @test range_size(e_r) == ()
 
         # 2D
-        @test domain_size(e_w) == (4,5)
-        @test domain_size(e_e) == (4,5)
-        @test domain_size(e_s) == (4,5)
-        @test domain_size(e_n) == (4,5)
+        @test domain_size(e_w) == (11,15)
+        @test domain_size(e_e) == (11,15)
+        @test domain_size(e_s) == (11,15)
+        @test domain_size(e_n) == (11,15)
 
-        @test range_size(e_w) == (5,)
-        @test range_size(e_e) == (5,)
-        @test range_size(e_s) == (4,)
-        @test range_size(e_n) == (4,)
+        @test range_size(e_w) == (15,)
+        @test range_size(e_e) == (15,)
+        @test range_size(e_s) == (11,)
+        @test range_size(e_n) == (11,)
     end
 
 
@@ -232,18 +232,13 @@ end
         @test (e_l*v)[] == v[1]
         @test (e_r*v)[] == v[end]
         @test (e_r*v)[1] == v[end]
-        @test e_l'*u == [u[], 0, 0, 0]
-        @test e_r'*u == [0, 0, 0, u[]]
+        @test e_l'*u == [u[]; zeros(10)]
+        @test e_r'*u == [zeros(10); u[]]
         @test_throws BoundsError (e_l*v)[2]
-        @test_throws BoundsError (e_l'*u)[5]
+        @test_throws BoundsError (e_l'*u)[20]
 
         # 2D
-        v = zeros(Float64, 4, 5)
-        v[:,5] = [1, 2, 3, 4]
-        v[:,4] = [1, 2, 3, 4]
-        v[:,3] = [4, 5, 6, 7]
-        v[:,2] = [7, 8, 9, 10]
-        v[:,1] = [10, 11, 12, 13]
+        v = rand(11, 15)
 
         @test e_w*v == v[1,:]
         @test e_e*v == v[end,:]
@@ -251,20 +246,20 @@ end
         @test e_n*v == v[:,end]
 
 
-       g_x = [1., 2., 3., 4.]
-       g_y = [5., 4., 3., 2., 1.]
+       g_x = rand(11)
+       g_y = rand(15)
 
-       G_w = zeros(Float64, (4,5))
+       G_w = zeros(Float64, (11,15))
        G_w[1,:] = g_y
 
-       G_e = zeros(Float64, (4,5))
-       G_e[4,:] = g_y
+       G_e = zeros(Float64, (11,15))
+       G_e[end,:] = g_y
 
-       G_s = zeros(Float64, (4,5))
+       G_s = zeros(Float64, (11,15))
        G_s[:,1] = g_x
 
-       G_n = zeros(Float64, (4,5))
-       G_n[:,5] = g_x
+       G_n = zeros(Float64, (11,15))
+       G_n[:,end] = g_x
 
        @test e_w'*g_y == G_w
        @test e_e'*g_y == G_e
@@ -273,34 +268,34 @@ end
     end
 
     @testset "Inferred" begin
-        # 1D
-        v = ones(Float64, 4)
+        # # 1D
+        v = ones(Float64, 11)
         u = fill(1.)
         @inferred (e_l*v)[] == 1
         @inferred (e_r*v)[] == 1
-        @inferred e_l'*u == [1., 0., 0., 0.]
-        @inferred e_r'*u == [0., 0., 0., 1.]
+        @inferred e_l'*u == [1.; zeros(10)]
+        @inferred e_r'*u == [zeros(10); 1.]
 
-        # 2D
-        v = ones(Float64, 4, 5)
-        @inferred e_w*v == ones(Float64, 5)
-        @inferred e_e*v == ones(Float64, 5)
-        @inferred e_s*v == ones(Float64, 4)
-        @inferred e_n*v == ones(Float64, 4)
+        # # 2D
+        v = ones(Float64, 11, 15)
+        @inferred e_w*v == ones(Float64, 15)
+        @inferred e_e*v == ones(Float64, 15)
+        @inferred e_s*v == ones(Float64, 11)
+        @inferred e_n*v == ones(Float64, 11)
 
-        g_x = ones(Float64,4)
-        g_y = ones(Float64,5)
+        g_x = ones(Float64,11)
+        g_y = ones(Float64,15)
 
-        G_w = zeros(Float64, (4,5))
+        G_w = zeros(Float64, (11,15))
         G_w[1,:] = g_y
 
-        G_e = zeros(Float64, (4,5))
+        G_e = zeros(Float64, (11,15))
         G_e[4,:] = g_y
 
-        G_s = zeros(Float64, (4,5))
+        G_s = zeros(Float64, (11,15))
         G_s[:,1] = g_x
 
-        G_n = zeros(Float64, (4,5))
+        G_n = zeros(Float64, (11,15))
         G_n[:,5] = g_x
 
         @inferred e_w'*g_y == G_w
