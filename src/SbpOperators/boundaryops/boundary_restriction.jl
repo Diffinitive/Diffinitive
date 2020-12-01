@@ -3,21 +3,17 @@
 
 Creates a BoundaryRestriction operator for the specified boundary
 """
-function boundary_restriction(grid::EquidistantGrid{1}, closureStencil::Stencil, boundary::CartesianBoundary{1})
-    return e = BoundaryRestriction(grid, closureStencil, region(boundary))
+function boundary_restriction(grid::EquidistantGrid{D,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary) where {D,T,M}
+    r = region(boundary)
+    d = dim(boundary)
+    e = BoundaryRestriction(restrict(grid, d), closureStencil, r)
+
+    one_d_grids = restrict.(Ref(grid), tuple(1:D))
+    Is = IdentityMapping{T}.(size.(one_d_grids))
+    parts = Base.setindex(Is, e, d)
+    return foldl(⊗, parts)
 end
 
-function boundary_restriction(grid::EquidistantGrid{2,T}, closureStencil::Stencil{T}, boundary::CartesianBoundary{1}) where T
-    e = BoundaryRestriction(restrict(grid, 1), closureStencil, region(boundary))
-    I = IdentityMapping{T}(size(restrict(grid,2)))
-    return e⊗I
-end
-
-function boundary_restriction(grid::EquidistantGrid{2,T}, closureStencil::Stencil{T}, boundary::CartesianBoundary{2}) where T
-    e = BoundaryRestriction(restrict(grid, 2), closureStencil, region(boundary))
-    I = IdentityMapping{T}(size(restrict(grid,1)))
-    return I⊗e
-end
 export boundary_restriction
 
 """
