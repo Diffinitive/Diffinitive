@@ -234,8 +234,6 @@ end
         @test (e_r*v)[1] == v[end]
         @test e_l'*u == [u[]; zeros(10)]
         @test e_r'*u == [zeros(10); u[]]
-        @test_throws BoundsError (e_l*v)[2]
-        @test_throws BoundsError (e_l'*u)[20]
 
         # 2D
         v = rand(11, 15)

@@ -52,16 +52,20 @@ function LazyTensors.apply(e::BoundaryRestriction{T,Upper}, v::AbstractVector{T}
     apply_stencil_backwards(e.stencil,v,e.size)
 end
 
-function LazyTensors.apply_transpose(e::BoundaryRestriction{T,Lower}, v::AbstractArray{T,0}, i) where T
-    @boundscheck if !(0 < Int(i) <= e.size)
-        throw(BoundsError())
-    end
+function LazyTensors.apply_transpose(e::BoundaryRestriction{T,Lower}, v::AbstractArray{T,0}, i::Index{Lower}) where T
     return e.stencil[Int(i)-1]*v[]
 end
 
-function LazyTensors.apply_transpose(e::BoundaryRestriction{T,Upper}, v::AbstractArray{T,0}, i) where T
-    @boundscheck if !(0 < Int(i) <= e.size)
-        throw(BoundsError())
-    end
+function LazyTensors.apply_transpose(e::BoundaryRestriction{T,Upper}, v::AbstractArray{T,0}, i::Index{Upper}) where T
     return e.stencil[e.size[1] - Int(i)]*v[]
+end
+
+# Catch all combinations of Lower, Upper and Inner not caught by the two previous methods.
+function LazyTensors.apply_transpose(e::BoundaryRestriction{T}, v::AbstractArray{T,0}, i::Index) where T
+    return zero(T)
+end
+
+function LazyTensors.apply_transpose(e::BoundaryRestriction{T}, v::AbstractArray{T,0}, i) where T
+    r = getregion(i, closuresize(e), e.size)
+    apply_transpose(e, v, Index(i,r))
 end
