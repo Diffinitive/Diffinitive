@@ -39,7 +39,7 @@ function BoundaryRestriction(grid::EquidistantGrid{1}, closureStencil::Stencil{T
     return BoundaryRestriction{T,typeof(region),N}(closureStencil,size(grid)[1])
 end
 
-closuresize(::BoundaryRestriction{T,R,N}) where {T,R,N} = N
+closure_size(::BoundaryRestriction{T,R,N}) where {T,R,N} = N
 
 LazyTensors.range_size(e::BoundaryRestriction) = ()
 LazyTensors.domain_size(e::BoundaryRestriction) = (e.size,)
@@ -66,6 +66,6 @@ function LazyTensors.apply_transpose(e::BoundaryRestriction{T}, v::AbstractArray
 end
 
 function LazyTensors.apply_transpose(e::BoundaryRestriction{T}, v::AbstractArray{T,0}, i) where T
-    r = getregion(i, closuresize(e), e.size)
+    r = getregion(i, closure_size(e), e.size)
     apply_transpose(e, v, Index(i,r))
 end
