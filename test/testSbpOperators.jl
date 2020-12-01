@@ -280,40 +280,12 @@ end
     end
 
     @testset "Inferred" begin
-        # # 1D
         v = ones(Float64, 11)
         u = fill(1.)
         @inferred (e_l*v)[] == 1
         @inferred (e_r*v)[] == 1
         @inferred e_l'*u == [1.; zeros(10)]
         @inferred e_r'*u == [zeros(10); 1.]
-
-        # # 2D
-        v = ones(Float64, 11, 15)
-        @inferred e_w*v == ones(Float64, 15)
-        @inferred e_e*v == ones(Float64, 15)
-        @inferred e_s*v == ones(Float64, 11)
-        @inferred e_n*v == ones(Float64, 11)
-
-        g_x = ones(Float64,11)
-        g_y = ones(Float64,15)
-
-        G_w = zeros(Float64, (11,15))
-        G_w[1,:] = g_y
-
-        G_e = zeros(Float64, (11,15))
-        G_e[4,:] = g_y
-
-        G_s = zeros(Float64, (11,15))
-        G_s[:,1] = g_x
-
-        G_n = zeros(Float64, (11,15))
-        G_n[:,5] = g_x
-
-        @inferred e_w'*g_y == G_w
-        @inferred e_e'*g_y == G_e
-        @inferred e_s'*g_x == G_s
-        @inferred e_n'*g_x == G_n
     end
 
 end
