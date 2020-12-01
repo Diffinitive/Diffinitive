@@ -180,12 +180,12 @@ end
 
     @testset "Constructors" begin
         @testset "1D" begin
-            e_l = BoundaryRestriction{Float64,Lower,4}(op.eClosure,size(g_1D)[1])
+            e_l = BoundaryRestriction{Lower}(op.eClosure,size(g_1D)[1])
             @test e_l == BoundaryRestriction(g_1D,op.eClosure,Lower())
             @test e_l == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Lower}())
             @test e_l isa TensorMapping{T,0,1} where T
 
-            e_r = BoundaryRestriction{Float64,Upper,4}(op.eClosure,size(g_1D)[1])
+            e_r = BoundaryRestriction{Upper}(op.eClosure,size(g_1D)[1])
             @test e_r == BoundaryRestriction(g_1D,op.eClosure,Upper())
             @test e_r == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Upper}())
             @test e_r isa TensorMapping{T,0,1} where T
@@ -291,24 +291,22 @@ end
         v = ones(Float64, 11)
         u = fill(1.)
 
-        # TBD: Are these testing what we want them to test, apply and apply_transpose,
-        #      or are they testing getindex of TensorMappingApplication?
-        @inferred (e_l*v)[]
-        @inferred (e_r*v)[]
+        @inferred apply(e_l, v)
+        @inferred apply(e_r, v)
 
-        @inferred (e_l'*u)[4]
-        @inferred (e_l'*u)[Index(1,Lower)]
-        @inferred (e_l'*u)[Index(2,Lower)]
-        @inferred (e_l'*u)[Index(6,Interior)]
-        @inferred (e_l'*u)[Index(10,Upper)]
-        @inferred (e_l'*u)[Index(11,Upper)]
+        @inferred apply_transpose(e_l, u, 4)
+        @inferred apply_transpose(e_l, u, Index(1,Lower))
+        @inferred apply_transpose(e_l, u, Index(2,Lower))
+        @inferred apply_transpose(e_l, u, Index(6,Interior))
+        @inferred apply_transpose(e_l, u, Index(10,Upper))
+        @inferred apply_transpose(e_l, u, Index(11,Upper))
 
-        @inferred (e_r'*u)[4]
-        @inferred (e_r'*u)[Index(1,Lower)]
-        @inferred (e_r'*u)[Index(2,Lower)]
-        @inferred (e_r'*u)[Index(6,Interior)]
-        @inferred (e_r'*u)[Index(10,Upper)]
-        @inferred (e_r'*u)[Index(11,Upper)]
+        @inferred apply_transpose(e_r, u, 4)
+        @inferred apply_transpose(e_r, u, Index(1,Lower))
+        @inferred apply_transpose(e_r, u, Index(2,Lower))
+        @inferred apply_transpose(e_r, u, Index(6,Interior))
+        @inferred apply_transpose(e_r, u, Index(10,Upper))
+        @inferred apply_transpose(e_r, u, Index(11,Upper))
     end
 
 end
