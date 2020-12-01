@@ -23,7 +23,11 @@ export boundary_restriction
 """
     BoundaryRestriction{T,N,R} <: TensorMapping{T,0,1}
 
-Implements the boundary operator `e` as a TensorMapping
+Implements the boundary operator `e` for 1D as a TensorMapping
+`e` is the restriction of a grid function to the boundary using some `closureStencil`.
+The boundary to restrict to is determined by `R`.
+
+`e'` is the prolongation of a zero dimensional array to the whole grid using the same `closureStencil`.
 """
 struct BoundaryRestriction{T,N,R<:Region} <: TensorMapping{T,0,1}
     stencil::Stencil{T,N}
@@ -38,18 +42,14 @@ end
 LazyTensors.range_size(e::BoundaryRestriction) = ()
 LazyTensors.domain_size(e::BoundaryRestriction) = e.size
 
-" Restricts a grid function v on a grid of size m to the scalar element v[1]"
 function LazyTensors.apply(e::BoundaryRestriction{T,N,Lower}, v::AbstractVector{T}) where {T,N}
     apply_stencil(e.stencil,v,1)
 end
 
-" Restricts a grid function v on a grid of size m to the scalar element v[m]"
 function LazyTensors.apply(e::BoundaryRestriction{T,N,Upper}, v::AbstractVector{T}) where {T,N}
     apply_stencil_backwards(e.stencil,v,e.size[1])
 end
 
-" Transpose of a restriction is an inflation or prolongation.
-  Inflates the scalar (1-element) vector to a vector of size of the grid"
 function LazyTensors.apply_transpose(e::BoundaryRestriction{T,N,Lower}, v::AbstractArray{T,0}, i) where {T,N}
     @boundscheck if !(0 < Int(i) <= e.size[1])
         throw(BoundsError())
@@ -57,8 +57,6 @@ function LazyTensors.apply_transpose(e::BoundaryRestriction{T,N,Lower}, v::Abstr
     return e.stencil[Int(i)-1]*v[]
 end
 
-" Transpose of a restriction is an inflation or prolongation.
-  Inflates the scalar (1-element) vector to a vector of size of the grid"
 function LazyTensors.apply_transpose(e::BoundaryRestriction{T,N,Upper}, v::AbstractArray{T,0}, i) where {T,N}
     @boundscheck if !(0 < Int(i) <= e.size[1])
         throw(BoundsError())
