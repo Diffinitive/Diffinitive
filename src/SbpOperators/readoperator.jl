@@ -34,6 +34,21 @@ function read_D2_operator(fn; order)
     return d2
 end
 
+
+"""
+    read_stencil(fn, path...; [center])
+
+Read a stencil at `path` from the file with name `fn`.
+If a center is specified the given element of the stecil is set as the center.
+
+# Examples
+```
+read_stencil(sbp_operators_path()*"standard_diagonal.toml", "order2", "D2", "inner_stencil")
+read_stencil(sbp_operators_path()*"standard_diagonal.toml", "order2", "d1", "closure"; center=1)
+```
+"""
+read_stencil(fn, path...; center=nothing) = get_stencil(TOML.parsefile(fn), path...; center=center)
+
 function get_stencil(parsed_toml, path...; center=nothing)
     if length(path) == 0
         @assert parsed_toml isa Vector
