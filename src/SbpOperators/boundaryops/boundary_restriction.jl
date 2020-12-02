@@ -1,16 +1,26 @@
 """
     boundary_restriction(grid,closureStencil,boundary)
 
-Creates a BoundaryRestriction operator for the specified boundary
+Creates a boundary restriction operator on a `Dim`-dimensional grid for the
+specified `boundary`.
+
+When `Dim=1`, the corresponding `BoundaryRestriction` tensor mapping is returned.
+When `Dim>1`, the `BoundaryRestriction` `e` is inflated by the outer product
+of `IdentityMappings` in orthogonal coordinate directions, e.g for `Dim=3`,
+the boundary restriction operator in the y-direction direction is `Ix⊗e⊗Iz`.
 """
-function boundary_restriction(grid::EquidistantGrid{D,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary) where {D,T,M}
+function boundary_restriction(grid::EquidistantGrid{Dim,T}, closureStencil::Stencil{T,M}, boundary::CartesianBoundary) where {Dim,T,M}
+    # Create 1D boundary restriction operator
     r = region(boundary)
     d = dim(boundary)
     e = BoundaryRestriction(restrict(grid, d), closureStencil, r)
 
+    # Create 1D IdentityMappings for each coordinate direction
     one_d_grids = restrict.(Ref(grid), Tuple(1:D))
-
     Is = IdentityMapping{T}.(size.(one_d_grids))
+
+    # Formulate the correct outer product sequence of the identity mappings and
+    # the boundary restriction operator
     parts = Base.setindex(Is, e, d)
     return foldl(⊗, parts)
 end
@@ -20,7 +30,8 @@ export boundary_restriction
 """
     BoundaryRestriction{T,R,N} <: TensorMapping{T,0,1}
 
-Implements the boundary operator `e` for 1D as a TensorMapping
+Implements the boundary operator `e` for 1D as a `TensorMapping`
+
 `e` is the restriction of a grid function to the boundary using some `closureStencil`.
 The boundary to restrict to is determined by `R`.
 
