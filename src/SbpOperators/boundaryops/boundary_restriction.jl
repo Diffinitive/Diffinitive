@@ -16,7 +16,7 @@ function boundary_restriction(grid::EquidistantGrid{Dim,T}, closureStencil::Sten
     e = BoundaryRestriction(restrict(grid, d), closureStencil, r)
 
     # Create 1D IdentityMappings for each coordinate direction
-    one_d_grids = restrict.(Ref(grid), Tuple(1:D))
+    one_d_grids = restrict.(Ref(grid), Tuple(1:Dim))
     Is = IdentityMapping{T}.(size.(one_d_grids))
 
     # Formulate the correct outer product sequence of the identity mappings and
