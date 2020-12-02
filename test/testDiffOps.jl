@@ -8,7 +8,7 @@ using Sbplib.LazyTensors
 @testset "DiffOps" begin
 #
 # @testset "BoundaryValue" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
 #     g = EquidistantGrid((4,5), (0.0, 0.0), (1.0,1.0))
 #
 #     e_w = BoundaryValue(op, g, CartesianBoundary{1,Lower}())
@@ -69,7 +69,7 @@ using Sbplib.LazyTensors
 # end
 #
 # @testset "NormalDerivative" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
 #     g = EquidistantGrid((5,6), (0.0, 0.0), (4.0,5.0))
 #
 #     d_w = NormalDerivative(op, g, CartesianBoundary{1,Lower}())
@@ -146,7 +146,7 @@ using Sbplib.LazyTensors
 # end
 #
 # @testset "BoundaryQuadrature" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
 #     g = EquidistantGrid((10,11), (0.0, 0.0), (1.0,1.0))
 #
 #     H_w = BoundaryQuadrature(op, g, CartesianBoundary{1,Lower}())

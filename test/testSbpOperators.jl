@@ -16,7 +16,7 @@ using LinearAlgebra
 end
 
 # @testset "apply_quadrature" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
 #     h = 0.5
 #
 #     @test apply_quadrature(op, h, 1.0, 10, 100) == h
@@ -37,7 +37,7 @@ end
 # end
 
 @testset "SecondDerivative" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     L = 3.5
     g = EquidistantGrid(101, 0.0, L)
     Dₓₓ = SecondDerivative(g,op.innerStencil,op.closureStencils)
@@ -77,7 +77,7 @@ end
 
 
 @testset "Laplace2D" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     Lx = 1.5
     Ly = 3.2
     g = EquidistantGrid((102,131), (0.0, 0.0), (Lx,Ly))
@@ -119,7 +119,7 @@ end
 end
 
 @testset "DiagonalInnerProduct" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     L = 2.3
     g = EquidistantGrid(77, 0.0, L)
     H = DiagonalInnerProduct(g,op.quadratureClosure)
@@ -132,7 +132,7 @@ end
 end
 
 @testset "Quadrature" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     Lx = 2.3
     Ly = 5.2
     g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
@@ -152,7 +152,7 @@ end
 end
 
 @testset "InverseDiagonalInnerProduct" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     L = 2.3
     g = EquidistantGrid(77, 0.0, L)
     H = DiagonalInnerProduct(g, op.quadratureClosure)
@@ -166,7 +166,7 @@ end
 end
 
 @testset "InverseQuadrature" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     Lx = 7.3
     Ly = 8.2
     g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
@@ -182,7 +182,7 @@ end
 end
 
 @testset "BoundaryRestrictrion" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
 
@@ -320,7 +320,7 @@ end
 end
 #
 # @testset "NormalDerivative" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
 #     g = EquidistantGrid((5,6), (0.0, 0.0), (4.0,5.0))
 #
 #     d_w = NormalDerivative(op, g, CartesianBoundary{1,Lower}())
@@ -397,7 +397,7 @@ end
 # end
 #
 # @testset "BoundaryQuadrature" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
 #     g = EquidistantGrid((10,11), (0.0, 0.0), (1.0,1.0))
 #
 #     H_w = BoundaryQuadrature(op, g, CartesianBoundary{1,Lower}())
