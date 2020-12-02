@@ -7,6 +7,14 @@ using LinearAlgebra
 
 @testset "SbpOperators" begin
 
+@testset "Stencil" begin
+    s = SbpOperators.Stencil((-2,2), (1.,2.,2.,3.,4.))
+    @test s isa SbpOperators.Stencil{Float64, 5}
+
+    @test eltype(s) == Float64
+    @test SbpOperators.scale(s, 2) == SbpOperators.Stencil((-2,2), (2.,4.,4.,6.,8.))
+end
+
 # @testset "apply_quadrature" begin
 #     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
 #     h = 0.5
