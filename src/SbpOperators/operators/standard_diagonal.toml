@@ -1,0 +1,36 @@
+[meta]
+authors = "Ken Mattson"
+descripion = "Standard operators for equidistant grids"
+type = "equidistant"
+
+[order2]
+H.inner = ["1"]
+H.closure = ["1/2"]
+
+D1.inner_stencil = ["-1/2", "0", "1/2"]
+D1.closure_stencils = [
+    ["-1", "1"],
+]
+
+D2.inner_stencil = ["1", "-2", "1"]
+D2.closure_stencils = [
+    ["1", "-2", "1"],
+]
+
+e.closure = ["1"]
+d1.closure = ["-3/2", "2", "-1/2"]
+
+[order4]
+H.inner = ["1"]
+H.closure = ["17/48", "59/48", "43/48", "49/48"]
+
+D2.inner_stencil = ["-1/12","4/3","-5/2","4/3","-1/12"]
+D2.closure_stencils = [
+    [     "2",    "-5",      "4",      "-1",     "0",     "0"],
+    [     "1",    "-2",      "1",       "0",     "0",     "0"],
+    [ "-4/43", "59/43", "-110/43",   "9/43", "-4/43",     "0"],
+    [ "-1/49",     "0",   "59/49", "118/49", "64/49", "-4/49"],
+]
+
+e.closure = ["1"]
+d1.closure = ["-11/6", "3", "-3/2", "1/3"]
