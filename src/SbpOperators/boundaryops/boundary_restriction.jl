@@ -8,7 +8,8 @@ function boundary_restriction(grid::EquidistantGrid{D,T}, closureStencil::Stenci
     d = dim(boundary)
     e = BoundaryRestriction(restrict(grid, d), closureStencil, r)
 
-    one_d_grids = restrict.(Ref(grid), tuple(1:D))
+    one_d_grids = restrict.(Ref(grid), Tuple(1:D))
+
     Is = IdentityMapping{T}.(size.(one_d_grids))
     parts = Base.setindex(Is, e, d)
     return foldl(⊗, parts)
