@@ -13,6 +13,10 @@ using LinearAlgebra
 
     @test eltype(s) == Float64
     @test SbpOperators.scale(s, 2) == SbpOperators.Stencil((-2,2), (2.,4.,4.,6.,8.))
+
+    @test SbpOperators.Stencil((1,2,3,4), center=1) == SbpOperators.Stencil((0, 3),(1,2,3,4))
+    @test SbpOperators.Stencil((1,2,3,4), center=2) == SbpOperators.Stencil((-1, 2),(1,2,3,4))
+    @test SbpOperators.Stencil((1,2,3,4), center=4) == SbpOperators.Stencil((-3, 0),(1,2,3,4))
 end
 
 # @testset "apply_quadrature" begin
