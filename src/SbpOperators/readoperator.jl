@@ -48,22 +48,42 @@ read_stencil(sbp_operators_path()*"standard_diagonal.toml", "order2", "d1", "clo
 ```
 """
 read_stencil(fn, path...; center=nothing) = get_stencil(TOML.parsefile(fn), path...; center=center)
+read_stencils(fn, path..., centers=nothing) = get_stencils(TOML.parsefile(fn), path...; centers=centers)
+read_tuple(fn, path..., centers=nothing) = get_tuple(TOML.parsefile(fn), path...)
 
-function get_stencil(parsed_toml, path...; center=nothing)
-    if length(path) == 0
-        @assert parsed_toml isa Vector
-        stencil_weights = Float64.(parse_rational.(parsed_toml))
+get_stencil(parsed_toml, path...; center=nothing) = get_stencil(parsed_toml[path[1]], path[2:end]...; center=center)
+function get_stencil(parsed_toml; center=nothing)
+    @assert parsed_toml isa Vector{String}
+    stencil_weights = Float64.(parse_rational.(parsed_toml))
 
-        width = length(stencil_weights)
+    width = length(stencil_weights)
 
-        if isnothing(center)
-            center = div(width,2)+1
-        end
-
-        return Stencil(Tuple(stencil_weights), center=center)
+    if isnothing(center)
+        center = div(width,2)+1
     end
 
-    return get_stencil(parsed_toml[path[1]], path[2:end]...; center=center)
+    return Stencil(Tuple(stencil_weights), center=center)
+end
+
+get_stencils(parsed_toml, path...; centers) = get_stencils(parsed_toml[path[1]], path[2:end]...; centers=centers)
+function get_stencils(parsed_toml; centers)
+    @assert parsed_toml isa Vector{Vector{String}}
+    @assert length(centers) == length(parsed_toml)
+
+    stencils = ()
+    for i ∈ 1:length(parsed_toml)
+        stencil = get_stencil(parsed_toml[i]), center = centers[i]
+        stencils = (stencils..., stencil)
+    end
+
+    return stencils
+end
+
+get_tuple(parsed_toml, path...) = get_tuple(parsed_toml[path[1]], path[2:end]...)
+function get_tuple(parsed_toml, path...)
+    @assert parsed_toml isa Vector{String}
+    t = Tuple(Float64.(parse_rational.(parsed_toml)))
+    return t
 end
 
 # TODO: Probably should be deleted once we have gotten rid of read_D2_operator()
