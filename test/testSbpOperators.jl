@@ -20,6 +20,15 @@ using TOML
     @test SbpOperators.Stencil((1,2,3,4), center=4) == SbpOperators.Stencil((-3, 0),(1,2,3,4))
 end
 
+@testset "parse_rational" begin
+    @test SbpOperators.parse_rational("1") isa Rational
+    @test SbpOperators.parse_rational("1") == 1//1
+    @test SbpOperators.parse_rational("1/2") isa Rational
+    @test SbpOperators.parse_rational("1/2") == 1//2
+    @test SbpOperators.parse_rational("37/13") isa Rational
+    @test SbpOperators.parse_rational("37/13") == 37//13
+end
+
 @testset "readoperator" begin
     toml_str = """
         [meta]

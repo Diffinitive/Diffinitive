@@ -104,7 +104,7 @@ end
 
 function parse_rational(str)
     expr = Meta.parse(replace(str, "/"=>"//"))
-    return eval(expr)
+    return eval(:(Rational($expr)))
 end
 
 function pad_tuple(t::NTuple{N, T}, n::Integer) where {N,T}
