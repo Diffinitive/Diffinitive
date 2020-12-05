@@ -48,8 +48,8 @@ read_stencil(sbp_operators_path()*"standard_diagonal.toml", "order2", "d1", "clo
 ```
 """
 read_stencil(fn, path...; center=nothing) = get_stencil(TOML.parsefile(fn), path...; center=center)
-read_stencils(fn, path..., centers=nothing) = get_stencils(TOML.parsefile(fn), path...; centers=centers)
-read_tuple(fn, path..., centers=nothing) = get_tuple(TOML.parsefile(fn), path...)
+read_stencils(fn, path...; centers=nothing) = get_stencils(TOML.parsefile(fn), path...; centers=centers)
+read_tuple(fn, path...) = get_tuple(TOML.parsefile(fn), path...)
 
 get_stencil(parsed_toml, path...; center=nothing) = get_stencil(parsed_toml[path[1]], path[2:end]...; center=center)
 function get_stencil(parsed_toml; center=nothing)
@@ -72,7 +72,7 @@ function get_stencils(parsed_toml; centers)
 
     stencils = ()
     for i ∈ 1:length(parsed_toml)
-        stencil = get_stencil(parsed_toml[i]), center = centers[i]
+        stencil = get_stencil(parsed_toml[i], center = centers[i])
         stencils = (stencils..., stencil)
     end
 
