@@ -1,49 +1,18 @@
-export Laplace
-"""
-    Laplace{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
-
-Implements the Laplace operator `L` in Dim dimensions as a tensor operator
-The multi-dimensional tensor operator consists of a tuple of 1D SecondDerivative
-tensor operators.
-"""
-#export quadrature, inverse_quadrature, boundary_quadrature, boundary_value, normal_derivative
-struct Laplace{Dim,T,N,M,K} <: TensorMapping{T,Dim,Dim}
-    D2::NTuple{Dim,SecondDerivative{T,N,M,K}}
-end
-
-function Laplace(g::EquidistantGrid{Dim}, innerStencil, closureStencils) where Dim
-    D2 = ()
-    for i ∈ 1:Dim
-        D2 = (D2..., SecondDerivative(restrict(g,i), innerStencil, closureStencils))
+# """
+#     Laplace{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
+#
+# Implements the Laplace operator `L` in Dim dimensions as a tensor operator
+# The multi-dimensional tensor operator consists of a tuple of 1D SecondDerivative
+# tensor operators.
+# """
+function Laplace(grid::EquidistantGrid{Dim}, innerStencil, closureStencils) where Dim
+    Δ = SecondDerivative(grid, innerStencil, closureStencils, 1)
+    for d = 2:Dim
+        Δ += SecondDerivative(grid, innerStencil, closureStencils, d)
     end
-
-    return Laplace(D2)
+    return Δ
 end
-
-LazyTensors.range_size(L::Laplace) = getindex.(range_size.(L.D2),1)
-LazyTensors.domain_size(L::Laplace) = getindex.(domain_size.(L.D2),1)
-
-function LazyTensors.apply(L::Laplace{Dim,T}, v::AbstractArray{T,Dim}, I::Vararg{Any,Dim}) where {T,Dim}
-    error("not implemented")
-end
-
-# u = L*v
-function LazyTensors.apply(L::Laplace{1,T}, v::AbstractVector{T}, i) where T
-    @inbounds u = LazyTensors.apply(L.D2[1],v,i)
-    return u
-end
-
-function LazyTensors.apply(L::Laplace{2,T}, v::AbstractArray{T,2}, i, j) where T
-    # 2nd x-derivative
-    @inbounds vx = view(v, :, Int(j))
-    @inbounds uᵢ = LazyTensors.apply(L.D2[1], vx , i)
-
-    # 2nd y-derivative
-    @inbounds vy = view(v, Int(i), :)
-    @inbounds uᵢ += LazyTensors.apply(L.D2[2], vy , j)
-
-    return uᵢ
-end
+export Laplace
 
 # quadrature(L::Laplace) = Quadrature(L.op, L.grid)
 # inverse_quadrature(L::Laplace) = InverseQuadrature(L.op, L.grid)
