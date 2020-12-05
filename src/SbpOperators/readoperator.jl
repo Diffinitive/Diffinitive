@@ -1,4 +1,15 @@
 using TOML
+
+export read_D2_operator
+export read_stencil
+export read_stencils
+export read_tuple
+
+export get_stencil
+export get_stencils
+export get_tuple
+
+
 function read_D2_operator(fn; order)
     operators = TOML.parsefile(fn)["order$order"]
     D2 = operators["D2"]
