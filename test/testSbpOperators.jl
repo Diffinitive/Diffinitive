@@ -107,10 +107,10 @@ end
     # implies that L*v should be exact for v - monomial up to order 3.
     # Exact differentiation is measured point-wise. For other grid functions
     # the error is measured in the H-norm.
-    @test norm(L*v0) ≈ 0 atol=5e-10
-    @test norm(L*v1) ≈ 0 atol=5e-10
+    @test norm(L*v0) ≈ 0 atol=1e-9
+    @test norm(L*v1) ≈ 0 atol=1e-9
     @test L*v2 ≈ v0 # Seems to be more accurate
-    @test L*v3 ≈ v1 atol=5e-10
+    @test L*v3 ≈ v1 atol=1e-9
 
     h = spacing(g)
     l2(v) = sqrt(prod(h)*sum(v.^2))
