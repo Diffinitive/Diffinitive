@@ -181,58 +181,58 @@ end
     @test Qinv*v == Qinv'*v
 end
 
-@testset "BoundaryRestrictrion" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+@testset "BoundaryOperator" begin
+    closure_stencil = SbpOperators.Stencil((0,2), (2.,1.,3.))
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
 
     @testset "Constructors" begin
         @testset "1D" begin
-            e_l = BoundaryRestriction{Lower}(op.eClosure,size(g_1D)[1])
-            @test e_l == BoundaryRestriction(g_1D,op.eClosure,Lower())
-            @test e_l == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Lower}())
-            @test e_l isa TensorMapping{T,0,1} where T
+            op_l = BoundaryOperator{Lower}(closure_stencil,size(g_1D)[1])
+            @test op_l == BoundaryOperator(g_1D,closure_stencil,Lower())
+            @test op_l == boundary_operator(g_1D,closure_stencil,CartesianBoundary{1,Lower}())
+            @test op_l isa TensorMapping{T,0,1} where T
 
-            e_r = BoundaryRestriction{Upper}(op.eClosure,size(g_1D)[1])
-            @test e_r == BoundaryRestriction(g_1D,op.eClosure,Upper())
-            @test e_r == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Upper}())
-            @test e_r isa TensorMapping{T,0,1} where T
+            op_r = BoundaryOperator{Upper}(closure_stencil,size(g_1D)[1])
+            @test op_r == BoundaryRestriction(g_1D,closure_stencil,Upper())
+            @test op_r == boundary_operator(g_1D,closure_stencil,CartesianBoundary{1,Upper}())
+            @test op_r isa TensorMapping{T,0,1} where T
         end
 
         @testset "2D" begin
-            e_w = boundary_restriction(g_2D,op.eClosure,CartesianBoundary{1,Upper}())
+            e_w = boundary_operator(g_2D,closure_stencil,CartesianBoundary{1,Upper}())
             @test e_w isa InflatedTensorMapping
             @test e_w isa TensorMapping{T,1,2} where T
         end
     end
 
-    e_l = boundary_restriction(g_1D, op.eClosure, CartesianBoundary{1,Lower}())
-    e_r = boundary_restriction(g_1D, op.eClosure, CartesianBoundary{1,Upper}())
+    op_l = boundary_operator(g_1D, closure_stencil, CartesianBoundary{1,Lower}())
+    op_r = boundary_operator(g_1D, closure_stencil, CartesianBoundary{1,Upper}())
 
-    e_w = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{1,Lower}())
-    e_e = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{1,Upper}())
-    e_s = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{2,Lower}())
-    e_n = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{2,Upper}())
+    op_w = boundary_operator(g_2D, closure_stencil, CartesianBoundary{1,Lower}())
+    op_e = boundary_operator(g_2D, closure_stencil, CartesianBoundary{1,Upper}())
+    op_s = boundary_operator(g_2D, closure_stencil, CartesianBoundary{2,Lower}())
+    op_n = boundary_operator(g_2D, closure_stencil, CartesianBoundary{2,Upper}())
 
     @testset "Sizes" begin
         @testset "1D" begin
-            @test domain_size(e_l) == (11,)
-            @test domain_size(e_r) == (11,)
+            @test domain_size(op_l) == (11,)
+            @test domain_size(op_r) == (11,)
 
-            @test range_size(e_l) == ()
-            @test range_size(e_r) == ()
+            @test range_size(op_l) == ()
+            @test range_size(op_r) == ()
         end
 
         @testset "2D" begin
-            @test domain_size(e_w) == (11,15)
-            @test domain_size(e_e) == (11,15)
-            @test domain_size(e_s) == (11,15)
-            @test domain_size(e_n) == (11,15)
+            @test domain_size(op_w) == (11,15)
+            @test domain_size(op_e) == (11,15)
+            @test domain_size(op_s) == (11,15)
+            @test domain_size(op_n) == (11,15)
 
-            @test range_size(e_w) == (15,)
-            @test range_size(e_e) == (15,)
-            @test range_size(e_s) == (11,)
-            @test range_size(e_n) == (11,)
+            @test range_size(op_w) == (15,)
+            @test range_size(op_e) == (15,)
+            @test range_size(op_s) == (11,)
+            @test range_size(op_n) == (11,)
         end
     end
 
@@ -241,6 +241,126 @@ end
         @testset "1D" begin
             v = evalOn(g_1D,x->1+x^2)
             u = fill(3.124)
+            @test (op_l*v)[] == 2*v[1] + v[2] + 3*v[3]
+            @test (op_r*v)[] == 2*v[end] + v[end-1] + 3*v[end-2]
+            @test (op_r*v)[1] == 2*v[end] + v[end-1] + 3*v[end-2]
+            @test op_l'*u == [2*u[]; u[]; 3*u[]; zeros(8)]
+            @test op_r'*u == [zeros(8); 3*u[]; u[]; 2*u[]]
+        end
+
+        @testset "2D" begin
+            v = rand(size(g_2D)...)
+            u = fill(3.124)
+            @test op_w*v ≈ 2*v[1,:] + v[2,:] + 3*v[3,:] rtol = 1e-14
+            @test op_e*v ≈ 2*v[end,:] + v[end-1,:] + 3*v[end-2,:] rtol = 1e-14
+            @test op_s*v ≈ 2*v[:,1] + v[:,2] + 3*v[:,3] rtol = 1e-14
+            @test op_n*v ≈ 2*v[:,end] + v[:,end-1] + 3*v[:,end-2] rtol = 1e-14
+
+
+           g_x = rand(size(g_2D)[1])
+           g_y = rand(size(g_2D)[2])
+
+           G_w = zeros(Float64, size(g_2D)...)
+           G_w[1,:] = 2*g_y
+           G_w[2,:] = g_y
+           G_w[3,:] = 3*g_y
+
+           G_e = zeros(Float64, size(g_2D)...)
+           G_e[end,:] = 2*g_y
+           G_e[end-1,:] = g_y
+           G_e[end-2,:] = 3*g_y
+
+           G_s = zeros(Float64, size(g_2D)...)
+           G_s[:,1] = 2*g_x
+           G_s[:,2] = g_x
+           G_s[:,3] = 3*g_x
+
+           G_n = zeros(Float64, size(g_2D)...)
+           G_n[:,end] = 2*g_x
+           G_n[:,end-1] = g_x
+           G_n[:,end-2] = 3*g_x
+
+           @test op_w'*g_y == G_w
+           @test op_e'*g_y == G_e
+           @test op_s'*g_x == G_s
+           @test op_n'*g_x == G_n
+       end
+
+       @testset "Regions" begin
+           u = fill(3.124)
+           @test (op_l'*u)[Index(1,Lower)] == 2*u[]
+           @test (op_l'*u)[Index(2,Lower)] == u[]
+           @test (op_l'*u)[Index(6,Interior)] == 0
+           @test (op_l'*u)[Index(10,Upper)] == 0
+           @test (op_l'*u)[Index(11,Upper)] == 0
+
+           @test (op_r'*u)[Index(1,Lower)] == 0
+           @test (op_r'*u)[Index(2,Lower)] == 0
+           @test (op_r'*u)[Index(6,Interior)] == 0
+           @test (op_r'*u)[Index(10,Upper)] == u[]
+           @test (op_r'*u)[Index(11,Upper)] == 2*u[]
+       end
+    end
+
+    @testset "Inferred" begin
+        v = ones(Float64, 11)
+        u = fill(1.)
+
+        @inferred apply(op_l, v)
+        @inferred apply(op_r, v)
+
+        @inferred apply_transpose(op_l, u, 4)
+        @inferred apply_transpose(op_l, u, Index(1,Lower))
+        @inferred apply_transpose(op_l, u, Index(2,Lower))
+        @inferred apply_transpose(op_l, u, Index(6,Interior))
+        @inferred apply_transpose(op_l, u, Index(10,Upper))
+        @inferred apply_transpose(op_l, u, Index(11,Upper))
+
+        @inferred apply_transpose(op_r, u, 4)
+        @inferred apply_transpose(op_r, u, Index(1,Lower))
+        @inferred apply_transpose(op_r, u, Index(2,Lower))
+        @inferred apply_transpose(op_r, u, Index(6,Interior))
+        @inferred apply_transpose(op_r, u, Index(10,Upper))
+        @inferred apply_transpose(op_r, u, Index(11,Upper))
+    end
+
+end
+
+@testset "BoundaryRestriction" begin
+    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    g_1D = EquidistantGrid(11, 0.0, 1.0)
+    g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
+
+    @testset "Constructors" begin
+        @testset "1D" begin
+            e_l = BoundaryRestriction(g_1D,op.eClosure,Lower())
+            @test e_l == BoundaryRestriction(g_1D,op.eClosure,CartesianBoundary{1,Lower}())
+            @test e_l == BoundaryOperator(g_1D,op.eClosure,Lower())
+            @test e_l isa BoundaryOperator{T,Lower} where T
+            @test e_l isa TensorMapping{T,0,1} where T
+
+            e_r = BoundaryRestriction(g_1D,op.eClosure,Upper())
+            @test e_r == BoundaryRestriction(g_1D,op.eClosure,CartesianBoundary{1,Upper}())
+            @test e_r == BoundaryOperator(g_1D,op.eClosure,Upper())
+            @test e_r isa BoundaryOperator{T,Upper} where T
+            @test e_r isa TensorMapping{T,0,1} where T
+        end
+
+        @testset "2D" begin
+            e_w = BoundaryRestriction(g_2D,op.eClosure,CartesianBoundary{1,Upper}())
+            @test e_w isa InflatedTensorMapping
+            @test e_w isa TensorMapping{T,1,2} where T
+        end
+    end
+
+    @testset "Application" begin
+        @testset "1D" begin
+            e_l = BoundaryRestriction(g_1D, op.eClosure, CartesianBoundary{1,Lower}())
+            e_r = BoundaryRestriction(g_1D, op.eClosure, CartesianBoundary{1,Upper}())
+
+            v = evalOn(g_1D,x->1+x^2)
+            u = fill(3.124)
+
             @test (e_l*v)[] == v[1]
             @test (e_r*v)[] == v[end]
             @test (e_r*v)[1] == v[end]
@@ -249,6 +369,11 @@ end
         end
 
         @testset "2D" begin
+            e_w = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{1,Lower}())
+            e_e = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{1,Upper}())
+            e_s = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{2,Lower}())
+            e_n = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{2,Upper}())
+
             v = rand(11, 15)
             u = fill(3.124)
 
@@ -278,45 +403,7 @@ end
            @test e_s'*g_x == G_s
            @test e_n'*g_x == G_n
        end
-
-       @testset "Regions" begin
-           u = fill(3.124)
-           @test (e_l'*u)[Index(1,Lower)] == 3.124
-           @test (e_l'*u)[Index(2,Lower)] == 0
-           @test (e_l'*u)[Index(6,Interior)] == 0
-           @test (e_l'*u)[Index(10,Upper)] == 0
-           @test (e_l'*u)[Index(11,Upper)] == 0
-
-           @test (e_r'*u)[Index(1,Lower)] == 0
-           @test (e_r'*u)[Index(2,Lower)] == 0
-           @test (e_r'*u)[Index(6,Interior)] == 0
-           @test (e_r'*u)[Index(10,Upper)] == 0
-           @test (e_r'*u)[Index(11,Upper)] == 3.124
-       end
     end
-
-    @testset "Inferred" begin
-        v = ones(Float64, 11)
-        u = fill(1.)
-
-        @inferred apply(e_l, v)
-        @inferred apply(e_r, v)
-
-        @inferred apply_transpose(e_l, u, 4)
-        @inferred apply_transpose(e_l, u, Index(1,Lower))
-        @inferred apply_transpose(e_l, u, Index(2,Lower))
-        @inferred apply_transpose(e_l, u, Index(6,Interior))
-        @inferred apply_transpose(e_l, u, Index(10,Upper))
-        @inferred apply_transpose(e_l, u, Index(11,Upper))
-
-        @inferred apply_transpose(e_r, u, 4)
-        @inferred apply_transpose(e_r, u, Index(1,Lower))
-        @inferred apply_transpose(e_r, u, Index(2,Lower))
-        @inferred apply_transpose(e_r, u, Index(6,Interior))
-        @inferred apply_transpose(e_r, u, Index(10,Upper))
-        @inferred apply_transpose(e_r, u, Index(11,Upper))
-    end
-
 end
 #
 # @testset "NormalDerivative" begin
