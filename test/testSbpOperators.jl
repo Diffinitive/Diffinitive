@@ -4,6 +4,7 @@ using Sbplib.Grids
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using LinearAlgebra
+using TOML
 
 @testset "SbpOperators" begin
 
@@ -17,6 +18,83 @@ using LinearAlgebra
     @test SbpOperators.Stencil((1,2,3,4), center=1) == SbpOperators.Stencil((0, 3),(1,2,3,4))
     @test SbpOperators.Stencil((1,2,3,4), center=2) == SbpOperators.Stencil((-1, 2),(1,2,3,4))
     @test SbpOperators.Stencil((1,2,3,4), center=4) == SbpOperators.Stencil((-3, 0),(1,2,3,4))
+end
+
+@testset "readoperator" begin
+    toml_str = """
+        [meta]
+        type = "equidistant"
+
+        [order2]
+        H.inner = ["1"]
+
+        D1.inner_stencil = ["-1/2", "0", "1/2"]
+        D1.closure_stencils = [
+            ["-1", "1"],
+        ]
+
+        d1.closure = ["-3/2", "2", "-1/2"]
+
+        [order4]
+        H.closure = ["17/48", "59/48", "43/48", "49/48"]
+
+        D2.inner_stencil = ["-1/12","4/3","-5/2","4/3","-1/12"]
+        D2.closure_stencils = [
+            [     "2",    "-5",      "4",       "-1",     "0",     "0"],
+            [     "1",    "-2",      "1",        "0",     "0",     "0"],
+            [ "-4/43", "59/43", "-110/43",   "59/43", "-4/43",     "0"],
+            [ "-1/49",     "0",   "59/49", "-118/49", "64/49", "-4/49"],
+        ]
+    """
+
+    parsed_toml = TOML.parse(toml_str)
+    @testset "get_stencil" begin
+        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil") == SbpOperators.Stencil((-1/2, 0., 1/2), center=2)
+        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil", center=1) == SbpOperators.Stencil((-1/2, 0., 1/2); center=1)
+        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil", center=3) == SbpOperators.Stencil((-1/2, 0., 1/2); center=3)
+
+        @test get_stencil(parsed_toml, "order2", "H", "inner") == SbpOperators.Stencil((1.,), center=1)
+
+        @test_throws AssertionError get_stencil(parsed_toml, "meta", "type")
+        @test_throws AssertionError get_stencil(parsed_toml, "order2", "D1", "closure_stencils")
+    end
+
+    @testset "get_stencils" begin
+        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=(1,)) == (SbpOperators.Stencil((-1., 1.), center=1),)
+        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=(2,)) == (SbpOperators.Stencil((-1., 1.), center=2),)
+        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=[2]) == (SbpOperators.Stencil((-1., 1.), center=2),)
+
+        @test get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=[1,1,1,1]) == (
+            SbpOperators.Stencil((    2.,    -5.,      4.,     -1.,    0.,    0.), center=1),
+            SbpOperators.Stencil((    1.,    -2.,      1.,      0.,    0.,    0.), center=1),
+            SbpOperators.Stencil(( -4/43,  59/43, -110/43,   59/43, -4/43,    0.), center=1),
+            SbpOperators.Stencil(( -1/49,     0.,   59/49, -118/49, 64/49, -4/49), center=1),
+        )
+
+        @test get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=(4,2,3,1)) == (
+            SbpOperators.Stencil((    2.,    -5.,      4.,     -1.,    0.,    0.), center=4),
+            SbpOperators.Stencil((    1.,    -2.,      1.,      0.,    0.,    0.), center=2),
+            SbpOperators.Stencil(( -4/43,  59/43, -110/43,   59/43, -4/43,    0.), center=3),
+            SbpOperators.Stencil(( -1/49,     0.,   59/49, -118/49, 64/49, -4/49), center=1),
+        )
+
+        @test get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=1:4) == (
+            SbpOperators.Stencil((    2.,    -5.,      4.,     -1.,    0.,    0.), center=1),
+            SbpOperators.Stencil((    1.,    -2.,      1.,      0.,    0.,    0.), center=2),
+            SbpOperators.Stencil(( -4/43,  59/43, -110/43,   59/43, -4/43,    0.), center=3),
+            SbpOperators.Stencil(( -1/49,     0.,   59/49, -118/49, 64/49, -4/49), center=4),
+        )
+
+        @test_throws AssertionError get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=(1,2,3))
+        @test_throws AssertionError get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=(1,2,3,5,4))
+        @test_throws AssertionError get_stencils(parsed_toml, "order4", "D2", "inner_stencil",centers=(1,2))
+    end
+
+    @testset "get_tuple" begin
+        @test get_tuple(parsed_toml, "order2", "d1", "closure") == (-3/2, 2, -1/2)
+
+        @test_throws AssertionError get_tuple(parsed_toml, "meta", "type")
+    end
 end
 
 # @testset "apply_quadrature" begin
