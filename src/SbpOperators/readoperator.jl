@@ -52,6 +52,8 @@ end
 Read a stencil at `path` from the file with name `fn`.
 If a center is specified the given element of the stecil is set as the center.
 
+See also: [`read_stencils`](@ref), [`read_tuple`](@ref), [`get_stencil`](@ref).
+
 # Examples
 ```
 read_stencil(sbp_operators_path()*"standard_diagonal.toml", "order2", "D2", "inner_stencil")
@@ -59,9 +61,31 @@ read_stencil(sbp_operators_path()*"standard_diagonal.toml", "order2", "d1", "clo
 ```
 """
 read_stencil(fn, path...; center=nothing) = get_stencil(TOML.parsefile(fn), path...; center=center)
+
+"""
+    read_stencils(fn, path...; centers)
+
+Read stencils at `path` from the file `fn`.
+Centers of the stencils are specified as a tuple or array in `centers`.
+
+See also: [`read_stencil`](@ref), [`read_tuple`](@ref), [`get_stencils`](@ref).
+"""
 read_stencils(fn, path...; centers) = get_stencils(TOML.parsefile(fn), path...; centers=centers)
+
+"""
+    read_tuple(fn, path...)
+
+Read tuple at `path` from the file `fn`.
+
+See also: [`read_stencil`](@ref), [`read_stencils`](@ref), [`get_tuple`](@ref).
+"""
 read_tuple(fn, path...) = get_tuple(TOML.parsefile(fn), path...)
 
+"""
+    get_stencil(parsed_toml, path...; center=nothing)
+
+Same as [`read_stencil`](@ref)) but takes already parsed toml.
+"""
 get_stencil(parsed_toml, path...; center=nothing) = get_stencil(parsed_toml[path[1]], path[2:end]...; center=center)
 function get_stencil(parsed_toml; center=nothing)
     @assert parsed_toml isa Vector{String}
@@ -76,6 +100,11 @@ function get_stencil(parsed_toml; center=nothing)
     return Stencil(Tuple(stencil_weights), center=center)
 end
 
+"""
+    get_stencils(parsed_toml, path...; centers)
+
+Same as [`read_stencils`](@ref)) but takes already parsed toml.
+"""
 get_stencils(parsed_toml, path...; centers) = get_stencils(parsed_toml[path[1]], path[2:end]...; centers=centers)
 function get_stencils(parsed_toml; centers)
     @assert parsed_toml isa Vector{Vector{String}}
@@ -90,6 +119,11 @@ function get_stencils(parsed_toml; centers)
     return stencils
 end
 
+"""
+    get_tuple(parsed_toml, path...)
+
+Same as [`read_tuple`](@ref)) but takes already parsed toml.
+"""
 get_tuple(parsed_toml, path...) = get_tuple(parsed_toml[path[1]], path[2:end]...)
 function get_tuple(parsed_toml)
     @assert parsed_toml isa Vector{String}
