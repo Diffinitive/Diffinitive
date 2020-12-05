@@ -91,7 +91,7 @@ function get_stencils(parsed_toml; centers)
 end
 
 get_tuple(parsed_toml, path...) = get_tuple(parsed_toml[path[1]], path[2:end]...)
-function get_tuple(parsed_toml, path...)
+function get_tuple(parsed_toml)
     @assert parsed_toml isa Vector{String}
     t = Tuple(Float64.(parse_rational.(parsed_toml)))
     return t
