@@ -9,6 +9,18 @@ struct Stencil{T<:Real,N}
 end
 
 """
+    Stencil(weights::NTuple; center::Int)
+
+Create a stencil with the given weights with element `center` as the center of the stencil.
+"""
+function Stencil(weights::NTuple; center::Int)
+    N = length(weights)
+    range = (1, N) .- center
+
+    return Stencil(range, weights)
+end
+
+"""
     scale(s::Stencil, a)
 
 Scale the weights of the stencil `s` with `a` and return a new stencil.

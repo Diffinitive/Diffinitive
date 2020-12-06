@@ -1,4 +1,4 @@
-export D2, closuresize, readOperator
+export D2, closuresize
 
 @enum Parity begin
     odd = -1
