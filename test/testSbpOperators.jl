@@ -500,83 +500,65 @@ end
        end
     end
 end
-#
-# @testset "NormalDerivative" begin
-#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-#     g = EquidistantGrid((5,6), (0.0, 0.0), (4.0,5.0))
-#
-#     d_w = NormalDerivative(op, g, CartesianBoundary{1,Lower}())
-#     d_e = NormalDerivative(op, g, CartesianBoundary{1,Upper}())
-#     d_s = NormalDerivative(op, g, CartesianBoundary{2,Lower}())
-#     d_n = NormalDerivative(op, g, CartesianBoundary{2,Upper}())
-#
-#
-#     v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
-#     v∂x = evalOn(g, (x,y)-> 2*x + y)
-#     v∂y = evalOn(g, (x,y)-> 2*(y-1) + x)
-#
-#     @test d_w  isa TensorMapping{T,2,1} where T
-#     @test d_w' isa TensorMapping{T,1,2} where T
-#
-#     @test domain_size(d_w, (3,2)) == (2,)
-#     @test domain_size(d_e, (3,2)) == (2,)
-#     @test domain_size(d_s, (3,2)) == (3,)
-#     @test domain_size(d_n, (3,2)) == (3,)
-#
-#     @test size(d_w'*v) == (6,)
-#     @test size(d_e'*v) == (6,)
-#     @test size(d_s'*v) == (5,)
-#     @test size(d_n'*v) == (5,)
-#
-#     @test d_w'*v .≈ v∂x[1,:]
-#     @test d_e'*v .≈ v∂x[5,:]
-#     @test d_s'*v .≈ v∂y[:,1]
-#     @test d_n'*v .≈ v∂y[:,6]
-#
-#
-#     d_x_l = zeros(Float64, 5)
-#     d_x_u = zeros(Float64, 5)
-#     for i ∈ eachindex(d_x_l)
-#         d_x_l[i] = op.dClosure[i-1]
-#         d_x_u[i] = -op.dClosure[length(d_x_u)-i]
-#     end
-#
-#     d_y_l = zeros(Float64, 6)
-#     d_y_u = zeros(Float64, 6)
-#     for i ∈ eachindex(d_y_l)
-#         d_y_l[i] = op.dClosure[i-1]
-#         d_y_u[i] = -op.dClosure[length(d_y_u)-i]
-#     end
-#
-#     function prod_matrix(x,y)
-#         G = zeros(Float64, length(x), length(y))
-#         for I ∈ CartesianIndices(G)
-#             G[I] = x[I[1]]*y[I[2]]
-#         end
-#
-#         return G
-#     end
-#
-#     g_x = [1,2,3,4.0,5]
-#     g_y = [5,4,3,2,1.0,11]
-#
-#     G_w = prod_matrix(d_x_l, g_y)
-#     G_e = prod_matrix(d_x_u, g_y)
-#     G_s = prod_matrix(g_x, d_y_l)
-#     G_n = prod_matrix(g_x, d_y_u)
-#
-#
-#     @test size(d_w*g_y) == (UnknownDim,6)
-#     @test size(d_e*g_y) == (UnknownDim,6)
-#     @test size(d_s*g_x) == (5,UnknownDim)
-#     @test size(d_n*g_x) == (5,UnknownDim)
-#
-#     # These tests should be moved to where they are possible (i.e we know what the grid should be)
-#     @test_broken d_w*g_y .≈ G_w
-#     @test_broken d_e*g_y .≈ G_e
-#     @test_broken d_s*g_x .≈ G_s
-#     @test_broken d_n*g_x .≈ G_n
-# end
+
+@testset "NormalDerivative" begin
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+    g = EquidistantGrid((5,6), (0.0, 0.0), (4.0,5.0))
+
+    d_w = NormalDerivative(g, op.dClosure, CartesianBoundary{1,Lower}())
+    d_e = NormalDerivative(g, op.dClosure, CartesianBoundary{1,Upper}())
+    d_s = NormalDerivative(g, op.dClosure, CartesianBoundary{2,Lower}())
+    d_n = NormalDerivative(g, op.dClosure, CartesianBoundary{2,Upper}())
+
+
+    v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
+    v∂x = evalOn(g, (x,y)-> 2*x + y)
+    v∂y = evalOn(g, (x,y)-> 2*(y-1) + x)
+
+    @test d_w isa TensorMapping{T,1,2} where T
+
+    @test d_w*v ≈ v∂x[1,:]
+    @test d_e*v ≈ -v∂x[end,:]
+    @test d_s*v ≈ v∂y[:,1]
+    @test d_n*v ≈ -v∂y[:,end]
+
+
+    d_x_l = zeros(Float64, size(g)[1])
+    d_x_u = zeros(Float64, size(g)[1])
+    for i ∈ eachindex(d_x_l)
+        d_x_l[i] = op.dClosure[i-1]
+        d_x_u[i] = op.dClosure[length(d_x_u)-i]
+    end
+
+    d_y_l = zeros(Float64, size(g)[2])
+    d_y_u = zeros(Float64, size(g)[2])
+    for i ∈ eachindex(d_y_l)
+        d_y_l[i] = op.dClosure[i-1]
+        d_y_u[i] = op.dClosure[length(d_y_u)-i]
+    end
+
+    function prod_matrix(x,y)
+        G = zeros(Float64, length(x), length(y))
+        for I ∈ CartesianIndices(G)
+            G[I] = x[I[1]]*y[I[2]]
+        end
+
+        return G
+    end
+
+    g_x = [1,2,3,4.0,5]
+    g_y = [5,4,3,2,1.0,11]
+
+    G_w = prod_matrix(d_x_l, g_y)
+    G_e = prod_matrix(d_x_u, g_y)
+    G_s = prod_matrix(g_x, d_y_l)
+    G_n = prod_matrix(g_x, d_y_u)
+
+    @test d_w'*g_y ≈ G_w
+    @test_broken d_e'*g_y ≈ G_e
+    @test d_s'*g_x ≈ G_s
+    @test_broken d_n'*g_x ≈ G_n
+end
 #
 # @testset "BoundaryQuadrature" begin
 #     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)

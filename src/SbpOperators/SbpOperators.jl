@@ -17,5 +17,6 @@ include("quadrature/inverse_diagonal_inner_product.jl")
 include("quadrature/inverse_quadrature.jl")
 include("boundaryops/boundary_operator.jl")
 include("boundaryops/boundary_restriction.jl")
+include("boundaryops/normal_derivative.jl")
 
 end # module
