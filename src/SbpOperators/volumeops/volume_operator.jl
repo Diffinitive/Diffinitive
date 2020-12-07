@@ -19,7 +19,6 @@ function volume_operator(grid::EquidistantGrid{Dim,T}, inner_stencil::Stencil{T}
     parts = Base.setindex(Is, op, direction)
     return foldl(⊗, parts)
 end
-export volume_operator
 
 """
     VolumeOperator{T,N,M,K} <: TensorOperator{T,1}
@@ -31,7 +30,6 @@ struct VolumeOperator{T,N,M,K} <: TensorMapping{T,1,1}
     size::NTuple{1,Int}
     parity::Parity
 end
-export VolumeOperator
 
 function VolumeOperator(grid::EquidistantGrid{1}, inner_stencil, closure_stencils, parity)
     return VolumeOperator(inner_stencil, closure_stencils, size(grid), parity)

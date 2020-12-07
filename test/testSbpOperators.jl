@@ -7,6 +7,8 @@ using LinearAlgebra
 using TOML
 
 import Sbplib.SbpOperators.Stencil
+import Sbplib.SbpOperators.BoundaryOperator
+import Sbplib.SbpOperators.boundary_operator
 
 @testset "SbpOperators" begin
 

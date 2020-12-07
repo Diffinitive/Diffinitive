@@ -24,7 +24,6 @@ function boundary_operator(grid::EquidistantGrid{Dim,T}, closure_stencil::Stenci
     parts = Base.setindex(Is, op, d)
     return foldl(⊗, parts)
 end
-export boundary_operator
 
 """
     BoundaryOperator{T,R,N} <: TensorMapping{T,0,1}
@@ -39,7 +38,6 @@ struct BoundaryOperator{T,R<:Region,N} <: TensorMapping{T,0,1}
     stencil::Stencil{T,N}
     size::Int
 end
-export BoundaryOperator
 
 BoundaryOperator{R}(stencil::Stencil{T,N}, size::Int) where {T,R,N} = BoundaryOperator{T,R,N}(stencil, size)
 
