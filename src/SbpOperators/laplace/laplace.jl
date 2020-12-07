@@ -5,10 +5,10 @@
 # The multi-dimensional tensor operator consists of a tuple of 1D SecondDerivative
 # tensor operators.
 # """
-function Laplace(grid::EquidistantGrid{Dim}, innerStencil, closureStencils) where Dim
-    Δ = SecondDerivative(grid, innerStencil, closureStencils, 1)
+function Laplace(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils) where Dim
+    Δ = SecondDerivative(grid, inner_stencil, closure_stencils, 1)
     for d = 2:Dim
-        Δ += SecondDerivative(grid, innerStencil, closureStencils, d)
+        Δ += SecondDerivative(grid, inner_stencil, closure_stencils, d)
     end
     return Δ
 end
