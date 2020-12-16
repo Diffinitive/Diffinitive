@@ -7,6 +7,7 @@ using LinearAlgebra
 using TOML
 
 import Sbplib.SbpOperators.Stencil
+import Sbplib.SbpOperators.VolumeOperator
 import Sbplib.SbpOperators.BoundaryOperator
 import Sbplib.SbpOperators.boundary_operator
 
@@ -133,41 +134,94 @@ end
 
 @testset "SecondDerivative" begin
     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    L = 3.5
-    g = EquidistantGrid(101, 0.0, L)
-    Dₓₓ = SecondDerivative(g,op.innerStencil,op.closureStencils)
+    Lx = 3.5
+    Ly = 3.
+    g_1D = EquidistantGrid(121, 0.0, Lx)
+    g_2D = EquidistantGrid((121,123), (0.0, 0.0), (Lx, Ly))
 
-    f0(x) = 1.
-    f1(x) = x
-    f2(x) = 1/2*x^2
-    f3(x) = 1/6*x^3
-    f4(x) = 1/24*x^4
-    f5(x) = sin(x)
-    f5ₓₓ(x) = -f5(x)
+    @testset "Constructors" begin
+        @testset "1D" begin
+            Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+            Dₓₓ == SecondDerivative(g_1D,op.innerStencil,op.closureStencils,1)
+            Dₓₓ isa VolumeOperator
+        end
+        @testset "2D" begin
+            Dₓₓ = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,1)
+            Dₓₓ isa TensorMappingComposition
+            Dₓₓ isa TensorMapping{2,2}
+        end
+    end
 
-    v0 = evalOn(g,f0)
-    v1 = evalOn(g,f1)
-    v2 = evalOn(g,f2)
-    v3 = evalOn(g,f3)
-    v4 = evalOn(g,f4)
-    v5 = evalOn(g,f5)
+    @testset "Accuracy" begin
 
-    @test Dₓₓ isa TensorMapping{T,1,1} where T
-    @test Dₓₓ' isa TensorMapping{T,1,1} where T
+        @testset "1D" begin
+            v0 = evalOn(g_1D,x->0.)
+            monomials = ()
+            maxOrder = 4;
+            for i = 0:maxOrder-1
+                f_i(x) = 1/factorial(i)*x^i
+                monomials = (monomials...,evalOn(g_1D,f_i))
+            end
+            l2(v) = sqrt(spacing(g_1D)[1]*sum(v.^2));
 
-    # 4th order interior stencil, 2nd order boundary stencil,
-    # implies that L*v should be exact for v - monomial up to order 3.
-    # Exact differentiation is measured point-wise. For other grid functions
-    # the error is measured in the l2-norm.
-    @test norm(Dₓₓ*v0) ≈ 0.0 atol=5e-10
-    @test norm(Dₓₓ*v1) ≈ 0.0 atol=5e-10
-    @test Dₓₓ*v2 ≈ v0 atol=5e-11
-    @test Dₓₓ*v3 ≈ v1 atol=5e-11
+            #TODO: Error when reading second order stencil!
+            # @testset "2nd order" begin
+            #     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+            #     Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+            #     @test Dₓₓ*monomials[1] ≈ v0 atol = 5e-13
+            #     @test Dₓₓ*monomials[2] ≈ v0 atol = 5e-13
+            # end
 
-    h = spacing(g)[1];
-    l2(v) = sqrt(h*sum(v.^2))
-    @test Dₓₓ*v4 ≈ v2  atol=5e-4 norm=l2
-    @test Dₓₓ*v5 ≈ -v5 atol=5e-4 norm=l2
+            # 4th order interior stencil, 2nd order boundary stencil,
+            # implies that L*v should be exact for monomials up to order 3.
+            # Exact differentiation is measured point-wise. For other grid functions
+            # the error is measured in the l2-norm.
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+                # TODO: high tolerances for checking the "exact" differentiation
+                # due to accumulation of round-off errors/cancellation errors?
+                @test Dₓₓ*monomials[1] ≈ v0 atol = 5e-10
+                @test Dₓₓ*monomials[2] ≈ v0 atol = 5e-10
+                @test Dₓₓ*monomials[3] ≈ monomials[1] atol = 5e-10
+                @test Dₓₓ*monomials[4] ≈ monomials[2] atol = 5e-10
+                @test Dₓₓ*evalOn(g_1D,x -> sin(x)) ≈ evalOn(g_1D,x -> -sin(x)) rtol = 5e-4 norm = l2
+            end
+        end
+
+        #TODO: Error when reading second order stencil!
+        @testset "2D" begin
+            binomials = ()
+            maxOrder = 4;
+            for i = 0:maxOrder-1
+                f_i(x,y) = 1/factorial(i)*y^i + x^i
+                binomials = (binomials...,evalOn(g_2D,f_i))
+            end
+            l2(v) = sqrt(prod(spacing(g_2D))*sum(v.^2));
+            # @testset "2nd order" begin
+            #     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+            #     Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
+            #     @test Dyy*binomials[1] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-12
+            #     @test Dyy*binomials[2] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-12
+            # end
+
+            # 4th order interior stencil, 2nd order boundary stencil,
+            # implies that L*v should be exact for binomials up to order 3.
+            # Exact differentiation is measured point-wise. For other grid functions
+            # the error is measured in the l2-norm.
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
+                # TODO: high tolerances for checking the "exact" differentiation
+                # due to accumulation of round-off errors/cancellation errors?
+                @test Dyy*binomials[1] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-9
+                @test Dyy*binomials[2] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-9
+                @test Dyy*binomials[3] ≈ evalOn(g_2D,(x,y)->1.) atol = 5e-9
+                @test Dyy*binomials[4] ≈ evalOn(g_2D,(x,y)->y) atol = 5e-9
+                @test Dyy*evalOn(g_2D, (x,y) -> sin(x)+cos(y)) ≈ evalOn(g_2D,(x,y) -> -cos(y)) rtol = 5e-4 norm = l2
+            end
+        end
+    end
 end
 
 
