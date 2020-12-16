@@ -153,7 +153,6 @@ end
     end
 
     @testset "Accuracy" begin
-
         @testset "1D" begin
             v0 = evalOn(g_1D,x->0.)
             monomials = ()
@@ -189,7 +188,6 @@ end
             end
         end
 
-        #TODO: Error when reading second order stencil!
         @testset "2D" begin
             binomials = ()
             maxOrder = 4;
@@ -198,6 +196,8 @@ end
                 binomials = (binomials...,evalOn(g_2D,f_i))
             end
             l2(v) = sqrt(prod(spacing(g_2D))*sum(v.^2));
+
+            #TODO: Error when reading second order stencil!
             # @testset "2nd order" begin
             #     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
             #     Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
