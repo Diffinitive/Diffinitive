@@ -1,10 +1,15 @@
-# """
-#     Laplace{Dim,T<:Real,N,M,K} <: TensorMapping{T,Dim,Dim}
-#
-# Implements the Laplace operator `L` in Dim dimensions as a tensor operator
-# The multi-dimensional tensor operator consists of a tuple of 1D SecondDerivative
-# tensor operators.
-# """
+"""
+    Laplace(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils)
+
+Creates the Laplace ooperator operator `Δ` as a `TensorMapping`
+
+`Δ` approximates the Laplace operator ∑d²/xᵢ² , i = 1,...,`Dim` on `grid`, using
+the stencil `inner_stencil` in the interior and a set of stencils `closure_stencils`
+for the points in the closure regions.
+
+On a one-dimensional `grid`, `Δ` is a `SecondDerivative`. On a multi-dimensional `grid`, `Δ` is the sum of
+multi-dimensional `SecondDerivative`s where the sum is carried out lazily.
+"""
 function Laplace(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils) where Dim
     Δ = SecondDerivative(grid, inner_stencil, closure_stencils, 1)
     for d = 2:Dim
@@ -19,44 +24,7 @@ export Laplace
 # boundary_value(L::Laplace, bId::CartesianBoundary) = BoundaryValue(L.op, L.grid, bId)
 # normal_derivative(L::Laplace, bId::CartesianBoundary) = NormalDerivative(L.op, L.grid, bId)
 # boundary_quadrature(L::Laplace, bId::CartesianBoundary) = BoundaryQuadrature(L.op, L.grid, bId)
-# export NormalDerivative
-# """
-#     NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
-#
-# Implements the boundary operator `d` as a TensorMapping
-# """
-# struct NormalDerivative{T,N,M,K} <: TensorMapping{T,2,1}
-#     op::D2{T,N,M,K}
-#     grid::EquidistantGrid{2}
-#     bId::CartesianBoundary
-# end
-#
-# # TODO: This is obviouly strange. Is domain_size just discarded? Is there a way to avoid storing grid in BoundaryValue?
-# # Can we give special treatment to TensorMappings that go to a higher dim?
-# function LazyTensors.range_size(e::NormalDerivative, domain_size::NTuple{1,Integer})
-#     if dim(e.bId) == 1
-#         return (UnknownDim, domain_size[1])
-#     elseif dim(e.bId) == 2
-#         return (domain_size[1], UnknownDim)
-#     end
-# end
-# LazyTensors.domain_size(e::NormalDerivative, range_size::NTuple{2,Integer}) = (range_size[3-dim(e.bId)],)
-#
-# # TODO: Not type stable D:<
-# # TODO: Make this independent of dimension
-# function LazyTensors.apply(d::NormalDerivative{T}, v::AbstractArray{T}, I::NTuple{2,Index}) where T
-#     i = I[dim(d.bId)]
-#     j = I[3-dim(d.bId)]
-#     N_i = size(d.grid)[dim(d.bId)]
-#     h_inv = inverse_spacing(d.grid)[dim(d.bId)]
-#     return apply_normal_derivative(d.op, h_inv, v[j], i, N_i, region(d.bId))
-# end
-#
-# function LazyTensors.apply_transpose(d::NormalDerivative{T}, v::AbstractArray{T}, I::NTuple{1,Index}) where T
-#     u = selectdim(v,3-dim(d.bId),Int(I[1]))
-#     return apply_normal_derivative_transpose(d.op, inverse_spacing(d.grid)[dim(d.bId)], u, region(d.bId))
-# end
-#
+
 # """
 #     BoundaryQuadrature{T,N,M,K} <: TensorOperator{T,1}
 #
