@@ -199,16 +199,18 @@ end
 
     # TODO: Test for other dimensions?
     op_x = volume_operator(g_2D,inner_stencil,closure_stencils,Parity(1),1)
-    op_y = volume_operator(g_2D,inner_stencil,closure_stencils,Parity(1),2)
+    op_y = volume_operator(g_2D,inner_stencil,closure_stencils,Parity(-1),2)
     v = zeros(size(g_2D))
     Nx = size(g_2D)[1]
+    Ny = size(g_2D)[2]
     for i = 1:Nx
         v[i,:] .= i
     end
     rx = copy(v)
     rx[1,:] .= 1.5
-    rx[end,:] .= (2*Nx-1)/2
+    rx[Nx,:] .= (2*Nx-1)/2
     ry = copy(v)
+    ry[:,Ny-1:Ny] = -v[:,Ny-1:Ny]
 
     @testset "Application" begin
         @test op_x*v ≈ rx rtol = 1e-14
