@@ -10,6 +10,8 @@ of `IdentityMappings` in orthogonal coordinate directions, e.g for `Dim=3`,
 the boundary restriction operator in the y-direction direction is `Ix⊗op⊗Iz`.
 """
 function boundary_operator(grid::EquidistantGrid{Dim,T}, closure_stencil::Stencil{T}, boundary::CartesianBoundary) where {Dim,T}
+    #TODO:Check that dim(boundary) <= Dim?
+
     # Create 1D boundary operator
     r = region(boundary)
     d = dim(boundary)

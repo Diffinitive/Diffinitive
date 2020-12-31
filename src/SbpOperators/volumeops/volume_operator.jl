@@ -9,6 +9,8 @@ of `IdentityMappings` in orthogonal coordinate directions, e.g for `Dim=3`,
 the boundary restriction operator in the y-direction direction is `Ix⊗op⊗Iz`.
 """
 function volume_operator(grid::EquidistantGrid{Dim,T}, inner_stencil::Stencil{T}, closure_stencils::NTuple{M,Stencil{T}}, parity, direction) where {Dim,T,M}
+    #TODO: Check that direction <= Dim?
+
     # Create 1D volume operator in along coordinate direction
     op = VolumeOperator(restrict(grid, direction), inner_stencil, closure_stencils, parity)
     # Create 1D IdentityMappings for each coordinate direction
