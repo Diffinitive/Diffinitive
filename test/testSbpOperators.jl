@@ -345,47 +345,62 @@ end
     end
 end
 
-
-@testset "Laplace2D" begin
+@testset "Laplace" begin
     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    Lx = 1.5
-    Ly = 3.2
-    g = EquidistantGrid((102,131), (0.0, 0.0), (Lx,Ly))
-    L = Laplace(g, op.innerStencil, op.closureStencils)
+    g_1D = EquidistantGrid(101, 0.0, 1.)
+    #TODO: It's nice to verify that 3D works somewhere at least, but perhaps should keep 3D tests to a minimum to avoid
+    # long run time for test?
+    g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
+    # TODO: These areant really constructors. Better name?
+    @testset "Constructors" begin
+        @testset "1D" begin
+            L = Laplace(g_1D, op.innerStencil, op.closureStencils)
+            @test L == SecondDerivative(g_1D, op.innerStencil, op.closureStencils)
+            @test L isa TensorMapping{T,1,1}  where T
+        end
+        @testset "3D" begin
+            L = Laplace(g_3D, op.innerStencil, op.closureStencils)
+            @test L isa TensorMapping{T,3,3} where T
+            Dxx = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,1)
+            Dyy = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,2)
+            Dzz = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,3)
+            @test L == Dxx + Dyy + Dzz
+        end
+    end
 
+    @testset "Accuracy" begin
+        polynomials = ()
+        maxOrder = 4;
+        for i = 0:maxOrder-1
+            f_i(x,y,z) = 1/factorial(i)*(y^i + x^i + z^i)
+            polynomials = (polynomials...,evalOn(g_3D,f_i))
+        end
+        l2(v) = sqrt(prod(spacing(g_3D))*sum(v.^2));
 
-    f0(x,y) = 2.
-    f1(x,y) = x+y
-    f2(x,y) = 1/2*x^2 + 1/2*y^2
-    f3(x,y) = 1/6*x^3 + 1/6*y^3
-    f4(x,y) = 1/24*x^4 + 1/24*y^4
-    f5(x,y) = sin(x) + cos(y)
-    f5ₓₓ(x,y) = -f5(x,y)
+        #TODO: Error when reading second order stencil!
+        # @testset "2nd order" begin
+        #     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+        #     Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
+        #     @test Dyy*binomials[1] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-12
+        #     @test Dyy*binomials[2] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-12
+        # end
 
-    v0 = evalOn(g,f0)
-    v1 = evalOn(g,f1)
-    v2 = evalOn(g,f2)
-    v3 = evalOn(g,f3)
-    v4 = evalOn(g,f4)
-    v5 = evalOn(g,f5)
-    v5ₓₓ = evalOn(g,f5ₓₓ)
-
-    @test L isa TensorMapping{T,2,2} where T
-    @test L' isa TensorMapping{T,2,2} where T
-
-    # 4th order interior stencil, 2nd order boundary stencil,
-    # implies that L*v should be exact for v - monomial up to order 3.
-    # Exact differentiation is measured point-wise. For other grid functions
-    # the error is measured in the H-norm.
-    @test norm(L*v0) ≈ 0 atol=1e-9
-    @test norm(L*v1) ≈ 0 atol=1e-9
-    @test L*v2 ≈ v0 # Seems to be more accurate
-    @test L*v3 ≈ v1 atol=1e-9
-
-    h = spacing(g)
-    l2(v) = sqrt(prod(h)*sum(v.^2))
-    @test L*v4 ≈ v2   atol=5e-4 norm=l2
-    @test L*v5 ≈ v5ₓₓ atol=5e-4 norm=l2
+        # 4th order interior stencil, 2nd order boundary stencil,
+        # implies that L*v should be exact for binomials up to order 3.
+        # Exact differentiation is measured point-wise. For other grid functions
+        # the error is measured in the l2-norm.
+        @testset "4th order" begin
+            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            L = Laplace(g_3D,op.innerStencil,op.closureStencils)
+            # TODO: high tolerances for checking the "exact" differentiation
+            # due to accumulation of round-off errors/cancellation errors?
+            @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
+            @test L*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
+            @test L*polynomials[3] ≈ polynomials[1] atol = 5e-9
+            @test L*polynomials[4] ≈ polynomials[2] atol = 5e-9
+            @test L*evalOn(g_3D, (x,y,z) -> sin(x) + cos(y) + exp(z)) ≈ evalOn(g_3D,(x,y,z) -> -sin(x)-cos(y) + exp(z)) rtol = 5e-4 norm = l2
+        end
+    end
 end
 
 @testset "DiagonalInnerProduct" begin
