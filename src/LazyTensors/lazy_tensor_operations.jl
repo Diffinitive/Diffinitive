@@ -331,7 +331,7 @@ E.g
 split_tuple((1,2,3,4),Val(3)) -> (1,2,3), (4,)
 ```
 """
-function split_tuple(t::NTuple{N},::Val{M}) where {N,M}
+function split_tuple(t::NTuple{N,Any},::Val{M}) where {N,M}
     return slice_tuple(t,Val(1), Val(M)), slice_tuple(t,Val(M+1), Val(N))
 end
 
@@ -341,7 +341,7 @@ end
 Same as `split_tuple(t::NTuple{N},::Val{M})` but splits the tuple in three parts. With the first
 two parts having lenght `M` and `K`.
 """
-function split_tuple(t::NTuple{N},::Val{M},::Val{K}) where {N,M,K}
+function split_tuple(t::NTuple{N,Any},::Val{M},::Val{K}) where {N,M,K}
     p1, tail = split_tuple(t, Val(M))
     p2, p3 = split_tuple(tail, Val(K))
     return p1,p2,p3
