@@ -258,22 +258,24 @@ end
     g_1D = EquidistantGrid(121, 0.0, Lx)
     g_2D = EquidistantGrid((121,123), (0.0, 0.0), (Lx, Ly))
 
+    # TODO: These areant really constructors. Better name?
     @testset "Constructors" begin
         @testset "1D" begin
             Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
-            Dₓₓ == SecondDerivative(g_1D,op.innerStencil,op.closureStencils,1)
-            Dₓₓ isa VolumeOperator
+            @test Dₓₓ == SecondDerivative(g_1D,op.innerStencil,op.closureStencils,1)
+            @test Dₓₓ isa VolumeOperator
         end
         @testset "2D" begin
             Dₓₓ = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,1)
-            Dₓₓ isa TensorMappingComposition
-            Dₓₓ isa TensorMapping{2,2}
+            D2 = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+            I = IdentityMapping{Float64}(size(g_2D)[2])
+            @test Dₓₓ == D2⊗I
+            @test Dₓₓ isa TensorMapping{T,2,2} where T
         end
     end
 
     @testset "Accuracy" begin
         @testset "1D" begin
-            v0 = evalOn(g_1D,x->0.)
             monomials = ()
             maxOrder = 4;
             for i = 0:maxOrder-1
@@ -286,8 +288,8 @@ end
             # @testset "2nd order" begin
             #     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
             #     Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
-            #     @test Dₓₓ*monomials[1] ≈ v0 atol = 5e-13
-            #     @test Dₓₓ*monomials[2] ≈ v0 atol = 5e-13
+            #     @test Dₓₓ*monomials[1] ≈ zeros(Float64,size(g_1D)...) atol = 5e-13
+            #     @test Dₓₓ*monomials[2] ≈ zeros(Float64,size(g_1D)...) atol = 5e-13
             # end
 
             # 4th order interior stencil, 2nd order boundary stencil,
@@ -299,8 +301,8 @@ end
                 Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
                 # TODO: high tolerances for checking the "exact" differentiation
                 # due to accumulation of round-off errors/cancellation errors?
-                @test Dₓₓ*monomials[1] ≈ v0 atol = 5e-10
-                @test Dₓₓ*monomials[2] ≈ v0 atol = 5e-10
+                @test Dₓₓ*monomials[1] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
+                @test Dₓₓ*monomials[2] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
                 @test Dₓₓ*monomials[3] ≈ monomials[1] atol = 5e-10
                 @test Dₓₓ*monomials[4] ≈ monomials[2] atol = 5e-10
                 @test Dₓₓ*evalOn(g_1D,x -> sin(x)) ≈ evalOn(g_1D,x -> -sin(x)) rtol = 5e-4 norm = l2
@@ -333,8 +335,8 @@ end
                 Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
                 # TODO: high tolerances for checking the "exact" differentiation
                 # due to accumulation of round-off errors/cancellation errors?
-                @test Dyy*binomials[1] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-9
-                @test Dyy*binomials[2] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-9
+                @test Dyy*binomials[1] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
+                @test Dyy*binomials[2] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
                 @test Dyy*binomials[3] ≈ evalOn(g_2D,(x,y)->1.) atol = 5e-9
                 @test Dyy*binomials[4] ≈ evalOn(g_2D,(x,y)->y) atol = 5e-9
                 @test Dyy*evalOn(g_2D, (x,y) -> sin(x)+cos(y)) ≈ evalOn(g_2D,(x,y) -> -cos(y)) rtol = 5e-4 norm = l2
