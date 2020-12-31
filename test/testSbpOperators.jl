@@ -521,7 +521,6 @@ end
         end
     end
 
-
     @testset "Application" begin
         @testset "1D" begin
             v = evalOn(g_1D,x->1+x^2)
@@ -542,48 +541,48 @@ end
             @test op_n*v ≈ 2*v[:,end] + v[:,end-1] + 3*v[:,end-2] rtol = 1e-14
 
 
-           g_x = rand(size(g_2D)[1])
-           g_y = rand(size(g_2D)[2])
+            g_x = rand(size(g_2D)[1])
+            g_y = rand(size(g_2D)[2])
 
-           G_w = zeros(Float64, size(g_2D)...)
-           G_w[1,:] = 2*g_y
-           G_w[2,:] = g_y
-           G_w[3,:] = 3*g_y
+            G_w = zeros(Float64, size(g_2D)...)
+            G_w[1,:] = 2*g_y
+            G_w[2,:] = g_y
+            G_w[3,:] = 3*g_y
 
-           G_e = zeros(Float64, size(g_2D)...)
-           G_e[end,:] = 2*g_y
-           G_e[end-1,:] = g_y
-           G_e[end-2,:] = 3*g_y
+            G_e = zeros(Float64, size(g_2D)...)
+            G_e[end,:] = 2*g_y
+            G_e[end-1,:] = g_y
+            G_e[end-2,:] = 3*g_y
 
-           G_s = zeros(Float64, size(g_2D)...)
-           G_s[:,1] = 2*g_x
-           G_s[:,2] = g_x
-           G_s[:,3] = 3*g_x
+            G_s = zeros(Float64, size(g_2D)...)
+            G_s[:,1] = 2*g_x
+            G_s[:,2] = g_x
+            G_s[:,3] = 3*g_x
 
-           G_n = zeros(Float64, size(g_2D)...)
-           G_n[:,end] = 2*g_x
-           G_n[:,end-1] = g_x
-           G_n[:,end-2] = 3*g_x
+            G_n = zeros(Float64, size(g_2D)...)
+            G_n[:,end] = 2*g_x
+            G_n[:,end-1] = g_x
+            G_n[:,end-2] = 3*g_x
 
-           @test op_w'*g_y == G_w
-           @test op_e'*g_y == G_e
-           @test op_s'*g_x == G_s
-           @test op_n'*g_x == G_n
+            @test op_w'*g_y == G_w
+            @test op_e'*g_y == G_e
+            @test op_s'*g_x == G_s
+            @test op_n'*g_x == G_n
        end
 
        @testset "Regions" begin
-           u = fill(3.124)
-           @test (op_l'*u)[Index(1,Lower)] == 2*u[]
-           @test (op_l'*u)[Index(2,Lower)] == u[]
-           @test (op_l'*u)[Index(6,Interior)] == 0
-           @test (op_l'*u)[Index(10,Upper)] == 0
-           @test (op_l'*u)[Index(11,Upper)] == 0
+            u = fill(3.124)
+            @test (op_l'*u)[Index(1,Lower)] == 2*u[]
+            @test (op_l'*u)[Index(2,Lower)] == u[]
+            @test (op_l'*u)[Index(6,Interior)] == 0
+            @test (op_l'*u)[Index(10,Upper)] == 0
+            @test (op_l'*u)[Index(11,Upper)] == 0
 
-           @test (op_r'*u)[Index(1,Lower)] == 0
-           @test (op_r'*u)[Index(2,Lower)] == 0
-           @test (op_r'*u)[Index(6,Interior)] == 0
-           @test (op_r'*u)[Index(10,Upper)] == u[]
-           @test (op_r'*u)[Index(11,Upper)] == 2*u[]
+            @test (op_r'*u)[Index(1,Lower)] == 0
+            @test (op_r'*u)[Index(2,Lower)] == 0
+            @test (op_r'*u)[Index(6,Interior)] == 0
+            @test (op_r'*u)[Index(10,Upper)] == u[]
+            @test (op_r'*u)[Index(11,Upper)] == 2*u[]
        end
     end
 
@@ -616,6 +615,7 @@ end
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
 
+    # TODO: These areant really constructors. Better name?
     @testset "Constructors" begin
         @testset "1D" begin
             e_l = BoundaryRestriction(g_1D,op.eClosure,Lower())
@@ -668,25 +668,25 @@ end
             @test e_n*v == v[:,end]
 
 
-           g_x = rand(11)
-           g_y = rand(15)
+            g_x = rand(11)
+            g_y = rand(15)
 
-           G_w = zeros(Float64, (11,15))
-           G_w[1,:] = g_y
+            G_w = zeros(Float64, (11,15))
+            G_w[1,:] = g_y
 
-           G_e = zeros(Float64, (11,15))
-           G_e[end,:] = g_y
+            G_e = zeros(Float64, (11,15))
+            G_e[end,:] = g_y
 
-           G_s = zeros(Float64, (11,15))
-           G_s[:,1] = g_x
+            G_s = zeros(Float64, (11,15))
+            G_s[:,1] = g_x
 
-           G_n = zeros(Float64, (11,15))
-           G_n[:,end] = g_x
+            G_n = zeros(Float64, (11,15))
+            G_n[:,end] = g_x
 
-           @test e_w'*g_y == G_w
-           @test e_e'*g_y == G_e
-           @test e_s'*g_x == G_s
-           @test e_n'*g_x == G_n
+            @test e_w'*g_y == G_w
+            @test e_e'*g_y == G_e
+            @test e_s'*g_x == G_s
+            @test e_n'*g_x == G_n
        end
     end
 end
