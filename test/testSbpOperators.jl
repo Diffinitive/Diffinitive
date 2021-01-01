@@ -405,67 +405,152 @@ end
     end
 end
 
-@testset "DiagonalInnerProduct" begin
+@testset "DiagonalQuadrature" begin
     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    L = 2.3
-    g = EquidistantGrid(77, 0.0, L)
-    H = DiagonalInnerProduct(g,op.quadratureClosure)
-    v = ones(Float64, size(g))
+    Lx = π/2.
+    Ly = Float64(π)
+    g_1D = EquidistantGrid(77, 0.0, Lx)
+    g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    integral(H,v) = sum(H*v)
+    @testset "Constructors" begin
+        # 1D
+        H_x = DiagonalQuadrature(spacing(g_1D)[1],op.quadratureClosure,size(g_1D));
+        @test H_x == DiagonalQuadrature(g_1D,op.quadratureClosure)
+        @test H_x == diagonal_quadrature(g_1D,op.quadratureClosure)
+        @test H_x isa TensorMapping{T,1,1} where T
+        @test H_x' isa TensorMapping{T,1,1} where T
+        # 2D
+        H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
+        @test H_xy isa TensorMappingComposition
+        @test H_xy isa TensorMapping{T,2,2} where T
+        @test H_xy' isa TensorMapping{T,2,2} where T
+    end
 
-    @test H isa TensorMapping{T,1,1} where T
-    @test H' isa TensorMapping{T,1,1} where T
-    @test sum(H*v) ≈ L
-    @test H*v == H'*v
+    @testset "Sizes" begin
+        # 1D
+        H_x = diagonal_quadrature(g_1D,op.quadratureClosure)
+        @test domain_size(H_x) == size(g_1D)
+        @test range_size(H_x) == size(g_1D)
+        # 2D
+        H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
+        @test domain_size(H_xy) == size(g_2D)
+        @test range_size(H_xy) == size(g_2D)
+    end
+
+    @testset "Application" begin
+        # 1D
+        H_x = diagonal_quadrature(g_1D,op.quadratureClosure)
+        a = 3.2
+        v_1D = a*ones(Float64, size(g_1D))
+        u_1D = evalOn(g_1D,x->sin(x))
+        @test integral(H_x,v_1D) ≈ a*Lx rtol = 1e-13
+        @test integral(H_x,u_1D) ≈ 1. rtol = 1e-8
+        @test H_x*v_1D == H_x'*v_1D
+        # 2D
+        H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
+        b = 2.1
+        v_2D = b*ones(Float64, size(g_2D))
+        u_2D = evalOn(g_2D,(x,y)->sin(x)+cos(y))
+        @test integral(H_xy,v_2D) ≈ b*Lx*Ly rtol = 1e-13
+        @test integral(H_xy,u_2D) ≈ π rtol = 1e-8
+        @test H_xy*v_2D ≈ H_xy'*v_2D rtol = 1e-16 #Failed for exact equality. Must differ in operation order for some reason?
+    end
+
+    @testset "Accuracy" begin
+        v = ()
+        for i = 0:4
+            f_i(x) = 1/factorial(i)*x^i
+            v = (v...,evalOn(g_1D,f_i))
+        end
+        # TODO: Bug in readOperator for 2nd order
+        # # 2nd order
+        # op2 = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+        # H2 = diagonal_quadrature(g_1D,op2.quadratureClosure)
+        # for i = 1:3
+        #     @test integral(H2,v[i]) ≈ v[i+1] rtol = 1e-14
+        # end
+
+        # 4th order
+        op4 = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        H4 = diagonal_quadrature(g_1D,op4.quadratureClosure)
+        for i = 1:4
+            @test integral(H4,v[i]) ≈ v[i+1][end] -  v[i+1][1] rtol = 1e-14
+        end
+    end
+
+    @testset "Inferred" begin
+        H_x = diagonal_quadrature(g_1D,op.quadratureClosure)
+        H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
+        v_1D = ones(Float64, size(g_1D))
+        v_2D = ones(Float64, size(g_2D))
+        @inferred H_x*v_1D
+        @inferred H_x'*v_1D
+        @inferred H_xy*v_2D
+        @inferred H_xy'*v_2D
+    end
 end
 
-@testset "Quadrature" begin
+@testset "InverseDiagonalQuadrature" begin
     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    Lx = 2.3
-    Ly = 5.2
-    g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    Lx = π/2.
+    Ly = Float64(π)
+    g_1D = EquidistantGrid(77, 0.0, Lx)
+    g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    @testset "Constructors" begin
+        # 1D
+        Hi_x = InverseDiagonalQuadrature(inverse_spacing(g_1D)[1], 1. ./ op.quadratureClosure, size(g_1D));
+        @test Hi_x == InverseDiagonalQuadrature(g_1D,op.quadratureClosure)
+        @test Hi_x == inverse_diagonal_quadrature(g_1D,op.quadratureClosure)
+        @test Hi_x isa TensorMapping{T,1,1} where T
+        @test Hi_x' isa TensorMapping{T,1,1} where T
 
-    Q = Quadrature(g, op.quadratureClosure)
+        # 2D
+        Hi_xy = inverse_diagonal_quadrature(g_2D,op.quadratureClosure)
+        @test Hi_xy isa TensorMappingComposition
+        @test Hi_xy isa TensorMapping{T,2,2} where T
+        @test Hi_xy' isa TensorMapping{T,2,2} where T
+    end
 
-    @test Q isa TensorMapping{T,2,2} where T
-    @test Q' isa TensorMapping{T,2,2} where T
+    @testset "Sizes" begin
+        # 1D
+        Hi_x = inverse_diagonal_quadrature(g_1D,op.quadratureClosure)
+        @test domain_size(Hi_x) == size(g_1D)
+        @test range_size(Hi_x) == size(g_1D)
+        # 2D
+        Hi_xy = inverse_diagonal_quadrature(g_2D,op.quadratureClosure)
+        @test domain_size(Hi_xy) == size(g_2D)
+        @test range_size(Hi_xy) == size(g_2D)
+    end
 
-    v = ones(Float64, size(g))
-    @test sum(Q*v) ≈ Lx*Ly
+    @testset "Application" begin
+        # 1D
+        H_x = diagonal_quadrature(g_1D,op.quadratureClosure)
+        Hi_x = inverse_diagonal_quadrature(g_1D,op.quadratureClosure)
+        v_1D = evalOn(g_1D,x->sin(x))
+        u_1D = evalOn(g_1D,x->x^3-x^2+1)
+        @test Hi_x*H_x*v_1D ≈ v_1D rtol = 1e-15
+        @test Hi_x*H_x*u_1D ≈ u_1D rtol = 1e-15
+        @test Hi_x*v_1D == Hi_x'*v_1D
+        # 2D
+        H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
+        Hi_xy = inverse_diagonal_quadrature(g_2D,op.quadratureClosure)
+        v_2D = evalOn(g_2D,(x,y)->sin(x)+cos(y))
+        u_2D = evalOn(g_2D,(x,y)->x*y + x^5 - sqrt(y))
+        @test Hi_xy*H_xy*v_2D ≈ v_2D rtol = 1e-15
+        @test Hi_xy*H_xy*u_2D ≈ u_2D rtol = 1e-15
+        @test Hi_xy*v_2D ≈ Hi_xy'*v_2D rtol = 1e-16 #Failed for exact equality. Must differ in operation order for some reason?
+    end
 
-    v = 2*ones(Float64, size(g))
-    @test_broken sum(Q*v) ≈ 2*Lx*Ly
-
-    @test Q*v == Q'*v
-end
-
-@testset "InverseDiagonalInnerProduct" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    L = 2.3
-    g = EquidistantGrid(77, 0.0, L)
-    H = DiagonalInnerProduct(g, op.quadratureClosure)
-    Hi = InverseDiagonalInnerProduct(g,op.quadratureClosure)
-    v = evalOn(g, x->sin(x))
-
-    @test Hi isa TensorMapping{T,1,1} where T
-    @test Hi' isa TensorMapping{T,1,1} where T
-    @test Hi*H*v ≈ v
-    @test Hi*v == Hi'*v
-end
-
-@testset "InverseQuadrature" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    Lx = 7.3
-    Ly = 8.2
-    g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
-
-    Q = Quadrature(g, op.quadratureClosure)
-    Qinv = InverseQuadrature(g, op.quadratureClosure)
-    v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
-
-    @test Qinv isa TensorMapping{T,2,2} where T
-    @test Qinv' isa TensorMapping{T,2,2} where T
-    @test_broken Qinv*(Q*v) ≈ v
-    @test Qinv*v == Qinv'*v
+    @testset "Inferred" begin
+        Hi_x = inverse_diagonal_quadrature(g_1D,op.quadratureClosure)
+        Hi_xy = inverse_diagonal_quadrature(g_2D,op.quadratureClosure)
+        v_1D = ones(Float64, size(g_1D))
+        v_2D = ones(Float64, size(g_2D))
+        @inferred Hi_x*v_1D
+        @inferred Hi_x'*v_1D
+        @inferred Hi_xy*v_2D
+        @inferred Hi_xy'*v_2D
+    end
 end
 
 @testset "BoundaryOperator" begin
