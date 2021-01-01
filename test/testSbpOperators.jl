@@ -4,11 +4,112 @@ using Sbplib.Grids
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using LinearAlgebra
+using TOML
+
+import Sbplib.SbpOperators.Stencil
 
 @testset "SbpOperators" begin
 
+@testset "Stencil" begin
+    s = Stencil((-2,2), (1.,2.,2.,3.,4.))
+    @test s isa Stencil{Float64, 5}
+
+    @test eltype(s) == Float64
+    @test SbpOperators.scale(s, 2) == Stencil((-2,2), (2.,4.,4.,6.,8.))
+
+    @test Stencil((1,2,3,4), center=1) == Stencil((0, 3),(1,2,3,4))
+    @test Stencil((1,2,3,4), center=2) == Stencil((-1, 2),(1,2,3,4))
+    @test Stencil((1,2,3,4), center=4) == Stencil((-3, 0),(1,2,3,4))
+end
+
+@testset "parse_rational" begin
+    @test SbpOperators.parse_rational("1") isa Rational
+    @test SbpOperators.parse_rational("1") == 1//1
+    @test SbpOperators.parse_rational("1/2") isa Rational
+    @test SbpOperators.parse_rational("1/2") == 1//2
+    @test SbpOperators.parse_rational("37/13") isa Rational
+    @test SbpOperators.parse_rational("37/13") == 37//13
+end
+
+@testset "readoperator" begin
+    toml_str = """
+        [meta]
+        type = "equidistant"
+
+        [order2]
+        H.inner = ["1"]
+
+        D1.inner_stencil = ["-1/2", "0", "1/2"]
+        D1.closure_stencils = [
+            ["-1", "1"],
+        ]
+
+        d1.closure = ["-3/2", "2", "-1/2"]
+
+        [order4]
+        H.closure = ["17/48", "59/48", "43/48", "49/48"]
+
+        D2.inner_stencil = ["-1/12","4/3","-5/2","4/3","-1/12"]
+        D2.closure_stencils = [
+            [     "2",    "-5",      "4",       "-1",     "0",     "0"],
+            [     "1",    "-2",      "1",        "0",     "0",     "0"],
+            [ "-4/43", "59/43", "-110/43",   "59/43", "-4/43",     "0"],
+            [ "-1/49",     "0",   "59/49", "-118/49", "64/49", "-4/49"],
+        ]
+    """
+
+    parsed_toml = TOML.parse(toml_str)
+    @testset "get_stencil" begin
+        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil") == Stencil((-1/2, 0., 1/2), center=2)
+        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil", center=1) == Stencil((-1/2, 0., 1/2); center=1)
+        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil", center=3) == Stencil((-1/2, 0., 1/2); center=3)
+
+        @test get_stencil(parsed_toml, "order2", "H", "inner") == Stencil((1.,), center=1)
+
+        @test_throws AssertionError get_stencil(parsed_toml, "meta", "type")
+        @test_throws AssertionError get_stencil(parsed_toml, "order2", "D1", "closure_stencils")
+    end
+
+    @testset "get_stencils" begin
+        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=(1,)) == (Stencil((-1., 1.), center=1),)
+        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=(2,)) == (Stencil((-1., 1.), center=2),)
+        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=[2]) == (Stencil((-1., 1.), center=2),)
+
+        @test get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=[1,1,1,1]) == (
+            Stencil((    2.,    -5.,      4.,     -1.,    0.,    0.), center=1),
+            Stencil((    1.,    -2.,      1.,      0.,    0.,    0.), center=1),
+            Stencil(( -4/43,  59/43, -110/43,   59/43, -4/43,    0.), center=1),
+            Stencil(( -1/49,     0.,   59/49, -118/49, 64/49, -4/49), center=1),
+        )
+
+        @test get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=(4,2,3,1)) == (
+            Stencil((    2.,    -5.,      4.,     -1.,    0.,    0.), center=4),
+            Stencil((    1.,    -2.,      1.,      0.,    0.,    0.), center=2),
+            Stencil(( -4/43,  59/43, -110/43,   59/43, -4/43,    0.), center=3),
+            Stencil(( -1/49,     0.,   59/49, -118/49, 64/49, -4/49), center=1),
+        )
+
+        @test get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=1:4) == (
+            Stencil((    2.,    -5.,      4.,     -1.,    0.,    0.), center=1),
+            Stencil((    1.,    -2.,      1.,      0.,    0.,    0.), center=2),
+            Stencil(( -4/43,  59/43, -110/43,   59/43, -4/43,    0.), center=3),
+            Stencil(( -1/49,     0.,   59/49, -118/49, 64/49, -4/49), center=4),
+        )
+
+        @test_throws AssertionError get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=(1,2,3))
+        @test_throws AssertionError get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=(1,2,3,5,4))
+        @test_throws AssertionError get_stencils(parsed_toml, "order4", "D2", "inner_stencil",centers=(1,2))
+    end
+
+    @testset "get_tuple" begin
+        @test get_tuple(parsed_toml, "order2", "d1", "closure") == (-3/2, 2, -1/2)
+
+        @test_throws AssertionError get_tuple(parsed_toml, "meta", "type")
+    end
+end
+
 # @testset "apply_quadrature" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
 #     h = 0.5
 #
 #     @test apply_quadrature(op, h, 1.0, 10, 100) == h
@@ -29,7 +130,7 @@ using LinearAlgebra
 # end
 
 @testset "SecondDerivative" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     L = 3.5
     g = EquidistantGrid(101, 0.0, L)
     Dₓₓ = SecondDerivative(g,op.innerStencil,op.closureStencils)
@@ -69,7 +170,7 @@ end
 
 
 @testset "Laplace2D" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     Lx = 1.5
     Ly = 3.2
     g = EquidistantGrid((102,131), (0.0, 0.0), (Lx,Ly))
@@ -111,7 +212,7 @@ end
 end
 
 @testset "DiagonalQuadrature" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     Lx = π/2.
     Ly = Float64(π)
     g_1D = EquidistantGrid(77, 0.0, Lx)
@@ -169,14 +270,14 @@ end
         end
         # TODO: Bug in readOperator for 2nd order
         # # 2nd order
-        # op2 = readOperator(sbp_operators_path()*"d2_2nd.txt",sbp_operators_path()*"h_2nd.txt")
+        # op2 = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
         # H2 = diagonal_quadrature(g_1D,op2.quadratureClosure)
         # for i = 1:3
         #     @test integral(H2,v[i]) ≈ v[i+1] rtol = 1e-14
         # end
 
         # 4th order
-        op4 = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+        op4 = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         H4 = diagonal_quadrature(g_1D,op4.quadratureClosure)
         for i = 1:4
             @test integral(H4,v[i]) ≈ v[i+1][end] -  v[i+1][1] rtol = 1e-14
@@ -196,7 +297,7 @@ end
 end
 
 @testset "InverseDiagonalQuadrature" begin
-    op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     Lx = π/2.
     Ly = Float64(π)
     g_1D = EquidistantGrid(77, 0.0, Lx)
@@ -257,70 +358,147 @@ end
         @inferred Hi_xy'*v_2D
     end
 end
-#
-# @testset "BoundaryValue" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
-#     g = EquidistantGrid((4,5), (0.0, 0.0), (1.0,1.0))
-#
-#     e_w = BoundaryValue(op, g, CartesianBoundary{1,Lower}())
-#     e_e = BoundaryValue(op, g, CartesianBoundary{1,Upper}())
-#     e_s = BoundaryValue(op, g, CartesianBoundary{2,Lower}())
-#     e_n = BoundaryValue(op, g, CartesianBoundary{2,Upper}())
-#
-#     v = zeros(Float64, 4, 5)
-#     v[:,5] = [1, 2, 3,4]
-#     v[:,4] = [1, 2, 3,4]
-#     v[:,3] = [4, 5, 6, 7]
-#     v[:,2] = [7, 8, 9, 10]
-#     v[:,1] = [10, 11, 12, 13]
-#
-#     @test e_w  isa TensorMapping{T,2,1} where T
-#     @test e_w' isa TensorMapping{T,1,2} where T
-#
-#     @test domain_size(e_w, (3,2)) == (2,)
-#     @test domain_size(e_e, (3,2)) == (2,)
-#     @test domain_size(e_s, (3,2)) == (3,)
-#     @test domain_size(e_n, (3,2)) == (3,)
-#
-#     @test size(e_w'*v) == (5,)
-#     @test size(e_e'*v) == (5,)
-#     @test size(e_s'*v) == (4,)
-#     @test size(e_n'*v) == (4,)
-#
-#     @test e_w'*v == [10,7,4,1.0,1]
-#     @test e_e'*v == [13,10,7,4,4.0]
-#     @test e_s'*v == [10,11,12,13.0]
-#     @test e_n'*v == [1,2,3,4.0]
-#
-#     g_x = [1,2,3,4.0]
-#     g_y = [5,4,3,2,1.0]
-#
-#     G_w = zeros(Float64, (4,5))
-#     G_w[1,:] = g_y
-#
-#     G_e = zeros(Float64, (4,5))
-#     G_e[4,:] = g_y
-#
-#     G_s = zeros(Float64, (4,5))
-#     G_s[:,1] = g_x
-#
-#     G_n = zeros(Float64, (4,5))
-#     G_n[:,5] = g_x
-#
-#     @test size(e_w*g_y) == (UnknownDim,5)
-#     @test size(e_e*g_y) == (UnknownDim,5)
-#     @test size(e_s*g_x) == (4,UnknownDim)
-#     @test size(e_n*g_x) == (4,UnknownDim)
-#
-#     # These tests should be moved to where they are possible (i.e we know what the grid should be)
-#     @test_broken e_w*g_y == G_w
-#     @test_broken e_e*g_y == G_e
-#     @test_broken e_s*g_x == G_s
-#     @test_broken e_n*g_x == G_n
-# end
+
+@testset "BoundaryRestrictrion" begin
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+    g_1D = EquidistantGrid(11, 0.0, 1.0)
+    g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
+
+    @testset "Constructors" begin
+        @testset "1D" begin
+            e_l = BoundaryRestriction{Lower}(op.eClosure,size(g_1D)[1])
+            @test e_l == BoundaryRestriction(g_1D,op.eClosure,Lower())
+            @test e_l == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Lower}())
+            @test e_l isa TensorMapping{T,0,1} where T
+
+            e_r = BoundaryRestriction{Upper}(op.eClosure,size(g_1D)[1])
+            @test e_r == BoundaryRestriction(g_1D,op.eClosure,Upper())
+            @test e_r == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Upper}())
+            @test e_r isa TensorMapping{T,0,1} where T
+        end
+
+        @testset "2D" begin
+            e_w = boundary_restriction(g_2D,op.eClosure,CartesianBoundary{1,Upper}())
+            @test e_w isa InflatedTensorMapping
+            @test e_w isa TensorMapping{T,1,2} where T
+        end
+    end
+
+    e_l = boundary_restriction(g_1D, op.eClosure, CartesianBoundary{1,Lower}())
+    e_r = boundary_restriction(g_1D, op.eClosure, CartesianBoundary{1,Upper}())
+
+    e_w = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{1,Lower}())
+    e_e = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{1,Upper}())
+    e_s = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{2,Lower}())
+    e_n = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{2,Upper}())
+
+    @testset "Sizes" begin
+        @testset "1D" begin
+            @test domain_size(e_l) == (11,)
+            @test domain_size(e_r) == (11,)
+
+            @test range_size(e_l) == ()
+            @test range_size(e_r) == ()
+        end
+
+        @testset "2D" begin
+            @test domain_size(e_w) == (11,15)
+            @test domain_size(e_e) == (11,15)
+            @test domain_size(e_s) == (11,15)
+            @test domain_size(e_n) == (11,15)
+
+            @test range_size(e_w) == (15,)
+            @test range_size(e_e) == (15,)
+            @test range_size(e_s) == (11,)
+            @test range_size(e_n) == (11,)
+        end
+    end
+
+
+    @testset "Application" begin
+        @testset "1D" begin
+            v = evalOn(g_1D,x->1+x^2)
+            u = fill(3.124)
+            @test (e_l*v)[] == v[1]
+            @test (e_r*v)[] == v[end]
+            @test (e_r*v)[1] == v[end]
+            @test e_l'*u == [u[]; zeros(10)]
+            @test e_r'*u == [zeros(10); u[]]
+        end
+
+        @testset "2D" begin
+            v = rand(11, 15)
+            u = fill(3.124)
+
+            @test e_w*v == v[1,:]
+            @test e_e*v == v[end,:]
+            @test e_s*v == v[:,1]
+            @test e_n*v == v[:,end]
+
+
+           g_x = rand(11)
+           g_y = rand(15)
+
+           G_w = zeros(Float64, (11,15))
+           G_w[1,:] = g_y
+
+           G_e = zeros(Float64, (11,15))
+           G_e[end,:] = g_y
+
+           G_s = zeros(Float64, (11,15))
+           G_s[:,1] = g_x
+
+           G_n = zeros(Float64, (11,15))
+           G_n[:,end] = g_x
+
+           @test e_w'*g_y == G_w
+           @test e_e'*g_y == G_e
+           @test e_s'*g_x == G_s
+           @test e_n'*g_x == G_n
+       end
+
+       @testset "Regions" begin
+           u = fill(3.124)
+           @test (e_l'*u)[Index(1,Lower)] == 3.124
+           @test (e_l'*u)[Index(2,Lower)] == 0
+           @test (e_l'*u)[Index(6,Interior)] == 0
+           @test (e_l'*u)[Index(10,Upper)] == 0
+           @test (e_l'*u)[Index(11,Upper)] == 0
+
+           @test (e_r'*u)[Index(1,Lower)] == 0
+           @test (e_r'*u)[Index(2,Lower)] == 0
+           @test (e_r'*u)[Index(6,Interior)] == 0
+           @test (e_r'*u)[Index(10,Upper)] == 0
+           @test (e_r'*u)[Index(11,Upper)] == 3.124
+       end
+    end
+
+    @testset "Inferred" begin
+        v = ones(Float64, 11)
+        u = fill(1.)
+
+        @inferred apply(e_l, v)
+        @inferred apply(e_r, v)
+
+        @inferred apply_transpose(e_l, u, 4)
+        @inferred apply_transpose(e_l, u, Index(1,Lower))
+        @inferred apply_transpose(e_l, u, Index(2,Lower))
+        @inferred apply_transpose(e_l, u, Index(6,Interior))
+        @inferred apply_transpose(e_l, u, Index(10,Upper))
+        @inferred apply_transpose(e_l, u, Index(11,Upper))
+
+        @inferred apply_transpose(e_r, u, 4)
+        @inferred apply_transpose(e_r, u, Index(1,Lower))
+        @inferred apply_transpose(e_r, u, Index(2,Lower))
+        @inferred apply_transpose(e_r, u, Index(6,Interior))
+        @inferred apply_transpose(e_r, u, Index(10,Upper))
+        @inferred apply_transpose(e_r, u, Index(11,Upper))
+    end
+
+end
 #
 # @testset "NormalDerivative" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
 #     g = EquidistantGrid((5,6), (0.0, 0.0), (4.0,5.0))
 #
 #     d_w = NormalDerivative(op, g, CartesianBoundary{1,Lower}())
@@ -397,7 +575,7 @@ end
 # end
 #
 # @testset "BoundaryQuadrature" begin
-#     op = readOperator(sbp_operators_path()*"d2_4th.txt",sbp_operators_path()*"h_4th.txt")
+#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
 #     g = EquidistantGrid((10,11), (0.0, 0.0), (1.0,1.0))
 #
 #     H_w = BoundaryQuadrature(op, g, CartesianBoundary{1,Lower}())

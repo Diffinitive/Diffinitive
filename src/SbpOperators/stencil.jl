@@ -8,6 +8,29 @@ struct Stencil{T<:Real,N}
     end
 end
 
+"""
+    Stencil(weights::NTuple; center::Int)
+
+Create a stencil with the given weights with element `center` as the center of the stencil.
+"""
+function Stencil(weights::NTuple; center::Int)
+    N = length(weights)
+    range = (1, N) .- center
+
+    return Stencil(range, weights)
+end
+
+"""
+    scale(s::Stencil, a)
+
+Scale the weights of the stencil `s` with `a` and return a new stencil.
+"""
+function scale(s::Stencil, a)
+    return Stencil(s.range, a.*s.weights)
+end
+
+Base.eltype(::Stencil{T}) where T = T
+
 function flip(s::Stencil)
     range = (-s.range[2], -s.range[1])
     return Stencil(range, reverse(s.weights))
@@ -16,7 +39,7 @@ end
 # Provides index into the Stencil based on offset for the root element
 @inline function Base.getindex(s::Stencil, i::Int)
     @boundscheck if i < s.range[1] || s.range[2] < i
-        return eltype(s.weights)(0)
+        return zero(eltype(s))
     end
     return s.weights[1 + i - s.range[1]]
 end

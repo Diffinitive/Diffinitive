@@ -9,11 +9,18 @@
  - [ ] Add 1D operators (D1, D2, e, d ... ) as TensorOperators
  - [ ] Create a struct that bundles the necessary Tensor operators for solving the wave equation.
  - [ ] Add a quick and simple way of running all tests for all subpackages.
- - [ ] Replace getindex hack for flatteing tuples with flatten_tuple.
+ - [ ] Replace getindex hack for flatteing tuples with flatten_tuple. (eg. `getindex.(range_size.(L.D2),1)`)
  - [ ] Use `@inferred` in a lot of tests.
  - [ ] Make sure we are setting tolerances in tests in a consistent way
  - [ ] Add check for correct domain sizes to lazy tensor operations using SizeMismatch
- - [ ] Write down some coding guideline or checklist for code convetions. For example i,j,... för indecies and I for multi-index
+ - [ ] Write down some coding guideline or checklist for code convetions. For example i,j,... for indecies and I for multi-index
+ - [ ] Add boundschecking in TensorMappingApplication
+ - [ ] Start renaming things in LazyTensors
+ - [ ] Clean up RegionIndices
+    1. [ ] Write tests for how things should work
+    2. [ ] Update RegionIndices accordingly
+    3. [ ] Fix the rest of the library
+ - [ ] Add posibility to create tensor mapping application with `()`, e.g `D1(v) <=> D1*v`?
 
 ## Repo
  - [ ] Add Vidar to the authors list

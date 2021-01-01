@@ -12,5 +12,6 @@ include("laplace/secondderivative.jl")
 include("laplace/laplace.jl")
 include("quadrature/diagonal_quadrature.jl")
 include("quadrature/inverse_diagonal_quadrature.jl")
+include("boundaryops/boundary_restriction.jl")
 
 end # module

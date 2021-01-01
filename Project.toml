@@ -4,6 +4,7 @@ authors = ["Jonatan Werpers <jonatan@werpers.com> and contributors"]
 version = "0.1.0"
 
 [deps]
+TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 TiledIteration = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 
 [compat]
