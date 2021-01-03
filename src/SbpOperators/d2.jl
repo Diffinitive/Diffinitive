@@ -5,15 +5,13 @@ export D2, closuresize
     even = 1
 end
 
-struct D2{T,N,M,K} <: ConstantStencilOperator
-    quadratureClosure::NTuple{M,T}
-    innerStencil::Stencil{T,N}
-    closureStencils::NTuple{M,Stencil{T,K}}
-    eClosure::Stencil{T,M}
-    dClosure::Stencil{T,M}
+struct D2{T,M} <: ConstantStencilOperator
+    innerStencil::Stencil{T}
+    closureStencils::NTuple{M,Stencil{T}}
+    eClosure::Stencil{T}
+    dClosure::Stencil{T}
+    quadratureClosure::NTuple{M,Stencil{T}}
     parity::Parity
 end
 
-function closuresize(D::D2)::Int
-    return length(D.quadratureClosure)
-end
+closuresize(D::D2{T,M}) where {T,M} = M
