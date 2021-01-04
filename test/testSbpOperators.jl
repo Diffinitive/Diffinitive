@@ -114,27 +114,6 @@ end
     end
 end
 
-# @testset "apply_quadrature" begin
-#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-#     h = 0.5
-#
-#     @test apply_quadrature(op, h, 1.0, 10, 100) == h
-#
-#     N = 10
-#     qc = op.quadratureClosure
-#     q = h.*(qc..., ones(N-2*closuresize(op))..., reverse(qc)...)
-#     @assert length(q) == N
-#
-#     for i ∈ 1:N
-#         @test apply_quadrature(op, h, 1.0, i, N) == q[i]
-#     end
-#
-#     v = [2.,3.,2.,4.,5.,4.,3.,4.,5.,4.5]
-#     for i ∈ 1:N
-#         @test apply_quadrature(op, h, v[i], i, N) == q[i]*v[i]
-#     end
-# end
-
 @testset "VolumeOperator" begin
     inner_stencil = Stencil(1/4 .* (1.,2.,1.),center=2)
     closure_stencils = (Stencil(1/2 .* (1.,1.),center=1),Stencil((0.,1.),center=2))
