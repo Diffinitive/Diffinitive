@@ -489,68 +489,85 @@ end
     end
 end
 
-# @testset "InverseDiagonalQuadrature" begin
-#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-#     Lx = π/2.
-#     Ly = Float64(π)
-#     g_1D = EquidistantGrid(77, 0.0, Lx)
-#     g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
-#     @testset "Constructors" begin
-#         # 1D
-#         Hi_x = InverseDiagonalQuadrature(inverse_spacing(g_1D)[1], 1. ./ op.quadratureClosure, size(g_1D));
-#         @test Hi_x == InverseDiagonalQuadrature(g_1D,op.quadratureClosure)
-#         @test Hi_x == inverse_diagonal_quadrature(g_1D,op.quadratureClosure)
-#         @test Hi_x isa TensorMapping{T,1,1} where T
-#         @test Hi_x' isa TensorMapping{T,1,1} where T
-#
-#         # 2D
-#         Hi_xy = inverse_diagonal_quadrature(g_2D,op.quadratureClosure)
-#         @test Hi_xy isa TensorMappingComposition
-#         @test Hi_xy isa TensorMapping{T,2,2} where T
-#         @test Hi_xy' isa TensorMapping{T,2,2} where T
-#     end
-#
-#     @testset "Sizes" begin
-#         # 1D
-#         Hi_x = inverse_diagonal_quadrature(g_1D,op.quadratureClosure)
-#         @test domain_size(Hi_x) == size(g_1D)
-#         @test range_size(Hi_x) == size(g_1D)
-#         # 2D
-#         Hi_xy = inverse_diagonal_quadrature(g_2D,op.quadratureClosure)
-#         @test domain_size(Hi_xy) == size(g_2D)
-#         @test range_size(Hi_xy) == size(g_2D)
-#     end
-#
-#     @testset "Application" begin
-#         # 1D
-#         H_x = diagonal_quadrature(g_1D,op.quadratureClosure)
-#         Hi_x = inverse_diagonal_quadrature(g_1D,op.quadratureClosure)
-#         v_1D = evalOn(g_1D,x->sin(x))
-#         u_1D = evalOn(g_1D,x->x^3-x^2+1)
-#         @test Hi_x*H_x*v_1D ≈ v_1D rtol = 1e-15
-#         @test Hi_x*H_x*u_1D ≈ u_1D rtol = 1e-15
-#         @test Hi_x*v_1D == Hi_x'*v_1D
-#         # 2D
-#         H_xy = diagonal_quadrature(g_2D,op.quadratureClosure)
-#         Hi_xy = inverse_diagonal_quadrature(g_2D,op.quadratureClosure)
-#         v_2D = evalOn(g_2D,(x,y)->sin(x)+cos(y))
-#         u_2D = evalOn(g_2D,(x,y)->x*y + x^5 - sqrt(y))
-#         @test Hi_xy*H_xy*v_2D ≈ v_2D rtol = 1e-15
-#         @test Hi_xy*H_xy*u_2D ≈ u_2D rtol = 1e-15
-#         @test Hi_xy*v_2D ≈ Hi_xy'*v_2D rtol = 1e-16 #Failed for exact equality. Must differ in operation order for some reason?
-#     end
-#
-#     @testset "Inferred" begin
-#         Hi_x = inverse_diagonal_quadrature(g_1D,op.quadratureClosure)
-#         Hi_xy = inverse_diagonal_quadrature(g_2D,op.quadratureClosure)
-#         v_1D = ones(Float64, size(g_1D))
-#         v_2D = ones(Float64, size(g_2D))
-#         @inferred Hi_x*v_1D
-#         @inferred Hi_x'*v_1D
-#         @inferred Hi_xy*v_2D
-#         @inferred Hi_xy'*v_2D
-#     end
-# end
+@testset "InverseDiagonalQuadrature" begin
+    Lx = π/2.
+    Ly = Float64(π)
+    g_1D = EquidistantGrid(77, 0.0, Lx)
+    g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    @testset "Constructors" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            Hi = InverseDiagonalQuadrature(g_1D, op.quadratureClosure);
+            inner_stencil = Stencil((1.,),center=1)
+            closures = ()
+            for i = 1:length(op.quadratureClosure)
+                closures = (closures...,Stencil(op.quadratureClosure[i].range,1.0./op.quadratureClosure[i].weights))
+            end
+            @test Hi == InverseQuadrature(g_1D,inner_stencil,closures)
+            @test Hi isa TensorMapping{T,1,1} where T
+        end
+        @testset "2D" begin
+            Hi = InverseDiagonalQuadrature(g_2D,op.quadratureClosure)
+            Hi_x = InverseDiagonalQuadrature(restrict(g_2D,1),op.quadratureClosure)
+            Hi_y = InverseDiagonalQuadrature(restrict(g_2D,2),op.quadratureClosure)
+            @test Hi == Hi_x⊗Hi_y
+            @test Hi isa TensorMapping{T,2,2} where T
+        end
+    end
+
+    @testset "Sizes" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            Hi = InverseDiagonalQuadrature(g_1D,op.quadratureClosure)
+            @test domain_size(Hi) == size(g_1D)
+            @test range_size(Hi) == size(g_1D)
+        end
+        @testset "2D" begin
+            Hi = InverseDiagonalQuadrature(g_2D,op.quadratureClosure)
+            @test domain_size(Hi) == size(g_2D)
+            @test range_size(Hi) == size(g_2D)
+        end
+    end
+
+    @testset "Accuracy" begin
+        @testset "1D" begin
+            v = evalOn(g_1D,x->sin(x))
+            u = evalOn(g_1D,x->x^3-x^2+1)
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                Hi = InverseDiagonalQuadrature(g_1D,op.quadratureClosure)
+                @test Hi*H*v ≈ v rtol = 1e-15
+                @test Hi*H*u ≈ u rtol = 1e-15
+            end
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                Hi = InverseDiagonalQuadrature(g_1D,op.quadratureClosure)
+                @test Hi*H*v ≈ v rtol = 1e-15
+                @test Hi*H*u ≈ u rtol = 1e-15
+            end
+        end
+        @testset "2D" begin
+            v = evalOn(g_2D,(x,y)->sin(x)+cos(y))
+            u = evalOn(g_2D,(x,y)->x*y + x^5 - sqrt(y))
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                Hi = InverseDiagonalQuadrature(g_2D,op.quadratureClosure)
+                @test Hi*H*v ≈ v rtol = 1e-15
+                @test Hi*H*u ≈ u rtol = 1e-15
+            end
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                Hi = InverseDiagonalQuadrature(g_2D,op.quadratureClosure)
+                @test Hi*H*v ≈ v rtol = 1e-15
+                @test Hi*H*u ≈ u rtol = 1e-15
+            end
+        end
+    end
+end
 
 @testset "BoundaryOperator" begin
     closure_stencil = Stencil((0,2), (2.,1.,3.))
