@@ -809,62 +809,99 @@ end
 end
 
 @testset "NormalDerivative" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    g = EquidistantGrid((5,6), (0.0, 0.0), (4.0,5.0))
-
-    d_w = NormalDerivative(g, op.dClosure, CartesianBoundary{1,Lower}())
-    d_e = NormalDerivative(g, op.dClosure, CartesianBoundary{1,Upper}())
-    d_s = NormalDerivative(g, op.dClosure, CartesianBoundary{2,Lower}())
-    d_n = NormalDerivative(g, op.dClosure, CartesianBoundary{2,Upper}())
-
-
-    v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
-    v∂x = evalOn(g, (x,y)-> 2*x + y)
-    v∂y = evalOn(g, (x,y)-> 2*(y-1) + x)
-
-    @test d_w isa TensorMapping{T,1,2} where T
-
-    @test d_w*v ≈ v∂x[1,:]
-    @test d_e*v ≈ -v∂x[end,:]
-    @test d_s*v ≈ v∂y[:,1]
-    @test d_n*v ≈ -v∂y[:,end]
-
-
-    d_x_l = zeros(Float64, size(g)[1])
-    d_x_u = zeros(Float64, size(g)[1])
-    for i ∈ eachindex(d_x_l)
-        d_x_l[i] = op.dClosure[i-1]
-        d_x_u[i] = op.dClosure[length(d_x_u)-i]
+    g_1D = EquidistantGrid(11, 0.0, 1.0)
+    g_2D = EquidistantGrid((11,12), (0.0, 0.0), (1.0,1.0))
+    @testset "Constructors" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            d_l = NormalDerivative(g_1D, op.dClosure, Lower())
+            @test d_l == NormalDerivative(g_1D, op.dClosure, CartesianBoundary{1,Lower}())
+            @test d_l isa BoundaryOperator{T,Lower} where T
+            @test d_l isa TensorMapping{T,0,1} where T
+        end
+        @testset "2D" begin
+            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            d_w = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
+            d_n = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
+            Ix = IdentityMapping{Float64}((size(g_2D)[1],))
+            Iy = IdentityMapping{Float64}((size(g_2D)[2],))
+            d_l = NormalDerivative(restrict(g_2D,1),op.dClosure,Lower())
+            d_r = NormalDerivative(restrict(g_2D,2),op.dClosure,Upper())
+            @test d_w ==  d_l⊗Iy
+            @test d_n ==  Ix⊗d_r
+            @test d_w isa TensorMapping{T,1,2} where T
+            @test d_n isa TensorMapping{T,1,2} where T
+        end
     end
+    @testset "Accuracy" begin
+        v = evalOn(g_2D, (x,y)-> x^2 + (y-1)^2 + x*y)
+        v∂x = evalOn(g_2D, (x,y)-> 2*x + y)
+        v∂y = evalOn(g_2D, (x,y)-> 2*(y-1) + x)
+        # TODO: Test for higher order polynomials?
+        @testset "2nd order" begin
+            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+            d_w = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
+            d_e = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Upper}())
+            d_s = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Lower}())
+            d_n = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
 
-    d_y_l = zeros(Float64, size(g)[2])
-    d_y_u = zeros(Float64, size(g)[2])
-    for i ∈ eachindex(d_y_l)
-        d_y_l[i] = op.dClosure[i-1]
-        d_y_u[i] = op.dClosure[length(d_y_u)-i]
-    end
-
-    function prod_matrix(x,y)
-        G = zeros(Float64, length(x), length(y))
-        for I ∈ CartesianIndices(G)
-            G[I] = x[I[1]]*y[I[2]]
+            @test d_w*v ≈ v∂x[1,:] atol = 1e-13
+            @test d_e*v ≈ -v∂x[end,:] atol = 1e-13
+            @test d_s*v ≈ v∂y[:,1] atol = 1e-13
+            @test d_n*v ≈ -v∂y[:,end] atol = 1e-13
         end
 
-        return G
+        @testset "4th order" begin
+            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            d_w = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
+            d_e = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Upper}())
+            d_s = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Lower}())
+            d_n = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
+
+            @test d_w*v ≈ v∂x[1,:] atol = 1e-13
+            @test d_e*v ≈ -v∂x[end,:] atol = 1e-13
+            @test d_s*v ≈ v∂y[:,1] atol = 1e-13
+            @test d_n*v ≈ -v∂y[:,end] atol = 1e-13
+        end
     end
 
-    g_x = [1,2,3,4.0,5]
-    g_y = [5,4,3,2,1.0,11]
-
-    G_w = prod_matrix(d_x_l, g_y)
-    G_e = prod_matrix(d_x_u, g_y)
-    G_s = prod_matrix(g_x, d_y_l)
-    G_n = prod_matrix(g_x, d_y_u)
-
-    @test d_w'*g_y ≈ G_w
-    @test_broken d_e'*g_y ≈ G_e
-    @test d_s'*g_x ≈ G_s
-    @test_broken d_n'*g_x ≈ G_n
+    #TODO: Need to check this? Tested in BoundaryOperator. If so, the old test
+    # below should be fixed.
+    @testset "Transpose" begin
+        # op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        # d_x_l = zeros(Float64, size(g_2D)[1])
+        # d_x_u = zeros(Float64, size(g_2D)[1])
+        # for i ∈ eachindex(d_x_l)
+        #     d_x_l[i] = op.dClosure[i-1]
+        #     d_x_u[i] = op.dClosure[length(d_x_u)-i]
+        # end
+        # d_y_l = zeros(Float64, size(g_2D)[2])
+        # d_y_u = zeros(Float64, size(g_2D)[2])
+        # for i ∈ eachindex(d_y_l)
+        #     d_y_l[i] = op.dClosure[i-1]
+        #     d_y_u[i] = op.dClosure[length(d_y_u)-i]
+        # end
+        # function prod_matrix(x,y)
+        #     G = zeros(Float64, length(x), length(y))
+        #     for I ∈ CartesianIndices(G)
+        #         G[I] = x[I[1]]*y[I[2]]
+        #     end
+        #
+        #     return G
+        # end
+        # g_x = [1,2,3,4.0,5]
+        # g_y = [5,4,3,2,1.0,11]
+        #
+        # G_w = prod_matrix(d_x_l, g_y)
+        # G_e = prod_matrix(d_x_u, g_y)
+        # G_s = prod_matrix(g_x, d_y_l)
+        # G_n = prod_matrix(g_x, d_y_u)
+        #
+        # @test d_w'*g_y ≈ G_w
+        # @test_broken d_e'*g_y ≈ G_e
+        # @test d_s'*g_x ≈ G_s
+        # @test_broken d_n'*g_x ≈ G_n
+    end
 end
 #
 # @testset "BoundaryQuadrature" begin
