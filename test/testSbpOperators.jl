@@ -415,8 +415,8 @@ end
     @testset "Constructors" begin
         @testset "1D" begin
             H = DiagonalQuadrature(g_1D,op.quadratureClosure)
-            inner_stencil = Stencil((spacing(g_1D)[1],),center=1)
-            H == Quadrature(g_1D,inner_stencil,op.quadratureClosure)
+            inner_stencil = Stencil((1.,),center=1)
+            @test H == Quadrature(g_1D,inner_stencil,op.quadratureClosure)
             @test H isa TensorMapping{T,1,1} where T
         end
         @testset "1D" begin
@@ -441,45 +441,49 @@ end
         end
     end
 
-    @testset "Application" begin
-        @testset "1D" begin
-            H = DiagonalQuadrature(g_1D,op.quadratureClosure)
-            a = 3.2
-            v_1D = a*ones(Float64, size(g_1D))
-            u_1D = evalOn(g_1D,x->sin(x))
-            @test integral(H,v_1D) ≈ a*Lx rtol = 1e-13
-            @test integral(H,u_1D) ≈ 1. rtol = 1e-8
-        end
-        @testset "1D" begin
-            H = DiagonalQuadrature(g_2D,op.quadratureClosure)
-            b = 2.1
-            v_2D = b*ones(Float64, size(g_2D))
-            u_2D = evalOn(g_2D,(x,y)->sin(x)+cos(y))
-            @test integral(H,v_2D) ≈ b*Lx*Ly rtol = 1e-13
-            @test integral(H,u_2D) ≈ π rtol = 1e-8
-        end
-    end
-
     @testset "Accuracy" begin
-        v = ()
-        for i = 0:4
-            f_i(x) = 1/factorial(i)*x^i
-            v = (v...,evalOn(g_1D,f_i))
-        end
+        @testset "1D" begin
+            v = ()
+            for i = 0:4
+                f_i(x) = 1/factorial(i)*x^i
+                v = (v...,evalOn(g_1D,f_i))
+            end
+            u = evalOn(g_1D,x->sin(x))
 
-        @testset "2nd order" begin
-            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-            H = DiagonalQuadrature(g_1D,op.quadratureClosure)
-            for i = 1:2
-                @test integral(H,v[i]) ≈ v[i+1][end] - v[i+1][1] rtol = 1e-14
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                for i = 1:2
+                    @test integral(H,v[i]) ≈ v[i+1][end] - v[i+1][1] rtol = 1e-14
+                end
+                @test integral(H,u) ≈ 1. rtol = 1e-4
+            end
+
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                for i = 1:4
+                    @test integral(H,v[i]) ≈ v[i+1][end] -  v[i+1][1] rtol = 1e-14
+                end
+                @test integral(H,u) ≈ 1. rtol = 1e-8
             end
         end
 
-        @testset "4th order" begin
-            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            H = DiagonalQuadrature(g_1D,op.quadratureClosure)
-            for i = 1:4
-                @test integral(H,v[i]) ≈ v[i+1][end] -  v[i+1][1] rtol = 1e-14
+        @testset "2D" begin
+            b = 2.1
+            v = b*ones(Float64, size(g_2D))
+            u = evalOn(g_2D,(x,y)->sin(x)+cos(y))
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                @test integral(H,v) ≈ b*Lx*Ly rtol = 1e-13
+                @test integral(H,u) ≈ π rtol = 1e-4
+            end
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                @test integral(H,v) ≈ b*Lx*Ly rtol = 1e-13
+                @test integral(H,u) ≈ π rtol = 1e-8
             end
         end
     end
