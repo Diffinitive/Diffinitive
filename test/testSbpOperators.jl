@@ -276,28 +276,33 @@ end
         end
     end
 
+    # Exact differentiation is measured point-wise. In other cases
+    # the error is measured in the l2-norm.
     @testset "Accuracy" begin
         @testset "1D" begin
+            l2(v) = sqrt(spacing(g_1D)[1]*sum(v.^2));
             monomials = ()
             maxOrder = 4;
             for i = 0:maxOrder-1
                 f_i(x) = 1/factorial(i)*x^i
                 monomials = (monomials...,evalOn(g_1D,f_i))
             end
-            l2(v) = sqrt(spacing(g_1D)[1]*sum(v.^2));
+            v = evalOn(g_1D,x -> sin(x))
+            vₓₓ = evalOn(g_1D,x -> -sin(x))
 
-            #TODO: Error when reading second order stencil!
-            # @testset "2nd order" begin
-            #     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-            #     Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
-            #     @test Dₓₓ*monomials[1] ≈ zeros(Float64,size(g_1D)...) atol = 5e-13
-            #     @test Dₓₓ*monomials[2] ≈ zeros(Float64,size(g_1D)...) atol = 5e-13
-            # end
+            # 2nd order interior stencil, 1nd order boundary stencil,
+            # implies that L*v should be exact for monomials up to order 2.
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+                @test Dₓₓ*monomials[1] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
+                @test Dₓₓ*monomials[2] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
+                @test Dₓₓ*monomials[3] ≈ monomials[1] atol = 5e-10
+                @test Dₓₓ*v ≈ vₓₓ rtol = 5e-2 norm = l2
+            end
 
             # 4th order interior stencil, 2nd order boundary stencil,
             # implies that L*v should be exact for monomials up to order 3.
-            # Exact differentiation is measured point-wise. For other grid functions
-            # the error is measured in the l2-norm.
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
                 Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
@@ -307,31 +312,34 @@ end
                 @test Dₓₓ*monomials[2] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
                 @test Dₓₓ*monomials[3] ≈ monomials[1] atol = 5e-10
                 @test Dₓₓ*monomials[4] ≈ monomials[2] atol = 5e-10
-                @test Dₓₓ*evalOn(g_1D,x -> sin(x)) ≈ evalOn(g_1D,x -> -sin(x)) rtol = 5e-4 norm = l2
+                @test Dₓₓ*v ≈ vₓₓ rtol = 5e-4 norm = l2
             end
         end
 
         @testset "2D" begin
+            l2(v) = sqrt(prod(spacing(g_2D))*sum(v.^2));
             binomials = ()
             maxOrder = 4;
             for i = 0:maxOrder-1
                 f_i(x,y) = 1/factorial(i)*y^i + x^i
                 binomials = (binomials...,evalOn(g_2D,f_i))
             end
-            l2(v) = sqrt(prod(spacing(g_2D))*sum(v.^2));
+            v = evalOn(g_2D, (x,y) -> sin(x)+cos(y))
+            v_yy = evalOn(g_2D,(x,y) -> -cos(y))
 
-            #TODO: Error when reading second order stencil!
-            # @testset "2nd order" begin
-            #     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-            #     Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
-            #     @test Dyy*binomials[1] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-12
-            #     @test Dyy*binomials[2] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-12
-            # end
+            # 2nd order interior stencil, 1st order boundary stencil,
+            # implies that L*v should be exact for binomials up to order 2.
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
+                @test Dyy*binomials[1] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
+                @test Dyy*binomials[2] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
+                @test Dyy*binomials[3] ≈ evalOn(g_2D,(x,y)->1.) atol = 5e-9
+                @test Dyy*v ≈ v_yy rtol = 5e-2 norm = l2
+            end
 
             # 4th order interior stencil, 2nd order boundary stencil,
             # implies that L*v should be exact for binomials up to order 3.
-            # Exact differentiation is measured point-wise. For other grid functions
-            # the error is measured in the l2-norm.
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
                 Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
@@ -341,20 +349,20 @@ end
                 @test Dyy*binomials[2] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
                 @test Dyy*binomials[3] ≈ evalOn(g_2D,(x,y)->1.) atol = 5e-9
                 @test Dyy*binomials[4] ≈ evalOn(g_2D,(x,y)->y) atol = 5e-9
-                @test Dyy*evalOn(g_2D, (x,y) -> sin(x)+cos(y)) ≈ evalOn(g_2D,(x,y) -> -cos(y)) rtol = 5e-4 norm = l2
+                @test Dyy*v ≈ v_yy rtol = 5e-4 norm = l2
             end
         end
     end
 end
 
 @testset "Laplace" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     g_1D = EquidistantGrid(101, 0.0, 1.)
     #TODO: It's nice to verify that 3D works somewhere at least, but perhaps should keep 3D tests to a minimum to avoid
     # long run time for test?
     g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
     # TODO: These areant really constructors. Better name?
     @testset "Constructors" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
             L = Laplace(g_1D, op.innerStencil, op.closureStencils)
             @test L == SecondDerivative(g_1D, op.innerStencil, op.closureStencils)
@@ -370,27 +378,32 @@ end
         end
     end
 
+    # Exact differentiation is measured point-wise. In other cases
+    # the error is measured in the l2-norm.
     @testset "Accuracy" begin
+        l2(v) = sqrt(prod(spacing(g_3D))*sum(v.^2));
         polynomials = ()
         maxOrder = 4;
         for i = 0:maxOrder-1
             f_i(x,y,z) = 1/factorial(i)*(y^i + x^i + z^i)
             polynomials = (polynomials...,evalOn(g_3D,f_i))
         end
-        l2(v) = sqrt(prod(spacing(g_3D))*sum(v.^2));
+        v = evalOn(g_3D, (x,y,z) -> sin(x) + cos(y) + exp(z))
+        Δv = evalOn(g_3D,(x,y,z) -> -sin(x) - cos(y) + exp(z))
 
-        #TODO: Error when reading second order stencil!
-        # @testset "2nd order" begin
-        #     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-        #     Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
-        #     @test Dyy*binomials[1] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-12
-        #     @test Dyy*binomials[2] ≈ evalOn(g_2D,(x,y)->0.) atol = 5e-12
-        # end
+        # 2nd order interior stencil, 1st order boundary stencil,
+        # implies that L*v should be exact for binomials up to order 2.
+        @testset "2nd order" begin
+            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+            L = Laplace(g_3D,op.innerStencil,op.closureStencils)
+            @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
+            @test L*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
+            @test L*polynomials[3] ≈ polynomials[1] atol = 5e-9
+            @test L*v ≈ Δv rtol = 5e-2 norm = l2
+        end
 
         # 4th order interior stencil, 2nd order boundary stencil,
         # implies that L*v should be exact for binomials up to order 3.
-        # Exact differentiation is measured point-wise. For other grid functions
-        # the error is measured in the l2-norm.
         @testset "4th order" begin
             op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
             L = Laplace(g_3D,op.innerStencil,op.closureStencils)
@@ -400,19 +413,19 @@ end
             @test L*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test L*polynomials[3] ≈ polynomials[1] atol = 5e-9
             @test L*polynomials[4] ≈ polynomials[2] atol = 5e-9
-            @test L*evalOn(g_3D, (x,y,z) -> sin(x) + cos(y) + exp(z)) ≈ evalOn(g_3D,(x,y,z) -> -sin(x)-cos(y) + exp(z)) rtol = 5e-4 norm = l2
+            @test L*v ≈ Δv rtol = 5e-4 norm = l2
         end
     end
 end
 
 @testset "DiagonalQuadrature" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     Lx = π/2.
     Ly = Float64(π)
     g_1D = EquidistantGrid(77, 0.0, Lx)
     g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
     integral(H,v) = sum(H*v)
     @testset "Constructors" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
             H = DiagonalQuadrature(g_1D,op.quadratureClosure)
             inner_stencil = Stencil((1.,),center=1)
@@ -429,6 +442,7 @@ end
     end
 
     @testset "Sizes" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
             H = DiagonalQuadrature(g_1D,op.quadratureClosure)
             @test domain_size(H) == size(g_1D)
