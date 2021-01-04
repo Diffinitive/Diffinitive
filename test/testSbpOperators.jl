@@ -903,55 +903,5 @@ end
         # @test_broken d_n'*g_x ≈ G_n
     end
 end
-#
-# @testset "BoundaryQuadrature" begin
-#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-#     g = EquidistantGrid((10,11), (0.0, 0.0), (1.0,1.0))
-#
-#     H_w = BoundaryQuadrature(op, g, CartesianBoundary{1,Lower}())
-#     H_e = BoundaryQuadrature(op, g, CartesianBoundary{1,Upper}())
-#     H_s = BoundaryQuadrature(op, g, CartesianBoundary{2,Lower}())
-#     H_n = BoundaryQuadrature(op, g, CartesianBoundary{2,Upper}())
-#
-#     v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
-#
-#     function get_quadrature(N)
-#         qc = op.quadratureClosure
-#         q = (qc..., ones(N-2*closuresize(op))..., reverse(qc)...)
-#         @assert length(q) == N
-#         return q
-#     end
-#
-#     v_w = v[1,:]
-#     v_e = v[10,:]
-#     v_s = v[:,1]
-#     v_n = v[:,11]
-#
-#     q_x = spacing(g)[1].*get_quadrature(10)
-#     q_y = spacing(g)[2].*get_quadrature(11)
-#
-#     @test H_w isa TensorOperator{T,1} where T
-#
-#     @test domain_size(H_w, (3,)) == (3,)
-#     @test domain_size(H_n, (3,)) == (3,)
-#
-#     @test range_size(H_w, (3,)) == (3,)
-#     @test range_size(H_n, (3,)) == (3,)
-#
-#     @test size(H_w*v_w) == (11,)
-#     @test size(H_e*v_e) == (11,)
-#     @test size(H_s*v_s) == (10,)
-#     @test size(H_n*v_n) == (10,)
-#
-#     @test H_w*v_w .≈ q_y.*v_w
-#     @test H_e*v_e .≈ q_y.*v_e
-#     @test H_s*v_s .≈ q_x.*v_s
-#     @test H_n*v_n .≈ q_x.*v_n
-#
-#     @test H_w'*v_w == H_w'*v_w
-#     @test H_e'*v_e == H_e'*v_e
-#     @test H_s'*v_s == H_s'*v_s
-#     @test H_n'*v_n == H_n'*v_n
-# end
 
 end
