@@ -5,7 +5,7 @@ export D2, closuresize
     even = 1
 end
 
-struct D2{T,M} <: ConstantStencilOperator
+struct D2{T,M}
     innerStencil::Stencil{T}
     closureStencils::NTuple{M,Stencil{T}}
     eClosure::Stencil{T}

@@ -5,7 +5,6 @@ using Sbplib.LazyTensors
 using Sbplib.Grids
 
 include("stencil.jl")
-include("constantstenciloperator.jl")
 include("d2.jl")
 include("readoperator.jl")
 include("volumeops/volume_operator.jl")
