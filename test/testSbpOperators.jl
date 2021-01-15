@@ -11,7 +11,8 @@ import Sbplib.SbpOperators.VolumeOperator
 import Sbplib.SbpOperators.volume_operator
 import Sbplib.SbpOperators.BoundaryOperator
 import Sbplib.SbpOperators.boundary_operator
-import Sbplib.SbpOperators.Parity
+import Sbplib.SbpOperators.even
+import Sbplib.SbpOperators.odd
 
 
 @testset "SbpOperators" begin
@@ -121,33 +122,32 @@ end
     g_2D = EquidistantGrid((11,12),(0.,0.),(1.,1.))
     g_3D = EquidistantGrid((11,12,10),(0.,0.,0.),(1.,1.,1.))
     @testset "Constructors" begin
-        #TODO: How are even and odd in SbpOperators.Parity exposed? Currently constructing even as Parity(1)
         @testset "1D" begin
-            op = VolumeOperator(inner_stencil,closure_stencils,(11,),Parity(1))
-            @test op == VolumeOperator(g_1D,inner_stencil,closure_stencils,Parity(1))
-            @test op == volume_operator(g_1D,inner_stencil,closure_stencils,Parity(1),1)
+            op = VolumeOperator(inner_stencil,closure_stencils,(11,),even)
+            @test op == VolumeOperator(g_1D,inner_stencil,closure_stencils,even)
+            @test op == volume_operator(g_1D,inner_stencil,closure_stencils,even,1)
             @test op isa TensorMapping{T,1,1} where T
         end
         @testset "2D" begin
-            op_x = volume_operator(g_2D,inner_stencil,closure_stencils,Parity(1),1)
-            op_y = volume_operator(g_2D,inner_stencil,closure_stencils,Parity(1),2)
+            op_x = volume_operator(g_2D,inner_stencil,closure_stencils,even,1)
+            op_y = volume_operator(g_2D,inner_stencil,closure_stencils,even,2)
             Ix = IdentityMapping{Float64}((11,))
             Iy = IdentityMapping{Float64}((12,))
-            @test op_x == VolumeOperator(inner_stencil,closure_stencils,(11,),Parity(1))⊗Iy
-            @test op_y == Ix⊗VolumeOperator(inner_stencil,closure_stencils,(12,),Parity(1))
+            @test op_x == VolumeOperator(inner_stencil,closure_stencils,(11,),even)⊗Iy
+            @test op_y == Ix⊗VolumeOperator(inner_stencil,closure_stencils,(12,),even)
             @test op_x isa TensorMapping{T,2,2} where T
             @test op_y isa TensorMapping{T,2,2} where T
         end
         @testset "3D" begin
-            op_x = volume_operator(g_3D,inner_stencil,closure_stencils,Parity(1),1)
-            op_y = volume_operator(g_3D,inner_stencil,closure_stencils,Parity(1),2)
-            op_z = volume_operator(g_3D,inner_stencil,closure_stencils,Parity(1),3)
+            op_x = volume_operator(g_3D,inner_stencil,closure_stencils,even,1)
+            op_y = volume_operator(g_3D,inner_stencil,closure_stencils,even,2)
+            op_z = volume_operator(g_3D,inner_stencil,closure_stencils,even,3)
             Ix = IdentityMapping{Float64}((11,))
             Iy = IdentityMapping{Float64}((12,))
             Iz = IdentityMapping{Float64}((10,))
-            @test op_x == VolumeOperator(inner_stencil,closure_stencils,(11,),Parity(1))⊗Iy⊗Iz
-            @test op_y == Ix⊗VolumeOperator(inner_stencil,closure_stencils,(12,),Parity(1))⊗Iz
-            @test op_z == Ix⊗Iy⊗VolumeOperator(inner_stencil,closure_stencils,(10,),Parity(1))
+            @test op_x == VolumeOperator(inner_stencil,closure_stencils,(11,),even)⊗Iy⊗Iz
+            @test op_y == Ix⊗VolumeOperator(inner_stencil,closure_stencils,(12,),even)⊗Iz
+            @test op_z == Ix⊗Iy⊗VolumeOperator(inner_stencil,closure_stencils,(10,),even)
             @test op_x isa TensorMapping{T,3,3} where T
             @test op_y isa TensorMapping{T,3,3} where T
             @test op_z isa TensorMapping{T,3,3} where T
@@ -156,29 +156,28 @@ end
 
     @testset "Sizes" begin
         @testset "1D" begin
-            op = volume_operator(g_1D,inner_stencil,closure_stencils,Parity(1),1)
+            op = volume_operator(g_1D,inner_stencil,closure_stencils,even,1)
             @test range_size(op) == domain_size(op) == size(g_1D)
         end
 
         @testset "2D" begin
-            op_x = volume_operator(g_2D,inner_stencil,closure_stencils,Parity(1),1)
-            op_y = volume_operator(g_2D,inner_stencil,closure_stencils,Parity(1),2)
+            op_x = volume_operator(g_2D,inner_stencil,closure_stencils,even,1)
+            op_y = volume_operator(g_2D,inner_stencil,closure_stencils,even,2)
             @test range_size(op_y) == domain_size(op_y) ==
                   range_size(op_x) == domain_size(op_x) == size(g_2D)
         end
         @testset "3D" begin
-            op_x = volume_operator(g_3D,inner_stencil,closure_stencils,Parity(1),1)
-            op_y = volume_operator(g_3D,inner_stencil,closure_stencils,Parity(1),2)
-            op_z = volume_operator(g_3D,inner_stencil,closure_stencils,Parity(1),3)
+            op_x = volume_operator(g_3D,inner_stencil,closure_stencils,even,1)
+            op_y = volume_operator(g_3D,inner_stencil,closure_stencils,even,2)
+            op_z = volume_operator(g_3D,inner_stencil,closure_stencils,even,3)
             @test range_size(op_z) == domain_size(op_z) ==
                   range_size(op_y) == domain_size(op_y) ==
                   range_size(op_x) == domain_size(op_x) == size(g_3D)
         end
     end
 
-    # TODO: Test for other dimensions?
-    op_x = volume_operator(g_2D,inner_stencil,closure_stencils,Parity(1),1)
-    op_y = volume_operator(g_2D,inner_stencil,closure_stencils,Parity(-1),2)
+    op_x = volume_operator(g_2D,inner_stencil,closure_stencils,even,1)
+    op_y = volume_operator(g_2D,inner_stencil,closure_stencils,odd,2)
     v = zeros(size(g_2D))
     Nx = size(g_2D)[1]
     Ny = size(g_2D)[2]
@@ -196,7 +195,6 @@ end
         @test op_y*v ≈ ry rtol = 1e-14
     end
 
-    # TODO: Test for other dimensions?
     @testset "Regions" begin
         @test (op_x*v)[Index(1,Lower),Index(3,Interior)] ≈ rx[1,3] rtol = 1e-14
         @test (op_x*v)[Index(2,Lower),Index(3,Interior)] ≈ rx[2,3] rtol = 1e-14
@@ -217,7 +215,6 @@ end
         @test_throws BoundsError (op_y*v)[Index(3,Interior),Index(3,Lower)]
     end
 
-    # TODO: Test for other dimensions?
     @testset "Inferred" begin
         @inferred apply(op_x, v,1,1)
         @inferred apply(op_x, v, Index(1,Lower),Index(1,Lower))
@@ -239,7 +236,6 @@ end
     g_1D = EquidistantGrid(121, 0.0, Lx)
     g_2D = EquidistantGrid((121,123), (0.0, 0.0), (Lx, Ly))
 
-    # TODO: These areant really constructors. Better name?
     @testset "Constructors" begin
         @testset "1D" begin
             Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
@@ -285,7 +281,7 @@ end
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
                 Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
-                # TODO: high tolerances for checking the "exact" differentiation
+                # NOTE: high tolerances for checking the "exact" differentiation
                 # due to accumulation of round-off errors/cancellation errors?
                 @test Dₓₓ*monomials[1] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
                 @test Dₓₓ*monomials[2] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
@@ -294,7 +290,7 @@ end
                 @test Dₓₓ*v ≈ vₓₓ rtol = 5e-4 norm = l2
             end
         end
-
+        
         @testset "2D" begin
             l2(v) = sqrt(prod(spacing(g_2D))*sum(v.^2));
             binomials = ()
@@ -322,7 +318,7 @@ end
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
                 Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
-                # TODO: high tolerances for checking the "exact" differentiation
+                # NOTE: high tolerances for checking the "exact" differentiation
                 # due to accumulation of round-off errors/cancellation errors?
                 @test Dyy*binomials[1] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
                 @test Dyy*binomials[2] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
@@ -336,10 +332,7 @@ end
 
 @testset "Laplace" begin
     g_1D = EquidistantGrid(101, 0.0, 1.)
-    #TODO: It's nice to verify that 3D works somewhere at least, but perhaps should keep 3D tests to a minimum to avoid
-    # long run time for test?
     g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
-    # TODO: These areant really constructors. Better name?
     @testset "Constructors" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
@@ -386,7 +379,7 @@ end
         @testset "4th order" begin
             op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
             L = Laplace(g_3D,op.innerStencil,op.closureStencils)
-            # TODO: high tolerances for checking the "exact" differentiation
+            # NOTE: high tolerances for checking the "exact" differentiation
             # due to accumulation of round-off errors/cancellation errors?
             @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test L*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
@@ -711,7 +704,6 @@ end
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
 
-    # TODO: These areant really constructors. Better name?
     @testset "Constructors" begin
         @testset "1D" begin
             e_l = BoundaryRestriction(g_1D,op.eClosure,Lower())
@@ -745,8 +737,6 @@ end
             @test (e_l*v)[] == v[1]
             @test (e_r*v)[] == v[end]
             @test (e_r*v)[1] == v[end]
-            @test e_l'*u == [u[]; zeros(10)]
-            @test e_r'*u == [zeros(10); u[]]
         end
 
         @testset "2D" begin
@@ -762,27 +752,6 @@ end
             @test e_e*v == v[end,:]
             @test e_s*v == v[:,1]
             @test e_n*v == v[:,end]
-
-
-            g_x = rand(11)
-            g_y = rand(15)
-
-            G_w = zeros(Float64, (11,15))
-            G_w[1,:] = g_y
-
-            G_e = zeros(Float64, (11,15))
-            G_e[end,:] = g_y
-
-            G_s = zeros(Float64, (11,15))
-            G_s[:,1] = g_x
-
-            G_n = zeros(Float64, (11,15))
-            G_n[:,end] = g_x
-
-            @test e_w'*g_y == G_w
-            @test e_e'*g_y == G_e
-            @test e_s'*g_x == G_s
-            @test e_n'*g_x == G_n
        end
     end
 end
@@ -842,44 +811,6 @@ end
             @test d_s*v ≈ v∂y[:,1] atol = 1e-13
             @test d_n*v ≈ -v∂y[:,end] atol = 1e-13
         end
-    end
-
-    #TODO: Need to check this? Tested in BoundaryOperator. If so, the old test
-    # below should be fixed.
-    @testset "Transpose" begin
-        # op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-        # d_x_l = zeros(Float64, size(g_2D)[1])
-        # d_x_u = zeros(Float64, size(g_2D)[1])
-        # for i ∈ eachindex(d_x_l)
-        #     d_x_l[i] = op.dClosure[i-1]
-        #     d_x_u[i] = op.dClosure[length(d_x_u)-i]
-        # end
-        # d_y_l = zeros(Float64, size(g_2D)[2])
-        # d_y_u = zeros(Float64, size(g_2D)[2])
-        # for i ∈ eachindex(d_y_l)
-        #     d_y_l[i] = op.dClosure[i-1]
-        #     d_y_u[i] = op.dClosure[length(d_y_u)-i]
-        # end
-        # function prod_matrix(x,y)
-        #     G = zeros(Float64, length(x), length(y))
-        #     for I ∈ CartesianIndices(G)
-        #         G[I] = x[I[1]]*y[I[2]]
-        #     end
-        #
-        #     return G
-        # end
-        # g_x = [1,2,3,4.0,5]
-        # g_y = [5,4,3,2,1.0,11]
-        #
-        # G_w = prod_matrix(d_x_l, g_y)
-        # G_e = prod_matrix(d_x_u, g_y)
-        # G_s = prod_matrix(g_x, d_y_l)
-        # G_n = prod_matrix(g_x, d_y_u)
-        #
-        # @test d_w'*g_y ≈ G_w
-        # @test_broken d_e'*g_y ≈ G_e
-        # @test d_s'*g_x ≈ G_s
-        # @test_broken d_n'*g_x ≈ G_n
     end
 end
 
