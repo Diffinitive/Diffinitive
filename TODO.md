@@ -6,7 +6,6 @@
 
 ## Coding
  - [ ] Add new Laplace operator to DiffOps, probably named WaveEqOp(?!!?)
- - [ ] Add 1D operators (D1, D2, e, d ... ) as TensorOperators
  - [ ] Create a struct that bundles the necessary Tensor operators for solving the wave equation.
  - [ ] Add a quick and simple way of running all tests for all subpackages.
  - [ ] Replace getindex hack for flattening tuples with flatten_tuple. (eg. `getindex.(range_size.(L.D2),1)`)
