@@ -7,6 +7,13 @@ using LinearAlgebra
 using TOML
 
 import Sbplib.SbpOperators.Stencil
+import Sbplib.SbpOperators.VolumeOperator
+import Sbplib.SbpOperators.volume_operator
+import Sbplib.SbpOperators.BoundaryOperator
+import Sbplib.SbpOperators.boundary_operator
+import Sbplib.SbpOperators.even
+import Sbplib.SbpOperators.odd
+
 
 @testset "SbpOperators" begin
 
@@ -108,283 +115,563 @@ end
     end
 end
 
-# @testset "apply_quadrature" begin
-#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-#     h = 0.5
-#
-#     @test apply_quadrature(op, h, 1.0, 10, 100) == h
-#
-#     N = 10
-#     qc = op.quadratureClosure
-#     q = h.*(qc..., ones(N-2*closuresize(op))..., reverse(qc)...)
-#     @assert length(q) == N
-#
-#     for i ∈ 1:N
-#         @test apply_quadrature(op, h, 1.0, i, N) == q[i]
-#     end
-#
-#     v = [2.,3.,2.,4.,5.,4.,3.,4.,5.,4.5]
-#     for i ∈ 1:N
-#         @test apply_quadrature(op, h, v[i], i, N) == q[i]*v[i]
-#     end
-# end
+@testset "VolumeOperator" begin
+    inner_stencil = Stencil(1/4 .* (1.,2.,1.),center=2)
+    closure_stencils = (Stencil(1/2 .* (1.,1.),center=1),Stencil((0.,1.),center=2))
+    g_1D = EquidistantGrid(11,0.,1.)
+    g_2D = EquidistantGrid((11,12),(0.,0.),(1.,1.))
+    g_3D = EquidistantGrid((11,12,10),(0.,0.,0.),(1.,1.,1.))
+    @testset "Constructors" begin
+        @testset "1D" begin
+            op = VolumeOperator(inner_stencil,closure_stencils,(11,),even)
+            @test op == VolumeOperator(g_1D,inner_stencil,closure_stencils,even)
+            @test op == volume_operator(g_1D,inner_stencil,closure_stencils,even,1)
+            @test op isa TensorMapping{T,1,1} where T
+        end
+        @testset "2D" begin
+            op_x = volume_operator(g_2D,inner_stencil,closure_stencils,even,1)
+            op_y = volume_operator(g_2D,inner_stencil,closure_stencils,even,2)
+            Ix = IdentityMapping{Float64}((11,))
+            Iy = IdentityMapping{Float64}((12,))
+            @test op_x == VolumeOperator(inner_stencil,closure_stencils,(11,),even)⊗Iy
+            @test op_y == Ix⊗VolumeOperator(inner_stencil,closure_stencils,(12,),even)
+            @test op_x isa TensorMapping{T,2,2} where T
+            @test op_y isa TensorMapping{T,2,2} where T
+        end
+        @testset "3D" begin
+            op_x = volume_operator(g_3D,inner_stencil,closure_stencils,even,1)
+            op_y = volume_operator(g_3D,inner_stencil,closure_stencils,even,2)
+            op_z = volume_operator(g_3D,inner_stencil,closure_stencils,even,3)
+            Ix = IdentityMapping{Float64}((11,))
+            Iy = IdentityMapping{Float64}((12,))
+            Iz = IdentityMapping{Float64}((10,))
+            @test op_x == VolumeOperator(inner_stencil,closure_stencils,(11,),even)⊗Iy⊗Iz
+            @test op_y == Ix⊗VolumeOperator(inner_stencil,closure_stencils,(12,),even)⊗Iz
+            @test op_z == Ix⊗Iy⊗VolumeOperator(inner_stencil,closure_stencils,(10,),even)
+            @test op_x isa TensorMapping{T,3,3} where T
+            @test op_y isa TensorMapping{T,3,3} where T
+            @test op_z isa TensorMapping{T,3,3} where T
+        end
+    end
+
+    @testset "Sizes" begin
+        @testset "1D" begin
+            op = volume_operator(g_1D,inner_stencil,closure_stencils,even,1)
+            @test range_size(op) == domain_size(op) == size(g_1D)
+        end
+
+        @testset "2D" begin
+            op_x = volume_operator(g_2D,inner_stencil,closure_stencils,even,1)
+            op_y = volume_operator(g_2D,inner_stencil,closure_stencils,even,2)
+            @test range_size(op_y) == domain_size(op_y) ==
+                  range_size(op_x) == domain_size(op_x) == size(g_2D)
+        end
+        @testset "3D" begin
+            op_x = volume_operator(g_3D,inner_stencil,closure_stencils,even,1)
+            op_y = volume_operator(g_3D,inner_stencil,closure_stencils,even,2)
+            op_z = volume_operator(g_3D,inner_stencil,closure_stencils,even,3)
+            @test range_size(op_z) == domain_size(op_z) ==
+                  range_size(op_y) == domain_size(op_y) ==
+                  range_size(op_x) == domain_size(op_x) == size(g_3D)
+        end
+    end
+
+    op_x = volume_operator(g_2D,inner_stencil,closure_stencils,even,1)
+    op_y = volume_operator(g_2D,inner_stencil,closure_stencils,odd,2)
+    v = zeros(size(g_2D))
+    Nx = size(g_2D)[1]
+    Ny = size(g_2D)[2]
+    for i = 1:Nx
+        v[i,:] .= i
+    end
+    rx = copy(v)
+    rx[1,:] .= 1.5
+    rx[Nx,:] .= (2*Nx-1)/2
+    ry = copy(v)
+    ry[:,Ny-1:Ny] = -v[:,Ny-1:Ny]
+
+    @testset "Application" begin
+        @test op_x*v ≈ rx rtol = 1e-14
+        @test op_y*v ≈ ry rtol = 1e-14
+    end
+
+    @testset "Regions" begin
+        @test (op_x*v)[Index(1,Lower),Index(3,Interior)] ≈ rx[1,3] rtol = 1e-14
+        @test (op_x*v)[Index(2,Lower),Index(3,Interior)] ≈ rx[2,3] rtol = 1e-14
+        @test (op_x*v)[Index(6,Interior),Index(3,Interior)] ≈ rx[6,3] rtol = 1e-14
+        @test (op_x*v)[Index(10,Upper),Index(3,Interior)] ≈ rx[10,3] rtol = 1e-14
+        @test (op_x*v)[Index(11,Upper),Index(3,Interior)] ≈ rx[11,3] rtol = 1e-14
+
+        @test_throws BoundsError (op_x*v)[Index(3,Lower),Index(3,Interior)]
+        @test_throws BoundsError (op_x*v)[Index(9,Upper),Index(3,Interior)]
+
+        @test (op_y*v)[Index(3,Interior),Index(1,Lower)] ≈ ry[3,1] rtol = 1e-14
+        @test (op_y*v)[Index(3,Interior),Index(2,Lower)] ≈ ry[3,2] rtol = 1e-14
+        @test (op_y*v)[Index(3,Interior),Index(6,Interior)] ≈ ry[3,6] rtol = 1e-14
+        @test (op_y*v)[Index(3,Interior),Index(11,Upper)] ≈ ry[3,11] rtol = 1e-14
+        @test (op_y*v)[Index(3,Interior),Index(12,Upper)] ≈ ry[3,12] rtol = 1e-14
+
+        @test_throws BoundsError (op_y*v)[Index(3,Interior),Index(10,Upper)]
+        @test_throws BoundsError (op_y*v)[Index(3,Interior),Index(3,Lower)]
+    end
+
+    @testset "Inferred" begin
+        @inferred apply(op_x, v,1,1)
+        @inferred apply(op_x, v, Index(1,Lower),Index(1,Lower))
+        @inferred apply(op_x, v, Index(6,Interior),Index(1,Lower))
+        @inferred apply(op_x, v, Index(11,Upper),Index(1,Lower))
+
+        @inferred apply(op_y, v,1,1)
+        @inferred apply(op_y, v, Index(1,Lower),Index(1,Lower))
+        @inferred apply(op_y, v, Index(1,Lower),Index(6,Interior))
+        @inferred apply(op_y, v, Index(1,Lower),Index(11,Upper))
+    end
+
+end
 
 @testset "SecondDerivative" begin
     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    L = 3.5
-    g = EquidistantGrid(101, 0.0, L)
-    Dₓₓ = SecondDerivative(g,op.innerStencil,op.closureStencils)
+    Lx = 3.5
+    Ly = 3.
+    g_1D = EquidistantGrid(121, 0.0, Lx)
+    g_2D = EquidistantGrid((121,123), (0.0, 0.0), (Lx, Ly))
 
-    f0(x) = 1.
-    f1(x) = x
-    f2(x) = 1/2*x^2
-    f3(x) = 1/6*x^3
-    f4(x) = 1/24*x^4
-    f5(x) = sin(x)
-    f5ₓₓ(x) = -f5(x)
+    @testset "Constructors" begin
+        @testset "1D" begin
+            Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+            @test Dₓₓ == SecondDerivative(g_1D,op.innerStencil,op.closureStencils,1)
+            @test Dₓₓ isa VolumeOperator
+        end
+        @testset "2D" begin
+            Dₓₓ = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,1)
+            D2 = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+            I = IdentityMapping{Float64}(size(g_2D)[2])
+            @test Dₓₓ == D2⊗I
+            @test Dₓₓ isa TensorMapping{T,2,2} where T
+        end
+    end
 
-    v0 = evalOn(g,f0)
-    v1 = evalOn(g,f1)
-    v2 = evalOn(g,f2)
-    v3 = evalOn(g,f3)
-    v4 = evalOn(g,f4)
-    v5 = evalOn(g,f5)
-
-    @test Dₓₓ isa TensorMapping{T,1,1} where T
-    @test Dₓₓ' isa TensorMapping{T,1,1} where T
-
-    # 4th order interior stencil, 2nd order boundary stencil,
-    # implies that L*v should be exact for v - monomial up to order 3.
-    # Exact differentiation is measured point-wise. For other grid functions
+    # Exact differentiation is measured point-wise. In other cases
     # the error is measured in the l2-norm.
-    @test norm(Dₓₓ*v0) ≈ 0.0 atol=5e-10
-    @test norm(Dₓₓ*v1) ≈ 0.0 atol=5e-10
-    @test Dₓₓ*v2 ≈ v0 atol=5e-11
-    @test Dₓₓ*v3 ≈ v1 atol=5e-11
+    @testset "Accuracy" begin
+        @testset "1D" begin
+            l2(v) = sqrt(spacing(g_1D)[1]*sum(v.^2));
+            monomials = ()
+            maxOrder = 4;
+            for i = 0:maxOrder-1
+                f_i(x) = 1/factorial(i)*x^i
+                monomials = (monomials...,evalOn(g_1D,f_i))
+            end
+            v = evalOn(g_1D,x -> sin(x))
+            vₓₓ = evalOn(g_1D,x -> -sin(x))
 
-    h = spacing(g)[1];
-    l2(v) = sqrt(h*sum(v.^2))
-    @test Dₓₓ*v4 ≈ v2  atol=5e-4 norm=l2
-    @test Dₓₓ*v5 ≈ -v5 atol=5e-4 norm=l2
+            # 2nd order interior stencil, 1nd order boundary stencil,
+            # implies that L*v should be exact for monomials up to order 2.
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+                @test Dₓₓ*monomials[1] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
+                @test Dₓₓ*monomials[2] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
+                @test Dₓₓ*monomials[3] ≈ monomials[1] atol = 5e-10
+                @test Dₓₓ*v ≈ vₓₓ rtol = 5e-2 norm = l2
+            end
+
+            # 4th order interior stencil, 2nd order boundary stencil,
+            # implies that L*v should be exact for monomials up to order 3.
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+                # NOTE: high tolerances for checking the "exact" differentiation
+                # due to accumulation of round-off errors/cancellation errors?
+                @test Dₓₓ*monomials[1] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
+                @test Dₓₓ*monomials[2] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
+                @test Dₓₓ*monomials[3] ≈ monomials[1] atol = 5e-10
+                @test Dₓₓ*monomials[4] ≈ monomials[2] atol = 5e-10
+                @test Dₓₓ*v ≈ vₓₓ rtol = 5e-4 norm = l2
+            end
+        end
+        
+        @testset "2D" begin
+            l2(v) = sqrt(prod(spacing(g_2D))*sum(v.^2));
+            binomials = ()
+            maxOrder = 4;
+            for i = 0:maxOrder-1
+                f_i(x,y) = 1/factorial(i)*y^i + x^i
+                binomials = (binomials...,evalOn(g_2D,f_i))
+            end
+            v = evalOn(g_2D, (x,y) -> sin(x)+cos(y))
+            v_yy = evalOn(g_2D,(x,y) -> -cos(y))
+
+            # 2nd order interior stencil, 1st order boundary stencil,
+            # implies that L*v should be exact for binomials up to order 2.
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
+                @test Dyy*binomials[1] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
+                @test Dyy*binomials[2] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
+                @test Dyy*binomials[3] ≈ evalOn(g_2D,(x,y)->1.) atol = 5e-9
+                @test Dyy*v ≈ v_yy rtol = 5e-2 norm = l2
+            end
+
+            # 4th order interior stencil, 2nd order boundary stencil,
+            # implies that L*v should be exact for binomials up to order 3.
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
+                # NOTE: high tolerances for checking the "exact" differentiation
+                # due to accumulation of round-off errors/cancellation errors?
+                @test Dyy*binomials[1] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
+                @test Dyy*binomials[2] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
+                @test Dyy*binomials[3] ≈ evalOn(g_2D,(x,y)->1.) atol = 5e-9
+                @test Dyy*binomials[4] ≈ evalOn(g_2D,(x,y)->y) atol = 5e-9
+                @test Dyy*v ≈ v_yy rtol = 5e-4 norm = l2
+            end
+        end
+    end
 end
 
+@testset "Laplace" begin
+    g_1D = EquidistantGrid(101, 0.0, 1.)
+    g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
+    @testset "Constructors" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            L = Laplace(g_1D, op.innerStencil, op.closureStencils)
+            @test L == SecondDerivative(g_1D, op.innerStencil, op.closureStencils)
+            @test L isa TensorMapping{T,1,1}  where T
+        end
+        @testset "3D" begin
+            L = Laplace(g_3D, op.innerStencil, op.closureStencils)
+            @test L isa TensorMapping{T,3,3} where T
+            Dxx = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,1)
+            Dyy = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,2)
+            Dzz = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,3)
+            @test L == Dxx + Dyy + Dzz
+        end
+    end
 
-@testset "Laplace2D" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    Lx = 1.5
-    Ly = 3.2
-    g = EquidistantGrid((102,131), (0.0, 0.0), (Lx,Ly))
-    L = Laplace(g, op.innerStencil, op.closureStencils)
+    # Exact differentiation is measured point-wise. In other cases
+    # the error is measured in the l2-norm.
+    @testset "Accuracy" begin
+        l2(v) = sqrt(prod(spacing(g_3D))*sum(v.^2));
+        polynomials = ()
+        maxOrder = 4;
+        for i = 0:maxOrder-1
+            f_i(x,y,z) = 1/factorial(i)*(y^i + x^i + z^i)
+            polynomials = (polynomials...,evalOn(g_3D,f_i))
+        end
+        v = evalOn(g_3D, (x,y,z) -> sin(x) + cos(y) + exp(z))
+        Δv = evalOn(g_3D,(x,y,z) -> -sin(x) - cos(y) + exp(z))
 
+        # 2nd order interior stencil, 1st order boundary stencil,
+        # implies that L*v should be exact for binomials up to order 2.
+        @testset "2nd order" begin
+            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+            L = Laplace(g_3D,op.innerStencil,op.closureStencils)
+            @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
+            @test L*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
+            @test L*polynomials[3] ≈ polynomials[1] atol = 5e-9
+            @test L*v ≈ Δv rtol = 5e-2 norm = l2
+        end
 
-    f0(x,y) = 2.
-    f1(x,y) = x+y
-    f2(x,y) = 1/2*x^2 + 1/2*y^2
-    f3(x,y) = 1/6*x^3 + 1/6*y^3
-    f4(x,y) = 1/24*x^4 + 1/24*y^4
-    f5(x,y) = sin(x) + cos(y)
-    f5ₓₓ(x,y) = -f5(x,y)
-
-    v0 = evalOn(g,f0)
-    v1 = evalOn(g,f1)
-    v2 = evalOn(g,f2)
-    v3 = evalOn(g,f3)
-    v4 = evalOn(g,f4)
-    v5 = evalOn(g,f5)
-    v5ₓₓ = evalOn(g,f5ₓₓ)
-
-    @test L isa TensorMapping{T,2,2} where T
-    @test L' isa TensorMapping{T,2,2} where T
-
-    # 4th order interior stencil, 2nd order boundary stencil,
-    # implies that L*v should be exact for v - monomial up to order 3.
-    # Exact differentiation is measured point-wise. For other grid functions
-    # the error is measured in the H-norm.
-    @test norm(L*v0) ≈ 0 atol=5e-10
-    @test norm(L*v1) ≈ 0 atol=5e-10
-    @test L*v2 ≈ v0 # Seems to be more accurate
-    @test L*v3 ≈ v1 atol=5e-10
-
-    h = spacing(g)
-    l2(v) = sqrt(prod(h)*sum(v.^2))
-    @test L*v4 ≈ v2   atol=5e-4 norm=l2
-    @test L*v5 ≈ v5ₓₓ atol=5e-4 norm=l2
+        # 4th order interior stencil, 2nd order boundary stencil,
+        # implies that L*v should be exact for binomials up to order 3.
+        @testset "4th order" begin
+            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            L = Laplace(g_3D,op.innerStencil,op.closureStencils)
+            # NOTE: high tolerances for checking the "exact" differentiation
+            # due to accumulation of round-off errors/cancellation errors?
+            @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
+            @test L*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
+            @test L*polynomials[3] ≈ polynomials[1] atol = 5e-9
+            @test L*polynomials[4] ≈ polynomials[2] atol = 5e-9
+            @test L*v ≈ Δv rtol = 5e-4 norm = l2
+        end
+    end
 end
 
-@testset "DiagonalInnerProduct" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    L = 2.3
-    g = EquidistantGrid(77, 0.0, L)
-    H = DiagonalInnerProduct(g,op.quadratureClosure)
-    v = ones(Float64, size(g))
+@testset "DiagonalQuadrature" begin
+    Lx = π/2.
+    Ly = Float64(π)
+    g_1D = EquidistantGrid(77, 0.0, Lx)
+    g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    integral(H,v) = sum(H*v)
+    @testset "Constructors" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+            inner_stencil = Stencil((1.,),center=1)
+            @test H == Quadrature(g_1D,inner_stencil,op.quadratureClosure)
+            @test H isa TensorMapping{T,1,1} where T
+        end
+        @testset "1D" begin
+            H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+            H_x = DiagonalQuadrature(restrict(g_2D,1),op.quadratureClosure)
+            H_y = DiagonalQuadrature(restrict(g_2D,2),op.quadratureClosure)
+            @test H == H_x⊗H_y
+            @test H isa TensorMapping{T,2,2} where T
+        end
+    end
 
-    @test H isa TensorMapping{T,1,1} where T
-    @test H' isa TensorMapping{T,1,1} where T
-    @test sum(H*v) ≈ L
-    @test H*v == H'*v
+    @testset "Sizes" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+            @test domain_size(H) == size(g_1D)
+            @test range_size(H) == size(g_1D)
+        end
+        @testset "2D" begin
+            H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+            @test domain_size(H) == size(g_2D)
+            @test range_size(H) == size(g_2D)
+        end
+    end
+
+    @testset "Accuracy" begin
+        @testset "1D" begin
+            v = ()
+            for i = 0:4
+                f_i(x) = 1/factorial(i)*x^i
+                v = (v...,evalOn(g_1D,f_i))
+            end
+            u = evalOn(g_1D,x->sin(x))
+
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                for i = 1:2
+                    @test integral(H,v[i]) ≈ v[i+1][end] - v[i+1][1] rtol = 1e-14
+                end
+                @test integral(H,u) ≈ 1. rtol = 1e-4
+            end
+
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                for i = 1:4
+                    @test integral(H,v[i]) ≈ v[i+1][end] -  v[i+1][1] rtol = 1e-14
+                end
+                @test integral(H,u) ≈ 1. rtol = 1e-8
+            end
+        end
+
+        @testset "2D" begin
+            b = 2.1
+            v = b*ones(Float64, size(g_2D))
+            u = evalOn(g_2D,(x,y)->sin(x)+cos(y))
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                @test integral(H,v) ≈ b*Lx*Ly rtol = 1e-13
+                @test integral(H,u) ≈ π rtol = 1e-4
+            end
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                @test integral(H,v) ≈ b*Lx*Ly rtol = 1e-13
+                @test integral(H,u) ≈ π rtol = 1e-8
+            end
+        end
+    end
 end
 
-@testset "Quadrature" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    Lx = 2.3
-    Ly = 5.2
-    g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+@testset "InverseDiagonalQuadrature" begin
+    Lx = π/2.
+    Ly = Float64(π)
+    g_1D = EquidistantGrid(77, 0.0, Lx)
+    g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    @testset "Constructors" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            Hi = InverseDiagonalQuadrature(g_1D, op.quadratureClosure);
+            inner_stencil = Stencil((1.,),center=1)
+            closures = ()
+            for i = 1:length(op.quadratureClosure)
+                closures = (closures...,Stencil(op.quadratureClosure[i].range,1.0./op.quadratureClosure[i].weights))
+            end
+            @test Hi == InverseQuadrature(g_1D,inner_stencil,closures)
+            @test Hi isa TensorMapping{T,1,1} where T
+        end
+        @testset "2D" begin
+            Hi = InverseDiagonalQuadrature(g_2D,op.quadratureClosure)
+            Hi_x = InverseDiagonalQuadrature(restrict(g_2D,1),op.quadratureClosure)
+            Hi_y = InverseDiagonalQuadrature(restrict(g_2D,2),op.quadratureClosure)
+            @test Hi == Hi_x⊗Hi_y
+            @test Hi isa TensorMapping{T,2,2} where T
+        end
+    end
 
-    Q = Quadrature(g, op.quadratureClosure)
+    @testset "Sizes" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            Hi = InverseDiagonalQuadrature(g_1D,op.quadratureClosure)
+            @test domain_size(Hi) == size(g_1D)
+            @test range_size(Hi) == size(g_1D)
+        end
+        @testset "2D" begin
+            Hi = InverseDiagonalQuadrature(g_2D,op.quadratureClosure)
+            @test domain_size(Hi) == size(g_2D)
+            @test range_size(Hi) == size(g_2D)
+        end
+    end
 
-    @test Q isa TensorMapping{T,2,2} where T
-    @test Q' isa TensorMapping{T,2,2} where T
-
-    v = ones(Float64, size(g))
-    @test sum(Q*v) ≈ Lx*Ly
-
-    v = 2*ones(Float64, size(g))
-    @test_broken sum(Q*v) ≈ 2*Lx*Ly
-
-    @test Q*v == Q'*v
+    @testset "Accuracy" begin
+        @testset "1D" begin
+            v = evalOn(g_1D,x->sin(x))
+            u = evalOn(g_1D,x->x^3-x^2+1)
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                Hi = InverseDiagonalQuadrature(g_1D,op.quadratureClosure)
+                @test Hi*H*v ≈ v rtol = 1e-15
+                @test Hi*H*u ≈ u rtol = 1e-15
+            end
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                Hi = InverseDiagonalQuadrature(g_1D,op.quadratureClosure)
+                @test Hi*H*v ≈ v rtol = 1e-15
+                @test Hi*H*u ≈ u rtol = 1e-15
+            end
+        end
+        @testset "2D" begin
+            v = evalOn(g_2D,(x,y)->sin(x)+cos(y))
+            u = evalOn(g_2D,(x,y)->x*y + x^5 - sqrt(y))
+            @testset "2nd order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                Hi = InverseDiagonalQuadrature(g_2D,op.quadratureClosure)
+                @test Hi*H*v ≈ v rtol = 1e-15
+                @test Hi*H*u ≈ u rtol = 1e-15
+            end
+            @testset "4th order" begin
+                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                Hi = InverseDiagonalQuadrature(g_2D,op.quadratureClosure)
+                @test Hi*H*v ≈ v rtol = 1e-15
+                @test Hi*H*u ≈ u rtol = 1e-15
+            end
+        end
+    end
 end
 
-@testset "InverseDiagonalInnerProduct" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    L = 2.3
-    g = EquidistantGrid(77, 0.0, L)
-    H = DiagonalInnerProduct(g, op.quadratureClosure)
-    Hi = InverseDiagonalInnerProduct(g,op.quadratureClosure)
-    v = evalOn(g, x->sin(x))
-
-    @test Hi isa TensorMapping{T,1,1} where T
-    @test Hi' isa TensorMapping{T,1,1} where T
-    @test Hi*H*v ≈ v
-    @test Hi*v == Hi'*v
-end
-
-@testset "InverseQuadrature" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-    Lx = 7.3
-    Ly = 8.2
-    g = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
-
-    Q = Quadrature(g, op.quadratureClosure)
-    Qinv = InverseQuadrature(g, op.quadratureClosure)
-    v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
-
-    @test Qinv isa TensorMapping{T,2,2} where T
-    @test Qinv' isa TensorMapping{T,2,2} where T
-    @test_broken Qinv*(Q*v) ≈ v
-    @test Qinv*v == Qinv'*v
-end
-
-@testset "BoundaryRestrictrion" begin
-    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+@testset "BoundaryOperator" begin
+    closure_stencil = Stencil((0,2), (2.,1.,3.))
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
 
     @testset "Constructors" begin
         @testset "1D" begin
-            e_l = BoundaryRestriction{Lower}(op.eClosure,size(g_1D)[1])
-            @test e_l == BoundaryRestriction(g_1D,op.eClosure,Lower())
-            @test e_l == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Lower}())
-            @test e_l isa TensorMapping{T,0,1} where T
+            op_l = BoundaryOperator{Lower}(closure_stencil,size(g_1D)[1])
+            @test op_l == BoundaryOperator(g_1D,closure_stencil,Lower())
+            @test op_l == boundary_operator(g_1D,closure_stencil,CartesianBoundary{1,Lower}())
+            @test op_l isa TensorMapping{T,0,1} where T
 
-            e_r = BoundaryRestriction{Upper}(op.eClosure,size(g_1D)[1])
-            @test e_r == BoundaryRestriction(g_1D,op.eClosure,Upper())
-            @test e_r == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Upper}())
-            @test e_r isa TensorMapping{T,0,1} where T
+            op_r = BoundaryOperator{Upper}(closure_stencil,size(g_1D)[1])
+            @test op_r == BoundaryRestriction(g_1D,closure_stencil,Upper())
+            @test op_r == boundary_operator(g_1D,closure_stencil,CartesianBoundary{1,Upper}())
+            @test op_r isa TensorMapping{T,0,1} where T
         end
 
         @testset "2D" begin
-            e_w = boundary_restriction(g_2D,op.eClosure,CartesianBoundary{1,Upper}())
+            e_w = boundary_operator(g_2D,closure_stencil,CartesianBoundary{1,Upper}())
             @test e_w isa InflatedTensorMapping
             @test e_w isa TensorMapping{T,1,2} where T
         end
     end
 
-    e_l = boundary_restriction(g_1D, op.eClosure, CartesianBoundary{1,Lower}())
-    e_r = boundary_restriction(g_1D, op.eClosure, CartesianBoundary{1,Upper}())
+    op_l = boundary_operator(g_1D, closure_stencil, CartesianBoundary{1,Lower}())
+    op_r = boundary_operator(g_1D, closure_stencil, CartesianBoundary{1,Upper}())
 
-    e_w = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{1,Lower}())
-    e_e = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{1,Upper}())
-    e_s = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{2,Lower}())
-    e_n = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{2,Upper}())
+    op_w = boundary_operator(g_2D, closure_stencil, CartesianBoundary{1,Lower}())
+    op_e = boundary_operator(g_2D, closure_stencil, CartesianBoundary{1,Upper}())
+    op_s = boundary_operator(g_2D, closure_stencil, CartesianBoundary{2,Lower}())
+    op_n = boundary_operator(g_2D, closure_stencil, CartesianBoundary{2,Upper}())
 
     @testset "Sizes" begin
         @testset "1D" begin
-            @test domain_size(e_l) == (11,)
-            @test domain_size(e_r) == (11,)
+            @test domain_size(op_l) == (11,)
+            @test domain_size(op_r) == (11,)
 
-            @test range_size(e_l) == ()
-            @test range_size(e_r) == ()
+            @test range_size(op_l) == ()
+            @test range_size(op_r) == ()
         end
 
         @testset "2D" begin
-            @test domain_size(e_w) == (11,15)
-            @test domain_size(e_e) == (11,15)
-            @test domain_size(e_s) == (11,15)
-            @test domain_size(e_n) == (11,15)
+            @test domain_size(op_w) == (11,15)
+            @test domain_size(op_e) == (11,15)
+            @test domain_size(op_s) == (11,15)
+            @test domain_size(op_n) == (11,15)
 
-            @test range_size(e_w) == (15,)
-            @test range_size(e_e) == (15,)
-            @test range_size(e_s) == (11,)
-            @test range_size(e_n) == (11,)
+            @test range_size(op_w) == (15,)
+            @test range_size(op_e) == (15,)
+            @test range_size(op_s) == (11,)
+            @test range_size(op_n) == (11,)
         end
     end
-
 
     @testset "Application" begin
         @testset "1D" begin
             v = evalOn(g_1D,x->1+x^2)
             u = fill(3.124)
-            @test (e_l*v)[] == v[1]
-            @test (e_r*v)[] == v[end]
-            @test (e_r*v)[1] == v[end]
-            @test e_l'*u == [u[]; zeros(10)]
-            @test e_r'*u == [zeros(10); u[]]
+            @test (op_l*v)[] == 2*v[1] + v[2] + 3*v[3]
+            @test (op_r*v)[] == 2*v[end] + v[end-1] + 3*v[end-2]
+            @test (op_r*v)[1] == 2*v[end] + v[end-1] + 3*v[end-2]
+            @test op_l'*u == [2*u[]; u[]; 3*u[]; zeros(8)]
+            @test op_r'*u == [zeros(8); 3*u[]; u[]; 2*u[]]
         end
 
         @testset "2D" begin
-            v = rand(11, 15)
+            v = rand(size(g_2D)...)
             u = fill(3.124)
+            @test op_w*v ≈ 2*v[1,:] + v[2,:] + 3*v[3,:] rtol = 1e-14
+            @test op_e*v ≈ 2*v[end,:] + v[end-1,:] + 3*v[end-2,:] rtol = 1e-14
+            @test op_s*v ≈ 2*v[:,1] + v[:,2] + 3*v[:,3] rtol = 1e-14
+            @test op_n*v ≈ 2*v[:,end] + v[:,end-1] + 3*v[:,end-2] rtol = 1e-14
 
-            @test e_w*v == v[1,:]
-            @test e_e*v == v[end,:]
-            @test e_s*v == v[:,1]
-            @test e_n*v == v[:,end]
 
+            g_x = rand(size(g_2D)[1])
+            g_y = rand(size(g_2D)[2])
 
-           g_x = rand(11)
-           g_y = rand(15)
+            G_w = zeros(Float64, size(g_2D)...)
+            G_w[1,:] = 2*g_y
+            G_w[2,:] = g_y
+            G_w[3,:] = 3*g_y
 
-           G_w = zeros(Float64, (11,15))
-           G_w[1,:] = g_y
+            G_e = zeros(Float64, size(g_2D)...)
+            G_e[end,:] = 2*g_y
+            G_e[end-1,:] = g_y
+            G_e[end-2,:] = 3*g_y
 
-           G_e = zeros(Float64, (11,15))
-           G_e[end,:] = g_y
+            G_s = zeros(Float64, size(g_2D)...)
+            G_s[:,1] = 2*g_x
+            G_s[:,2] = g_x
+            G_s[:,3] = 3*g_x
 
-           G_s = zeros(Float64, (11,15))
-           G_s[:,1] = g_x
+            G_n = zeros(Float64, size(g_2D)...)
+            G_n[:,end] = 2*g_x
+            G_n[:,end-1] = g_x
+            G_n[:,end-2] = 3*g_x
 
-           G_n = zeros(Float64, (11,15))
-           G_n[:,end] = g_x
-
-           @test e_w'*g_y == G_w
-           @test e_e'*g_y == G_e
-           @test e_s'*g_x == G_s
-           @test e_n'*g_x == G_n
+            @test op_w'*g_y == G_w
+            @test op_e'*g_y == G_e
+            @test op_s'*g_x == G_s
+            @test op_n'*g_x == G_n
        end
 
        @testset "Regions" begin
-           u = fill(3.124)
-           @test (e_l'*u)[Index(1,Lower)] == 3.124
-           @test (e_l'*u)[Index(2,Lower)] == 0
-           @test (e_l'*u)[Index(6,Interior)] == 0
-           @test (e_l'*u)[Index(10,Upper)] == 0
-           @test (e_l'*u)[Index(11,Upper)] == 0
+            u = fill(3.124)
+            @test (op_l'*u)[Index(1,Lower)] == 2*u[]
+            @test (op_l'*u)[Index(2,Lower)] == u[]
+            @test (op_l'*u)[Index(6,Interior)] == 0
+            @test (op_l'*u)[Index(10,Upper)] == 0
+            @test (op_l'*u)[Index(11,Upper)] == 0
 
-           @test (e_r'*u)[Index(1,Lower)] == 0
-           @test (e_r'*u)[Index(2,Lower)] == 0
-           @test (e_r'*u)[Index(6,Interior)] == 0
-           @test (e_r'*u)[Index(10,Upper)] == 0
-           @test (e_r'*u)[Index(11,Upper)] == 3.124
+            @test (op_r'*u)[Index(1,Lower)] == 0
+            @test (op_r'*u)[Index(2,Lower)] == 0
+            @test (op_r'*u)[Index(6,Interior)] == 0
+            @test (op_r'*u)[Index(10,Upper)] == u[]
+            @test (op_r'*u)[Index(11,Upper)] == 2*u[]
        end
     end
 
@@ -392,151 +679,139 @@ end
         v = ones(Float64, 11)
         u = fill(1.)
 
-        @inferred apply(e_l, v)
-        @inferred apply(e_r, v)
+        @inferred apply(op_l, v)
+        @inferred apply(op_r, v)
 
-        @inferred apply_transpose(e_l, u, 4)
-        @inferred apply_transpose(e_l, u, Index(1,Lower))
-        @inferred apply_transpose(e_l, u, Index(2,Lower))
-        @inferred apply_transpose(e_l, u, Index(6,Interior))
-        @inferred apply_transpose(e_l, u, Index(10,Upper))
-        @inferred apply_transpose(e_l, u, Index(11,Upper))
+        @inferred apply_transpose(op_l, u, 4)
+        @inferred apply_transpose(op_l, u, Index(1,Lower))
+        @inferred apply_transpose(op_l, u, Index(2,Lower))
+        @inferred apply_transpose(op_l, u, Index(6,Interior))
+        @inferred apply_transpose(op_l, u, Index(10,Upper))
+        @inferred apply_transpose(op_l, u, Index(11,Upper))
 
-        @inferred apply_transpose(e_r, u, 4)
-        @inferred apply_transpose(e_r, u, Index(1,Lower))
-        @inferred apply_transpose(e_r, u, Index(2,Lower))
-        @inferred apply_transpose(e_r, u, Index(6,Interior))
-        @inferred apply_transpose(e_r, u, Index(10,Upper))
-        @inferred apply_transpose(e_r, u, Index(11,Upper))
+        @inferred apply_transpose(op_r, u, 4)
+        @inferred apply_transpose(op_r, u, Index(1,Lower))
+        @inferred apply_transpose(op_r, u, Index(2,Lower))
+        @inferred apply_transpose(op_r, u, Index(6,Interior))
+        @inferred apply_transpose(op_r, u, Index(10,Upper))
+        @inferred apply_transpose(op_r, u, Index(11,Upper))
     end
 
 end
-#
-# @testset "NormalDerivative" begin
-#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-#     g = EquidistantGrid((5,6), (0.0, 0.0), (4.0,5.0))
-#
-#     d_w = NormalDerivative(op, g, CartesianBoundary{1,Lower}())
-#     d_e = NormalDerivative(op, g, CartesianBoundary{1,Upper}())
-#     d_s = NormalDerivative(op, g, CartesianBoundary{2,Lower}())
-#     d_n = NormalDerivative(op, g, CartesianBoundary{2,Upper}())
-#
-#
-#     v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
-#     v∂x = evalOn(g, (x,y)-> 2*x + y)
-#     v∂y = evalOn(g, (x,y)-> 2*(y-1) + x)
-#
-#     @test d_w  isa TensorMapping{T,2,1} where T
-#     @test d_w' isa TensorMapping{T,1,2} where T
-#
-#     @test domain_size(d_w, (3,2)) == (2,)
-#     @test domain_size(d_e, (3,2)) == (2,)
-#     @test domain_size(d_s, (3,2)) == (3,)
-#     @test domain_size(d_n, (3,2)) == (3,)
-#
-#     @test size(d_w'*v) == (6,)
-#     @test size(d_e'*v) == (6,)
-#     @test size(d_s'*v) == (5,)
-#     @test size(d_n'*v) == (5,)
-#
-#     @test d_w'*v .≈ v∂x[1,:]
-#     @test d_e'*v .≈ v∂x[5,:]
-#     @test d_s'*v .≈ v∂y[:,1]
-#     @test d_n'*v .≈ v∂y[:,6]
-#
-#
-#     d_x_l = zeros(Float64, 5)
-#     d_x_u = zeros(Float64, 5)
-#     for i ∈ eachindex(d_x_l)
-#         d_x_l[i] = op.dClosure[i-1]
-#         d_x_u[i] = -op.dClosure[length(d_x_u)-i]
-#     end
-#
-#     d_y_l = zeros(Float64, 6)
-#     d_y_u = zeros(Float64, 6)
-#     for i ∈ eachindex(d_y_l)
-#         d_y_l[i] = op.dClosure[i-1]
-#         d_y_u[i] = -op.dClosure[length(d_y_u)-i]
-#     end
-#
-#     function prod_matrix(x,y)
-#         G = zeros(Float64, length(x), length(y))
-#         for I ∈ CartesianIndices(G)
-#             G[I] = x[I[1]]*y[I[2]]
-#         end
-#
-#         return G
-#     end
-#
-#     g_x = [1,2,3,4.0,5]
-#     g_y = [5,4,3,2,1.0,11]
-#
-#     G_w = prod_matrix(d_x_l, g_y)
-#     G_e = prod_matrix(d_x_u, g_y)
-#     G_s = prod_matrix(g_x, d_y_l)
-#     G_n = prod_matrix(g_x, d_y_u)
-#
-#
-#     @test size(d_w*g_y) == (UnknownDim,6)
-#     @test size(d_e*g_y) == (UnknownDim,6)
-#     @test size(d_s*g_x) == (5,UnknownDim)
-#     @test size(d_n*g_x) == (5,UnknownDim)
-#
-#     # These tests should be moved to where they are possible (i.e we know what the grid should be)
-#     @test_broken d_w*g_y .≈ G_w
-#     @test_broken d_e*g_y .≈ G_e
-#     @test_broken d_s*g_x .≈ G_s
-#     @test_broken d_n*g_x .≈ G_n
-# end
-#
-# @testset "BoundaryQuadrature" begin
-#     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-#     g = EquidistantGrid((10,11), (0.0, 0.0), (1.0,1.0))
-#
-#     H_w = BoundaryQuadrature(op, g, CartesianBoundary{1,Lower}())
-#     H_e = BoundaryQuadrature(op, g, CartesianBoundary{1,Upper}())
-#     H_s = BoundaryQuadrature(op, g, CartesianBoundary{2,Lower}())
-#     H_n = BoundaryQuadrature(op, g, CartesianBoundary{2,Upper}())
-#
-#     v = evalOn(g, (x,y)-> x^2 + (y-1)^2 + x*y)
-#
-#     function get_quadrature(N)
-#         qc = op.quadratureClosure
-#         q = (qc..., ones(N-2*closuresize(op))..., reverse(qc)...)
-#         @assert length(q) == N
-#         return q
-#     end
-#
-#     v_w = v[1,:]
-#     v_e = v[10,:]
-#     v_s = v[:,1]
-#     v_n = v[:,11]
-#
-#     q_x = spacing(g)[1].*get_quadrature(10)
-#     q_y = spacing(g)[2].*get_quadrature(11)
-#
-#     @test H_w isa TensorOperator{T,1} where T
-#
-#     @test domain_size(H_w, (3,)) == (3,)
-#     @test domain_size(H_n, (3,)) == (3,)
-#
-#     @test range_size(H_w, (3,)) == (3,)
-#     @test range_size(H_n, (3,)) == (3,)
-#
-#     @test size(H_w*v_w) == (11,)
-#     @test size(H_e*v_e) == (11,)
-#     @test size(H_s*v_s) == (10,)
-#     @test size(H_n*v_n) == (10,)
-#
-#     @test H_w*v_w .≈ q_y.*v_w
-#     @test H_e*v_e .≈ q_y.*v_e
-#     @test H_s*v_s .≈ q_x.*v_s
-#     @test H_n*v_n .≈ q_x.*v_n
-#
-#     @test H_w'*v_w == H_w'*v_w
-#     @test H_e'*v_e == H_e'*v_e
-#     @test H_s'*v_s == H_s'*v_s
-#     @test H_n'*v_n == H_n'*v_n
-# end
+
+@testset "BoundaryRestriction" begin
+    op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+    g_1D = EquidistantGrid(11, 0.0, 1.0)
+    g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
+
+    @testset "Constructors" begin
+        @testset "1D" begin
+            e_l = BoundaryRestriction(g_1D,op.eClosure,Lower())
+            @test e_l == BoundaryRestriction(g_1D,op.eClosure,CartesianBoundary{1,Lower}())
+            @test e_l == BoundaryOperator(g_1D,op.eClosure,Lower())
+            @test e_l isa BoundaryOperator{T,Lower} where T
+            @test e_l isa TensorMapping{T,0,1} where T
+
+            e_r = BoundaryRestriction(g_1D,op.eClosure,Upper())
+            @test e_r == BoundaryRestriction(g_1D,op.eClosure,CartesianBoundary{1,Upper}())
+            @test e_r == BoundaryOperator(g_1D,op.eClosure,Upper())
+            @test e_r isa BoundaryOperator{T,Upper} where T
+            @test e_r isa TensorMapping{T,0,1} where T
+        end
+
+        @testset "2D" begin
+            e_w = BoundaryRestriction(g_2D,op.eClosure,CartesianBoundary{1,Upper}())
+            @test e_w isa InflatedTensorMapping
+            @test e_w isa TensorMapping{T,1,2} where T
+        end
+    end
+
+    @testset "Application" begin
+        @testset "1D" begin
+            e_l = BoundaryRestriction(g_1D, op.eClosure, CartesianBoundary{1,Lower}())
+            e_r = BoundaryRestriction(g_1D, op.eClosure, CartesianBoundary{1,Upper}())
+
+            v = evalOn(g_1D,x->1+x^2)
+            u = fill(3.124)
+
+            @test (e_l*v)[] == v[1]
+            @test (e_r*v)[] == v[end]
+            @test (e_r*v)[1] == v[end]
+        end
+
+        @testset "2D" begin
+            e_w = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{1,Lower}())
+            e_e = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{1,Upper}())
+            e_s = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{2,Lower}())
+            e_n = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{2,Upper}())
+
+            v = rand(11, 15)
+            u = fill(3.124)
+
+            @test e_w*v == v[1,:]
+            @test e_e*v == v[end,:]
+            @test e_s*v == v[:,1]
+            @test e_n*v == v[:,end]
+       end
+    end
+end
+
+@testset "NormalDerivative" begin
+    g_1D = EquidistantGrid(11, 0.0, 1.0)
+    g_2D = EquidistantGrid((11,12), (0.0, 0.0), (1.0,1.0))
+    @testset "Constructors" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            d_l = NormalDerivative(g_1D, op.dClosure, Lower())
+            @test d_l == NormalDerivative(g_1D, op.dClosure, CartesianBoundary{1,Lower}())
+            @test d_l isa BoundaryOperator{T,Lower} where T
+            @test d_l isa TensorMapping{T,0,1} where T
+        end
+        @testset "2D" begin
+            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            d_w = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
+            d_n = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
+            Ix = IdentityMapping{Float64}((size(g_2D)[1],))
+            Iy = IdentityMapping{Float64}((size(g_2D)[2],))
+            d_l = NormalDerivative(restrict(g_2D,1),op.dClosure,Lower())
+            d_r = NormalDerivative(restrict(g_2D,2),op.dClosure,Upper())
+            @test d_w ==  d_l⊗Iy
+            @test d_n ==  Ix⊗d_r
+            @test d_w isa TensorMapping{T,1,2} where T
+            @test d_n isa TensorMapping{T,1,2} where T
+        end
+    end
+    @testset "Accuracy" begin
+        v = evalOn(g_2D, (x,y)-> x^2 + (y-1)^2 + x*y)
+        v∂x = evalOn(g_2D, (x,y)-> 2*x + y)
+        v∂y = evalOn(g_2D, (x,y)-> 2*(y-1) + x)
+        # TODO: Test for higher order polynomials?
+        @testset "2nd order" begin
+            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+            d_w = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
+            d_e = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Upper}())
+            d_s = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Lower}())
+            d_n = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
+
+            @test d_w*v ≈ v∂x[1,:] atol = 1e-13
+            @test d_e*v ≈ -v∂x[end,:] atol = 1e-13
+            @test d_s*v ≈ v∂y[:,1] atol = 1e-13
+            @test d_n*v ≈ -v∂y[:,end] atol = 1e-13
+        end
+
+        @testset "4th order" begin
+            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            d_w = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
+            d_e = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Upper}())
+            d_s = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Lower}())
+            d_n = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
+
+            @test d_w*v ≈ v∂x[1,:] atol = 1e-13
+            @test d_e*v ≈ -v∂x[end,:] atol = 1e-13
+            @test d_s*v ≈ v∂y[:,1] atol = 1e-13
+            @test d_n*v ≈ -v∂y[:,end] atol = 1e-13
+        end
+    end
+end
 
 end

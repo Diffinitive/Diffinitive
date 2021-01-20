@@ -9,7 +9,6 @@ export get_stencil
 export get_stencils
 export get_tuple
 
-
 function read_D2_operator(fn; order)
     operators = TOML.parsefile(fn)["order$order"]
     D2 = operators["D2"]
@@ -23,22 +22,25 @@ function read_D2_operator(fn; order)
     # Create boundary stencils
     boundarySize = length(D2["closure_stencils"])
     closureStencils = Vector{typeof(innerStencil)}() # TBD: is the the right way to get the correct type?
-
     for i ∈ 1:boundarySize
         closureStencils = (closureStencils..., get_stencil(operators, "D2", "closure_stencils", i; center=i))
     end
-
     # TODO: Get rid of the padding here. Any padding should be handled by the consturctor accepting the stencils.
-    quadratureClosure = pad_tuple(toml_string_array_to_tuple(Float64, H["closure"]), boundarySize)
     eClosure = Stencil(pad_tuple(toml_string_array_to_tuple(Float64, e["closure"]), boundarySize), center=1)
     dClosure = Stencil(pad_tuple(toml_string_array_to_tuple(Float64, d1["closure"]), boundarySize), center=1)
 
+    q_tuple = pad_tuple(toml_string_array_to_tuple(Float64, H["closure"]), boundarySize)
+    quadratureClosure = Vector{typeof(innerStencil)}()
+    for i ∈ 1:boundarySize
+        quadratureClosure = (quadratureClosure..., Stencil((q_tuple[i],), center=1))
+    end
+
     d2 = SbpOperators.D2(
-        quadratureClosure,
         innerStencil,
         closureStencils,
         eClosure,
         dClosure,
+        quadratureClosure,
         even
     )
 
