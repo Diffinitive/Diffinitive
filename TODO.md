@@ -23,7 +23,6 @@
  - [ ] Add possibility to create tensor mapping application with `()`, e.g `D1(v) <=> D1*v`?
 
 ## Repo
- - [ ] Add Vidar to the authors list
  - [ ] Rename repo to Sbplib.jl
 
 # Wrap up tasks
