@@ -2,35 +2,41 @@
 authors = "Ken Mattson"
 descripion = "Standard operators for equidistant grids"
 type = "equidistant"
+cite = "A paper a long time ago in a galaxy far far away."
 
-[order2]
+[[stencil_set]]
+
+order = 2
+
 H.inner = ["1"]
 H.closure = ["1/2"]
 
 D1.inner_stencil = ["-1/2", "0", "1/2"]
 D1.closure_stencils = [
-    ["-1", "1"],
+    {s = ["-1", "1"], c = 1},
 ]
 
 D2.inner_stencil = ["1", "-2", "1"]
 D2.closure_stencils = [
-    ["1", "-2", "1"],
+    {s = ["1", "-2", "1"], c = 1},
 ]
 
 e.closure = ["1"]
-d1.closure = ["-3/2", "2", "-1/2"]
+d1.closure = {s = ["-3/2", "2", "-1/2"], c = 1}
 
-[order4]
+[[stencil_set]]
+
+order = 4
 H.inner = ["1"]
 H.closure = ["17/48", "59/48", "43/48", "49/48"]
 
 D2.inner_stencil = ["-1/12","4/3","-5/2","4/3","-1/12"]
 D2.closure_stencils = [
-    [     "2",    "-5",      "4",       "-1",     "0",     "0"],
-    [     "1",    "-2",      "1",        "0",     "0",     "0"],
-    [ "-4/43", "59/43", "-110/43",   "59/43", "-4/43",     "0"],
-    [ "-1/49",     "0",   "59/49", "-118/49", "64/49", "-4/49"],
+    {s = [     "2",    "-5",      "4",       "-1",     "0",     "0"], c = 1},
+    {s = [     "1",    "-2",      "1",        "0",     "0",     "0"], c = 2},
+    {s = [ "-4/43", "59/43", "-110/43",   "59/43", "-4/43",     "0"], c = 3},
+    {s = [ "-1/49",     "0",   "59/49", "-118/49", "64/49", "-4/49"], c = 4},
 ]
 
 e.closure = ["1"]
-d1.closure = ["-11/6", "3", "-3/2", "1/3"]
+d1.closure = {s = ["-11/6", "3", "-3/2", "1/3"], c = 1}

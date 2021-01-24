@@ -47,6 +47,18 @@ function read_D2_operator(fn; order)
     return d2
 end
 
+"""
+    read_stencil_set(fn, filter_pairs::Vararg{Pair})
+
+Picks out a stencil set from the given toml file based on some filters.
+If more than one set matches the filters an error is raised.
+
+"""
+read_stencil_set(fn, filter_pairs::Vararg{Pair}) = get_stencil_set(TOML.parsefile(fn), filter_pairs...)
+
+function get_stencil_set(parsed_toml, filter_pairs::Vararg{Pair})
+
+end
 
 """
     read_stencil(fn, path...; [center])
@@ -131,6 +143,9 @@ function get_tuple(parsed_toml)
     @assert parsed_toml isa Vector{String}
     t = Tuple(Float64.(parse_rational.(parsed_toml)))
     return t
+end
+
+function get_rationals()
 end
 
 # TODO: Probably should be deleted once we have gotten rid of read_D2_operator()
