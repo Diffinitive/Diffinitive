@@ -1,5 +1,112 @@
 # Notes
 
+## Reading operators
+
+Jonatan's suggestion is to add methods to `Laplace`, `SecondDerivative` and
+similar functions that take in a filename from which to read stencils. These
+methods encode how to use the structure in a file to build the particular
+operator. The filename should be a keyword argument and could have a default
+value.
+
+ * This allows easy creation of operators without the user having to handle stencils.
+ * The user can easily switch between sets of operators by changing the file stecils are read from.
+
+Grids for optimized operators could be created by reading from a .toml file in
+a similar fashion as for the operators. The grid can then be used in a
+`Laplace` method which dispatches on the grid type and knows how to read the
+optimized operators. The method would also make sure the operators match the
+grid.
+
+Idea: Make the current upper case methods lower case. Add types with the upper
+case names. These types are tensor mappings for the operator but also contain
+the associated operators as fields. For example:
+
+```julia
+ L = Laplace(grid)
+ L.H
+ L.Hi
+ L.e
+ L.d
+ L.M
+
+ wave = L - L.Hi∘L.e'∘L.d
+```
+
+These types could also contain things like borrowing and such.
+
+## Storage of operators
+We need to change the toml format so that it is easier to store several
+operator with different kinds of differentiations. For example there could be
+several operators of the same order but with different number of boundary
+points or different choice of boundary stencils.
+
+Properties that differentiate operators should for this reason be stored in
+variables and not be section or table names.
+
+Operators/sets of stencils should be stored in an [array of tables](https://toml.io/en/v1.0.0-rc.3#array-of-tables).
+
+We should formalize the format and write simple and general access methods for
+getting operators/sets of stencils from the file. They should support a simple
+way to filter based on values of variables. There filters could possibly be
+implemented through keyword arguments that are sent through all the layers of
+operator creation.
+
+* Remove order as a table name and put it as a variable.
+
+
+## Variable second derivative
+
+2020-12-08 after discussion with Vidar:
+We will have to handle the variable second derivative in a new variant of
+VolumeOperator, "SecondDerivativeVariable?". Somehow it needs to know about
+the coefficients. They should be provided as an AbstractVector. Where they are
+provided is another question. It could be that you provide a reference to the
+array to the constructor of SecondDerivativeVariable. If that array is mutable
+you are free to change it whenever and the changes should propagate
+accordingly. Another option is that the counter part to "Laplace" for this
+variable second derivate returns a function or acts like a functions that
+takes an Abstract array and returns a SecondDerivativeVariable with the
+appropriate array. This would allow syntax like `D2(a)*v`. Can this be made
+performant?
+
+For the 1d case we can have a constructor
+`SecondDerivativeVariable(D2::SecondDerivativeVariable, a)` that just creates
+a copy with a different `a`.
+
+Apart from just the second derivative in 1D we need operators for higher
+dimensions. What happens if a=a(x,y)? Maybe this can be solved orthogonally to
+the `D2(a)*v` issue, meaning that if a constant nD version of
+SecondDerivativeVariable is available then maybe it can be wrapped to support
+function like syntax. We might have to implement `SecondDerivativeVariable`
+for N dimensions which takes a N dimensional a. If this could be easily
+closured to allow D(a) syntax we would have come a long way.
+
+For `Laplace` which might use a variable D2 if it is on a curvilinear grid we
+might want to choose how to calculate the metric coefficients. They could be
+known on closed form, they could be calculated from the grid coordinates or
+they could be provided as a vector. Which way you want to do it might change
+depending on for example if you are memory bound or compute bound. This choice
+cannot be done on the grid since the grid shouldn't care about the computer
+architecture. The most sensible option seems to be to have an argument to the
+`Laplace` function which controls how the coefficients are gotten from the
+grid. The argument could for example be a function which is to be applied to
+the grid.
+
+What happens if the grid or the varible coefficient is dependent on time?
+Maybe it becomes important to support `D(a)` or even `D(t,a)` syntax in a more
+general way.
+
+```
+g = TimeDependentGrid()
+L = Laplace(g)
+function Laplace(g::TimeDependentGrid)
+    g_logical = logical(g) # g_logical is time independent
+    ... Build a L(a) assuming we can do that ...
+    a(t) = metric_coeffs(g,t)
+    return t->L(a(t))
+end
+```
+
 ## Known size of range and domain?
 Is there any reason to use a trait to differentiate between fixed size and unknown size?
 
