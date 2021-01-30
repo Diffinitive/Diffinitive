@@ -1,6 +1,6 @@
 [meta]
 authors = "Ken Mattson"
-descripion = "Standard operators for equidistant grids"
+description = "Standard operators for equidistant grids"
 type = "equidistant"
 cite = "A paper a long time ago in a galaxy far far away."
 
