@@ -103,9 +103,9 @@ Returns a tuple containing the boundary identifiers for the grid, stored as
 	 CartesianBoundary(2,Lower),
 	 ...)
 """
-function boundary_identifiers(g::EquidistantGrid{Dim}) where Dim
+function boundary_identifiers(g::EquidistantGrid)
     bids = ()
-    for i=1:Dim
+    for i=1:dimension(g)
         for r ∈ (Lower,Upper)
             bids = (bids...,CartesianBoundary{i,r}())
         end
