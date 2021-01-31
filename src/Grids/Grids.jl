@@ -1,6 +1,7 @@
 module Grids
 
 using Sbplib.RegionIndices
+using Sbplib.LazyTensors
 
 export BoundaryIdentifier, CartesianBoundary
 

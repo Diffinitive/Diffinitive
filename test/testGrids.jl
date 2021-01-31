@@ -57,9 +57,11 @@ using Sbplib.RegionIndices
 
     @testset "boundary_identifiers" begin
         g = EquidistantGrid((2,5,3), (0.0,0.0,0.0), (2.0,1.0,3.0))
-        @test boundary_identifiers(g) == (CartesianBoundary{1,Lower}(),CartesianBoundary{1,Upper}(),
-                                          CartesianBoundary{2,Lower}(),CartesianBoundary{2,Upper}(),
-                                          CartesianBoundary{3,Lower}(),CartesianBoundary{3,Upper}())
+        bids = (CartesianBoundary{1,Lower}(),CartesianBoundary{1,Upper}(),
+                CartesianBoundary{2,Lower}(),CartesianBoundary{2,Upper}(),
+                CartesianBoundary{3,Lower}(),CartesianBoundary{3,Upper}())
+        @test boundary_identifiers(g) == bids
+        @inferred boundary_identifiers(g)
     end
 end
 

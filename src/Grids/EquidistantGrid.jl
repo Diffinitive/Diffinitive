@@ -41,7 +41,6 @@ end
 
 Base.size(g::EquidistantGrid) = g.size
 
-# TODO: Change to ndims? Seem to be the julia naming convention, at least for AbstractArrays.
 """
     dimension(grid::EquidistantGrid)
 
@@ -103,13 +102,5 @@ Returns a tuple containing the boundary identifiers for the grid, stored as
 	 CartesianBoundary(2,Lower),
 	 ...)
 """
-function boundary_identifiers(g::EquidistantGrid)
-    bids = ()
-    for i=1:dimension(g)
-        for r ∈ (Lower,Upper)
-            bids = (bids...,CartesianBoundary{i,r}())
-        end
-    end
-    return bids
-end
+boundary_identifiers(g::EquidistantGrid) = (((ntuple(i->(CartesianBoundary{i,Lower}(),CartesianBoundary{i,Upper}()),dimension(g)))...)...,)
 export boundary_identifiers
