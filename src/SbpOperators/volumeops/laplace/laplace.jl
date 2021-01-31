@@ -36,22 +36,17 @@ function Laplace(grid::EquidistantGrid, fn; order)
     H =  DiagonalQuadrature(grid, H_closure_stencils)
     H⁻¹ =  InverseDiagonalQuadrature(grid, H_closure_stencils)
 
-    # Pair boundary operators and boundary quadratures with the boundary ids
-    e_pairs = ()
-    d_pairs = ()
-    Hᵧ_pairs = ()
+    # Pair operators with boundary ids
+    bids = boundary_identifiers(grid)
+    # Boundary operators
+    e_pairs = ntuple(i -> Pair(bids[i],BoundaryRestriction(grid,e_closure_stencil,bids[i])),length(bids))
+    d_pairs = ntuple(i -> Pair(bids[i],NormalDerivative(grid,d_closure_stencil,bids[i])),length(bids))
+    # Boundary quadratures are constructed on the lower-dimensional grid defined
+    # by the coordinite directions orthogonal to that of the boundary.
     dims = collect(1:dimension(grid))
-    for id ∈ boundary_identifiers(grid)
-        # Boundary operators
-        e_pairs = (e_pairs...,Pair(id,BoundaryRestriction(grid,e_closure_stencil,id)))
-        d_pairs = (d_pairs...,Pair(id,NormalDerivative(grid,d_closure_stencil,id)))
-        # Boundary quadratures
-        # Construct these on the lower-dimensional grid in the
-        # coordinite directions orthogonal to dim(id)
-        orth_dims = dims[dims .!= dim(id)]
-        orth_grid = restrict(grid,orth_dims)
-        Hᵧ_pairs = (Hᵧ_pairs...,Pair(id,DiagonalQuadrature(orth_grid,H_closure_stencils)))
-    end
+    orth_grids = ntuple(i -> restrict(grid,dims[dims .!= dim(bids[i])]),length(bids))
+    Hᵧ_pairs = ntuple(i -> Pair(bids[i],DiagonalQuadrature(orth_grids[i],H_closure_stencils)),length(bids))
+
     return Laplace(Δ, H, H⁻¹, Dict(e_pairs), Dict(d_pairs), Dict(Hᵧ_pairs))
 end
 
