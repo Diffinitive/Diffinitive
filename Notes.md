@@ -130,6 +130,7 @@ When do we need to know the size of the range and domain?
  - [ ] How do we handle mixes of periodic and non-periodic grids? Seems it should be supported on the grid level and on the 1d operator level. Between there it should be transparent.
  - [ ] Can we have a trait to tell if a TensorMapping is transposable?
  - [ ] Is it ok to have "Constructors" for abstract types which create subtypes? For example a Grids() functions that gives different kind of grids based on input?
+ - [ ] Figure out how to treat the borrowing parameters of operators. Include in into the struct? Expose via function dispatched on the operator type and grid?
 
 ## Regions and tensormappings
 - [ ] Use a trait to indicate if a TensorMapping uses indices with regions.
