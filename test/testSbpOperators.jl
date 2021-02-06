@@ -367,6 +367,7 @@ end
             @test L.H_boundary == Hb_dict
 
             @test L isa TensorMapping{T,1,1}  where T
+            @inferred Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict)
         end
         @testset "3D" begin
             # Create all tensor mappings included in Laplace
@@ -417,6 +418,7 @@ end
             @test L.d == d_dict
             @test L.H_boundary == Hb_dict
             @test L isa TensorMapping{T,3,3} where T
+            @inferred Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict)
         end
     end
 
