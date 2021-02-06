@@ -93,6 +93,17 @@ end
     """
 
     parsed_toml = TOML.parse(toml_str)
+
+    @testset "get_stencil_set" begin
+        @test get_stencil_set(parsed_toml; order = 2) isa Dict
+        @test get_stencil_set(parsed_toml; order = 2) == parsed_toml["stencil_set"][1]
+        @test get_stencil_set(parsed_toml; test = 1) == parsed_toml["stencil_set"][2]
+        @test get_stencil_set(parsed_toml; order = 4, test = 2) == parsed_toml["stencil_set"][3]
+
+        @test_throws ArgumentError get_stencil_set(parsed_toml; test = 2)
+        @test_throws ArgumentError get_stencil_set(parsed_toml; order = 4)
+    end
+
     @testset "get_stencil" begin
         @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil") == Stencil((-1/2, 0., 1/2), center=2)
         @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil", center=1) == Stencil((-1/2, 0., 1/2); center=1)
@@ -317,7 +328,7 @@ end
                 @test Dₓₓ*v ≈ vₓₓ rtol = 5e-4 norm = l2
             end
         end
-        
+
         @testset "2D" begin
             l2(v) = sqrt(prod(spacing(g_2D))*sum(v.^2));
             binomials = ()

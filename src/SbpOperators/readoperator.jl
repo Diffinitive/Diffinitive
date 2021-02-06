@@ -1,5 +1,8 @@
 using TOML
 
+export read_stencil_set
+export get_stencil_set
+
 export read_D2_operator
 export read_stencil
 export read_stencils
@@ -53,11 +56,33 @@ end
 Picks out a stencil set from the given toml file based on some filters.
 If more than one set matches the filters an error is raised.
 
+The stencil set is not parsed beyond the inital toml parse. To get usable
+stencils use the `parse_stencil` functions on the fields of the stencil set.
 """
 read_stencil_set(fn, filter_pairs::Vararg{Pair}) = get_stencil_set(TOML.parsefile(fn), filter_pairs...)
 
-function get_stencil_set(parsed_toml, filter_pairs::Vararg{Pair})
+"""
+    get_stencil_set(parsed_toml; filters...)
 
+Same as `read_stencil_set` but works on already parsed TOML.
+"""
+function get_stencil_set(parsed_toml; filters...)
+    matches = findall(parsed_toml["stencil_set"]) do set
+        for (key, val) ∈ filters
+            if set[string(key)] != val
+                return false
+            end
+        end
+
+        return true
+    end
+
+    if length(matches) != 1
+        throw(ArgumentError("filters must pick out a single stencil set"))
+    end
+
+    i = matches[1]
+    return parsed_toml["stencil_set"][i]
 end
 
 """
