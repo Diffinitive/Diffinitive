@@ -5,6 +5,10 @@
 Implements the Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
 `TensorMapping`. Additionally, `Laplace` stores the quadrature, and boundary
 operators relevant for constructing a SBP finite difference scheme as `TensorMapping`s.
+
+Laplace(grid::EquidistantGrid, fn; order) creates the Laplace operator on an
+equidistant grid, where the operators are read from a TOML. The laplace operator
+is created using laplace(grid,...).
 """
 struct Laplace{T, Dim, Rb, TMdiffop<:TensorMapping{T,Dim,Dim}, # Differential operator tensor mapping
                            TMqop<:TensorMapping{T,Dim,Dim}, # Quadrature operator tensor mapping
@@ -33,19 +37,14 @@ function Laplace(grid::EquidistantGrid, fn; order)
 
     # Volume operators
     Δ =  laplace(grid, D_inner_stecil, D_closure_stencils)
-    H =  DiagonalQuadrature(grid, H_closure_stencils)
+    H =  quadrature(grid, H_closure_stencils)
     H⁻¹ =  InverseDiagonalQuadrature(grid, H_closure_stencils)
 
-    # Pair operators with boundary ids
+    # Boundary operator - id pairs
     bids = boundary_identifiers(grid)
-    # Boundary operators
     e_pairs = ntuple(i -> Pair(bids[i],BoundaryRestriction(grid,e_closure_stencil,bids[i])),length(bids))
     d_pairs = ntuple(i -> Pair(bids[i],NormalDerivative(grid,d_closure_stencil,bids[i])),length(bids))
-    # Boundary quadratures are constructed on the lower-dimensional grid defined
-    # by the coordinite directions orthogonal to that of the boundary.
-    dims = collect(1:dimension(grid))
-    orth_grids = ntuple(i -> restrict(grid,dims[dims .!= dim(bids[i])]),length(bids))
-    Hᵧ_pairs = ntuple(i -> Pair(bids[i],DiagonalQuadrature(orth_grids[i],H_closure_stencils)),length(bids))
+    Hᵧ_pairs = ntuple(i -> Pair(bids[i],boundary_quadrature(grid,H_closure_stencils,bids[i])),length(bids))
 
     return Laplace(Δ, H, H⁻¹, Dict(e_pairs), Dict(d_pairs), Dict(Hᵧ_pairs))
 end
