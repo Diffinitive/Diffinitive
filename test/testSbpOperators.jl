@@ -290,7 +290,7 @@ end
                 @test Dₓₓ*v ≈ vₓₓ rtol = 5e-4 norm = l2
             end
         end
-        
+
         @testset "2D" begin
             l2(v) = sqrt(prod(spacing(g_2D))*sum(v.^2));
             binomials = ()
@@ -390,38 +390,73 @@ end
     end
 end
 
-@testset "DiagonalQuadrature" begin
+@testset "Quadrature diagonal" begin
     Lx = π/2.
     Ly = Float64(π)
+    Lz = 1.
     g_1D = EquidistantGrid(77, 0.0, Lx)
     g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
+    g_3D = EquidistantGrid((10,10, 10), (0.0, 0.0, 0.0), (Lx,Ly,Lz))
     integral(H,v) = sum(H*v)
-    @testset "Constructors" begin
+    @testset "quadrature" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
-            H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+            H = quadrature(g_1D,op.quadratureClosure)
             inner_stencil = Stencil((1.,),center=1)
-            @test H == Quadrature(g_1D,inner_stencil,op.quadratureClosure)
+            @test H == quadrature(g_1D,inner_stencil,op.quadratureClosure)
             @test H isa TensorMapping{T,1,1} where T
         end
-        @testset "1D" begin
-            H = DiagonalQuadrature(g_2D,op.quadratureClosure)
-            H_x = DiagonalQuadrature(restrict(g_2D,1),op.quadratureClosure)
-            H_y = DiagonalQuadrature(restrict(g_2D,2),op.quadratureClosure)
+        @testset "2D" begin
+            H = quadrature(g_2D,op.quadratureClosure)
+            H_x = quadrature(restrict(g_2D,1),op.quadratureClosure)
+            H_y = quadrature(restrict(g_2D,2),op.quadratureClosure)
             @test H == H_x⊗H_y
             @test H isa TensorMapping{T,2,2} where T
+        end
+    end
+
+    @testset "boundary_quadrature" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            (id_l, id_r) = boundary_identifiers(g_1D)
+            @test boundary_quadrature(g_1D,op.quadratureClosure,id_l) == IdentityMapping{Float64}()
+            @test boundary_quadrature(g_1D,op.quadratureClosure,id_r) == IdentityMapping{Float64}()
+
+        end
+        @testset "2D" begin
+            (id_w, id_e, id_s, id_n) = boundary_identifiers(g_2D)
+            H_x = quadrature(restrict(g_2D,1),op.quadratureClosure)
+            H_y = quadrature(restrict(g_2D,2),op.quadratureClosure)
+            @test boundary_quadrature(g_2D,op.quadratureClosure,id_w) == H_y
+            @test boundary_quadrature(g_2D,op.quadratureClosure,id_e) == H_y
+            @test boundary_quadrature(g_2D,op.quadratureClosure,id_s) == H_x
+            @test boundary_quadrature(g_2D,op.quadratureClosure,id_n) == H_x
+        end
+        @testset "3D" begin
+            (id_w, id_e,
+             id_s, id_n,
+             id_t, id_b) = boundary_identifiers(g_3D)
+            H_xy = quadrature(restrict(g_3D,[1,2]),op.quadratureClosure)
+            H_xz = quadrature(restrict(g_3D,[1,3]),op.quadratureClosure)
+            H_yz = quadrature(restrict(g_3D,[2,3]),op.quadratureClosure)
+            @test boundary_quadrature(g_3D,op.quadratureClosure,id_w) == H_yz
+            @test boundary_quadrature(g_3D,op.quadratureClosure,id_e) == H_yz
+            @test boundary_quadrature(g_3D,op.quadratureClosure,id_s) == H_xz
+            @test boundary_quadrature(g_3D,op.quadratureClosure,id_n) == H_xz
+            @test boundary_quadrature(g_3D,op.quadratureClosure,id_t) == H_xy
+            @test boundary_quadrature(g_3D,op.quadratureClosure,id_b) == H_xy
         end
     end
 
     @testset "Sizes" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
-            H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+            H = quadrature(g_1D,op.quadratureClosure)
             @test domain_size(H) == size(g_1D)
             @test range_size(H) == size(g_1D)
         end
         @testset "2D" begin
-            H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+            H = quadrature(g_2D,op.quadratureClosure)
             @test domain_size(H) == size(g_2D)
             @test range_size(H) == size(g_2D)
         end
@@ -438,7 +473,7 @@ end
 
             @testset "2nd order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                H = quadrature(g_1D,op.quadratureClosure)
                 for i = 1:2
                     @test integral(H,v[i]) ≈ v[i+1][end] - v[i+1][1] rtol = 1e-14
                 end
@@ -447,7 +482,7 @@ end
 
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                H = quadrature(g_1D,op.quadratureClosure)
                 for i = 1:4
                     @test integral(H,v[i]) ≈ v[i+1][end] -  v[i+1][1] rtol = 1e-14
                 end
@@ -461,13 +496,13 @@ end
             u = evalOn(g_2D,(x,y)->sin(x)+cos(y))
             @testset "2nd order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                H = quadrature(g_2D,op.quadratureClosure)
                 @test integral(H,v) ≈ b*Lx*Ly rtol = 1e-13
                 @test integral(H,u) ≈ π rtol = 1e-4
             end
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                H = quadrature(g_2D,op.quadratureClosure)
                 @test integral(H,v) ≈ b*Lx*Ly rtol = 1e-13
                 @test integral(H,u) ≈ π rtol = 1e-8
             end
@@ -521,14 +556,14 @@ end
             u = evalOn(g_1D,x->x^3-x^2+1)
             @testset "2nd order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                H = quadrature(g_1D,op.quadratureClosure)
                 Hi = InverseDiagonalQuadrature(g_1D,op.quadratureClosure)
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
             end
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                H = DiagonalQuadrature(g_1D,op.quadratureClosure)
+                H = quadrature(g_1D,op.quadratureClosure)
                 Hi = InverseDiagonalQuadrature(g_1D,op.quadratureClosure)
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
@@ -539,14 +574,14 @@ end
             u = evalOn(g_2D,(x,y)->x*y + x^5 - sqrt(y))
             @testset "2nd order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                H = quadrature(g_2D,op.quadratureClosure)
                 Hi = InverseDiagonalQuadrature(g_2D,op.quadratureClosure)
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
             end
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                H = DiagonalQuadrature(g_2D,op.quadratureClosure)
+                H = quadrature(g_2D,op.quadratureClosure)
                 Hi = InverseDiagonalQuadrature(g_2D,op.quadratureClosure)
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
