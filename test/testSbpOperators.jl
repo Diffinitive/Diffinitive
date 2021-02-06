@@ -336,18 +336,120 @@ end
     @testset "Constructors" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
-            L = Laplace(g_1D, op.innerStencil, op.closureStencils)
+            # Create all tensor mappings included in Laplace
+            Δ = laplace(g_1D, op.innerStencil, op.closureStencils)
+            H = quadrature(g_1D, op.quadratureClosure)
+            Hi = InverseDiagonalQuadrature(g_1D, op.quadratureClosure)
+
+            (id_l, id_r) = boundary_identifiers(g_1D)
+
+            e_l = BoundaryRestriction(g_1D,op.eClosure,id_l)
+            e_r = BoundaryRestriction(g_1D,op.eClosure,id_r)
+            e_dict = Dict(Pair(id_l,e_l),Pair(id_r,e_r))
+
+            d_l = NormalDerivative(g_1D,op.dClosure,id_l)
+            d_r = NormalDerivative(g_1D,op.dClosure,id_r)
+            d_dict = Dict(Pair(id_l,d_l),Pair(id_r,d_r))
+
+            H_l = boundary_quadrature(g_1D,op.quadratureClosure,id_r)
+            H_r = boundary_quadrature(g_1D,op.quadratureClosure,id_r)
+            Hb_dict = Dict(Pair(id_l,H_l),Pair(id_r,H_r))
+
+            # TODO: Not sure why this doesnt work? Comparing the fields of
+            # Laplace seems to work. Reformulate below once solved.
+            @test_broken Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict) == Laplace(g_1D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            L = Laplace(g_1D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            @test L.D == Δ
+            @test L.H == H
+            @test L.H_inv == Hi
+            @test L.e == e_dict
+            @test L.d == d_dict
+            @test L.H_boundary == Hb_dict
+
+            @test L isa TensorMapping{T,1,1}  where T
+        end
+        @testset "3D" begin
+            # Create all tensor mappings included in Laplace
+            Δ = laplace(g_3D, op.innerStencil, op.closureStencils)
+            H = quadrature(g_3D, op.quadratureClosure)
+            Hi = InverseDiagonalQuadrature(g_3D, op.quadratureClosure)
+
+            (id_l, id_r, id_s, id_n, id_b, id_t) = boundary_identifiers(g_3D)
+
+            e_l = BoundaryRestriction(g_3D,op.eClosure,id_l)
+            e_r = BoundaryRestriction(g_3D,op.eClosure,id_r)
+            e_s = BoundaryRestriction(g_3D,op.eClosure,id_s)
+            e_n = BoundaryRestriction(g_3D,op.eClosure,id_n)
+            e_b = BoundaryRestriction(g_3D,op.eClosure,id_b)
+            e_t = BoundaryRestriction(g_3D,op.eClosure,id_t)
+            e_dict = Dict(Pair(id_l,e_l),Pair(id_r,e_r),
+                          Pair(id_s,e_s),Pair(id_n,e_n),
+                          Pair(id_b,e_b),Pair(id_t,e_t))
+
+            d_l = NormalDerivative(g_3D,op.dClosure,id_l)
+            d_r = NormalDerivative(g_3D,op.dClosure,id_r)
+            d_s = NormalDerivative(g_3D,op.dClosure,id_s)
+            d_n = NormalDerivative(g_3D,op.dClosure,id_n)
+            d_b = NormalDerivative(g_3D,op.dClosure,id_b)
+            d_t = NormalDerivative(g_3D,op.dClosure,id_t)
+            d_dict = Dict(Pair(id_l,d_l),Pair(id_r,d_r),
+                          Pair(id_s,d_s),Pair(id_n,d_n),
+                          Pair(id_b,d_b),Pair(id_t,d_t))
+
+            H_l = boundary_quadrature(g_3D,op.quadratureClosure,id_r)
+            H_r = boundary_quadrature(g_3D,op.quadratureClosure,id_r)
+            H_s = boundary_quadrature(g_3D,op.quadratureClosure,id_s)
+            H_n = boundary_quadrature(g_3D,op.quadratureClosure,id_n)
+            H_b = boundary_quadrature(g_3D,op.quadratureClosure,id_b)
+            H_t = boundary_quadrature(g_3D,op.quadratureClosure,id_t)
+            Hb_dict = Dict(Pair(id_l,H_l),Pair(id_r,H_r),
+                          Pair(id_s,H_s),Pair(id_n,H_n),
+                          Pair(id_b,H_b),Pair(id_t,H_t))
+
+            # TODO: Not sure why this doesnt work? Comparing the fields of
+            # Laplace seems to work. Reformulate below once solved.
+            @test_broken Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict) == Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            L = Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            @test L.D == Δ
+            @test L.H == H
+            @test L.H_inv == Hi
+            @test L.e == e_dict
+            @test L.d == d_dict
+            @test L.H_boundary == Hb_dict
+            @test L isa TensorMapping{T,3,3} where T
+        end
+    end
+
+    @testset "laplace" begin
+        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "1D" begin
+            L = laplace(g_1D, op.innerStencil, op.closureStencils)
             @test L == SecondDerivative(g_1D, op.innerStencil, op.closureStencils)
             @test L isa TensorMapping{T,1,1}  where T
         end
         @testset "3D" begin
-            L = Laplace(g_3D, op.innerStencil, op.closureStencils)
-            @test L isa TensorMapping{T,3,3} where T
+            L = laplace(g_3D, op.innerStencil, op.closureStencils)
             Dxx = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,1)
             Dyy = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,2)
             Dzz = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,3)
             @test L == Dxx + Dyy + Dzz
+            @test L isa TensorMapping{T,3,3} where T
         end
+    end
+
+    @testset "quadrature" begin
+    end
+
+    @testset "inverse_quadrature" begin
+    end
+
+    @testset "boundary_restriction" begin
+    end
+
+    @testset "normal_restriction" begin
+    end
+
+    @testset "boundary_quadrature" begin
     end
 
     # Exact differentiation is measured point-wise. In other cases
@@ -366,8 +468,7 @@ end
         # 2nd order interior stencil, 1st order boundary stencil,
         # implies that L*v should be exact for binomials up to order 2.
         @testset "2nd order" begin
-            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-            L = Laplace(g_3D,op.innerStencil,op.closureStencils)
+            L = Laplace(g_3D,sbp_operators_path()*"standard_diagonal.toml"; order=2)
             @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test L*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test L*polynomials[3] ≈ polynomials[1] atol = 5e-9
@@ -377,8 +478,7 @@ end
         # 4th order interior stencil, 2nd order boundary stencil,
         # implies that L*v should be exact for binomials up to order 3.
         @testset "4th order" begin
-            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            L = Laplace(g_3D,op.innerStencil,op.closureStencils)
+            L = Laplace(g_3D,sbp_operators_path()*"standard_diagonal.toml"; order=4)
             # NOTE: high tolerances for checking the "exact" differentiation
             # due to accumulation of round-off errors/cancellation errors?
             @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
