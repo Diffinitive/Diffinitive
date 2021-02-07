@@ -29,13 +29,13 @@ function read_D2_operator(fn; order)
         closureStencils = (closureStencils..., get_stencil(operators, "D2", "closure_stencils", i; center=i))
     end
     # TODO: Get rid of the padding here. Any padding should be handled by the consturctor accepting the stencils.
-    eClosure = Stencil(pad_tuple(toml_string_array_to_tuple(Float64, e["closure"]), boundarySize), center=1)
-    dClosure = Stencil(pad_tuple(toml_string_array_to_tuple(Float64, d1["closure"]), boundarySize), center=1)
+    eClosure = Stencil(pad_tuple(toml_string_array_to_tuple(Float64, e["closure"]), boundarySize)..., center=1)
+    dClosure = Stencil(pad_tuple(toml_string_array_to_tuple(Float64, d1["closure"]), boundarySize)..., center=1)
 
     q_tuple = pad_tuple(toml_string_array_to_tuple(Float64, H["closure"]), boundarySize)
     quadratureClosure = Vector{typeof(innerStencil)}()
     for i ∈ 1:boundarySize
-        quadratureClosure = (quadratureClosure..., Stencil((q_tuple[i],), center=1))
+        quadratureClosure = (quadratureClosure..., Stencil(q_tuple[i], center=1))
     end
 
     d2 = SbpOperators.D2(
@@ -136,7 +136,7 @@ function get_stencil(parsed_toml; center=nothing)
         center = div(width,2)+1
     end
 
-    return Stencil(Tuple(stencil_weights), center=center)
+    return Stencil(stencil_weights..., center=center)
 end
 
 """

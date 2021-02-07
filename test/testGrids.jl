@@ -1,5 +1,6 @@
 using Sbplib.Grids
 using Test
+using Sbplib.RegionIndices
 
 @testset "Grids" begin
 
@@ -53,6 +54,15 @@ using Test
     @test restrict(g, 2:3) == EquidistantGrid((5,3),(0.0,0.0),(1.0,3.0))
     @test restrict(g, [1,3]) == EquidistantGrid((2,3),(0.0,0.0),(2.0,3.0))
     @test restrict(g, [2,1]) == EquidistantGrid((5,2),(0.0,0.0),(1.0,2.0))
+
+    @testset "boundary_identifiers" begin
+        g = EquidistantGrid((2,5,3), (0.0,0.0,0.0), (2.0,1.0,3.0))
+        bids = (CartesianBoundary{1,Lower}(),CartesianBoundary{1,Upper}(),
+                CartesianBoundary{2,Lower}(),CartesianBoundary{2,Upper}(),
+                CartesianBoundary{3,Lower}(),CartesianBoundary{3,Upper}())
+        @test boundary_identifiers(g) == bids
+        @inferred boundary_identifiers(g)
+    end
 end
 
 end

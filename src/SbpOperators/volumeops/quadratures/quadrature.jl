@@ -30,7 +30,7 @@ Creates the quadrature operator with the inner stencil 1/h and 1-element sized
 closure stencils (i.e the operator is diagonal)
 """
 function DiagonalQuadrature(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T,1}}) where {M,T}
-    inner_stencil = Stencil(Tuple{T}(1),center=1)
+    inner_stencil = Stencil(one(T), center=1)
     return Quadrature(grid, inner_stencil, closure_stencils)
 end
 export DiagonalQuadrature

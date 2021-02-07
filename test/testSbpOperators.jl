@@ -24,9 +24,12 @@ import Sbplib.SbpOperators.odd
     @test eltype(s) == Float64
     @test SbpOperators.scale(s, 2) == Stencil((-2,2), (2.,4.,4.,6.,8.))
 
-    @test Stencil((1,2,3,4), center=1) == Stencil((0, 3),(1,2,3,4))
-    @test Stencil((1,2,3,4), center=2) == Stencil((-1, 2),(1,2,3,4))
-    @test Stencil((1,2,3,4), center=4) == Stencil((-3, 0),(1,2,3,4))
+    @test Stencil(1,2,3,4; center=1) == Stencil((0, 3),(1,2,3,4))
+    @test Stencil(1,2,3,4; center=2) == Stencil((-1, 2),(1,2,3,4))
+    @test Stencil(1,2,3,4; center=4) == Stencil((-3, 0),(1,2,3,4))
+
+    @test CenteredStencil(1,2,3,4,5) == Stencil((-2, 2), (1,2,3,4,5))
+    @test_throws ArgumentError CenteredStencil(1,2,3,4)
 end
 
 @testset "parse_rational" begin
@@ -105,40 +108,40 @@ end
     end
 
     @testset "get_stencil" begin
-        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil") == Stencil((-1/2, 0., 1/2), center=2)
-        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil", center=1) == Stencil((-1/2, 0., 1/2); center=1)
-        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil", center=3) == Stencil((-1/2, 0., 1/2); center=3)
+        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil") == Stencil(-1/2, 0., 1/2, center=2)
+        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil", center=1) == Stencil(-1/2, 0., 1/2; center=1)
+        @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil", center=3) == Stencil(-1/2, 0., 1/2; center=3)
 
-        @test get_stencil(parsed_toml, "order2", "H", "inner") == Stencil((1.,), center=1)
+        @test get_stencil(parsed_toml, "order2", "H", "inner") == Stencil(1.; center=1)
 
         @test_throws AssertionError get_stencil(parsed_toml, "meta", "type")
         @test_throws AssertionError get_stencil(parsed_toml, "order2", "D1", "closure_stencils")
     end
 
     @testset "get_stencils" begin
-        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=(1,)) == (Stencil((-1., 1.), center=1),)
-        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=(2,)) == (Stencil((-1., 1.), center=2),)
-        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=[2]) == (Stencil((-1., 1.), center=2),)
+        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=(1,)) == (Stencil(-1., 1., center=1),)
+        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=(2,)) == (Stencil(-1., 1., center=2),)
+        @test get_stencils(parsed_toml, "order2", "D1", "closure_stencils", centers=[2]) == (Stencil(-1., 1., center=2),)
 
         @test get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=[1,1,1,1]) == (
-            Stencil((    2.,    -5.,      4.,     -1.,    0.,    0.), center=1),
-            Stencil((    1.,    -2.,      1.,      0.,    0.,    0.), center=1),
-            Stencil(( -4/43,  59/43, -110/43,   59/43, -4/43,    0.), center=1),
-            Stencil(( -1/49,     0.,   59/49, -118/49, 64/49, -4/49), center=1),
+            Stencil(    2.,    -5.,      4.,     -1.,    0.,    0., center=1),
+            Stencil(    1.,    -2.,      1.,      0.,    0.,    0., center=1),
+            Stencil( -4/43,  59/43, -110/43,   59/43, -4/43,    0., center=1),
+            Stencil( -1/49,     0.,   59/49, -118/49, 64/49, -4/49, center=1),
         )
 
         @test get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=(4,2,3,1)) == (
-            Stencil((    2.,    -5.,      4.,     -1.,    0.,    0.), center=4),
-            Stencil((    1.,    -2.,      1.,      0.,    0.,    0.), center=2),
-            Stencil(( -4/43,  59/43, -110/43,   59/43, -4/43,    0.), center=3),
-            Stencil(( -1/49,     0.,   59/49, -118/49, 64/49, -4/49), center=1),
+            Stencil(    2.,    -5.,      4.,     -1.,    0.,    0., center=4),
+            Stencil(    1.,    -2.,      1.,      0.,    0.,    0., center=2),
+            Stencil( -4/43,  59/43, -110/43,   59/43, -4/43,    0., center=3),
+            Stencil( -1/49,     0.,   59/49, -118/49, 64/49, -4/49, center=1),
         )
 
         @test get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=1:4) == (
-            Stencil((    2.,    -5.,      4.,     -1.,    0.,    0.), center=1),
-            Stencil((    1.,    -2.,      1.,      0.,    0.,    0.), center=2),
-            Stencil(( -4/43,  59/43, -110/43,   59/43, -4/43,    0.), center=3),
-            Stencil(( -1/49,     0.,   59/49, -118/49, 64/49, -4/49), center=4),
+            Stencil(    2.,    -5.,      4.,     -1.,    0.,    0., center=1),
+            Stencil(    1.,    -2.,      1.,      0.,    0.,    0., center=2),
+            Stencil( -4/43,  59/43, -110/43,   59/43, -4/43,    0., center=3),
+            Stencil( -1/49,     0.,   59/49, -118/49, 64/49, -4/49, center=4),
         )
 
         @test_throws AssertionError get_stencils(parsed_toml, "order4", "D2", "closure_stencils",centers=(1,2,3))
@@ -154,8 +157,8 @@ end
 end
 
 @testset "VolumeOperator" begin
-    inner_stencil = Stencil(1/4 .* (1.,2.,1.),center=2)
-    closure_stencils = (Stencil(1/2 .* (1.,1.),center=1),Stencil((0.,1.),center=2))
+    inner_stencil = CenteredStencil(1/4, 2/4, 1/4)
+    closure_stencils = (Stencil(1/2, 1/2; center=1), Stencil(0.,1.; center=2))
     g_1D = EquidistantGrid(11,0.,1.)
     g_2D = EquidistantGrid((11,12),(0.,0.),(1.,1.))
     g_3D = EquidistantGrid((11,12,10),(0.,0.,0.),(1.,1.,1.))
@@ -438,7 +441,7 @@ end
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
             H = DiagonalQuadrature(g_1D,op.quadratureClosure)
-            inner_stencil = Stencil((1.,),center=1)
+            inner_stencil = CenteredStencil(1.)
             @test H == Quadrature(g_1D,inner_stencil,op.quadratureClosure)
             @test H isa TensorMapping{T,1,1} where T
         end
@@ -522,7 +525,7 @@ end
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
             Hi = InverseDiagonalQuadrature(g_1D, op.quadratureClosure);
-            inner_stencil = Stencil((1.,),center=1)
+            inner_stencil = CenteredStencil(1.)
             closures = ()
             for i = 1:length(op.quadratureClosure)
                 closures = (closures...,Stencil(op.quadratureClosure[i].range,1.0./op.quadratureClosure[i].weights))
