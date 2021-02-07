@@ -26,7 +26,7 @@ end
 export quadrature
 
 function quadrature(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T}}) where {M,T}
-    inner_stencil = Stencil(Tuple{T}(1),center=1)
+    inner_stencil = CenteredStencil(one(T))
     return quadrature(grid, inner_stencil, closure_stencils)
 end
 
@@ -52,7 +52,7 @@ function boundary_quadrature(grid::EquidistantGrid{1}, inner_stencil::Stencil{T}
 end
 
 function boundary_quadrature(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T}}, id::CartesianBoundary) where {M,T}
-    inner_stencil = Stencil(Tuple{T}(1),center=1)
+    inner_stencil = CenteredStencil(one(T))
     return boundary_quadrature(grid,inner_stencil,closure_stencils,id)
 end
 

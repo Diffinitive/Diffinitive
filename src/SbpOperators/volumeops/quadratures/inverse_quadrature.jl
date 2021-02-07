@@ -32,7 +32,7 @@ Creates the inverse of the diagonal quadrature operator defined by the inner ste
 the closure stencils are those of the quadrature operator (and not the inverse).
 """
 function InverseDiagonalQuadrature(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T,1}}) where {T,M}
-    inv_inner_stencil = Stencil(Tuple{T}(1),center=1)
+    inv_inner_stencil = Stencil(one(T), center=1)
     inv_closure_stencils = reciprocal_stencil.(closure_stencils)
     return InverseQuadrature(grid, inv_inner_stencil, inv_closure_stencils)
 end
