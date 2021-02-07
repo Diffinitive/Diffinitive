@@ -22,7 +22,6 @@ function Stencil(weights::Vararg{Number}; center::Int)
     return Stencil(range, weights)
 end
 
-
 function CenteredStencil(weights::Vararg)
     if iseven(length(weights))
         throw(ArgumentError("a centered stencil must have an odd number of weights."))
@@ -32,6 +31,7 @@ function CenteredStencil(weights::Vararg)
 
     return Stencil((-r, r), weights)
 end
+
 
 """
     scale(s::Stencil, a)
