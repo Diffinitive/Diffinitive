@@ -1,3 +1,5 @@
+export CenteredStencil
+
 struct Stencil{T<:Real,N}
     range::Tuple{Int,Int}
     weights::NTuple{N,T}
@@ -13,12 +15,23 @@ end
 
 Create a stencil with the given weights with element `center` as the center of the stencil.
 """
-function Stencil(weights::NTuple; center::Int)
+function Stencil(weights::Vararg{Number}; center::Int)
     N = length(weights)
     range = (1, N) .- center
 
     return Stencil(range, weights)
 end
+
+function CenteredStencil(weights::Vararg)
+    if iseven(length(weights))
+        throw(ArgumentError("a centered stencil must have an odd number of weights."))
+    end
+
+    r = length(weights) ÷ 2
+
+    return Stencil((-r, r), weights)
+end
+
 
 """
     scale(s::Stencil, a)
