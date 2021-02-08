@@ -403,6 +403,11 @@ end
     integral(H,v) = sum(H*v)
     @testset "quadrature" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "0D" begin
+            H = quadrature(EquidistantGrid((),(),()),op.quadratureClosure)
+            @test H == IdentityMapping{Float64}()
+            @test H isa TensorMapping{T,0,0} where T
+        end
         @testset "1D" begin
             H = quadrature(g_1D,op.quadratureClosure)
             inner_stencil = CenteredStencil(1.)
@@ -415,39 +420,6 @@ end
             H_y = quadrature(restrict(g_2D,2),op.quadratureClosure)
             @test H == H_x⊗H_y
             @test H isa TensorMapping{T,2,2} where T
-        end
-    end
-
-    @testset "boundary_quadrature" begin
-        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-        @testset "1D" begin
-            (id_l, id_r) = boundary_identifiers(g_1D)
-            @test boundary_quadrature(g_1D,op.quadratureClosure,id_l) == IdentityMapping{Float64}()
-            @test boundary_quadrature(g_1D,op.quadratureClosure,id_r) == IdentityMapping{Float64}()
-
-        end
-        @testset "2D" begin
-            (id_w, id_e, id_s, id_n) = boundary_identifiers(g_2D)
-            H_x = quadrature(restrict(g_2D,1),op.quadratureClosure)
-            H_y = quadrature(restrict(g_2D,2),op.quadratureClosure)
-            @test boundary_quadrature(g_2D,op.quadratureClosure,id_w) == H_y
-            @test boundary_quadrature(g_2D,op.quadratureClosure,id_e) == H_y
-            @test boundary_quadrature(g_2D,op.quadratureClosure,id_s) == H_x
-            @test boundary_quadrature(g_2D,op.quadratureClosure,id_n) == H_x
-        end
-        @testset "3D" begin
-            (id_w, id_e,
-             id_s, id_n,
-             id_t, id_b) = boundary_identifiers(g_3D)
-            H_xy = quadrature(restrict(g_3D,[1,2]),op.quadratureClosure)
-            H_xz = quadrature(restrict(g_3D,[1,3]),op.quadratureClosure)
-            H_yz = quadrature(restrict(g_3D,[2,3]),op.quadratureClosure)
-            @test boundary_quadrature(g_3D,op.quadratureClosure,id_w) == H_yz
-            @test boundary_quadrature(g_3D,op.quadratureClosure,id_e) == H_yz
-            @test boundary_quadrature(g_3D,op.quadratureClosure,id_s) == H_xz
-            @test boundary_quadrature(g_3D,op.quadratureClosure,id_n) == H_xz
-            @test boundary_quadrature(g_3D,op.quadratureClosure,id_t) == H_xy
-            @test boundary_quadrature(g_3D,op.quadratureClosure,id_b) == H_xy
         end
     end
 

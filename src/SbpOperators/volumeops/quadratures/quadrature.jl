@@ -12,9 +12,10 @@ interior stencil with weight 1 is used.
 On a one-dimensional `grid`, `H` is a `VolumeOperator`. On a multi-dimensional
 `grid`, `H` is the outer product of the 1-dimensional quadrature operators in
 each coordinate direction. Also see the documentation of
-`SbpOperators.volume_operator(...)` for more details.
+`SbpOperators.volume_operator(...)` for more details. On 0-dimensional `grid`,
+`H` is a 0-dimensional `IdentityMapping`.
 """
-function quadrature(grid::EquidistantGrid, inner_stencil, closure_stencils) where Dim
+function quadrature(grid::EquidistantGrid, inner_stencil, closure_stencils)
     h = spacing(grid)
     H = SbpOperators.volume_operator(grid, scale(inner_stencil,h[1]), scale.(closure_stencils,h[1]), even, 1)
     for i ∈ 2:dimension(grid)
@@ -25,45 +26,11 @@ function quadrature(grid::EquidistantGrid, inner_stencil, closure_stencils) wher
 end
 export quadrature
 
-function quadrature(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T}}) where {M,T}
+quadrature(grid::EquidistantGrid{0,T}, inner_stencil, closure_stencils) where T = IdentityMapping{T}()
+#TODO:  Consider changing the interface of volume_operator to volume_operator(grid,closure_stencils,inner_stencil)
+#       in order to allow for having quadrature(grid, closure_stencils, inner_stencil = CenteredStencil(one(T)))
+#       Then the below function can be removed.
+function quadrature(grid::EquidistantGrid{Dim,T}, closure_stencils) where {Dim,T}
     inner_stencil = CenteredStencil(one(T))
     return quadrature(grid, inner_stencil, closure_stencils)
-end
-
-"""
-    boundary_quadrature(grid::EquidistantGrid, inner_stencil, closure_stencils, id::CartesianBoundary)
-    boundary_quadrature(grid::EquidistantGrid{1}, inner_stencil, closure_stencils, id)
-    boundary_quadrature(grid::EquidistantGrid, closure_stencils, id)
-
-Creates the lower-dimensional quadrature operator associated with the boundary
-of `grid` specified by `id`. The quadrature operator is defined on the grid
-spanned by the dimensions orthogonal to the boundary coordinate direction.
-If the dimension of `grid` is 1, then the boundary quadrature is the 0-dimensional
-`IdentityMapping`. If `inner_stencil` is omitted a central interior stencil with
-weight 1 is used.
-"""
-function boundary_quadrature(grid::EquidistantGrid, inner_stencil, closure_stencils, id::CartesianBoundary)
-    return quadrature(orthogonal_grid(grid,dim(id)),inner_stencil,closure_stencils)
-end
-export boundary_quadrature
-
-function boundary_quadrature(grid::EquidistantGrid{1}, inner_stencil::Stencil{T}, closure_stencils::NTuple{M,Stencil{T}}, id::CartesianBoundary{1}) where {M,T}
-    return IdentityMapping{T}()
-end
-
-function boundary_quadrature(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T}}, id::CartesianBoundary) where {M,T}
-    inner_stencil = CenteredStencil(one(T))
-    return boundary_quadrature(grid,inner_stencil,closure_stencils,id)
-end
-
-"""
-    orthogonal_grid(grid,dim)
-
-Creates the lower-dimensional restriciton of `grid` spanned by the dimensions
-orthogonal to `dim`.
-"""
-function orthogonal_grid(grid,dim)
-    dims = collect(1:dimension(grid))
-    orth_dims = dims[dims .!= dim]
-    return restrict(grid,orth_dims)
 end
