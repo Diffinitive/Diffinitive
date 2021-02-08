@@ -63,6 +63,36 @@ using Sbplib.RegionIndices
         @test boundary_identifiers(g) == bids
         @inferred boundary_identifiers(g)
     end
+
+    @testset "boundary_grid" begin
+            @testset "1D" begin
+                g = EquidistantGrid(5,0.0,2.0)
+                (id_l, id_r) = boundary_identifiers(g)
+                @test boundary_grid(g,id_l) == EquidistantGrid((),(),())
+                @test boundary_grid(g,id_r) == EquidistantGrid((),(),())
+
+            end
+            @testset "2D" begin
+                g = EquidistantGrid((5,3),(0.0,0.0),(1.0,3.0))
+                (id_w, id_e, id_s, id_n) = boundary_identifiers(g)
+                @test boundary_grid(g,id_w) == restrict(g,2)
+                @test boundary_grid(g,id_e) == restrict(g,2)
+                @test boundary_grid(g,id_s) == restrict(g,1)
+                @test boundary_grid(g,id_n) == restrict(g,1)
+            end
+            @testset "3D" begin
+                g = EquidistantGrid((2,5,3), (0.0,0.0,0.0), (2.0,1.0,3.0))
+                (id_w, id_e,
+                 id_s, id_n,
+                 id_t, id_b) = boundary_identifiers(g)
+                @test boundary_grid(g,id_w) == restrict(g,[2,3])
+                @test boundary_grid(g,id_e) == restrict(g,[2,3])
+                @test boundary_grid(g,id_s) == restrict(g,[1,3])
+                @test boundary_grid(g,id_n) == restrict(g,[1,3])
+                @test boundary_grid(g,id_t) == restrict(g,[1,2])
+                @test boundary_grid(g,id_b) == restrict(g,[1,2])
+            end
+    end
 end
 
 end

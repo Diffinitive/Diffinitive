@@ -22,6 +22,13 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
         end
         return new{Dim,T}(size, limit_lower, limit_upper)
     end
+
+	# Special constructor for 0-dimensional grids.
+	function EquidistantGrid(size::Tuple{}, limit_lower::Tuple{}, limit_upper::Tuple{})
+		#TODO: 	Need to specialize T.
+		#		Is Float64 a good choice here? How to propage from arguments?
+        return new{0,Float64}(size, limit_lower, limit_upper)
+    end
 end
 export EquidistantGrid
 
@@ -104,3 +111,21 @@ Returns a tuple containing the boundary identifiers for the grid, stored as
 """
 boundary_identifiers(g::EquidistantGrid) = (((ntuple(i->(CartesianBoundary{i,Lower}(),CartesianBoundary{i,Upper}()),dimension(g)))...)...,)
 export boundary_identifiers
+
+
+"""
+    boundary_grid(grid::EquidistantGrid,id::CartesianBoundary)
+	boundary_grid(::EquidistantGrid{1},::CartesianBoundary{1})
+
+Creates the lower-dimensional restriciton of `grid` spanned by the dimensions
+orthogonal to the boundary specified by `id`. The boundary grid of a 1-dimensional
+grid is a zero-dimensional grid.
+"""
+function boundary_grid(grid::EquidistantGrid,id::CartesianBoundary)
+    dims = collect(1:dimension(grid))
+    orth_dims = dims[dims .!= dim(id)]
+    return restrict(grid,orth_dims)
+end
+export boundary_grid
+boundary_grid(::EquidistantGrid{1},::CartesianBoundary{1}) = EquidistantGrid((),(),())
+boundary_grid(::EquidistantGrid{1},::CartesianBoundary) = throw(DimensionMismatch("dimension of Grid and BoundaryIdentifier not matching"))
