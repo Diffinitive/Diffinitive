@@ -70,7 +70,8 @@ using Sbplib.RegionIndices
                 (id_l, id_r) = boundary_identifiers(g)
                 @test boundary_grid(g,id_l) == EquidistantGrid((),(),())
                 @test boundary_grid(g,id_r) == EquidistantGrid((),(),())
-
+                @test_throws DomainError boundary_grid(g,CartesianBoundary{2,Lower}())
+                @test_throws DomainError boundary_grid(g,CartesianBoundary{0,Lower}())
             end
             @testset "2D" begin
                 g = EquidistantGrid((5,3),(0.0,0.0),(1.0,3.0))
@@ -79,6 +80,7 @@ using Sbplib.RegionIndices
                 @test boundary_grid(g,id_e) == restrict(g,2)
                 @test boundary_grid(g,id_s) == restrict(g,1)
                 @test boundary_grid(g,id_n) == restrict(g,1)
+                @test_throws DomainError boundary_grid(g,CartesianBoundary{4,Lower}())
             end
             @testset "3D" begin
                 g = EquidistantGrid((2,5,3), (0.0,0.0,0.0), (2.0,1.0,3.0))
@@ -91,6 +93,7 @@ using Sbplib.RegionIndices
                 @test boundary_grid(g,id_n) == restrict(g,[1,3])
                 @test boundary_grid(g,id_t) == restrict(g,[1,2])
                 @test boundary_grid(g,id_b) == restrict(g,[1,2])
+                @test_throws DomainError boundary_grid(g,CartesianBoundary{4,Lower}())
             end
     end
 end

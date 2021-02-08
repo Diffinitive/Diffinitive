@@ -122,10 +122,14 @@ orthogonal to the boundary specified by `id`. The boundary grid of a 1-dimension
 grid is a zero-dimensional grid.
 """
 function boundary_grid(grid::EquidistantGrid,id::CartesianBoundary)
+	dims = collect(1:dimension(grid))
+	orth_dims = dims[dims .!= dim(id)]
+	if orth_dims == dims
+		throw(DomainError("boundary identifier not matching grid"))
+	end
     dims = collect(1:dimension(grid))
     orth_dims = dims[dims .!= dim(id)]
     return restrict(grid,orth_dims)
 end
 export boundary_grid
 boundary_grid(::EquidistantGrid{1},::CartesianBoundary{1}) = EquidistantGrid((),(),())
-boundary_grid(::EquidistantGrid{1},::CartesianBoundary) = throw(DimensionMismatch("dimension of Grid and BoundaryIdentifier not matching"))
