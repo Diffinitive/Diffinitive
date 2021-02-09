@@ -127,8 +127,6 @@ function boundary_grid(grid::EquidistantGrid,id::CartesianBoundary)
 	if orth_dims == dims
 		throw(DomainError("boundary identifier not matching grid"))
 	end
-    dims = collect(1:dimension(grid))
-    orth_dims = dims[dims .!= dim(id)]
     return restrict(grid,orth_dims)
 end
 export boundary_grid
