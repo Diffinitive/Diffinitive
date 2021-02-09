@@ -68,8 +68,8 @@ using Sbplib.RegionIndices
             @testset "1D" begin
                 g = EquidistantGrid(5,0.0,2.0)
                 (id_l, id_r) = boundary_identifiers(g)
-                @test boundary_grid(g,id_l) == EquidistantGrid((),(),())
-                @test boundary_grid(g,id_r) == EquidistantGrid((),(),())
+                @test boundary_grid(g,id_l) == EquidistantGrid{Float64}()
+                @test boundary_grid(g,id_r) == EquidistantGrid{Float64}()
                 @test_throws DomainError boundary_grid(g,CartesianBoundary{2,Lower}())
                 @test_throws DomainError boundary_grid(g,CartesianBoundary{0,Lower}())
             end
