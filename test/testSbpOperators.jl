@@ -404,7 +404,7 @@ end
     @testset "quadrature" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "0D" begin
-            H = quadrature(EquidistantGrid((),(),()),op.quadratureClosure)
+            H = quadrature(EquidistantGrid{Float64}(),op.quadratureClosure)
             @test H == IdentityMapping{Float64}()
             @test H isa TensorMapping{T,0,0} where T
         end
