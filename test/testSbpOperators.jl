@@ -241,13 +241,13 @@ end
 
     @testset "Constructors" begin
         @testset "1D" begin
-            Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
-            @test Dₓₓ == SecondDerivative(g_1D,op.innerStencil,op.closureStencils,1)
+            Dₓₓ = second_derivative(g_1D,op.innerStencil,op.closureStencils)
+            @test Dₓₓ == second_derivative(g_1D,op.innerStencil,op.closureStencils,1)
             @test Dₓₓ isa VolumeOperator
         end
         @testset "2D" begin
-            Dₓₓ = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,1)
-            D2 = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+            Dₓₓ = second_derivative(g_2D,op.innerStencil,op.closureStencils,1)
+            D2 = second_derivative(g_1D,op.innerStencil,op.closureStencils)
             I = IdentityMapping{Float64}(size(g_2D)[2])
             @test Dₓₓ == D2⊗I
             @test Dₓₓ isa TensorMapping{T,2,2} where T
@@ -272,7 +272,7 @@ end
             # implies that L*v should be exact for monomials up to order 2.
             @testset "2nd order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+                Dₓₓ = second_derivative(g_1D,op.innerStencil,op.closureStencils)
                 @test Dₓₓ*monomials[1] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
                 @test Dₓₓ*monomials[2] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
                 @test Dₓₓ*monomials[3] ≈ monomials[1] atol = 5e-10
@@ -283,7 +283,7 @@ end
             # implies that L*v should be exact for monomials up to order 3.
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                Dₓₓ = SecondDerivative(g_1D,op.innerStencil,op.closureStencils)
+                Dₓₓ = second_derivative(g_1D,op.innerStencil,op.closureStencils)
                 # NOTE: high tolerances for checking the "exact" differentiation
                 # due to accumulation of round-off errors/cancellation errors?
                 @test Dₓₓ*monomials[1] ≈ zeros(Float64,size(g_1D)...) atol = 5e-10
@@ -309,7 +309,7 @@ end
             # implies that L*v should be exact for binomials up to order 2.
             @testset "2nd order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
+                Dyy = second_derivative(g_2D,op.innerStencil,op.closureStencils,2)
                 @test Dyy*binomials[1] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
                 @test Dyy*binomials[2] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
                 @test Dyy*binomials[3] ≈ evalOn(g_2D,(x,y)->1.) atol = 5e-9
@@ -320,7 +320,7 @@ end
             # implies that L*v should be exact for binomials up to order 3.
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                Dyy = SecondDerivative(g_2D,op.innerStencil,op.closureStencils,2)
+                Dyy = second_derivative(g_2D,op.innerStencil,op.closureStencils,2)
                 # NOTE: high tolerances for checking the "exact" differentiation
                 # due to accumulation of round-off errors/cancellation errors?
                 @test Dyy*binomials[1] ≈ zeros(Float64,size(g_2D)...) atol = 5e-9
@@ -339,16 +339,16 @@ end
     @testset "Constructors" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
-            L = Laplace(g_1D, op.innerStencil, op.closureStencils)
-            @test L == SecondDerivative(g_1D, op.innerStencil, op.closureStencils)
+            L = laplace(g_1D, op.innerStencil, op.closureStencils)
+            @test L == second_derivative(g_1D, op.innerStencil, op.closureStencils)
             @test L isa TensorMapping{T,1,1}  where T
         end
         @testset "3D" begin
-            L = Laplace(g_3D, op.innerStencil, op.closureStencils)
+            L = laplace(g_3D, op.innerStencil, op.closureStencils)
             @test L isa TensorMapping{T,3,3} where T
-            Dxx = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,1)
-            Dyy = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,2)
-            Dzz = SecondDerivative(g_3D, op.innerStencil, op.closureStencils,3)
+            Dxx = second_derivative(g_3D, op.innerStencil, op.closureStencils,1)
+            Dyy = second_derivative(g_3D, op.innerStencil, op.closureStencils,2)
+            Dzz = second_derivative(g_3D, op.innerStencil, op.closureStencils,3)
             @test L == Dxx + Dyy + Dzz
         end
     end
@@ -370,7 +370,7 @@ end
         # implies that L*v should be exact for binomials up to order 2.
         @testset "2nd order" begin
             op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-            L = Laplace(g_3D,op.innerStencil,op.closureStencils)
+            L = laplace(g_3D,op.innerStencil,op.closureStencils)
             @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test L*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test L*polynomials[3] ≈ polynomials[1] atol = 5e-9
@@ -381,7 +381,7 @@ end
         # implies that L*v should be exact for binomials up to order 3.
         @testset "4th order" begin
             op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            L = Laplace(g_3D,op.innerStencil,op.closureStencils)
+            L = laplace(g_3D,op.innerStencil,op.closureStencils)
             # NOTE: high tolerances for checking the "exact" differentiation
             # due to accumulation of round-off errors/cancellation errors?
             @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
@@ -571,7 +571,7 @@ end
             @test op_l isa TensorMapping{T,0,1} where T
 
             op_r = BoundaryOperator{Upper}(closure_stencil,size(g_1D)[1])
-            @test op_r == BoundaryRestriction(g_1D,closure_stencil,Upper())
+            @test op_r == BoundaryOperator(g_1D,closure_stencil,Upper())
             @test op_r == boundary_operator(g_1D,closure_stencil,CartesianBoundary{1,Upper}())
             @test op_r isa TensorMapping{T,0,1} where T
         end
@@ -702,28 +702,28 @@ end
 
 end
 
-@testset "BoundaryRestriction" begin
+@testset "boundary_restriction" begin
     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
 
-    @testset "Constructors" begin
+    @testset "boundary_restriction" begin
         @testset "1D" begin
-            e_l = BoundaryRestriction(g_1D,op.eClosure,Lower())
-            @test e_l == BoundaryRestriction(g_1D,op.eClosure,CartesianBoundary{1,Lower}())
+            e_l = boundary_restriction(g_1D,op.eClosure,Lower())
+            @test e_l == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Lower}())
             @test e_l == BoundaryOperator(g_1D,op.eClosure,Lower())
             @test e_l isa BoundaryOperator{T,Lower} where T
             @test e_l isa TensorMapping{T,0,1} where T
 
-            e_r = BoundaryRestriction(g_1D,op.eClosure,Upper())
-            @test e_r == BoundaryRestriction(g_1D,op.eClosure,CartesianBoundary{1,Upper}())
+            e_r = boundary_restriction(g_1D,op.eClosure,Upper())
+            @test e_r == boundary_restriction(g_1D,op.eClosure,CartesianBoundary{1,Upper}())
             @test e_r == BoundaryOperator(g_1D,op.eClosure,Upper())
             @test e_r isa BoundaryOperator{T,Upper} where T
             @test e_r isa TensorMapping{T,0,1} where T
         end
 
         @testset "2D" begin
-            e_w = BoundaryRestriction(g_2D,op.eClosure,CartesianBoundary{1,Upper}())
+            e_w = boundary_restriction(g_2D,op.eClosure,CartesianBoundary{1,Upper}())
             @test e_w isa InflatedTensorMapping
             @test e_w isa TensorMapping{T,1,2} where T
         end
@@ -731,8 +731,8 @@ end
 
     @testset "Application" begin
         @testset "1D" begin
-            e_l = BoundaryRestriction(g_1D, op.eClosure, CartesianBoundary{1,Lower}())
-            e_r = BoundaryRestriction(g_1D, op.eClosure, CartesianBoundary{1,Upper}())
+            e_l = boundary_restriction(g_1D, op.eClosure, CartesianBoundary{1,Lower}())
+            e_r = boundary_restriction(g_1D, op.eClosure, CartesianBoundary{1,Upper}())
 
             v = evalOn(g_1D,x->1+x^2)
             u = fill(3.124)
@@ -743,10 +743,10 @@ end
         end
 
         @testset "2D" begin
-            e_w = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{1,Lower}())
-            e_e = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{1,Upper}())
-            e_s = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{2,Lower}())
-            e_n = BoundaryRestriction(g_2D, op.eClosure, CartesianBoundary{2,Upper}())
+            e_w = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{1,Lower}())
+            e_e = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{1,Upper}())
+            e_s = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{2,Lower}())
+            e_n = boundary_restriction(g_2D, op.eClosure, CartesianBoundary{2,Upper}())
 
             v = rand(11, 15)
             u = fill(3.124)
@@ -759,25 +759,25 @@ end
     end
 end
 
-@testset "NormalDerivative" begin
+@testset "normal_derivative" begin
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,12), (0.0, 0.0), (1.0,1.0))
-    @testset "Constructors" begin
+    @testset "normal_derivative" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
-            d_l = NormalDerivative(g_1D, op.dClosure, Lower())
-            @test d_l == NormalDerivative(g_1D, op.dClosure, CartesianBoundary{1,Lower}())
+            d_l = normal_derivative(g_1D, op.dClosure, Lower())
+            @test d_l == normal_derivative(g_1D, op.dClosure, CartesianBoundary{1,Lower}())
             @test d_l isa BoundaryOperator{T,Lower} where T
             @test d_l isa TensorMapping{T,0,1} where T
         end
         @testset "2D" begin
             op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            d_w = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
-            d_n = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
+            d_w = normal_derivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
+            d_n = normal_derivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
             Ix = IdentityMapping{Float64}((size(g_2D)[1],))
             Iy = IdentityMapping{Float64}((size(g_2D)[2],))
-            d_l = NormalDerivative(restrict(g_2D,1),op.dClosure,Lower())
-            d_r = NormalDerivative(restrict(g_2D,2),op.dClosure,Upper())
+            d_l = normal_derivative(restrict(g_2D,1),op.dClosure,Lower())
+            d_r = normal_derivative(restrict(g_2D,2),op.dClosure,Upper())
             @test d_w ==  d_l⊗Iy
             @test d_n ==  Ix⊗d_r
             @test d_w isa TensorMapping{T,1,2} where T
@@ -791,10 +791,10 @@ end
         # TODO: Test for higher order polynomials?
         @testset "2nd order" begin
             op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-            d_w = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
-            d_e = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Upper}())
-            d_s = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Lower}())
-            d_n = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
+            d_w = normal_derivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
+            d_e = normal_derivative(g_2D, op.dClosure, CartesianBoundary{1,Upper}())
+            d_s = normal_derivative(g_2D, op.dClosure, CartesianBoundary{2,Lower}())
+            d_n = normal_derivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
 
             @test d_w*v ≈ v∂x[1,:] atol = 1e-13
             @test d_e*v ≈ -v∂x[end,:] atol = 1e-13
@@ -804,10 +804,10 @@ end
 
         @testset "4th order" begin
             op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            d_w = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
-            d_e = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{1,Upper}())
-            d_s = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Lower}())
-            d_n = NormalDerivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
+            d_w = normal_derivative(g_2D, op.dClosure, CartesianBoundary{1,Lower}())
+            d_e = normal_derivative(g_2D, op.dClosure, CartesianBoundary{1,Upper}())
+            d_s = normal_derivative(g_2D, op.dClosure, CartesianBoundary{2,Lower}())
+            d_n = normal_derivative(g_2D, op.dClosure, CartesianBoundary{2,Upper}())
 
             @test d_w*v ≈ v∂x[1,:] atol = 1e-13
             @test d_e*v ≈ -v∂x[end,:] atol = 1e-13

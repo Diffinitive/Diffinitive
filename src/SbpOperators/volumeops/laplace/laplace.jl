@@ -1,5 +1,5 @@
 """
-    Laplace(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils)
+    laplace(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils)
 
 Creates the Laplace operator operator `Δ` as a `TensorMapping`
 
@@ -7,14 +7,15 @@ Creates the Laplace operator operator `Δ` as a `TensorMapping`
 the stencil `inner_stencil` in the interior and a set of stencils `closure_stencils`
 for the points in the closure regions.
 
-On a one-dimensional `grid`, `Δ` is a `SecondDerivative`. On a multi-dimensional `grid`, `Δ` is the sum of
-multi-dimensional `SecondDerivative`s where the sum is carried out lazily.
+On a one-dimensional `grid`, `Δ` is equivalent to `second_derivative`. On a
+multi-dimensional `grid`, `Δ` is the sum of multi-dimensional `second_derivative`s
+where the sum is carried out lazily.
 """
-function Laplace(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils) where Dim
-    Δ = SecondDerivative(grid, inner_stencil, closure_stencils, 1)
+function laplace(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils) where Dim
+    Δ = second_derivative(grid, inner_stencil, closure_stencils, 1)
     for d = 2:Dim
-        Δ += SecondDerivative(grid, inner_stencil, closure_stencils, d)
+        Δ += second_derivative(grid, inner_stencil, closure_stencils, d)
     end
     return Δ
 end
-export Laplace
+export laplace
