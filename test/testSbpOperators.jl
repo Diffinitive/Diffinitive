@@ -411,7 +411,7 @@ end
         @testset "1D" begin
             H = quadrature(g_1D,op.quadratureClosure)
             inner_stencil = CenteredStencil(1.)
-            @test H == quadrature(g_1D,inner_stencil,op.quadratureClosure)
+            @test H == quadrature(g_1D,op.quadratureClosure,inner_stencil,)
             @test H isa TensorMapping{T,1,1} where T
         end
         @testset "2D" begin
