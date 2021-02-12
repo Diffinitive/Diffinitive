@@ -46,9 +46,9 @@ function EquidistantGrid(size::Int, limit_lower::T, limit_upper::T) where T
 	return EquidistantGrid((size,),(limit_lower,),(limit_upper,))
 end
 
-function Base.eachindex(grid::EquidistantGrid)
-    CartesianIndices(grid.size)
-end
+Base.eltype(grid::EquidistantGrid{Dim,T}) where {Dim,T} = T
+
+Base.eachindex(grid::EquidistantGrid) = CartesianIndices(grid.size)
 
 Base.size(g::EquidistantGrid) = g.size
 

@@ -13,9 +13,12 @@ using Sbplib.RegionIndices
     @test_throws DomainError EquidistantGrid(1,1.0,-1.0)
     @test EquidistantGrid(4,0.0,1.0) == EquidistantGrid((4,),(0.0,),(1.0,))
 
-    # size
-    @test size(EquidistantGrid(4,0.0,1.0)) == (4,)
-    @test size(EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))) == (5,3)
+    @testset "Base" begin
+        @test eltype(EquidistantGrid(4,0.0,1.0)) == Float64
+        @test eltype(EquidistantGrid((4,3),(0,0),(1,3))) == Int
+        @test size(EquidistantGrid(4,0.0,1.0)) == (4,)
+        @test size(EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))) == (5,3)
+    end
 
     # dimension
     @test dimension(EquidistantGrid(4,0.0,1.0)) == 1
