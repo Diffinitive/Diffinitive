@@ -13,9 +13,12 @@ using Sbplib.RegionIndices
     @test_throws DomainError EquidistantGrid(1,1.0,-1.0)
     @test EquidistantGrid(4,0.0,1.0) == EquidistantGrid((4,),(0.0,),(1.0,))
 
-    # size
-    @test size(EquidistantGrid(4,0.0,1.0)) == (4,)
-    @test size(EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))) == (5,3)
+    @testset "Base" begin
+        @test eltype(EquidistantGrid(4,0.0,1.0)) == Float64
+        @test eltype(EquidistantGrid((4,3),(0,0),(1,3))) == Int
+        @test size(EquidistantGrid(4,0.0,1.0)) == (4,)
+        @test size(EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))) == (5,3)
+    end
 
     # dimension
     @test dimension(EquidistantGrid(4,0.0,1.0)) == 1
@@ -62,6 +65,39 @@ using Sbplib.RegionIndices
                 CartesianBoundary{3,Lower}(),CartesianBoundary{3,Upper}())
         @test boundary_identifiers(g) == bids
         @inferred boundary_identifiers(g)
+    end
+
+    @testset "boundary_grid" begin
+            @testset "1D" begin
+                g = EquidistantGrid(5,0.0,2.0)
+                (id_l, id_r) = boundary_identifiers(g)
+                @test boundary_grid(g,id_l) == EquidistantGrid{Float64}()
+                @test boundary_grid(g,id_r) == EquidistantGrid{Float64}()
+                @test_throws DomainError boundary_grid(g,CartesianBoundary{2,Lower}())
+                @test_throws DomainError boundary_grid(g,CartesianBoundary{0,Lower}())
+            end
+            @testset "2D" begin
+                g = EquidistantGrid((5,3),(0.0,0.0),(1.0,3.0))
+                (id_w, id_e, id_s, id_n) = boundary_identifiers(g)
+                @test boundary_grid(g,id_w) == restrict(g,2)
+                @test boundary_grid(g,id_e) == restrict(g,2)
+                @test boundary_grid(g,id_s) == restrict(g,1)
+                @test boundary_grid(g,id_n) == restrict(g,1)
+                @test_throws DomainError boundary_grid(g,CartesianBoundary{4,Lower}())
+            end
+            @testset "3D" begin
+                g = EquidistantGrid((2,5,3), (0.0,0.0,0.0), (2.0,1.0,3.0))
+                (id_w, id_e,
+                 id_s, id_n,
+                 id_t, id_b) = boundary_identifiers(g)
+                @test boundary_grid(g,id_w) == restrict(g,[2,3])
+                @test boundary_grid(g,id_e) == restrict(g,[2,3])
+                @test boundary_grid(g,id_s) == restrict(g,[1,3])
+                @test boundary_grid(g,id_n) == restrict(g,[1,3])
+                @test boundary_grid(g,id_t) == restrict(g,[1,2])
+                @test boundary_grid(g,id_b) == restrict(g,[1,2])
+                @test_throws DomainError boundary_grid(g,CartesianBoundary{4,Lower}())
+            end
     end
 end
 
