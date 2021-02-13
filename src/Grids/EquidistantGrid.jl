@@ -1,11 +1,19 @@
 """
-    EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}
+    EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T})
+	EquidistantGrid{T}()
 
-EquidistantGrid is a grid with equidistant grid spacing per coordinat direction.
-The domain is defined through the two points P1 = x̄₁, P2 = x̄₂ by the exterior
-product of the vectors obtained by projecting (x̄₂-x̄₁) onto the coordinate
-directions. E.g for a 2D grid with x̄₁=(-1,0) and x̄₂=(1,2) the domain is defined
-as (-1,1)x(0,2). The side lengths of the grid are not allowed to be negative
+`EquidistantGrid` is a grid with equidistant grid spacing per coordinat direction.
+
+`EquidistantGrid(size, limit_lower, limit_upper)` construct the grid with the
+domain defined by the two points P1, and P2 given by `limit_lower` and
+`limit_upper`. The length of the domain sides are given by the components of
+(P2-P1). E.g for a 2D grid with P1=(-1,0) and P2=(1,2) the domain is defined
+as (-1,1)x(0,2). The side lengths of the grid are not allowed to be negative.
+The number of equidistantly spaced points in each coordinate direction are given
+by `size`.
+
+`EquidistantGrid{T}()` constructs a 0-dimensional grid.
+
 """
 struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
     size::NTuple{Dim, Int}
@@ -22,6 +30,9 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
         end
         return new{Dim,T}(size, limit_lower, limit_upper)
     end
+
+	# Specialized constructor for 0-dimensional grid
+	EquidistantGrid{T}() where T = new{0,T}((),(),())
 end
 export EquidistantGrid
 
@@ -35,9 +46,9 @@ function EquidistantGrid(size::Int, limit_lower::T, limit_upper::T) where T
 	return EquidistantGrid((size,),(limit_lower,),(limit_upper,))
 end
 
-function Base.eachindex(grid::EquidistantGrid)
-    CartesianIndices(grid.size)
-end
+Base.eltype(grid::EquidistantGrid{Dim,T}) where {Dim,T} = T
+
+Base.eachindex(grid::EquidistantGrid) = CartesianIndices(grid.size)
 
 Base.size(g::EquidistantGrid) = g.size
 
@@ -104,3 +115,23 @@ Returns a tuple containing the boundary identifiers for the grid, stored as
 """
 boundary_identifiers(g::EquidistantGrid) = (((ntuple(i->(CartesianBoundary{i,Lower}(),CartesianBoundary{i,Upper}()),dimension(g)))...)...,)
 export boundary_identifiers
+
+
+"""
+    boundary_grid(grid::EquidistantGrid,id::CartesianBoundary)
+	boundary_grid(::EquidistantGrid{1},::CartesianBoundary{1})
+
+Creates the lower-dimensional restriciton of `grid` spanned by the dimensions
+orthogonal to the boundary specified by `id`. The boundary grid of a 1-dimensional
+grid is a zero-dimensional grid.
+"""
+function boundary_grid(grid::EquidistantGrid,id::CartesianBoundary)
+	dims = collect(1:dimension(grid))
+	orth_dims = dims[dims .!= dim(id)]
+	if orth_dims == dims
+		throw(DomainError("boundary identifier not matching grid"))
+	end
+    return restrict(grid,orth_dims)
+end
+export boundary_grid
+boundary_grid(::EquidistantGrid{1,T},::CartesianBoundary{1}) where T = EquidistantGrid{T}()
