@@ -107,6 +107,38 @@ end
         @test_throws ArgumentError get_stencil_set(parsed_toml; order = 4)
     end
 
+    @testset "parse_stencil" begin
+        toml = """
+            s1 = ["-1/12","4/3","-5/2","4/3","-1/12"]
+            s2 = {s = ["2", "-5", "4", "-1", "0", "0"], c = 1}
+            s3 = {s = ["1", "-2", "1", "0", "0", "0"], c = 2}
+            s4 = "not a stencil"
+            s5 = [-1, 4, 3]
+            s6 = {k = ["1", "-2", "1", "0", "0", "0"], c = 2}
+            s7 = {s = [-1, 4, 3], c = 2}
+            s8 = {s = ["1", "-2", "1", "0", "0", "0"], c = [2,2]}
+        """
+
+        @test parse_stencil(TOML.parse(toml)["s1"]) == CenteredStencil(-1/12, 4/3, -5/2, 4/3, -1/12)
+        @test parse_stencil(TOML.parse(toml)["s2"]) == Stencil(2., -5., 4., -1., 0., 0.; center=1)
+        @test parse_stencil(TOML.parse(toml)["s3"]) == Stencil(1., -2., 1., 0., 0., 0.; center=2)
+
+        @test_throws ArgumentError parse_stencil(TOML.parse(toml)["s4"])
+        @test_throws ArgumentError parse_stencil(TOML.parse(toml)["s5"])
+        @test_throws ArgumentError parse_stencil(TOML.parse(toml)["s6"])
+        @test_throws ArgumentError parse_stencil(TOML.parse(toml)["s7"])
+        @test_throws ArgumentError parse_stencil(TOML.parse(toml)["s8"])
+
+        stencil_set = get_stencil_set(parsed_toml; order = 4, test = 1)
+
+        @test parse_stencil.(stencil_set["D2"]["closure_stencils"]) == [
+            Stencil(    2.,    -5.,      4.,       -1.,     0.,     0.; center=1),
+            Stencil(    1.,    -2.,      1.,        0.,     0.,     0.; center=2),
+            Stencil(-4/43, 59/43, -110/43,   59/43, -4/43,     0.; center=3),
+            Stencil(-1/49,     0.,   59/49, -118/49, 64/49, -4/49; center=4),
+        ]
+    end
+
     @testset "get_stencil" begin
         @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil") == Stencil(-1/2, 0., 1/2, center=2)
         @test get_stencil(parsed_toml, "order2", "D1", "inner_stencil", center=1) == Stencil(-1/2, 0., 1/2; center=1)

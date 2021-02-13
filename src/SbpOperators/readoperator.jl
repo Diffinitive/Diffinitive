@@ -3,6 +3,8 @@ using TOML
 export read_stencil_set
 export get_stencil_set
 
+export parse_stencil
+
 export read_D2_operator
 export read_stencil
 export read_stencils
@@ -83,6 +85,40 @@ function get_stencil_set(parsed_toml; filters...)
 
     i = matches[1]
     return parsed_toml["stencil_set"][i]
+end
+
+function parse_stencil(toml)
+    check_stencil_toml(toml)
+
+    if toml isa Array
+        weights = Float64.(parse_rational.(toml))
+        return CenteredStencil(weights...)
+    end
+
+    weights = Float64.(parse_rational.(toml["s"]))
+    return Stencil(weights..., center = toml["c"])
+end
+
+function check_stencil_toml(toml)
+    if !(toml isa Dict || toml isa Vector{String})
+        throw(ArgumentError("the TOML for a stecil must be a vector of strings or a table."))
+    end
+
+    if toml isa Vector{String}
+        return
+    end
+
+    if !(haskey(toml, "s") && haskey(toml, "c"))
+        throw(ArgumentError("the table form of a stencil must have fields `s` and `c`."))
+    end
+
+    if !(toml["s"] isa Vector{String})
+        throw(ArgumentError("a stencil must be specified as a vector of strings."))
+    end
+
+    if !(toml["c"] isa Int)
+        throw(ArgumentError("the center of a stencil must be specified as an integer."))
+    end
 end
 
 """
