@@ -492,6 +492,11 @@ end
     g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
     @testset "inverse_inner_product" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        @testset "0D" begin
+            Hi = inverse_inner_product(EquidistantGrid{Float64}(),op.quadratureClosure)
+            @test Hi == IdentityMapping{Float64}()
+            @test Hi isa TensorMapping{T,0,0} where T
+        end
         @testset "1D" begin
             Hi = inverse_inner_product(g_1D, op.quadratureClosure);
             inner_stencil = CenteredStencil(1.)
