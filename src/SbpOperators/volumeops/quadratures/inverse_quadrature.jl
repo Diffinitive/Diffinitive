@@ -1,41 +1,43 @@
-
 """
-    InverseQuadrature(grid::EquidistantGrid, inv_inner_stencil, inv_closure_stencils)
+    inverse_inner_product(grid::EquidistantGrid, inv_inner_stencil, inv_closure_stencils)
+    inverse_inner_product(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T,1}})
 
-Creates the inverse `H⁻¹` of the quadrature operator as a `TensorMapping`
+Creates the inverse inner product operator `H⁻¹` as a `TensorMapping` on an
+equidistant grid. `H⁻¹` is defined implicitly by `H⁻¹∘H = I`, where
+`H` is the corresponding inner product operator and `I` is the `IdentityMapping`.
 
-The inverse quadrature approximates the integral operator on the grid using
-`inv_inner_stencil` in the interior and a set of stencils `inv_closure_stencils`
-for the points in the closure regions.
+`inverse_inner_product(grid::EquidistantGrid, inv_inner_stencil, inv_closure_stencils)`
+constructs `H⁻¹` using a set of stencils `inv_closure_stencils` for the points
+in the closure regions and the stencil `inv_inner_stencil` in the interior. If
+`inv_closure_stencils` is omitted, a central interior stencil with weight 1 is used.
 
-On a one-dimensional `grid`, `H⁻¹` is a `VolumeOperator`. On a multi-dimensional
-`grid`, `H` is the outer product of the 1-dimensional inverse quadrature operators in
-each coordinate direction. Also see the documentation of
-`SbpOperators.volume_operator(...)` for more details.
+`inverse_inner_product(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T,1}})`
+constructs a diagonal inverse inner product operator where `closure_stencils` are the
+closure stencils of `H` (not `H⁻¹`!).
+
+On a 1-dimensional `grid`, `H⁻¹` is a `VolumeOperator`. On a N-dimensional
+`grid`, `H⁻¹` is the outer product of the 1-dimensional inverse inner product
+operators in each coordinate direction. Also see the documentation of
+`SbpOperators.volume_operator(...)` for more details. On a 0-dimensional `grid`,
+`H⁻¹` is a 0-dimensional `IdentityMapping`.
 """
-function InverseQuadrature(grid::EquidistantGrid{Dim}, inv_inner_stencil, inv_closure_stencils) where Dim
+function inverse_inner_product(grid::EquidistantGrid, inv_closure_stencils, inv_inner_stencil = CenteredStencil(one(eltype(grid))))
     h⁻¹ = inverse_spacing(grid)
     H⁻¹ = SbpOperators.volume_operator(grid,scale(inv_inner_stencil,h⁻¹[1]),scale.(inv_closure_stencils,h⁻¹[1]),even,1)
-    for i ∈ 2:Dim
+    for i ∈ 2:dimension(grid)
         Hᵢ⁻¹ = SbpOperators.volume_operator(grid,scale(inv_inner_stencil,h⁻¹[i]),scale.(inv_closure_stencils,h⁻¹[i]),even,i)
         H⁻¹ = H⁻¹∘Hᵢ⁻¹
     end
     return H⁻¹
 end
-export InverseQuadrature
+export inverse_inner_product
 
-"""
-    InverseDiagonalQuadrature(grid::EquidistantGrid, closure_stencils)
+inverse_inner_product(grid::EquidistantGrid{0}, inv_closure_stencils, inv_inner_stencil) = IdentityMapping{eltype(grid)}()
 
-Creates the inverse of the diagonal quadrature operator defined by the inner stencil
-1/h and a set of 1-element closure stencils in `closure_stencils`. Note that
-the closure stencils are those of the quadrature operator (and not the inverse).
-"""
-function InverseDiagonalQuadrature(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T,1}}) where {T,M}
-    inv_inner_stencil = Stencil(one(T), center=1)
-    inv_closure_stencils = reciprocal_stencil.(closure_stencils)
-    return InverseQuadrature(grid, inv_inner_stencil, inv_closure_stencils)
+function inverse_inner_product(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T,1}}) where {M,T}
+     inv_closure_stencils = reciprocal_stencil.(closure_stencils)
+     inv_inner_stencil = CenteredStencil(one(T))
+     return inverse_inner_product(grid, inv_closure_stencils, inv_inner_stencil)
 end
-export InverseDiagonalQuadrature
 
 reciprocal_stencil(s::Stencil{T}) where T = Stencil(s.range,one(T)./s.weights)
