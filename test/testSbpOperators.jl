@@ -501,7 +501,7 @@ end
         # 2nd order interior stencil, 1st order boundary stencil,
         # implies that L*v should be exact for binomials up to order 2.
         @testset "2nd order" begin
-            L = laplace(g_3D,op2.innerStencil,op2.closureStencils)
+            L = Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=2)
             @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test L*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test L*polynomials[3] ≈ polynomials[1] atol = 5e-9
@@ -511,8 +511,7 @@ end
         # 4th order interior stencil, 2nd order boundary stencil,
         # implies that L*v should be exact for binomials up to order 3.
         @testset "4th order" begin
-            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            L = laplace(g_3D,op4.innerStencil,op4.closureStencils)
+            L = Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
             # NOTE: high tolerances for checking the "exact" differentiation
             # due to accumulation of round-off errors/cancellation errors?
             @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
