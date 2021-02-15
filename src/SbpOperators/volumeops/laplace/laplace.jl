@@ -37,14 +37,14 @@ function Laplace(grid::EquidistantGrid, fn; order)
 
     # Volume operators
     Δ =  laplace(grid, D_inner_stecil, D_closure_stencils)
-    H =  quadrature(grid, H_closure_stencils)
-    H⁻¹ =  InverseDiagonalQuadrature(grid, H_closure_stencils)
+    H =  inner_product(grid, H_closure_stencils)
+    H⁻¹ =  inverse_inner_product(grid, H_closure_stencils)
 
     # Boundary operator - id pairs
     bids = boundary_identifiers(grid)
-    e_pairs = ntuple(i -> Pair(bids[i],BoundaryRestriction(grid,e_closure_stencil,bids[i])),length(bids))
-    d_pairs = ntuple(i -> Pair(bids[i],NormalDerivative(grid,d_closure_stencil,bids[i])),length(bids))
-    Hᵧ_pairs = ntuple(i -> Pair(bids[i],boundary_quadrature(grid,H_closure_stencils,bids[i])),length(bids))
+    e_pairs = ntuple(i -> Pair(bids[i],boundary_restriction(grid,e_closure_stencil,bids[i])),length(bids))
+    d_pairs = ntuple(i -> Pair(bids[i],normal_derivative(grid,d_closure_stencil,bids[i])),length(bids))
+    Hᵧ_pairs = ntuple(i -> Pair(bids[i],inner_product(boundary_grid(grid,bids[i]),H_closure_stencils)),length(bids))
 
     return Laplace(Δ, H, H⁻¹, Dict(e_pairs), Dict(d_pairs), Dict(Hᵧ_pairs))
 end
@@ -73,13 +73,14 @@ Creates the Laplace operator operator `Δ` as a `TensorMapping`
 the stencil `inner_stencil` in the interior and a set of stencils `closure_stencils`
 for the points in the closure regions.
 
-On a one-dimensional `grid`, `Δ` is a `SecondDerivative`. On a multi-dimensional `grid`, `Δ` is the sum of
-multi-dimensional `SecondDerivative`s where the sum is carried out lazily.
+On a one-dimensional `grid`, `Δ` is equivalent to `second_derivative`. On a
+multi-dimensional `grid`, `Δ` is the sum of multi-dimensional `second_derivative`s
+where the sum is carried out lazily.
 """
 function laplace(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils) where Dim
-    Δ = SecondDerivative(grid, inner_stencil, closure_stencils, 1)
+    Δ = second_derivative(grid, inner_stencil, closure_stencils, 1)
     for d = 2:Dim
-        Δ += SecondDerivative(grid, inner_stencil, closure_stencils, d)
+        Δ += second_derivative(grid, inner_stencil, closure_stencils, d)
     end
     return Δ
 end
