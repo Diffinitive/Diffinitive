@@ -358,17 +358,8 @@ end
             H_r = inner_product(boundary_grid(g_1D,id_r),op.quadratureClosure)
             Hb_dict = Dict(Pair(id_l,H_l),Pair(id_r,H_r))
 
-            # TODO: Not sure why this doesnt work? Comparing the fields of
-            # Laplace seems to work. Reformulate below once solved.
-            @test_broken Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict) == Laplace(g_1D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
             L = Laplace(g_1D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            @test L.D == Δ
-            @test L.H == H
-            @test L.H_inv == Hi
-            @test L.e == e_dict
-            @test L.d == d_dict
-            @test L.H_boundary == Hb_dict
-
+            @test cmp_fields(L,Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict))
             @test L isa TensorMapping{T,1,1}  where T
             @inferred Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict)
         end
@@ -410,16 +401,8 @@ end
                           Pair(id_s,H_s),Pair(id_n,H_n),
                           Pair(id_b,H_b),Pair(id_t,H_t))
 
-            # TODO: Not sure why this doesnt work? Comparing the fields of
-            # Laplace seems to work. Reformulate below once solved.
-            @test_broken Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict) == Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
             L = Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            @test L.D == Δ
-            @test L.H == H
-            @test L.H_inv == Hi
-            @test L.e == e_dict
-            @test L.d == d_dict
-            @test L.H_boundary == Hb_dict
+            @test cmp_fields(L,Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict))
             @test L isa TensorMapping{T,3,3} where T
             @inferred Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict)
         end

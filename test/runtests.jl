@@ -1,3 +1,4 @@
+include("test_utils.jl")
 using Test
 using TestSetExtensions
 
