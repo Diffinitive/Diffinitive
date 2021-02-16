@@ -7,7 +7,7 @@ Implements the Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` a
 operators relevant for constructing a SBP finite difference scheme as `TensorMapping`s.
 
 Laplace(grid::EquidistantGrid, fn; order) creates the Laplace operator on an
-equidistant grid, where the operators are read from a TOML. The differential operator
+equidistant grid, where the operators are read from TOML. The differential operator
 is created using `laplace(grid,...)`.
 """
 struct Laplace{T, Dim, Rb, TMdiffop<:TensorMapping{T,Dim,Dim}, # Differential operator
@@ -41,10 +41,11 @@ function Laplace(grid::EquidistantGrid, fn; order)
     H⁻¹ =  inverse_inner_product(grid, H_closure_stencils)
 
     # Boundary operator - id pairs
-    bids = boundary_identifiers(grid)
-    e_pairs = ntuple(i -> Pair(bids[i],boundary_restriction(grid,e_closure_stencil,bids[i])),length(bids))
-    d_pairs = ntuple(i -> Pair(bids[i],normal_derivative(grid,d_closure_stencil,bids[i])),length(bids))
-    Hᵧ_pairs = ntuple(i -> Pair(bids[i],inner_product(boundary_grid(grid,bids[i]),H_closure_stencils)),length(bids))
+    ids = boundary_identifiers(grid)
+    n_ids = length(ids)
+    e_pairs = ntuple(i -> Pair(ids[i],boundary_restriction(grid,e_closure_stencil,ids[i])),n_ids)
+    d_pairs = ntuple(i -> Pair(ids[i],normal_derivative(grid,d_closure_stencil,ids[i])),n_ids)
+    Hᵧ_pairs = ntuple(i -> Pair(ids[i],inner_product(boundary_grid(grid,ids[i]),H_closure_stencils)),n_ids)
 
     return Laplace(Δ, H, H⁻¹, Dict(e_pairs), Dict(d_pairs), Dict(Hᵧ_pairs))
 end
@@ -61,6 +62,7 @@ boundary_restriction(L::Laplace,bid::BoundaryIdentifier) = L.e[bid]
 export boundary_restriction
 normal_derivative(L::Laplace,bid::BoundaryIdentifier) = L.d[bid]
 export normal_derivative
+# TODO: boundary_inner_product?
 boundary_quadrature(L::Laplace,bid::BoundaryIdentifier) = L.H_boundary[bid]
 export boundary_quadrature
 
