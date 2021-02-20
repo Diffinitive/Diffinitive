@@ -21,6 +21,3 @@ to run all test in the `SbpOperators` folder, or
 julia> Pkg.test(test_args=["*/readoperators.jl"])
 ```
 to run only the tests in files named `readoperators.jl`.
-
-
-This works by using the `@includetests` macro from the [TestSetExtensions](https://github.com/ssfrr/TestSetExtensions.jl) package. For more information, see their documentation.
