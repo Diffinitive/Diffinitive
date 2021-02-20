@@ -6,7 +6,7 @@ using Glob
     run_testfiles(path)
     run_testfiles(path, glob)
 
-Find and run all files with filenames starting with "test". If `path` is omitted the test folder is assumed.
+Find and run all files with filenames ending with "_test.jl". If `path` is omitted the test folder is assumed.
 The argument `glob` can optionally be supplied to filter which test files are run.
 """
 function run_testfiles(args)
@@ -19,7 +19,6 @@ function run_testfiles(args)
     run_testfiles(".", glob)
 end
 
-# TODO change from prefix `test` to suffix `_test` for testfiles
 function  run_testfiles(path, glob)
     for name ∈ readdir(path)
         filepath = joinpath(path, name)
@@ -30,11 +29,7 @@ function  run_testfiles(path, glob)
             end
         end
 
-        if !endswith(name, ".jl") ## TODO combine this into test below when switching to suffix
-            continue
-        end
-
-        if startswith(name, "test") && occursin(glob, filepath)
+        if endswith(name, "_test.jl") && occursin(glob, filepath)
             printstyled("Running "; bold=true, color=:green)
             println(filepath)
             include(filepath)
