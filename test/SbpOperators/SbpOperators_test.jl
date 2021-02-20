@@ -15,8 +15,6 @@ import Sbplib.SbpOperators.even
 import Sbplib.SbpOperators.odd
 
 
-@testset "SbpOperators" begin
-
 @testset "Stencil" begin
     s = Stencil((-2,2), (1.,2.,2.,3.,4.))
     @test s isa Stencil{Float64, 5}
@@ -827,6 +825,4 @@ end
             @test d_n*v ≈ -v∂y[:,end] atol = 1e-13
         end
     end
-end
-
 end

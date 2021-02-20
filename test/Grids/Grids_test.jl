@@ -2,7 +2,6 @@ using Sbplib.Grids
 using Test
 using Sbplib.RegionIndices
 
-@testset "Grids" begin
 
 @testset "EquidistantGrid" begin
     @test EquidistantGrid(4,0.0,1.0) isa EquidistantGrid
@@ -99,6 +98,4 @@ using Sbplib.RegionIndices
                 @test_throws DomainError boundary_grid(g,CartesianBoundary{4,Lower}())
             end
     end
-end
-
 end
