@@ -32,7 +32,9 @@ function  run_testfiles(path, glob)
         if endswith(name, "_test.jl") && occursin(glob, filepath)
             printstyled("Running "; bold=true, color=:green)
             println(filepath)
-            include(filepath)
+            @testset "$name" begin
+                include(filepath)
+            end
         end
     end
 end
