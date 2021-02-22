@@ -15,7 +15,7 @@ struct Laplace{T, Dim, Rb, TMdiffop<:TensorMapping{T,Dim,Dim}, # Differential op
                            TMbop<:TensorMapping{T,Rb,Dim}, # Boundary operator
                            TMbqop<:TensorMapping{T,Rb,Rb}, # Boundary quadrature
                            BID<:BoundaryIdentifier} <: TensorMapping{T,Dim,Dim}
-    D::TMdiffop # Difference operator
+    D::TMdiffop # Differential operator
     H::TMipop # Inner product operator
     H_inv::TMipop # Inverse inner product operator
     e::Dict{BID,TMbop} # Boundary restriction operators
