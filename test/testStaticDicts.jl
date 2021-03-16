@@ -32,6 +32,10 @@ using Sbplib.StaticDicts
         @test get(d,5,6) == 6
     end
 
+    @testset "iterate" begin
+        # TODO
+    end
+
     @testset "merge" begin
         @test merge(
             StaticDict(1=>3, 2=> 4),
