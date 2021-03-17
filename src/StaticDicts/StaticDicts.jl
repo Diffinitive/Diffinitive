@@ -44,9 +44,6 @@ function Base.get(d::StaticDict, key, default)
     return default
 end
 
-firsttype(::Pair{T1,T2}) where {T1,T2} = T1
-secondtype(::Pair{T1,T2}) where {T1,T2}  = T2
-
 Base.iterate(d::StaticDict) = iterate(d.pairs)
 Base.iterate(d::StaticDict, state) = iterate(d.pairs,state)
 
@@ -57,5 +54,20 @@ Base.length(d::StaticDict) = length(d.pairs)
 function Base.merge(d1::StaticDict, d2::StaticDict)
     return StaticDict(d1.pairs..., d2.pairs...)
 end
+
+
+"""
+    firsttype(::Pair{T1,T2})
+
+The type of the first element in the pair.
+"""
+firsttype(::Pair{T1,T2}) where {T1,T2} = T1
+
+"""
+    secondtype(::Pair{T1,T2})
+
+The type of the secondtype element in the pair.
+"""
+secondtype(::Pair{T1,T2}) where {T1,T2}  = T2
 
 end # module
