@@ -3,7 +3,6 @@ using Glob
 
 """
     run_testfiles()
-    run_testfiles(path)
     run_testfiles(path, globs)
 
 Find and run all files with filenames ending with "_test.jl". If `path` is omitted the test folder is assumed.
