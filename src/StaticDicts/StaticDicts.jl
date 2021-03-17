@@ -2,17 +2,17 @@ module StaticDicts
 
 export StaticDict
 
-# Vidar 2021-02-27
-#NOTE: This type was added since ==-comparison of structs containing
-# Dict (even Base.ImmutableDict) fails even though the fields satisfy
-# ==-comparison. This is due to the fact that === is called for Dict-fields.
-# See https://github.com/JuliaLang/julia/issues/4648. If the PR gets resolved
-# we should consider removing StaticDict.
 """
-    StaticDict{K,V,N}(NTuple{N,Pair{K,V}})
+    StaticDict{K,V,N}(NTuple{N,Pair{K,V}}) <: AbstractDict
 
-A simple static dictonary. Performs lookup using linear search with ==-comparison
-of keys. No hashing is used.
+A static dictionary implementing the interface for an `AbstractDict`. A
+`StaticDict` is fully immutable and after creation no changes can be made.
+
+The immutable nature means that `StaticDict`s can be compared with `==`, in
+constrast to regular `Dict`s or `ImmutableDict`s which can not. (See
+https://github.com/JuliaLang/julia/issues/4648 for details)
+
+Lookups are done by linear search.
 """
 struct StaticDict{K,V,N} <: AbstractDict{K,V}
     pairs::NTuple{N,Pair{K,V}}
