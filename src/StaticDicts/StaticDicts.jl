@@ -13,6 +13,9 @@ constrast to regular `Dict`s or `ImmutableDict`s which can not. (See
 https://github.com/JuliaLang/julia/issues/4648 for details)
 
 Lookups are done by linear search.
+
+Duplicate keys are not allowed and an error will be thrown if they are passed
+to the constructor.
 """
 struct StaticDict{K,V,N} <: AbstractDict{K,V}
     pairs::NTuple{N,Pair{K,V}}
@@ -50,7 +53,12 @@ Base.iterate(d::StaticDict, state) = iterate(d.pairs,state)
 Base.length(d::StaticDict) = length(d.pairs)
 
 
-# TODO documentation: duplicate keys not allowed atm.  will error
+"""
+    merge(d1::StaticDict, d2::StaticDict)
+
+Merge two `StaticDict`. Repeating keys is considered and error. This may
+change in a future version.
+"""
 function Base.merge(d1::StaticDict, d2::StaticDict)
     return StaticDict(d1.pairs..., d2.pairs...)
 end
