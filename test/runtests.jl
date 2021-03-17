@@ -31,10 +31,17 @@ function  run_testfiles(path, globs)
 
         if endswith(name, "_test.jl") && any(occursin.(globs, filepath))
             printstyled("Running "; bold=true, color=:green)
-            println(filepath)
+            print(filepath)
+
+            t_start = time()
             @testset "$name" begin
                 include(filepath)
             end
+            t_end = time()
+
+            Δt = t_end - t_start
+            printstyled(" ($(round(Δt, digits=2)) s)"; color=:light_black)
+            println()
         end
     end
 end
@@ -47,4 +54,3 @@ end
 
 # Make it more clear that a glob was used in the test set name.
 # Make standalone files fail the same way when run together and alone
-# Add a timer for each file run
