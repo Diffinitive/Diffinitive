@@ -1,14 +1,14 @@
 """
     Laplace{T, Dim, ...} <: TensorMapping{T,Dim,Dim}
-    Laplace(grid::EquidistantGrid, fn; order)
+    Laplace(grid::AbstractGrid, fn; order)
 
 Implements the Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
 `TensorMapping`. Additionally, `Laplace` stores the inner product and boundary
 operators relevant for constructing a SBP finite difference scheme as `TensorMapping`s.
 
-Laplace(grid::EquidistantGrid, fn; order) creates the Laplace operator on an
-equidistant grid, where the operators are read from TOML. The differential operator
-is created using `laplace(grid,...)`.
+Laplace(grid, fn; order) creates the Laplace operator defined on `grid`,
+where the operators are read from TOML. The differential operator is created
+using `laplace(grid::AbstractGrid,...)`.
 """
 struct Laplace{T, Dim, Rb, TMdiffop<:TensorMapping{T,Dim,Dim}, # Differential operator
                            TMipop<:TensorMapping{T,Dim,Dim}, # Inner product operator
@@ -24,7 +24,7 @@ struct Laplace{T, Dim, Rb, TMdiffop<:TensorMapping{T,Dim,Dim}, # Differential op
 end
 export Laplace
 
-function Laplace(grid::EquidistantGrid, fn; order)
+function Laplace(grid::AbstractGrid, fn; order)
     # TODO: Removed once we can construct the volume and
     # boundary operators by op(grid, fn; order,...).
     # Read stencils
@@ -67,7 +67,7 @@ boundary_quadrature(L::Laplace,bid::BoundaryIdentifier) = L.H_boundary[bid]
 export boundary_quadrature
 
 """
-    laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
+    laplace(grid, inner_stencil, closure_stencils)
 
 Creates the Laplace operator operator `Δ` as a `TensorMapping`
 
@@ -79,7 +79,7 @@ On a one-dimensional `grid`, `Δ` is equivalent to `second_derivative`. On a
 multi-dimensional `grid`, `Δ` is the sum of multi-dimensional `second_derivative`s
 where the sum is carried out lazily.
 """
-function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
+function laplace(grid::AbstractGrid, inner_stencil, closure_stencils)
     Δ = second_derivative(grid, inner_stencil, closure_stencils, 1)
     for d = 2:dimension(grid)
         Δ += second_derivative(grid, inner_stencil, closure_stencils, d)
