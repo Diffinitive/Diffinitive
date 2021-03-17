@@ -3,13 +3,13 @@ module StaticDicts
 export StaticDict
 
 """
-    StaticDict{K,V,N}(NTuple{N,Pair{K,V}}) <: AbstractDict
+    StaticDict{K,V,N} <: AbstractDict{K,V}
 
 A static dictionary implementing the interface for an `AbstractDict`. A
 `StaticDict` is fully immutable and after creation no changes can be made.
 
-The immutable nature means that `StaticDict`s can be compared with `===`, in
-constrast to regular `Dict`s or `ImmutableDict`s which can not. (See
+The immutable nature means that `StaticDict` can be compared with `===`, in
+constrast to regular `Dict` or `ImmutableDict` which can not. (See
 https://github.com/JuliaLang/julia/issues/4648 for details) One important
 aspect of this is that `StaticDict` can be used in a struct while still
 allowing the struct to be comared using the default implementation of `==` for
@@ -41,7 +41,7 @@ end
 StaticDict(pairs::NTuple{N,Pair} where N) = StaticDict(pairs...)
 
 function Base.get(d::StaticDict, key, default)
-    for p ∈ d.pairs # TBD: Is this the best? Should we use the iterator on `d`?
+    for p ∈ d.pairs
         if key == p.first
             return p.second
         end
