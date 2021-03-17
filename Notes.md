@@ -311,3 +311,12 @@ Implementation of this is an issue that requires some thought. Adding an extra
 contribute to "type bloat". On the other hand adapting existing types to
 handle embeddedness would complicate the now very simple grid types. Are there
 other ways of doing the implentation?
+
+## Performance measuring
+We should be measuring performance early. How does our effective cpu and memory bandwidth utilization compare to peak performance?
+
+We should make these test simple to run for any solver.
+
+See [this talk](https://www.youtube.com/watch?v=vPsfZUqI4_0) for some simple ideas for defining effecive memory usage and some comparison with peak performance.
+
+
