@@ -21,11 +21,16 @@ using Sbplib.StaticDicts
         @test_throws DomainError StaticDict(1=>3, 1=>3)
     end
 
+    @testset "length" begin
+        @test length(StaticDict()) == 0
+        @test length(StaticDict(1=>1)) == 1
+        @test length(StaticDict(1=>1, 2=>2)) == 2
+    end
+
     @testset "equality" begin
         @test StaticDict(1=>1) == StaticDict(1=>1)
         @test StaticDict(2=>1) != StaticDict(1=>1)
         @test StaticDict(1=>2) != StaticDict(1=>1)
-
 
         # The following is not true for the regular Dict
         @test StaticDict(1=>1) === StaticDict(1=>1)
