@@ -50,7 +50,10 @@ using Sbplib.StaticDicts
     end
 
     @testset "iterate" begin
-        # TODO
+        pairs = [1=>2, 3=>4, 5=>6]
+
+        d = StaticDict(pairs...)
+        @test collect(d) == pairs
     end
 
     @testset "merge" begin
