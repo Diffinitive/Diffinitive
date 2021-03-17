@@ -18,8 +18,7 @@ using Sbplib.StaticDicts
         @test StaticDict(1. =>3, 2=>4) isa StaticDict{Real,Int}
         @test StaticDict(1. =>3, 2=>4.) isa StaticDict{Real,Real}
 
-        @test_throws ArgumentError StaticDict(1=>3, 1=>3)
-        #TBD: is ArgumentError correct?
+        @test_throws DomainError StaticDict(1=>3, 1=>3)
     end
 
     @testset "equality" begin
@@ -47,7 +46,7 @@ using Sbplib.StaticDicts
             StaticDict(3=>5,4=>6)) == StaticDict(
                 1=>3, 2=>4, 3=>5, 4=>6
             )
-        @test_throws ArgumentError merge(StaticDict(1=>3),StaticDict(1=>3))
+        @test_throws DomainError merge(StaticDict(1=>3),StaticDict(1=>3))
     end
 end
 

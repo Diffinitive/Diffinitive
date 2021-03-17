@@ -25,7 +25,7 @@ struct StaticDict{K,V,N} <: AbstractDict{K,V}
 
     function StaticDict{K,V,N}(pairs::Tuple) where {K,V,N}
         if !allunique(first.(pairs))
-            throw(ArgumentError("keys must be unique (for now)"))
+            throw(DomainError(pairs, "keys must be unique"))
         end
         return new{K,V,N}(pairs)
     end
