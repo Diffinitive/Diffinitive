@@ -2,6 +2,9 @@ using Test
 
 using Sbplib.SbpOperators
 using Sbplib.Grids
+using Sbplib.LazyTensors
+
+import Sbplib.SbpOperators.Stencil
 
 @testset "Diagonal-stencil inverse_inner_product" begin
     Lx = π/2.

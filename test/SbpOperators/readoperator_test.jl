@@ -3,6 +3,8 @@ using Test
 using TOML
 using Sbplib.SbpOperators
 
+import Sbplib.SbpOperators.Stencil
+
 
 @testset "parse_rational" begin
     @test SbpOperators.parse_rational("1") isa Rational

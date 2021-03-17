@@ -2,8 +2,11 @@ using Test
 
 using Sbplib.SbpOperators
 using Sbplib.Grids
+using Sbplib.RegionIndices
+using Sbplib.LazyTensors
 
 import Sbplib.SbpOperators.Stencil
+import Sbplib.SbpOperators.VolumeOperator
 import Sbplib.SbpOperators.volume_operator
 import Sbplib.SbpOperators.odd
 import Sbplib.SbpOperators.even

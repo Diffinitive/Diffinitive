@@ -2,6 +2,7 @@ using Test
 
 using Sbplib.SbpOperators
 using Sbplib.Grids
+using Sbplib.LazyTensors
 
 @testset "Laplace" begin
     g_1D = EquidistantGrid(101, 0.0, 1.)

@@ -2,6 +2,7 @@ using Test
 
 using Sbplib.SbpOperators
 using Sbplib.Grids
+using Sbplib.LazyTensors
 
 
 @testset "Diagonal-stencil inner_product" begin

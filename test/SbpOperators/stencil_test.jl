@@ -1,5 +1,6 @@
 using Test
 using Sbplib.SbpOperators
+import Sbplib.SbpOperators.Stencil
 
 @testset "Stencil" begin
     s = Stencil((-2,2), (1.,2.,2.,3.,4.))

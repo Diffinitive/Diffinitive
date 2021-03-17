@@ -2,6 +2,10 @@ using Test
 
 using Sbplib.SbpOperators
 using Sbplib.Grids
+using Sbplib.RegionIndices
+using Sbplib.LazyTensors
+
+import Sbplib.SbpOperators.BoundaryOperator
 
 @testset "boundary_restriction" begin
     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
