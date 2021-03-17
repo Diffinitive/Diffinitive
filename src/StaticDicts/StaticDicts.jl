@@ -23,7 +23,7 @@ to the constructor.
 struct StaticDict{K,V,N} <: AbstractDict{K,V}
     pairs::NTuple{N,Pair{K,V}}
 
-    function StaticDict{K,V,N}(pairs::Tuple) where {K,V,N}
+    function StaticDict{K,V}(pairs::Vararg{Pair,N}) where {K,V,N}
         if !allunique(first.(pairs))
             throw(DomainError(pairs, "keys must be unique"))
         end
@@ -34,8 +34,7 @@ end
 function StaticDict(pairs::Vararg{Pair})
     K = typejoin(firsttype.(pairs)...)
     V = typejoin(secondtype.(pairs)...)
-    N = length(pairs)
-    return StaticDict{K,V,N}(pairs)
+    return StaticDict{K,V}(pairs...)
 end
 
 StaticDict(pairs::NTuple{N,Pair} where N) = StaticDict(pairs...)
