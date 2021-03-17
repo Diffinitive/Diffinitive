@@ -23,12 +23,10 @@ to the constructor.
 struct StaticDict{K,V,N} <: AbstractDict{K,V}
     pairs::NTuple{N,Pair{K,V}}
 
-    # TBD: Why doesn't `pairs::NTuple{N,Pair{K,V}}` work?
     function StaticDict{K,V,N}(pairs::Tuple) where {K,V,N}
         if !allunique(first.(pairs))
             throw(ArgumentError("keys must be unique (for now)"))
         end
-
         return new{K,V,N}(pairs)
     end
 end
@@ -39,6 +37,8 @@ function StaticDict(pairs::Vararg{Pair})
     N = length(pairs)
     return StaticDict{K,V,N}(pairs)
 end
+
+StaticDict(pairs::NTuple{N,Pair} where N) = StaticDict(pairs...)
 
 function Base.get(d::StaticDict, key, default)
     for p ∈ d.pairs # TBD: Is this the best? Should we use the iterator on `d`?
