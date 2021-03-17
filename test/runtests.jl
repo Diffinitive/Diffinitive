@@ -50,5 +50,3 @@ testsetname = isempty(ARGS) ? "Sbplib.jl" : "["*join(ARGS, ", ")*"]"
 @testset "$testsetname" begin
     run_testfiles(ARGS)
 end
-
-# Make standalone files fail the same way when run together and alone
