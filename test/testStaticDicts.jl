@@ -21,7 +21,10 @@ using Sbplib.StaticDicts
     end
 
     @testset "equality" begin
-        @test StaticDict(1=>1) == StaticDict(1=>1) # This is not true for the regular Dict
+        @test StaticDict(1=>1) == StaticDict(1=>1)
+
+        # The following is not true for the regular Dict
+        @test StaticDict(1=>1) === StaticDict(1=>1)
     end
 
     @testset "get" begin
