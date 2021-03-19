@@ -51,7 +51,6 @@ end
 
 Base.iterate(d::StaticDict) = iterate(d.pairs)
 Base.iterate(d::StaticDict, state) = iterate(d.pairs,state)
-
 Base.length(d::StaticDict) = length(d.pairs)
 
 

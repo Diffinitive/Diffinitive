@@ -35,8 +35,7 @@ using Sbplib.StaticDicts
         @test StaticDict(2=>1) != StaticDict(1=>1)
         @test StaticDict(1=>2) != StaticDict(1=>1)
 
-        # The following is not true for the regular Dict
-        @test StaticDict(1=>1) === StaticDict(1=>1)
+        @test StaticDict(1=>1) === StaticDict(1=>1) #not true for a regular Dict
         @test StaticDict(2=>1) !== StaticDict(1=>1)
         @test StaticDict(1=>2) !== StaticDict(1=>1)
     end
