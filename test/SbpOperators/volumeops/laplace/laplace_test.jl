@@ -22,15 +22,15 @@ using Sbplib.StaticDicts
 
             e_l = boundary_restriction(g_1D,op.eClosure,id_l)
             e_r = boundary_restriction(g_1D,op.eClosure,id_r)
-            e_dict = StaticDict(Pair(id_l,e_l),Pair(id_r,e_r))
+            e_dict = StaticDict(id_l => e_l, id_r => e_r)
 
             d_l = normal_derivative(g_1D,op.dClosure,id_l)
             d_r = normal_derivative(g_1D,op.dClosure,id_r)
-            d_dict = StaticDict(Pair(id_l,d_l),Pair(id_r,d_r))
+            d_dict = StaticDict(id_l => d_l, id_r => d_r)
 
             H_l = inner_product(boundary_grid(g_1D,id_l),op.quadratureClosure)
             H_r = inner_product(boundary_grid(g_1D,id_r),op.quadratureClosure)
-            Hb_dict = StaticDict(Pair(id_l,H_l),Pair(id_r,H_r))
+            Hb_dict = StaticDict(id_l => H_l, id_r => H_r)
 
             L = Laplace(g_1D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
             @test L == Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict)
@@ -44,16 +44,15 @@ using Sbplib.StaticDicts
             Hi = inverse_inner_product(g_3D, op.quadratureClosure)
 
             (id_l, id_r, id_s, id_n, id_b, id_t) = boundary_identifiers(g_3D)
-
             e_l = boundary_restriction(g_3D,op.eClosure,id_l)
             e_r = boundary_restriction(g_3D,op.eClosure,id_r)
             e_s = boundary_restriction(g_3D,op.eClosure,id_s)
             e_n = boundary_restriction(g_3D,op.eClosure,id_n)
             e_b = boundary_restriction(g_3D,op.eClosure,id_b)
             e_t = boundary_restriction(g_3D,op.eClosure,id_t)
-            e_dict = StaticDict(Pair(id_l,e_l),Pair(id_r,e_r),
-                          Pair(id_s,e_s),Pair(id_n,e_n),
-                          Pair(id_b,e_b),Pair(id_t,e_t))
+            e_dict = StaticDict(id_l => e_l, id_r => e_r,
+                                id_s => e_s, id_n => e_n,
+                                id_b => e_b, id_t => e_t)
 
             d_l = normal_derivative(g_3D,op.dClosure,id_l)
             d_r = normal_derivative(g_3D,op.dClosure,id_r)
@@ -61,9 +60,9 @@ using Sbplib.StaticDicts
             d_n = normal_derivative(g_3D,op.dClosure,id_n)
             d_b = normal_derivative(g_3D,op.dClosure,id_b)
             d_t = normal_derivative(g_3D,op.dClosure,id_t)
-            d_dict = StaticDict(Pair(id_l,d_l),Pair(id_r,d_r),
-                          Pair(id_s,d_s),Pair(id_n,d_n),
-                          Pair(id_b,d_b),Pair(id_t,d_t))
+            d_dict = StaticDict(id_l => d_l, id_r => d_r,
+                                id_s => d_s, id_n => d_n,
+                                id_b => d_b, id_t => d_t)
 
             H_l = inner_product(boundary_grid(g_3D,id_l),op.quadratureClosure)
             H_r = inner_product(boundary_grid(g_3D,id_r),op.quadratureClosure)
@@ -71,9 +70,9 @@ using Sbplib.StaticDicts
             H_n = inner_product(boundary_grid(g_3D,id_n),op.quadratureClosure)
             H_b = inner_product(boundary_grid(g_3D,id_b),op.quadratureClosure)
             H_t = inner_product(boundary_grid(g_3D,id_t),op.quadratureClosure)
-            Hb_dict = StaticDict(Pair(id_l,H_l),Pair(id_r,H_r),
-                          Pair(id_s,H_s),Pair(id_n,H_n),
-                          Pair(id_b,H_b),Pair(id_t,H_t))
+            Hb_dict = StaticDict(id_l => H_l, id_r => H_r,
+                                 id_s => H_s, id_n => H_n,
+                                 id_b => H_b, id_t => H_t)
 
             L = Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
             @test L == Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict)
@@ -111,12 +110,8 @@ using Sbplib.StaticDicts
 
     @testset "boundary_restriction" begin
         L = Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
-        id_l = CartesianBoundary{1,Lower}()
-        id_r = CartesianBoundary{1,Upper}()
-        id_s = CartesianBoundary{2,Lower}()
-        id_n = CartesianBoundary{2,Upper}()
-        id_b = CartesianBoundary{3,Lower}()
-        id_t = CartesianBoundary{3,Upper}()
+        (id_l, id_r, id_s, id_n, id_b, id_t) = boundary_identifiers(g_3D)
+        ids = boundary_identifiers(g_3D)
         @test boundary_restriction(L,id_l) == boundary_restriction(g_3D,op.eClosure,id_l)
         @test boundary_restriction(L,id_r) == boundary_restriction(g_3D,op.eClosure,id_r)
         @test boundary_restriction(L,id_s) == boundary_restriction(g_3D,op.eClosure,id_s)
@@ -127,12 +122,7 @@ using Sbplib.StaticDicts
 
     @testset "normal_derivative" begin
         L = Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
-        id_l = CartesianBoundary{1,Lower}()
-        id_r = CartesianBoundary{1,Upper}()
-        id_s = CartesianBoundary{2,Lower}()
-        id_n = CartesianBoundary{2,Upper}()
-        id_b = CartesianBoundary{3,Lower}()
-        id_t = CartesianBoundary{3,Upper}()
+        (id_l, id_r, id_s, id_n, id_b, id_t) = boundary_identifiers(g_3D)
         @test normal_derivative(L,id_l) == normal_derivative(g_3D,op.dClosure,id_l)
         @test normal_derivative(L,id_r) == normal_derivative(g_3D,op.dClosure,id_r)
         @test normal_derivative(L,id_s) == normal_derivative(g_3D,op.dClosure,id_s)
@@ -143,12 +133,7 @@ using Sbplib.StaticDicts
 
     @testset "boundary_quadrature" begin
         L = Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
-        id_l = CartesianBoundary{1,Lower}()
-        id_r = CartesianBoundary{1,Upper}()
-        id_s = CartesianBoundary{2,Lower}()
-        id_n = CartesianBoundary{2,Upper}()
-        id_b = CartesianBoundary{3,Lower}()
-        id_t = CartesianBoundary{3,Upper}()
+        (id_l, id_r, id_s, id_n, id_b, id_t) = boundary_identifiers(g_3D)
         @test boundary_quadrature(L,id_l) == inner_product(boundary_grid(g_3D,id_l),op.quadratureClosure)
         @test boundary_quadrature(L,id_r) == inner_product(boundary_grid(g_3D,id_r),op.quadratureClosure)
         @test boundary_quadrature(L,id_s) == inner_product(boundary_grid(g_3D,id_s),op.quadratureClosure)

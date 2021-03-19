@@ -43,9 +43,9 @@ function Laplace(grid::AbstractGrid, fn; order)
     # Boundary operator - id pairs
     ids = boundary_identifiers(grid)
     n_ids = length(ids)
-    e_pairs = ntuple(i -> Pair(ids[i],boundary_restriction(grid,e_closure_stencil,ids[i])),n_ids)
-    d_pairs = ntuple(i -> Pair(ids[i],normal_derivative(grid,d_closure_stencil,ids[i])),n_ids)
-    Hᵧ_pairs = ntuple(i -> Pair(ids[i],inner_product(boundary_grid(grid,ids[i]),H_closure_stencils)),n_ids)
+    e_pairs = ntuple(i -> ids[i] => boundary_restriction(grid,e_closure_stencil,ids[i]),n_ids)
+    d_pairs = ntuple(i -> ids[i] => normal_derivative(grid,d_closure_stencil,ids[i]),n_ids)
+    Hᵧ_pairs = ntuple(i -> ids[i] => inner_product(boundary_grid(grid,ids[i]),H_closure_stencils),n_ids)
 
     return Laplace(Δ, H, H⁻¹, StaticDict(e_pairs), StaticDict(d_pairs), StaticDict(Hᵧ_pairs))
 end
