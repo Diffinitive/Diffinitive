@@ -18,9 +18,9 @@ struct Laplace{T, Dim, Rb, TMdiffop<:TensorMapping{T,Dim,Dim}, # Differential op
     D::TMdiffop # Differential operator
     H::TMipop # Inner product operator
     H_inv::TMipop # Inverse inner product operator
-    e::Dict{BID,TMbop} # Boundary restriction operators
-    d::Dict{BID,TMbop} # Normal derivative operators
-    H_boundary::Dict{BID,TMbqop} # Boundary quadrature operators
+    e::StaticDict{BID,TMbop} # Boundary restriction operators
+    d::StaticDict{BID,TMbop} # Normal derivative operators
+    H_boundary::StaticDict{BID,TMbqop} # Boundary quadrature operators
 end
 export Laplace
 
@@ -47,7 +47,7 @@ function Laplace(grid::AbstractGrid, fn; order)
     d_pairs = ntuple(i -> Pair(ids[i],normal_derivative(grid,d_closure_stencil,ids[i])),n_ids)
     Hᵧ_pairs = ntuple(i -> Pair(ids[i],inner_product(boundary_grid(grid,ids[i]),H_closure_stencils)),n_ids)
 
-    return Laplace(Δ, H, H⁻¹, Dict(e_pairs), Dict(d_pairs), Dict(Hᵧ_pairs))
+    return Laplace(Δ, H, H⁻¹, StaticDict(e_pairs), StaticDict(d_pairs), StaticDict(Hᵧ_pairs))
 end
 
 LazyTensors.range_size(L::Laplace) = LazyTensors.range_size(L.D)

@@ -4,16 +4,7 @@ using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
 using Sbplib.RegionIndices
-
-"""
-    cmp_fields(s1,s2)
-
-Compares the fields of two structs s1, s2, using the == operator.
-"""
-function cmp_fields(s1::T,s2::T) where T
-    f = fieldnames(T)
-    return getfield.(Ref(s1),f) == getfield.(Ref(s2),f)
-end
+using Sbplib.StaticDicts
 
 @testset "Laplace" begin
     g_1D = EquidistantGrid(101, 0.0, 1.)
@@ -31,18 +22,18 @@ end
 
             e_l = boundary_restriction(g_1D,op.eClosure,id_l)
             e_r = boundary_restriction(g_1D,op.eClosure,id_r)
-            e_dict = Dict(Pair(id_l,e_l),Pair(id_r,e_r))
+            e_dict = StaticDict(Pair(id_l,e_l),Pair(id_r,e_r))
 
             d_l = normal_derivative(g_1D,op.dClosure,id_l)
             d_r = normal_derivative(g_1D,op.dClosure,id_r)
-            d_dict = Dict(Pair(id_l,d_l),Pair(id_r,d_r))
+            d_dict = StaticDict(Pair(id_l,d_l),Pair(id_r,d_r))
 
             H_l = inner_product(boundary_grid(g_1D,id_l),op.quadratureClosure)
             H_r = inner_product(boundary_grid(g_1D,id_r),op.quadratureClosure)
-            Hb_dict = Dict(Pair(id_l,H_l),Pair(id_r,H_r))
+            Hb_dict = StaticDict(Pair(id_l,H_l),Pair(id_r,H_r))
 
             L = Laplace(g_1D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            @test cmp_fields(L,Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict))
+            @test L == Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict)
             @test L isa TensorMapping{T,1,1}  where T
             @inferred Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict)
         end
@@ -60,7 +51,7 @@ end
             e_n = boundary_restriction(g_3D,op.eClosure,id_n)
             e_b = boundary_restriction(g_3D,op.eClosure,id_b)
             e_t = boundary_restriction(g_3D,op.eClosure,id_t)
-            e_dict = Dict(Pair(id_l,e_l),Pair(id_r,e_r),
+            e_dict = StaticDict(Pair(id_l,e_l),Pair(id_r,e_r),
                           Pair(id_s,e_s),Pair(id_n,e_n),
                           Pair(id_b,e_b),Pair(id_t,e_t))
 
@@ -70,7 +61,7 @@ end
             d_n = normal_derivative(g_3D,op.dClosure,id_n)
             d_b = normal_derivative(g_3D,op.dClosure,id_b)
             d_t = normal_derivative(g_3D,op.dClosure,id_t)
-            d_dict = Dict(Pair(id_l,d_l),Pair(id_r,d_r),
+            d_dict = StaticDict(Pair(id_l,d_l),Pair(id_r,d_r),
                           Pair(id_s,d_s),Pair(id_n,d_n),
                           Pair(id_b,d_b),Pair(id_t,d_t))
 
@@ -80,12 +71,12 @@ end
             H_n = inner_product(boundary_grid(g_3D,id_n),op.quadratureClosure)
             H_b = inner_product(boundary_grid(g_3D,id_b),op.quadratureClosure)
             H_t = inner_product(boundary_grid(g_3D,id_t),op.quadratureClosure)
-            Hb_dict = Dict(Pair(id_l,H_l),Pair(id_r,H_r),
+            Hb_dict = StaticDict(Pair(id_l,H_l),Pair(id_r,H_r),
                           Pair(id_s,H_s),Pair(id_n,H_n),
                           Pair(id_b,H_b),Pair(id_t,H_t))
 
             L = Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            @test cmp_fields(L,Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict))
+            @test L == Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict)
             @test L isa TensorMapping{T,3,3} where T
             @inferred Laplace(Δ,H,Hi,e_dict,d_dict,Hb_dict)
         end

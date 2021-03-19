@@ -3,6 +3,7 @@ module SbpOperators
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using Sbplib.Grids
+using Sbplib.StaticDicts
 
 include("stencil.jl")
 include("d2.jl")
