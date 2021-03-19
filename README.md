@@ -10,6 +10,20 @@ To run all tests simply run
 If you want to run tests from a specific file in `test/`, you can do
 ```
 julia> using Pkg
-julia> Pkg.test(test_args=["testLazyTensors"])
+julia> Pkg.test(test_args=["[glob pattern]"])
 ```
-This works by using the `@includetests` macro from the [TestSetExtensions](https://github.com/ssfrr/TestSetExtensions.jl) package. For more information, see their documentation.
+For example
+```
+julia> Pkg.test(test_args=["SbpOperators/*"])
+```
+to run all test in the `SbpOperators` folder, or
+```
+julia> Pkg.test(test_args=["*/readoperators.jl"])
+```
+to run only the tests in files named `readoperators.jl`.
+Multiple filters are allowed and will cause files matching any of the provided
+filters to be run. For example
+```
+Pkg.test(test_args=["*/lazy_tensor_operations_test.jl", "Grids/*"])
+```
+will run any file named `lazy_tensor_operations_test.jl` and all the files in the `Grids` folder.
