@@ -58,12 +58,18 @@ inner_product(L::Laplace) = L.H
 export inner_product
 inverse_inner_product(L::Laplace) = L.H_inv
 export inverse_inner_product
-boundary_restriction(L::Laplace,bid::BoundaryIdentifier) = L.e[bid]
+boundary_restriction(L::Laplace,id::BoundaryIdentifier) = L.e[id]
+boundary_restriction(L::Laplace,ids::NTuple{N,BoundaryIdentifier}) where N = ntuple(i->L.e[ids[i]],N)
+boundary_restriction(L::Laplace,ids::Vararg{BoundaryIdentifier,N}) where N = ntuple(i->L.e[ids[i]],N)
 export boundary_restriction
-normal_derivative(L::Laplace,bid::BoundaryIdentifier) = L.d[bid]
+normal_derivative(L::Laplace,id::BoundaryIdentifier) = L.d[id]
+normal_derivative(L::Laplace,ids::NTuple{N,BoundaryIdentifier}) where N = ntuple(i->L.d[ids[i]],N)
+normal_derivative(L::Laplace,ids::Vararg{BoundaryIdentifier,N}) where N = ntuple(i->L.d[ids[i]],N)
 export normal_derivative
 # TODO: boundary_inner_product?
-boundary_quadrature(L::Laplace,bid::BoundaryIdentifier) = L.H_boundary[bid]
+boundary_quadrature(L::Laplace,id::BoundaryIdentifier) = L.H_boundary[id]
+boundary_quadrature(L::Laplace,ids::NTuple{N,BoundaryIdentifier}) where N = ntuple(i->L.H_boundary[ids[i]],N)
+boundary_quadrature(L::Laplace,ids::Vararg{BoundaryIdentifier,N}) where N = ntuple(i->L.H_boundary[ids[i]],N)
 export boundary_quadrature
 
 """

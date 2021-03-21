@@ -111,13 +111,22 @@ using Sbplib.StaticDicts
     @testset "boundary_restriction" begin
         L = Laplace(g_3D, sbp_operators_path()*"standard_diagonal.toml"; order=4)
         (id_l, id_r, id_s, id_n, id_b, id_t) = boundary_identifiers(g_3D)
-        ids = boundary_identifiers(g_3D)
         @test boundary_restriction(L,id_l) == boundary_restriction(g_3D,op.eClosure,id_l)
         @test boundary_restriction(L,id_r) == boundary_restriction(g_3D,op.eClosure,id_r)
         @test boundary_restriction(L,id_s) == boundary_restriction(g_3D,op.eClosure,id_s)
         @test boundary_restriction(L,id_n) == boundary_restriction(g_3D,op.eClosure,id_n)
         @test boundary_restriction(L,id_b) == boundary_restriction(g_3D,op.eClosure,id_b)
         @test boundary_restriction(L,id_t) == boundary_restriction(g_3D,op.eClosure,id_t)
+
+        ids = boundary_identifiers(g_3D)
+        es = boundary_restriction(L,ids)
+        @test es ==  (boundary_restriction(L,id_l),
+                      boundary_restriction(L,id_r),
+                      boundary_restriction(L,id_s),
+                      boundary_restriction(L,id_n),
+                      boundary_restriction(L,id_b),
+                      boundary_restriction(L,id_t));
+        @test es == boundary_restriction(L,ids...)
     end
 
     @testset "normal_derivative" begin
@@ -129,6 +138,16 @@ using Sbplib.StaticDicts
         @test normal_derivative(L,id_n) == normal_derivative(g_3D,op.dClosure,id_n)
         @test normal_derivative(L,id_b) == normal_derivative(g_3D,op.dClosure,id_b)
         @test normal_derivative(L,id_t) == normal_derivative(g_3D,op.dClosure,id_t)
+
+        ids = boundary_identifiers(g_3D)
+        ds = normal_derivative(L,ids)
+        @test ds ==  (normal_derivative(L,id_l),
+                      normal_derivative(L,id_r),
+                      normal_derivative(L,id_s),
+                      normal_derivative(L,id_n),
+                      normal_derivative(L,id_b),
+                      normal_derivative(L,id_t));
+        @test ds == normal_derivative(L,ids...)
     end
 
     @testset "boundary_quadrature" begin
@@ -140,6 +159,16 @@ using Sbplib.StaticDicts
         @test boundary_quadrature(L,id_n) == inner_product(boundary_grid(g_3D,id_n),op.quadratureClosure)
         @test boundary_quadrature(L,id_b) == inner_product(boundary_grid(g_3D,id_b),op.quadratureClosure)
         @test boundary_quadrature(L,id_t) == inner_product(boundary_grid(g_3D,id_t),op.quadratureClosure)
+
+        ids = boundary_identifiers(g_3D)
+        H_gammas = boundary_quadrature(L,ids)
+        @test H_gammas ==  (boundary_quadrature(L,id_l),
+                            boundary_quadrature(L,id_r),
+                            boundary_quadrature(L,id_s),
+                            boundary_quadrature(L,id_n),
+                            boundary_quadrature(L,id_b),
+                            boundary_quadrature(L,id_t));
+        @test H_gammas == boundary_quadrature(L,ids...)
     end
 
     # Exact differentiation is measured point-wise. In other cases
