@@ -51,8 +51,8 @@ function Laplace(grid::AbstractGrid, fn; order)
     return Laplace(Δ, H, H⁻¹, StaticDict(e_pairs), StaticDict(d_pairs), StaticDict(Hᵧ_pairs))
 end
 
-
-Base.show(io::IO, L::Laplace{T, Dim}) where {T,Dim} =  print(io, "Laplace{$T, $Dim}(", L.D, L.H, L.H_inv, L.e, L.d, L.H_boundary, ")")
+# TODO: Consider pretty printing of the following form
+# Base.show(io::IO, L::Laplace{T, Dim}) where {T,Dim,TM} =  print(io, "Laplace{$T, $Dim, $TM}(", L.D, L.H, L.H_inv, L.e, L.d, L.H_boundary, ")")
 
 LazyTensors.range_size(L::Laplace) = LazyTensors.range_size(L.D)
 LazyTensors.domain_size(L::Laplace) = LazyTensors.domain_size(L.D)
