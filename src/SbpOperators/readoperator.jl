@@ -53,7 +53,7 @@ function read_D2_operator(fn; order)
 end
 
 """
-    read_stencil_set(fn, filter_pairs::Vararg{Pair})
+    read_stencil_set(fn; filters)
 
 Picks out a stencil set from the given toml file based on some filters.
 If more than one set matches the filters an error is raised.
@@ -61,7 +61,7 @@ If more than one set matches the filters an error is raised.
 The stencil set is not parsed beyond the inital toml parse. To get usable
 stencils use the `parse_stencil` functions on the fields of the stencil set.
 """
-read_stencil_set(fn, filter_pairs::Vararg{Pair}) = get_stencil_set(TOML.parsefile(fn), filter_pairs...)
+read_stencil_set(fn; filters...) = get_stencil_set(TOML.parsefile(fn), filters...)
 
 """
     get_stencil_set(parsed_toml; filters...)
