@@ -320,3 +320,13 @@ We should make these test simple to run for any solver.
 See [this talk](https://www.youtube.com/watch?v=vPsfZUqI4_0) for some simple ideas for defining effecive memory usage and some comparison with peak performance.
 
 
+## Adjoint as a trait on the sbp_operator level?
+
+It would be nice to have a way of refering to adjoints with resepct to the sbp-inner-product.
+If it was possible you could reduce the number of times you have to deal with the inner product matrix.
+
+Since the LazyOperators package is sort of implementing matrix-free matrices there is no concept of inner products there at the moment. It seems to complicate large parts of the package if this was included there.
+
+A different approach would be to include it as a trait for operators so that you can specify what the adjoint for that operator is.
+
+
