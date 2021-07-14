@@ -5,7 +5,6 @@ using Sbplib.SbpOperators
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 
-@testset "DiffOps" begin
 #
 # @testset "BoundaryValue" begin
 #     op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
@@ -194,5 +193,3 @@ using Sbplib.LazyTensors
 #     @test collect(H_s'*v_s) == collect(H_s'*v_s)
 #     @test collect(H_n'*v_n) == collect(H_n'*v_n)
 # end
-
-end
