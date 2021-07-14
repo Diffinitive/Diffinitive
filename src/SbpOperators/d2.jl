@@ -5,6 +5,8 @@ export D2, closuresize
     even = 1
 end
 
+
+# TBD: Can this be deleted when this branch is finished?
 struct D2{T,M}
     innerStencil::Stencil{T}
     closureStencils::NTuple{M,Stencil{T}}
