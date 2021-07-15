@@ -8,7 +8,7 @@ When `Dim>1`, the `VolumeOperator` `op` is inflated by the outer product
 of `IdentityMappings` in orthogonal coordinate directions, e.g for `Dim=3`,
 the boundary restriction operator in the y-direction direction is `Ix⊗op⊗Iz`.
 """
-function volume_operator(grid::EquidistantGrid{Dim,T}, inner_stencil::Stencil{T}, closure_stencils::NTuple{M,Stencil{T}}, parity, direction) where {Dim,T,M}
+function volume_operator(grid::EquidistantGrid{Dim,T}, inner_stencil, closure_stencils, parity, direction) where {Dim,T,M}
     #TODO: Check that direction <= Dim?
 
     # Create 1D volume operator in along coordinate direction
@@ -34,7 +34,7 @@ struct VolumeOperator{T,N,M,K} <: TensorMapping{T,1,1}
 end
 
 function VolumeOperator(grid::EquidistantGrid{1}, inner_stencil, closure_stencils, parity)
-    return VolumeOperator(inner_stencil, closure_stencils, size(grid), parity)
+    return VolumeOperator(inner_stencil, Tuple(closure_stencils), size(grid), parity)
 end
 
 closure_size(::VolumeOperator{T,N,M}) where {T,N,M} = M
