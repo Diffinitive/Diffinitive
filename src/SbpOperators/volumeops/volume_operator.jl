@@ -1,14 +1,14 @@
 """
-    volume_operator(grid,inner_stencil,closure_stencils,parity,direction)
+    volume_operator(grid, inner_stencil, closure_stencils, parity, direction)
+
 Creates a volume operator on a `Dim`-dimensional grid acting along the
-specified coordinate `direction`. The action of the operator is determined by the
-stencils `inner_stencil` and `closure_stencils`.
-When `Dim=1`, the corresponding `VolumeOperator` tensor mapping is returned.
-When `Dim>1`, the `VolumeOperator` `op` is inflated by the outer product
-of `IdentityMappings` in orthogonal coordinate directions, e.g for `Dim=3`,
-the boundary restriction operator in the y-direction direction is `Ix⊗op⊗Iz`.
+specified coordinate `direction`. The action of the operator is determined by
+the stencils `inner_stencil` and `closure_stencils`. When `Dim=1`, the
+corresponding `VolumeOperator` tensor mapping is returned. When `Dim>1`, the
+returned operator is the appropriate outer product of a one-dimensional
+operators and `IdentityMapping`s, e.g for `Dim=2`, `I⊗op⊗I`.
 """
-function volume_operator(grid::EquidistantGrid{Dim,T}, inner_stencil, closure_stencils, parity, direction) where {Dim,T,M}
+function volume_operator(grid::EquidistantGrid{Dim,T}, inner_stencil, closure_stencils, parity, direction) where {Dim,T}
     #TODO: Check that direction <= Dim?
 
     # Create 1D volume operator in along coordinate direction
