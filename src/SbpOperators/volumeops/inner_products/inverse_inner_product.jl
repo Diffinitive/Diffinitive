@@ -21,7 +21,7 @@ operators in each coordinate direction. Also see the documentation of
 `SbpOperators.volume_operator(...)` for more details. On a 0-dimensional `grid`,
 `H⁻¹` is a 0-dimensional `IdentityMapping`.
 """
-function inverse_inner_product(grid::EquidistantGrid, inv_closure_stencils, inv_inner_stencil = CenteredStencil(one(eltype(grid))))
+function inverse_inner_product(grid::EquidistantGrid, inv_closure_stencils, inv_inner_stencil)
     H⁻¹s = ()
 
     for i ∈ 1:dimension(grid)
@@ -31,13 +31,13 @@ function inverse_inner_product(grid::EquidistantGrid, inv_closure_stencils, inv_
     return foldl(⊗, H⁻¹s)
 end
 
-function inverse_inner_product(grid::EquidistantGrid{1}, inv_closure_stencils, inv_inner_stencil = CenteredStencil(one(eltype(grid))))
+function inverse_inner_product(grid::EquidistantGrid{1}, inv_closure_stencils, inv_inner_stencil)
     h⁻¹ = inverse_spacing(grid)
     H⁻¹ = SbpOperators.volume_operator(grid, scale(inv_inner_stencil, h⁻¹[1]), scale.(inv_closure_stencils, h⁻¹[1]),even,1)
     return H⁻¹
 end
 export inverse_inner_product
 
-inverse_inner_product(grid::EquidistantGrid{0}, inv_closure_stencils, inv_inner_stencil = CenteredStencil(one(eltype(grid)))) = IdentityMapping{eltype(grid)}()
+inverse_inner_product(grid::EquidistantGrid{0}, inv_closure_stencils, inv_inner_stencil) = IdentityMapping{eltype(grid)}()
 
 reciprocal_stencil(s::Stencil{T}) where T = Stencil(s.range,one(T)./s.weights)
