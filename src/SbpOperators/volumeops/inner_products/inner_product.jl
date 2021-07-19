@@ -16,14 +16,20 @@ each coordinate direction. Also see the documentation of
 `H` is a 0-dimensional `IdentityMapping`.
 """
 function inner_product(grid::EquidistantGrid, closure_stencils, inner_stencil = CenteredStencil(one(eltype(grid))))
-    h = spacing(grid)
-    H = SbpOperators.volume_operator(grid, scale(inner_stencil,h[1]), scale.(closure_stencils,h[1]), even, 1)
-    for i ∈ 2:dimension(grid)
-        Hᵢ = SbpOperators.volume_operator(grid, scale(inner_stencil,h[i]), scale.(closure_stencils,h[i]), even, i)
-        H = H∘Hᵢ
+    Hs = ()
+
+    for i ∈ 1:dimension(grid)
+        Hs = (Hs..., inner_product(restrict(grid, i), closure_stencils, inner_stencil))
     end
-    return H
+
+    return foldl(⊗, Hs)
 end
 export inner_product
+
+function inner_product(grid::EquidistantGrid{1}, closure_stencils, inner_stencil = CenteredStencil(one(eltype(grid))))
+    h = spacing(grid)
+    H = SbpOperators.volume_operator(grid, scale(inner_stencil,h[1]), scale.(closure_stencils,h[1]), even, 1)
+    return H
+end
 
 inner_product(grid::EquidistantGrid{0}, closure_stencils, inner_stencil) = IdentityMapping{eltype(grid)}()
