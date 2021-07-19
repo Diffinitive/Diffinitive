@@ -57,14 +57,14 @@ import Sbplib.SbpOperators.Stencil
             u = evalOn(g_1D,x->x^3-x^2+1)
             @testset "2nd order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                H = inner_product(g_1D,op.quadratureClosure)
+                H = inner_product(g_1D, op.quadratureClosure, CenteredStencil(1.))
                 Hi = inverse_inner_product(g_1D,op.quadratureClosure)
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
             end
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                H = inner_product(g_1D,op.quadratureClosure)
+                H = inner_product(g_1D, op.quadratureClosure, CenteredStencil(1.))
                 Hi = inverse_inner_product(g_1D,op.quadratureClosure)
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
@@ -75,14 +75,14 @@ import Sbplib.SbpOperators.Stencil
             u = evalOn(g_2D,(x,y)->x*y + x^5 - sqrt(y))
             @testset "2nd order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                H = inner_product(g_2D,op.quadratureClosure)
+                H = inner_product(g_2D, op.quadratureClosure, CenteredStencil(1.))
                 Hi = inverse_inner_product(g_2D,op.quadratureClosure)
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
             end
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                H = inner_product(g_2D,op.quadratureClosure)
+                H = inner_product(g_2D, op.quadratureClosure, CenteredStencil(1.))
                 Hi = inverse_inner_product(g_2D,op.quadratureClosure)
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
