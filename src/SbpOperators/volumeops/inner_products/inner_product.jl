@@ -1,3 +1,6 @@
+# TODO:refactor to take a tuple instead. Convert the tuple to stencil for now. Could probably be refactored using a diagonal operator later.
+# How would a block-ip be built? A method on inner_product taking a stencil collection for the closure which then returns a different type of tensormapping
+
 """
     inner_product(grid::EquidistantGrid, closure_stencils, inner_stencil)
 
