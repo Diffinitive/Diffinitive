@@ -330,3 +330,5 @@ Since the LazyOperators package is sort of implementing matrix-free matrices the
 A different approach would be to include it as a trait for operators so that you can specify what the adjoint for that operator is.
 
 
+## Name of the `VolumeOperator` type for constant stencils
+It seems that the name is too general. The name of the method `volume_operator` makes sense. It should return different types of `TensorMapping` specialized for the grid. A suggetion for a better name is `ConstantStencilVolumeOperator`
