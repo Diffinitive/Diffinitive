@@ -4,6 +4,7 @@ export read_stencil_set
 export get_stencil_set
 
 export parse_stencil
+export parse_rational
 
 # The read_stencil_set and get_stencil_set functions return the freshly parsed
 # toml. The generic code in these functions can't be expected to know anyhting
