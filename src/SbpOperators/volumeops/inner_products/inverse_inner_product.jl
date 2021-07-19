@@ -1,6 +1,5 @@
 """
     inverse_inner_product(grid::EquidistantGrid, inv_inner_stencil, inv_closure_stencils)
-    inverse_inner_product(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T,1}})
 
 Creates the inverse inner product operator `H⁻¹` as a `TensorMapping` on an
 equidistant grid. `H⁻¹` is defined implicitly by `H⁻¹∘H = I`, where
@@ -8,12 +7,7 @@ equidistant grid. `H⁻¹` is defined implicitly by `H⁻¹∘H = I`, where
 
 `inverse_inner_product(grid::EquidistantGrid, inv_inner_stencil, inv_closure_stencils)`
 constructs `H⁻¹` using a set of stencils `inv_closure_stencils` for the points
-in the closure regions and the stencil `inv_inner_stencil` in the interior. If
-`inv_closure_stencils` is omitted, a central interior stencil with weight 1 is used.
-
-`inverse_inner_product(grid::EquidistantGrid, closure_stencils::NTuple{M,Stencil{T,1}})`
-constructs a diagonal inverse inner product operator where `closure_stencils` are the
-closure stencils of `H` (not `H⁻¹`!).
+in the closure regions and the stencil `inv_inner_stencil` in the interior.
 
 On a 1-dimensional `grid`, `H⁻¹` is a `VolumeOperator`. On a N-dimensional
 `grid`, `H⁻¹` is the outer product of the 1-dimensional inverse inner product
