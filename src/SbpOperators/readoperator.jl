@@ -9,7 +9,7 @@ export parse_rational
 # The read_stencil_set and get_stencil_set functions return the freshly parsed
 # toml. The generic code in these functions can't be expected to know anyhting
 # about how to read different stencil sets as they may contain many different
-# kinds of stecils. We should how ever add read_ and get_ functions for all
+# kinds of stencils. We should how ever add read_ and get_ functions for all
 # the types of stencils we know about.
 #
 # After getting a stencil set the user can use parse functions to parse what
@@ -78,7 +78,7 @@ end
 
 function check_stencil_toml(toml)
     if !(toml isa Dict || toml isa Vector{String})
-        throw(ArgumentError("the TOML for a stecil must be a vector of strings or a table."))
+        throw(ArgumentError("the TOML for a stencil must be a vector of strings or a table."))
     end
 
     if toml isa Vector{String}
