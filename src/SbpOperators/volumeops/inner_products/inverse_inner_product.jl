@@ -1,11 +1,11 @@
 """
-    inverse_inner_product(grid::EquidistantGrid, inv_inner_stencil, inv_closure_stencils)
+    inverse_inner_product(grid::EquidistantGrid, inv_closure_stencils, inv_inner_stencil)
 
 Creates the inverse inner product operator `H⁻¹` as a `TensorMapping` on an
 equidistant grid. `H⁻¹` is defined implicitly by `H⁻¹∘H = I`, where
 `H` is the corresponding inner product operator and `I` is the `IdentityMapping`.
 
-`inverse_inner_product(grid::EquidistantGrid, inv_inner_stencil, inv_closure_stencils)`
+`inverse_inner_product(grid::EquidistantGrid, inv_closure_stencils, inv_inner_stencil)`
 constructs `H⁻¹` using a set of stencils `inv_closure_stencils` for the points
 in the closure regions and the stencil `inv_inner_stencil` in the interior.
 
