@@ -23,6 +23,8 @@ export parse_rational
 
 # TODO: Control type for the stencil
 # TODO: Think about naming and terminology around freshly parsed TOML.
+# Vidar: What about get_stencil instead of parse_stencil for an already parsed
+# toml. It matches get_stencil_set.
 
 """
     read_stencil_set(fn; filters)
@@ -76,6 +78,29 @@ function parse_stencil(toml)
     return Stencil(weights..., center = toml["c"])
 end
 
+# TBD Vidar:
+# I suggest the following restructure, for a clearer control flow.
+# function check_stencil_toml(toml)
+#     if toml isa Vector{String}
+#         return
+#     end
+#
+#     if toml isa Dict
+#       if !(haskey(toml, "s") && haskey(toml, "c"))
+#             throw(ArgumentError("the table form of a stencil must have fields `s` and `c`."))
+#       end
+#
+#       if !(toml["s"] isa Vector{String})
+#           throw(ArgumentError("a stencil must be specified as a vector of strings."))
+#       end
+#
+#       if !(toml["c"] isa Int)
+#             throw(ArgumentError("the center of a stencil must be specified as an integer."))
+#       end
+#       return
+#     end
+#     throw(ArgumentError("the TOML for a stencil must be a vector of strings or a table."))
+# end
 function check_stencil_toml(toml)
     if !(toml isa Dict || toml isa Vector{String})
         throw(ArgumentError("the TOML for a stencil must be a vector of strings or a table."))
