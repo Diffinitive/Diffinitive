@@ -2,6 +2,7 @@ using Test
 
 using Sbplib.LazyTensors
 using Sbplib.SbpOperators
+import Sbplib.SbpOperators: ConstantInteriorScalingOperator
 
 @testset "ConstantInteriorScalingOperator" begin
     @test ConstantInteriorScalingOperator(1, (2,3), 10) isa ConstantInteriorScalingOperator{Int,2}

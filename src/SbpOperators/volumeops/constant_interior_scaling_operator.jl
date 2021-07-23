@@ -1,5 +1,3 @@
-export ConstantInteriorScalingOperator
-
 """
     ConstantInteriorScalingOperator{T,N} <: TensorMapping{T,1,1}
 
