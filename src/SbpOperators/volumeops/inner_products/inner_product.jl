@@ -17,21 +17,22 @@ each coordinate direction. Also see the documentation of
 `SbpOperators.volume_operator(...)` for more details. On a 0-dimensional `grid`,
 `H` is a 0-dimensional `IdentityMapping`.
 """
-function inner_product(grid::EquidistantGrid, closure_stencils, inner_stencil)
+function inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
     Hs = ()
 
     for i ∈ 1:dimension(grid)
-        Hs = (Hs..., inner_product(restrict(grid, i), closure_stencils, inner_stencil))
+        Hs = (Hs..., inner_product(restrict(grid, i), interior_weight, closure_weights))
     end
 
     return foldl(⊗, Hs)
 end
 export inner_product
 
-function inner_product(grid::EquidistantGrid{1}, closure_stencils, inner_stencil)
-    h = spacing(grid)
-    H = SbpOperators.volume_operator(grid, scale(inner_stencil,h[1]), scale.(closure_stencils,h[1]), even, 1)
+function inner_product(grid::EquidistantGrid{1}, interior_weight, closure_weights)
+    h = spacing(grid)[1]
+
+    H = SbpOperators.ConstantInteriorScalingOperator(grid, h*interior_weight, h.*closure_weights)
     return H
 end
 
-inner_product(grid::EquidistantGrid{0}, closure_stencils, inner_stencil) = IdentityMapping{eltype(grid)}()
+inner_product(grid::EquidistantGrid{0}, interior_weight, closure_weights) = IdentityMapping{eltype(grid)}()

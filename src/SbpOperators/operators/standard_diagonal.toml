@@ -8,7 +8,7 @@ cite = "A paper a long time ago in a galaxy far far away."
 
 order = 2
 
-H.inner = ["1"]
+H.inner = "1"
 H.closure = ["1/2"]
 
 D1.inner_stencil = ["-1/2", "0", "1/2"]
@@ -27,7 +27,7 @@ d1.closure = {s = ["-3/2", "2", "-1/2"], c = 1}
 [[stencil_set]]
 
 order = 4
-H.inner = ["1"]
+H.inner = "1"
 H.closure = ["17/48", "59/48", "43/48", "49/48"]
 
 D2.inner_stencil = ["-1/12","4/3","-5/2","4/3","-1/12"]
