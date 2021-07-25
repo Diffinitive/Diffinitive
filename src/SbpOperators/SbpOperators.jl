@@ -4,8 +4,12 @@ using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using Sbplib.Grids
 
+@enum Parity begin
+    odd = -1
+    even = 1
+end
+
 include("stencil.jl")
-include("d2.jl")
 include("readoperator.jl")
 include("volumeops/volume_operator.jl")
 include("volumeops/constant_interior_scaling_operator.jl")
