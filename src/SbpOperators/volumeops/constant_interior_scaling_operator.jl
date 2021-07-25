@@ -19,7 +19,7 @@ struct ConstantInteriorScalingOperator{T,N} <: TensorMapping{T,1,1}
 end
 
 function ConstantInteriorScalingOperator(grid::EquidistantGrid{1}, interior_weight, closure_weights)
-    return ConstantInteriorScalingOperator(interior_weight, Tuple(closure_weights), size(grid))
+    return ConstantInteriorScalingOperator(interior_weight, Tuple(closure_weights), size(grid)[1])
 end
 
 closure_size(::ConstantInteriorScalingOperator{T,N}) where {T,N} = N
