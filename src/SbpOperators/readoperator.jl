@@ -105,13 +105,5 @@ function parse_rational(str)
     return eval(:(Rational($expr)))
 end
 
-function pad_tuple(t::NTuple{N, T}, n::Integer) where {N,T}
-    if N >= n
-        return t
-    else
-        return pad_tuple((t..., zero(T)), n)
-    end
-end
-
 sbp_operators_path() = (@__DIR__) * "/operators/"
 export sbp_operators_path
