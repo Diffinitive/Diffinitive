@@ -6,6 +6,8 @@ export get_stencil_set
 export parse_stencil
 export parse_rational
 
+export sbp_operators_path
+
 # The read_stencil_set and get_stencil_set functions return the freshly parsed
 # toml. The generic code in these functions can't be expected to know anyhting
 # about how to read different stencil sets as they may contain many different
@@ -106,4 +108,3 @@ function parse_rational(str)
 end
 
 sbp_operators_path() = (@__DIR__) * "/operators/"
-export sbp_operators_path
