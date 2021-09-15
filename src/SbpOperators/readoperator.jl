@@ -28,6 +28,11 @@ export sbp_operators_path
 # Vidar: What about get_stencil instead of parse_stencil for an already parsed
 # toml. It matches get_stencil_set.
 
+# TODO: Docs for readoperator.jl
+    # Parsing as rationals is intentional, allows preserving exactness, which can be lowered using converts or promotions later.
+# TODO: readoperator.jl file name?
+# TODO: Remove references to toml for dict-input arguments
+
 """
     read_stencil_set(fn; filters)
 
