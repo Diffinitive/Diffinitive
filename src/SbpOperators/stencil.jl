@@ -1,10 +1,10 @@
 export CenteredStencil
 
-struct Stencil{T<:Real,N}
+struct Stencil{T,N}
     range::Tuple{Int,Int}
     weights::NTuple{N,T}
 
-    function Stencil(range::Tuple{Int,Int},weights::NTuple{N,T}) where {T <: Real, N}
+    function Stencil(range::Tuple{Int,Int},weights::NTuple{N,T}) where {T, N}
         @assert range[2]-range[1]+1 == N
         new{T,N}(range,weights)
     end
@@ -15,7 +15,7 @@ end
 
 Create a stencil with the given weights with element `center` as the center of the stencil.
 """
-function Stencil(weights::Vararg{Number}; center::Int)
+function Stencil(weights::Vararg; center::Int)
     N = length(weights)
     range = (1, N) .- center
 
