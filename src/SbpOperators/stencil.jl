@@ -15,7 +15,7 @@ end
 
 Create a stencil with the given weights with element `center` as the center of the stencil.
 """
-function Stencil(weights::Vararg; center::Int)
+function Stencil(weights::Vararg{T}; center::Int) where T # Type parameter T makes sure the weights are valid for the Stencil constuctors and throws an earlier, more readable, error
     N = length(weights)
     range = (1, N) .- center
 
