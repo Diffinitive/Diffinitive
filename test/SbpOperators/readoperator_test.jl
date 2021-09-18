@@ -93,9 +93,9 @@ end
             s8 = {s = ["1", "-2", "1", "0", "0", "0"], c = [2,2]}
         """
 
-        @test parse_stencil(TOML.parse(toml)["s1"]) == CenteredStencil(-1/12, 4/3, -5/2, 4/3, -1/12)
-        @test parse_stencil(TOML.parse(toml)["s2"]) == Stencil(2., -5., 4., -1., 0., 0.; center=1)
-        @test parse_stencil(TOML.parse(toml)["s3"]) == Stencil(1., -2., 1., 0., 0., 0.; center=2)
+        @test parse_stencil(TOML.parse(toml)["s1"]) == CenteredStencil(-1//12, 4//3, -5//2, 4//3, -1//12)
+        @test parse_stencil(TOML.parse(toml)["s2"]) == Stencil(2//1, -5//1, 4//1, -1//1, 0//1, 0//1; center=1)
+        @test parse_stencil(TOML.parse(toml)["s3"]) == Stencil(1//1, -2//1, 1//1, 0//1, 0//1, 0//1; center=2)
 
         @test_throws ArgumentError parse_stencil(TOML.parse(toml)["s4"])
         @test_throws ArgumentError parse_stencil(TOML.parse(toml)["s5"])
@@ -106,10 +106,10 @@ end
         stencil_set = get_stencil_set(parsed_toml; order = 4, test = 1)
 
         @test parse_stencil.(stencil_set["D2"]["closure_stencils"]) == [
-            Stencil(    2.,    -5.,      4.,       -1.,     0.,     0.; center=1),
-            Stencil(    1.,    -2.,      1.,        0.,     0.,     0.; center=2),
-            Stencil(-4/43, 59/43, -110/43,   59/43, -4/43,     0.; center=3),
-            Stencil(-1/49,     0.,   59/49, -118/49, 64/49, -4/49; center=4),
+            Stencil(  2//1,  -5//1,     4//1,    -1//1,   0//1,   0//1; center=1),
+            Stencil(  1//1,  -2//1,     1//1,     0//1,   0//1,   0//1; center=2),
+            Stencil(-4//43, 59//43, -110//43,   59//43, -4//43,   0//1; center=3),
+            Stencil(-1//49,   0//1,   59//49, -118//49, 64//49, -4//49; center=4),
         ]
     end
 end

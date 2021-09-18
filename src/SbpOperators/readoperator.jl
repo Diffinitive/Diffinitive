@@ -77,11 +77,11 @@ function parse_stencil(toml)
     check_stencil_toml(toml)
 
     if toml isa Array
-        weights = Float64.(parse_rational.(toml))
+        weights = parse_rational.(toml)
         return CenteredStencil(weights...)
     end
 
-    weights = Float64.(parse_rational.(toml["s"]))
+    weights = parse_rational.(toml["s"])
     return Stencil(weights..., center = toml["c"])
 end
 
