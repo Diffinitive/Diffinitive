@@ -9,6 +9,13 @@ returned operator is the appropriate outer product of a one-dimensional
 operators and `IdentityMapping`s, e.g for `Dim=3` the volume operator in the
 y-direction is `I⊗op⊗I`.
 """
+# Review: The type parameters Dim, T in the signature can be removed,
+# by the following changes:
+#   one_d_grids = restrict.(Ref(grid), Tuple(1:Dim)) -->
+#   one_d_grids = restrict.(Ref(grid), Tuple(1:dimension(grid)))
+# and
+#   Is = IdentityMapping{T}.(size.(one_d_grids)) -->
+#   Is = IdentityMapping{eltype(grid)}.(size.(one_d_grids))
 function volume_operator(grid::EquidistantGrid{Dim,T}, inner_stencil, closure_stencils, parity, direction) where {Dim,T}
     #TODO: Check that direction <= Dim?
 
