@@ -10,6 +10,9 @@ struct ConstantInteriorScalingOperator{T,N} <: TensorMapping{T,1,1}
     size::Int
 
     function ConstantInteriorScalingOperator(interior_weight::T, closure_weights::NTuple{N,T}, size::Int) where {T,N}
+        # Review: Suggested change
+        # 2length(closure_weights) --> 2*length(closure_weights)
+        # Excluding the multiplication makes in look like a typo.
         if size < 2length(closure_weights)
             throw(DomainError(size, "size must be larger that two times the closure size."))
         end
