@@ -13,8 +13,8 @@ import Sbplib.SbpOperators.Stencil
     g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
     @testset "inverse_inner_product" begin
         stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-        quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-        quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+        quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+        quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
         @testset "0D" begin
             Hi = inverse_inner_product(EquidistantGrid{Float64}(), quadrature_interior, quadrature_closure)
             @test Hi == IdentityMapping{Float64}()
@@ -35,8 +35,8 @@ import Sbplib.SbpOperators.Stencil
 
     @testset "Sizes" begin
         stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-        quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-        quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+        quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+        quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
         @testset "1D" begin
             Hi = inverse_inner_product(g_1D, quadrature_interior, quadrature_closure)
             @test domain_size(Hi) == size(g_1D)
@@ -55,8 +55,8 @@ import Sbplib.SbpOperators.Stencil
             u = evalOn(g_1D,x->x^3-x^2+1)
             @testset "2nd order" begin
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-                quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_1D, quadrature_interior, quadrature_closure)
                 Hi = inverse_inner_product(g_1D, quadrature_interior, quadrature_closure)
                 @test Hi*H*v ≈ v rtol = 1e-15
@@ -64,8 +64,8 @@ import Sbplib.SbpOperators.Stencil
             end
             @testset "4th order" begin
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-                quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_1D, quadrature_interior, quadrature_closure)
                 Hi = inverse_inner_product(g_1D, quadrature_interior, quadrature_closure)
                 @test Hi*H*v ≈ v rtol = 1e-15
@@ -77,8 +77,8 @@ import Sbplib.SbpOperators.Stencil
             u = evalOn(g_2D,(x,y)->x*y + x^5 - sqrt(y))
             @testset "2nd order" begin
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-                quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_2D, quadrature_interior, quadrature_closure)
                 Hi = inverse_inner_product(g_2D, quadrature_interior, quadrature_closure)
                 @test Hi*H*v ≈ v rtol = 1e-15
@@ -86,8 +86,8 @@ import Sbplib.SbpOperators.Stencil
             end
             @testset "4th order" begin
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-                quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_2D, quadrature_interior, quadrature_closure)
                 Hi = inverse_inner_product(g_2D, quadrature_interior, quadrature_closure)
                 @test Hi*H*v ≈ v rtol = 1e-15

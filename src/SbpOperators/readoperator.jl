@@ -4,7 +4,8 @@ export read_stencil_set
 export get_stencil_set
 
 export parse_stencil
-export parse_rational
+export parse_scalar
+export parse_tuple
 
 export sbp_operators_path
 
@@ -32,6 +33,7 @@ export sbp_operators_path
     # Parsing as rationals is intentional, allows preserving exactness, which can be lowered using converts or promotions later.
 # TODO: readoperator.jl file name?
 # TODO: Remove references to toml for dict-input arguments
+# TODO: Documetning the format: Allows representing rationals as strings
 
 """
     read_stencil_set(fn; filters)
@@ -85,6 +87,8 @@ function parse_stencil(toml)
     return Stencil(weights..., center = toml["c"])
 end
 
+parse_stencil(T, toml) = Stencil{T}(parse_stencil(toml))
+
 function check_stencil_toml(toml)
     if !(toml isa Dict || toml isa Vector{String})
         throw(ArgumentError("the TOML for a stencil must be a vector of strings or a table."))
@@ -107,9 +111,29 @@ function check_stencil_toml(toml)
     end
 end
 
-function parse_rational(str)
-    expr = Meta.parse(replace(str, "/"=>"//"))
-    return eval(:(Rational($expr)))
+
+function parse_scalar(toml)
+    try
+        return parse_rational(toml)
+    catch e
+        throw(ArgumentError("must be a number or a string representing a number."))
+    end
+end
+
+function parse_tuple(toml)
+    if !(toml isa Array)
+        throw(ArgumentError("argument must be an array"))
+    end
+    return Tuple(parse_scalar.(toml))
+end
+
+function parse_rational(toml)
+    if toml isa String
+        expr = Meta.parse(replace(toml, "/"=>"//"))
+        return eval(:(Rational($expr)))
+    else
+        return Rational(toml)
+    end
 end
 
 sbp_operators_path() = (@__DIR__) * "/operators/"

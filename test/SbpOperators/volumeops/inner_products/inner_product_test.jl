@@ -15,8 +15,8 @@ using Sbplib.LazyTensors
     integral(H,v) = sum(H*v)
     @testset "inner_product" begin
         stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-        quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-        quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+        quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+        quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
         @testset "0D" begin
             H = inner_product(EquidistantGrid{Float64}(), quadrature_interior, quadrature_closure)
             @test H == IdentityMapping{Float64}()
@@ -38,8 +38,8 @@ using Sbplib.LazyTensors
 
     @testset "Sizes" begin
         stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-        quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-        quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+        quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+        quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
         @testset "1D" begin
             H = inner_product(g_1D, quadrature_interior, quadrature_closure)
             @test domain_size(H) == size(g_1D)
@@ -63,8 +63,8 @@ using Sbplib.LazyTensors
 
             @testset "2nd order" begin
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-                quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_1D, quadrature_interior, quadrature_closure)
                 for i = 1:2
                     @test integral(H,v[i]) ≈ v[i+1][end] - v[i+1][1] rtol = 1e-14
@@ -74,8 +74,8 @@ using Sbplib.LazyTensors
 
             @testset "4th order" begin
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-                quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_1D, quadrature_interior, quadrature_closure)
                 for i = 1:4
                     @test integral(H,v[i]) ≈ v[i+1][end] -  v[i+1][1] rtol = 1e-14
@@ -90,16 +90,16 @@ using Sbplib.LazyTensors
             u = evalOn(g_2D,(x,y)->sin(x)+cos(y))
             @testset "2nd order" begin
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-                quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_2D, quadrature_interior, quadrature_closure)
                 @test integral(H,v) ≈ b*Lx*Ly rtol = 1e-13
                 @test integral(H,u) ≈ π rtol = 1e-4
             end
             @testset "4th order" begin
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                quadrature_interior = parse_rational(stencil_set["H"]["inner"])
-                quadrature_closure = parse_rational.(stencil_set["H"]["closure"])
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_2D, quadrature_interior, quadrature_closure)
                 @test integral(H,v) ≈ b*Lx*Ly rtol = 1e-13
                 @test integral(H,u) ≈ π rtol = 1e-8
