@@ -4,7 +4,8 @@ export read_stencil_set
 export get_stencil_set
 
 export parse_stencil
-export parse_rational
+export parse_scalar
+export parse_tuple
 
 export sbp_operators_path
 
@@ -32,6 +33,7 @@ export sbp_operators_path
     # Parsing as rationals is intentional, allows preserving exactness, which can be lowered using converts or promotions later.
 # TODO: readoperator.jl file name?
 # TODO: Remove references to toml for dict-input arguments
+# TODO: Documetning the format: Allows representing rationals as strings
 
 """
     read_stencil_set(fn; filters)
@@ -107,6 +109,22 @@ function check_stencil_toml(toml)
     if !(toml["c"] isa Int)
         throw(ArgumentError("the center of a stencil must be specified as an integer."))
     end
+end
+
+
+function parse_scalar(toml)
+    try
+        return parse_rational(toml)
+    catch e
+        throw(ArgumentError("must be a number or a string representing a number."))
+    end
+end
+
+function parse_tuple(toml)
+    if !(toml isa Array)
+        throw(ArgumentError("argument must be an array"))
+    end
+    return Tuple(parse_scalar.(toml))
 end
 
 function parse_rational(toml)
