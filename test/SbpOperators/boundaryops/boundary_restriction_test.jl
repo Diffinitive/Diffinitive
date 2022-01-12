@@ -17,13 +17,13 @@ import Sbplib.SbpOperators.BoundaryOperator
         @testset "1D" begin
             e_l = boundary_restriction(g_1D,e_closure,Lower())
             @test e_l == boundary_restriction(g_1D,e_closure,CartesianBoundary{1,Lower}())
-            @test e_l == BoundaryOperator(g_1D,e_closure,Lower())
+            @test e_l == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),Lower())
             @test e_l isa BoundaryOperator{T,Lower} where T
             @test e_l isa TensorMapping{T,0,1} where T
 
             e_r = boundary_restriction(g_1D,e_closure,Upper())
             @test e_r == boundary_restriction(g_1D,e_closure,CartesianBoundary{1,Upper}())
-            @test e_r == BoundaryOperator(g_1D,e_closure,Upper())
+            @test e_r == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),Upper())
             @test e_r isa BoundaryOperator{T,Upper} where T
             @test e_r isa TensorMapping{T,0,1} where T
         end
