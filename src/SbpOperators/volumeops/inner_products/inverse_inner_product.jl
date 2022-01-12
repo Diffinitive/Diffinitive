@@ -3,15 +3,13 @@
 
 Constructs the inverse inner product operator `H⁻¹` as a `TensorMapping` using
 the weights of `H`, `interior_weight`, `closure_weights`. `H⁻¹` is inverse of
-the inner product operator `H`. The weights are the
+the inner product operator `H`.
 
 On a 1-dimensional grid, `H⁻¹` is a `ConstantInteriorScalingOperator`. On an
 N-dimensional grid, `H⁻¹` is the outer product of the 1-dimensional inverse
 inner product operators for each coordinate direction. On a 0-dimensional
 `grid`, `H⁻¹` is a 0-dimensional `IdentityMapping`.
 """
-# Review:
-# Incomplete sentence in first section of the docs. "The weights are the".
 function inverse_inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
     H⁻¹s = ()
 

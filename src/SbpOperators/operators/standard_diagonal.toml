@@ -2,21 +2,16 @@
 authors = "Ken Mattson"
 description = "Standard operators for equidistant grids"
 type = "equidistant"
-cite = "A paper a long time ago in a galaxy far far away."
-# Review:
-# Suggested change:
-# "A paper a long time ago in a galaxy far far away." -->
-# "
-# Ken Mattsson, Jan Nordström,
-# Summation by parts operators for finite difference approximations of second derivatives,
-# Journal of Computational Physics,
-# Volume 199, Issue 2,
-# 2004,
-# Pages 503-540,
-# ISSN 0021-9991,
-# https://doi.org/10.1016/j.jcp.2004.03.001.
-# "
-# or perhaps a shorter version.
+cite = """
+    Ken Mattsson, Jan Nordström,
+    Summation by parts operators for finite difference approximations of second derivatives,
+    Journal of Computational Physics,
+    Volume 199, Issue 2,
+    2004,
+    Pages 503-540,
+    ISSN 0021-9991,
+    https://doi.org/10.1016/j.jcp.2004.03.001.
+"""
 
 [[stencil_set]]
 
@@ -44,15 +39,13 @@ order = 4
 H.inner = "1"
 H.closure = ["17/48", "59/48", "43/48", "49/48"]
 
-# Review:
-# Add missing 4th order accurate D1 operator
-# D1.inner_stencil = ["1/12","-2/3","0","2/3","-1/12"]
-# D1.closure_stencils = [
-#     {s = [ "-24/17",  "59/34",  "-4/17", "-3/34",     "0",     "0"], c = 1},
-#     {s = [   "-1/2",      "0",    "1/2",     "0",     "0",     "0"], c = 2},
-#     {s = [   "4/43", "-59/86",      "0", "59/86", "-4/43",     "0"], c = 3},
-#     {s = [   "3/98",      "0", "-59/98",     "0", "32/49", "-4/49"], c = 4},
-# ]
+D1.inner_stencil = ["1/12","-2/3","0","2/3","-1/12"]
+D1.closure_stencils = [
+    {s = [ "-24/17",  "59/34",  "-4/17", "-3/34",     "0",     "0"], c = 1},
+    {s = [   "-1/2",      "0",    "1/2",     "0",     "0",     "0"], c = 2},
+    {s = [   "4/43", "-59/86",      "0", "59/86", "-4/43",     "0"], c = 3},
+    {s = [   "3/98",      "0", "-59/98",     "0", "32/49", "-4/49"], c = 4},
+]
 
 D2.inner_stencil = ["-1/12","4/3","-5/2","4/3","-1/12"]
 D2.closure_stencils = [
