@@ -111,5 +111,10 @@ end
             Stencil(-4//43, 59//43, -110//43,   59//43, -4//43,   0//1; center=3),
             Stencil(-1//49,   0//1,   59//49, -118//49, 64//49, -4//49; center=4),
         ]
+
+
+        @test parse_stencil(Float64, TOML.parse(toml)["s1"]) == CenteredStencil(-1/12, 4/3, -5/2, 4/3, -1/12)
+        @test parse_stencil(Float64, TOML.parse(toml)["s2"]) == Stencil(2/1, -5/1, 4/1, -1/1, 0/1, 0/1; center=1)
+        @test parse_stencil(Float64, TOML.parse(toml)["s3"]) == Stencil(1/1, -2/1, 1/1, 0/1, 0/1, 0/1; center=2)
     end
 end

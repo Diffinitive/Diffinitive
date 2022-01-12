@@ -85,6 +85,8 @@ function parse_stencil(toml)
     return Stencil(weights..., center = toml["c"])
 end
 
+parse_stencil(T, toml) = Stencil{T}(parse_stencil(toml))
+
 function check_stencil_toml(toml)
     if !(toml isa Dict || toml isa Vector{String})
         throw(ArgumentError("the TOML for a stencil must be a vector of strings or a table."))
