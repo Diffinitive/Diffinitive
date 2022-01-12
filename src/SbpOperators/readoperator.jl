@@ -109,9 +109,13 @@ function check_stencil_toml(toml)
     end
 end
 
-function parse_rational(str)
-    expr = Meta.parse(replace(str, "/"=>"//"))
-    return eval(:(Rational($expr)))
+function parse_rational(toml)
+    if toml isa String
+        expr = Meta.parse(replace(toml, "/"=>"//"))
+        return eval(:(Rational($expr)))
+    else
+        return Rational(toml)
+    end
 end
 
 sbp_operators_path() = (@__DIR__) * "/operators/"

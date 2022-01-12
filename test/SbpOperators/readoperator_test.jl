@@ -13,6 +13,15 @@ import Sbplib.SbpOperators.Stencil
     @test SbpOperators.parse_rational("1/2") == 1//2
     @test SbpOperators.parse_rational("37/13") isa Rational
     @test SbpOperators.parse_rational("37/13") == 37//13
+
+    @test SbpOperators.parse_rational(0.5) isa Rational
+    @test SbpOperators.parse_rational(0.5) == 1//2
+
+    @test SbpOperators.parse_rational("0.5") isa Rational
+    @test SbpOperators.parse_rational("0.5") == 1//2
+
+    @test SbpOperators.parse_rational(2) isa Rational
+    @test SbpOperators.parse_rational(2) == 2//1
 end
 
 @testset "readoperator" begin
