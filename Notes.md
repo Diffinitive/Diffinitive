@@ -53,6 +53,19 @@ operator creation.
 
 * Remove order as a table name and put it as a variable.
 
+### Parsing
+At the moment the only parsing that can be done at the top level is conversion
+from the toml file to a dict of strings. This forces the user to dig through
+the dictionary and apply the correct parsing methods for the different parts,
+e.g. `parse_stencil` or `parse_tuple`. While very flexible there is a tight
+coupling between what is written in the file and what code is run to make data
+in the file usable. While this coupling is hard to avoid it should be made
+explicit. This could be done by putting a reference to a parsing function in
+the operator-storage format or somehow specifying the type of each object.
+This mechanism should be extensible without changing the package. Perhaps
+there could be a way to register parsing functions or object types for the
+toml.
+
 
 ## Variable second derivative
 
