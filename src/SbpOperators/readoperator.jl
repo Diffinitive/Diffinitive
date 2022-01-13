@@ -9,40 +9,27 @@ export parse_tuple
 
 export sbp_operators_path
 
-# The read_stencil_set and get_stencil_set functions return the freshly parsed
-# toml. The generic code in these functions can't be expected to know anyhting
-# about how to read different stencil sets as they may contain many different
-# kinds of stencils. We should how ever add read_ and get_ functions for all
-# the types of stencils we know about.
-#
-# After getting a stencil set the user can use parse functions to parse what
-# they want from the TOML dict. I.e no more "paths".
-# Functions needed:
-#   * parse stencil
-#   * parse rational
-#
-# maybe there is a better name than parse?
-# Would be nice to be able to control the type in the stencil
-
-# TODO: Control type for the stencil
-# TODO: Think about naming and terminology around freshly parsed TOML.
-# Vidar: What about get_stencil instead of parse_stencil for an already parsed
-# toml. It matches get_stencil_set.
+# TODO: Think about naming and terminology around freshly parsed TOML. answer: toml_dict/parsed_toml?
 
 # TODO: Docs for readoperator.jl
     # Parsing as rationals is intentional, allows preserving exactness, which can be lowered using converts or promotions later.
-# TODO: readoperator.jl file name?
+    # Documetning the format: Allows representing rationals as strings
 # TODO: Remove references to toml for dict-input arguments
-# TODO: Documetning the format: Allows representing rationals as strings
 
 """
     read_stencil_set(fn; filters)
 
-Picks out a stencil set from the given toml file based on some filters.
+Picks out a stencil set from the given toml file based on some key-value filters.
 If more than one set matches the filters an error is raised.
 
 The stencil set is not parsed beyond the inital toml parse. To get usable
 stencils use the `parse_stencil` functions on the fields of the stencil set.
+
+The reason for this is that since stencil sets are intended to be very
+general, and currently do not include any way to specify how to parse a given
+section, the exact parsing is left to the user.
+
+See also [`sbp_operators_path`](@ref), [`get_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref),.
 """
 read_stencil_set(fn; filters...) = get_stencil_set(TOML.parsefile(fn); filters...)
 
@@ -50,6 +37,8 @@ read_stencil_set(fn; filters...) = get_stencil_set(TOML.parsefile(fn); filters..
     get_stencil_set(parsed_toml; filters...)
 
 Same as `read_stencil_set` but works on already parsed TOML.
+
+See also [`read_stencil_set`](@ref).
 """
 function get_stencil_set(parsed_toml; filters...)
     matches = findall(parsed_toml["stencil_set"]) do set
@@ -74,6 +63,8 @@ end
     parse_stencil(toml)
 
 Accepts parsed toml and reads it as a stencil
+
+See also [`read_stencil_set`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref).
 """
 function parse_stencil(toml)
     check_stencil_toml(toml)
@@ -87,6 +78,11 @@ function parse_stencil(toml)
     return Stencil(weights..., center = toml["c"])
 end
 
+"""
+    parse_stencil(T, toml)
+
+Parses the stencil with element type `T`
+"""
 parse_stencil(T, toml) = Stencil{T}(parse_stencil(toml))
 
 function check_stencil_toml(toml)
@@ -111,7 +107,13 @@ function check_stencil_toml(toml)
     end
 end
 
+"""
+    parse_scalar(toml)
 
+Parse a scalar, represented as a string or a number in the TOML, and return it as a `Rational`
+
+See also [`read_stencil_set`](@ref), [`parse_stencil`](@ref) [`parse_tuple`](@ref).
+"""
 function parse_scalar(toml)
     try
         return parse_rational(toml)
@@ -120,6 +122,13 @@ function parse_scalar(toml)
     end
 end
 
+"""
+    parse_tuple(toml)
+
+Parse `toml` as a tuple of scalars.
+
+See also [`read_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref).
+"""
 function parse_tuple(toml)
     if !(toml isa Array)
         throw(ArgumentError("argument must be an array"))
@@ -127,6 +136,12 @@ function parse_tuple(toml)
     return Tuple(parse_scalar.(toml))
 end
 
+
+"""
+    parse_rational(toml)
+
+Parse a string or a number as a rational.
+"""
 function parse_rational(toml)
     if toml isa String
         expr = Meta.parse(replace(toml, "/"=>"//"))
@@ -136,4 +151,11 @@ function parse_rational(toml)
     end
 end
 
+"""
+    sbp_operators_path()
+
+Calculate the path for the operators folder with included stencil sets.
+
+See also [`read_stencil_set`](@ref)
+"""
 sbp_operators_path() = (@__DIR__) * "/operators/"
