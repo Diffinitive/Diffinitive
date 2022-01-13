@@ -9,18 +9,18 @@ export parse_tuple
 
 export sbp_operators_path
 
-# TODO: Think about naming and terminology around freshly parsed TOML. answer: toml_dict/parsed_toml?
 
 # TODO: Docs for readoperator.jl
     # Parsing as rationals is intentional, allows preserving exactness, which can be lowered using converts or promotions later.
     # Documetning the format: Allows representing rationals as strings
-# TODO: Remove references to toml for dict-input arguments
 
 """
     read_stencil_set(fn; filters)
 
-Picks out a stencil set from the given toml file based on some key-value filters.
-If more than one set matches the filters an error is raised.
+Picks out a stencil set from the given toml file based on some key-value
+filters. If more than one set matches the filters an error is raised. The
+stencil set contains parsed toml intended for functions like `parse_scalar`
+and `parse_stencil`.
 
 The stencil set is not parsed beyond the inital toml parse. To get usable
 stencils use the `parse_stencil` functions on the fields of the stencil set.
@@ -60,94 +60,94 @@ function get_stencil_set(parsed_toml; filters...)
 end
 
 """
-    parse_stencil(toml)
+    parse_stencil(parsed_toml)
 
-Accepts parsed toml and reads it as a stencil
+Accepts parsed parsed_toml and reads it as a stencil
 
 See also [`read_stencil_set`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref).
 """
-function parse_stencil(toml)
-    check_stencil_toml(toml)
+function parse_stencil(parsed_toml)
+    check_stencil_toml(parsed_toml)
 
-    if toml isa Array
-        weights = parse_rational.(toml)
+    if parsed_toml isa Array
+        weights = parse_rational.(parsed_toml)
         return CenteredStencil(weights...)
     end
 
-    weights = parse_rational.(toml["s"])
-    return Stencil(weights..., center = toml["c"])
+    weights = parse_rational.(parsed_toml["s"])
+    return Stencil(weights..., center = parsed_toml["c"])
 end
 
 """
-    parse_stencil(T, toml)
+    parse_stencil(T, parsed_toml)
 
 Parses the stencil with element type `T`
 """
-parse_stencil(T, toml) = Stencil{T}(parse_stencil(toml))
+parse_stencil(T, parsed_toml) = Stencil{T}(parse_stencil(parsed_toml))
 
-function check_stencil_toml(toml)
-    if !(toml isa Dict || toml isa Vector{String})
+function check_stencil_toml(parsed_toml)
+    if !(parsed_toml isa Dict || parsed_toml isa Vector{String})
         throw(ArgumentError("the TOML for a stencil must be a vector of strings or a table."))
     end
 
-    if toml isa Vector{String}
+    if parsed_toml isa Vector{String}
         return
     end
 
-    if !(haskey(toml, "s") && haskey(toml, "c"))
+    if !(haskey(parsed_toml, "s") && haskey(parsed_toml, "c"))
         throw(ArgumentError("the table form of a stencil must have fields `s` and `c`."))
     end
 
-    if !(toml["s"] isa Vector{String})
+    if !(parsed_toml["s"] isa Vector{String})
         throw(ArgumentError("a stencil must be specified as a vector of strings."))
     end
 
-    if !(toml["c"] isa Int)
+    if !(parsed_toml["c"] isa Int)
         throw(ArgumentError("the center of a stencil must be specified as an integer."))
     end
 end
 
 """
-    parse_scalar(toml)
+    parse_scalar(parsed_toml)
 
 Parse a scalar, represented as a string or a number in the TOML, and return it as a `Rational`
 
 See also [`read_stencil_set`](@ref), [`parse_stencil`](@ref) [`parse_tuple`](@ref).
 """
-function parse_scalar(toml)
+function parse_scalar(parsed_toml)
     try
-        return parse_rational(toml)
+        return parse_rational(parsed_toml)
     catch e
         throw(ArgumentError("must be a number or a string representing a number."))
     end
 end
 
 """
-    parse_tuple(toml)
+    parse_tuple(parsed_toml)
 
-Parse `toml` as a tuple of scalars.
+Parse `parsed_toml` as a tuple of scalars.
 
 See also [`read_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref).
 """
-function parse_tuple(toml)
-    if !(toml isa Array)
+function parse_tuple(parsed_toml)
+    if !(parsed_toml isa Array)
         throw(ArgumentError("argument must be an array"))
     end
-    return Tuple(parse_scalar.(toml))
+    return Tuple(parse_scalar.(parsed_toml))
 end
 
 
 """
-    parse_rational(toml)
+    parse_rational(parsed_toml)
 
 Parse a string or a number as a rational.
 """
-function parse_rational(toml)
-    if toml isa String
-        expr = Meta.parse(replace(toml, "/"=>"//"))
+function parse_rational(parsed_toml)
+    if parsed_toml isa String
+        expr = Meta.parse(replace(parsed_toml, "/"=>"//"))
         return eval(:(Rational($expr)))
     else
-        return Rational(toml)
+        return Rational(parsed_toml)
     end
 end
 
