@@ -9,7 +9,7 @@ When `Dim>1`, the `BoundaryOperator` `op` is inflated by the outer product
 of `IdentityMappings` in orthogonal coordinate directions, e.g for `Dim=3`,
 the boundary restriction operator in the y-direction direction is `Ix⊗op⊗Iz`.
 """
-function boundary_operator(grid::EquidistantGrid{Dim,T}, closure_stencil, boundary::CartesianBoundary) where {Dim,T}
+function boundary_operator(grid::EquidistantGrid, closure_stencil, boundary::CartesianBoundary)
     #TODO:Check that dim(boundary) <= Dim?
 
     # Create 1D boundary operator
@@ -18,8 +18,8 @@ function boundary_operator(grid::EquidistantGrid{Dim,T}, closure_stencil, bounda
     op = BoundaryOperator(restrict(grid, d), closure_stencil, r)
 
     # Create 1D IdentityMappings for each coordinate direction
-    one_d_grids = restrict.(Ref(grid), Tuple(1:Dim))
-    Is = IdentityMapping{T}.(size.(one_d_grids))
+    one_d_grids = restrict.(Ref(grid), Tuple(1:dimension(grid)))
+    Is = IdentityMapping{eltype(grid)}.(size.(one_d_grids))
 
     # Formulate the correct outer product sequence of the identity mappings and
     # the boundary operator
