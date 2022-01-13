@@ -11,9 +11,9 @@ On a one-dimensional `grid`, `Δ` is equivalent to `second_derivative`. On a
 multi-dimensional `grid`, `Δ` is the sum of multi-dimensional `second_derivative`s
 where the sum is carried out lazily.
 """
-function laplace(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils) where Dim
+function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
     Δ = second_derivative(grid, inner_stencil, closure_stencils, 1)
-    for d = 2:Dim
+    for d = 2:dimension(grid)
         Δ += second_derivative(grid, inner_stencil, closure_stencils, d)
     end
     return Δ

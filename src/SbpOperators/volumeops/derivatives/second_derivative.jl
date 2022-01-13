@@ -1,6 +1,5 @@
 """
-    second_derivative(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils, direction)
-    second_derivative(grid::EquidistantGrid{1}, inner_stencil, closure_stencils)
+    second_derivative(grid::EquidistantGrid, inner_stencil, closure_stencils, direction)
 
 Creates the second-derivative operator `D2` as a `TensorMapping`
 
@@ -12,7 +11,7 @@ On a one-dimensional `grid`, `D2` is a `VolumeOperator`. On a multi-dimensional 
 one-dimensional operator with the `IdentityMapping`s in orthogonal coordinate dirrections.
 Also see the documentation of `SbpOperators.volume_operator(...)` for more details.
 """
-function second_derivative(grid::EquidistantGrid{Dim}, inner_stencil, closure_stencils, direction) where Dim
+function second_derivative(grid::EquidistantGrid, inner_stencil, closure_stencils, direction)
     h_inv = inverse_spacing(grid)[direction]
     return SbpOperators.volume_operator(grid, scale(inner_stencil,h_inv^2), scale.(closure_stencils,h_inv^2), even, direction)
 end
