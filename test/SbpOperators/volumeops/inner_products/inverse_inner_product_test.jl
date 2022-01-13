@@ -14,24 +14,18 @@ import Sbplib.SbpOperators.Stencil
     @testset "inverse_inner_product" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "0D" begin
-            Hi = inverse_inner_product(EquidistantGrid{Float64}(),op.quadratureClosure)
+            Hi = inverse_inner_product(EquidistantGrid{Float64}(),SbpOperators.reciprocal_stencil.(op.quadratureClosure), CenteredStencil(1.))
             @test Hi == IdentityMapping{Float64}()
             @test Hi isa TensorMapping{T,0,0} where T
         end
         @testset "1D" begin
-            Hi = inverse_inner_product(g_1D, op.quadratureClosure);
-            inner_stencil = CenteredStencil(1.)
-            closures = ()
-            for i = 1:length(op.quadratureClosure)
-                closures = (closures...,Stencil(op.quadratureClosure[i].range,1.0./op.quadratureClosure[i].weights))
-            end
-            @test Hi == inverse_inner_product(g_1D,closures,inner_stencil)
+            Hi = inverse_inner_product(g_1D, SbpOperators.reciprocal_stencil.(op.quadratureClosure), CenteredStencil(1.));
             @test Hi isa TensorMapping{T,1,1} where T
         end
         @testset "2D" begin
-            Hi = inverse_inner_product(g_2D,op.quadratureClosure)
-            Hi_x = inverse_inner_product(restrict(g_2D,1),op.quadratureClosure)
-            Hi_y = inverse_inner_product(restrict(g_2D,2),op.quadratureClosure)
+            Hi = inverse_inner_product(g_2D,op.quadratureClosure, CenteredStencil(1.))
+            Hi_x = inverse_inner_product(restrict(g_2D,1),op.quadratureClosure, CenteredStencil(1.))
+            Hi_y = inverse_inner_product(restrict(g_2D,2),op.quadratureClosure, CenteredStencil(1.))
             @test Hi == Hi_x⊗Hi_y
             @test Hi isa TensorMapping{T,2,2} where T
         end
@@ -40,12 +34,12 @@ import Sbplib.SbpOperators.Stencil
     @testset "Sizes" begin
         op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
-            Hi = inverse_inner_product(g_1D,op.quadratureClosure)
+            Hi = inverse_inner_product(g_1D,op.quadratureClosure, CenteredStencil(1.))
             @test domain_size(Hi) == size(g_1D)
             @test range_size(Hi) == size(g_1D)
         end
         @testset "2D" begin
-            Hi = inverse_inner_product(g_2D,op.quadratureClosure)
+            Hi = inverse_inner_product(g_2D,op.quadratureClosure, CenteredStencil(1.))
             @test domain_size(Hi) == size(g_2D)
             @test range_size(Hi) == size(g_2D)
         end
@@ -57,15 +51,15 @@ import Sbplib.SbpOperators.Stencil
             u = evalOn(g_1D,x->x^3-x^2+1)
             @testset "2nd order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                H = inner_product(g_1D,op.quadratureClosure)
-                Hi = inverse_inner_product(g_1D,op.quadratureClosure)
+                H = inner_product(g_1D, op.quadratureClosure, CenteredStencil(1.))
+                Hi = inverse_inner_product(g_1D,SbpOperators.reciprocal_stencil.(op.quadratureClosure), CenteredStencil(1.))
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
             end
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                H = inner_product(g_1D,op.quadratureClosure)
-                Hi = inverse_inner_product(g_1D,op.quadratureClosure)
+                H = inner_product(g_1D, op.quadratureClosure, CenteredStencil(1.))
+                Hi = inverse_inner_product(g_1D,SbpOperators.reciprocal_stencil.(op.quadratureClosure), CenteredStencil(1.))
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
             end
@@ -75,15 +69,15 @@ import Sbplib.SbpOperators.Stencil
             u = evalOn(g_2D,(x,y)->x*y + x^5 - sqrt(y))
             @testset "2nd order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                H = inner_product(g_2D,op.quadratureClosure)
-                Hi = inverse_inner_product(g_2D,op.quadratureClosure)
+                H = inner_product(g_2D, op.quadratureClosure, CenteredStencil(1.))
+                Hi = inverse_inner_product(g_2D,SbpOperators.reciprocal_stencil.(op.quadratureClosure), CenteredStencil(1.))
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
             end
             @testset "4th order" begin
                 op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                H = inner_product(g_2D,op.quadratureClosure)
-                Hi = inverse_inner_product(g_2D,op.quadratureClosure)
+                H = inner_product(g_2D, op.quadratureClosure, CenteredStencil(1.))
+                Hi = inverse_inner_product(g_2D,SbpOperators.reciprocal_stencil.(op.quadratureClosure), CenteredStencil(1.))
                 @test Hi*H*v ≈ v rtol = 1e-15
                 @test Hi*H*u ≈ u rtol = 1e-15
             end
