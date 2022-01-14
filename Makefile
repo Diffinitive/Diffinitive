@@ -26,19 +26,19 @@ help:
 	@echo 'or as shell environment variables.'
 
 docs:
-	$(JULIA) --project=docs docs/make.jl --prettyurls
+	$(JULIA) --project=docs docs/make.jl --build-dir build --prettyurls
 
 localdocs:
-	$(JULIA) --project=docs docs/make.jl
+	$(JULIA) --project=docs docs/make.jl --build-dir build-local
 
 opendocs:
-	$(BROWSER) docs/build/index.html
+	$(BROWSER) docs/build-local/index.html
 
 clean:
 	rm -r docs/build
+	rm -r docs/build-local
 
 .PHONY: help docs localdocs opendocs clean
 
 # TODO:
 # Make a real target for docs/build
-# Possibly store the local and nonlocal in different build folders

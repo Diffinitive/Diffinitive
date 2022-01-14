@@ -16,6 +16,13 @@ else
     prettyurls = false
 end
 
+if "--build-dir" ∈ ARGS
+    i = findlast(==("--build-dir"), ARGS)
+    build = ARGS[i+1]
+else
+    build = "build"
+end
+
 pages = [
     "index.md",
     "Submodules" => [
@@ -31,4 +38,4 @@ pages = [
 # This ordering is not respected by @contents. See https://github.com/JuliaDocs/Documenter.jl/issues/936
 
 format=Documenter.HTML(;prettyurls)
-makedocs(;sitename, pages, format)
+makedocs(;sitename, pages, format, build)
