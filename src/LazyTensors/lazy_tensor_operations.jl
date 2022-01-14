@@ -76,7 +76,7 @@ Base.:-(tm1::TensorMapping{T,R,D}, tm2::TensorMapping{T,R,D}) where {T,R,D} = La
 """
     TensorMappingComposition{T,R,K,D}
 
-Lazily compose two TensorMappings, so that they can be handled as a single TensorMapping.
+Lazily compose two `TensorMapping`s, so that they can be handled as a single `TensorMapping`.
 """
 struct TensorMappingComposition{T,R,K,D, TM1<:TensorMapping{T,R,K}, TM2<:TensorMapping{T,K,D}} <: TensorMapping{T,R,D}
     t1::TM1
@@ -165,8 +165,8 @@ apply(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where 
 apply_transpose(tmi::IdentityMapping{T,D}, v::AbstractArray{T,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 
 """
-Base.:∘(tm, tmi)
-Base.:∘(tmi, tm)
+    Base.:∘(tm, tmi)
+    Base.:∘(tmi, tm)
 
 Composes a `Tensormapping` `tm` with an `IdentityMapping` `tmi`, by returning `tm`
 """
@@ -316,7 +316,7 @@ end
     slice_tuple(t, Val(l), Val(u))
 
 Get a slice of a tuple in a type stable way.
-Equivalent to t[l:u] but type stable.
+Equivalent to `t[l:u]` but type stable.
 """
 function slice_tuple(t,::Val{L},::Val{U}) where {L,U}
     return ntuple(i->t[i+L-1], U-L+1)
@@ -327,7 +327,7 @@ end
 
 Split the tuple `t` into two parts. the first part is `M` long.
 E.g
-```
+```julia
 split_tuple((1,2,3,4),Val(3)) -> (1,2,3), (4,)
 ```
 """
@@ -357,17 +357,19 @@ flatten_tuple(t::NTuple{N, Number} where N) = t
 flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
 flatten_tuple(ts::Vararg) = flatten_tuple(ts)
 
-"""
-   LazyOuterProduct(tms...)
+@doc raw"""
+    LazyOuterProduct(tms...)
 
 Creates a `TensorMappingComposition` for the outerproduct of `tms...`.
 This is done by separating the outer product into regular products of outer products involving only identity mappings and one non-identity mapping.
 
 First let
 ```math
-A = A_{I,J}
-B = B_{M,N}
-C = C_{P,Q}
+\begin{aligned}
+A &= A_{I,J} \\
+B &= B_{M,N} \\
+C &= C_{P,Q} \\
+\end{aligned}
 ```
 
 where ``I``, ``M``, ``P`` are  multi-indexes for the ranges of ``A``, ``B``, ``C``, and ``J``, ``N``, ``Q`` are multi-indexes of the domains.
@@ -385,10 +387,12 @@ And that
 ```math
 A⊗B⊗C = (A⊗I_{|M|}⊗I_{|P|})(I_{|J|}⊗B⊗I_{|P|})(I_{|J|}⊗I_{|N|}⊗C)
 ```
-where |.| of a multi-index is a vector of sizes for each dimension. ``I_v`` denotes the identity tensor of size ``v[i]`` in each direction
+where ``|⋅|`` of a multi-index is a vector of sizes for each dimension. ``I_v`` denotes the identity tensor of size ``v[i]`` in each direction
 To apply ``A⊗B⊗C`` we evaluate
 
+```math
 (A⊗B⊗C)v = [(A⊗I_{|M|}⊗I_{|P|})  [(I_{|J|}⊗B⊗I_{|P|}) [(I_{|J|}⊗I_{|N|}⊗C)v]]]
+```
 """
 function LazyOuterProduct end
 export LazyOuterProduct
