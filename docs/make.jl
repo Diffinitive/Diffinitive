@@ -20,7 +20,7 @@ if "--build-dir" ∈ ARGS
     i = findlast(==("--build-dir"), ARGS)
     build = ARGS[i+1]
 else
-    build = "build"
+    build = "build-local"
 end
 
 pages = [
