@@ -39,6 +39,8 @@ make localdocs
 ```
 The first variant generates files suitable for webserver deployment, i.e setting `prettyurls=true`. The second generates files sutible for local viewing in a web browser, i.e `prettyurls=false`.
 
+To view the documentation locally simply open `docs/build/index.html` in your web browser.
+
 When including the `docs/make.jl` script `prettyurls` is set to `false` by default.
 
 Including `docs/make.jl` from the REPL may be preferable when repeatadely building the documentation since this avoids compilation latency.
