@@ -42,10 +42,10 @@ end
 
 """
     LazyElementwiseOperation{T,D,Op} <: LazyArray{T,D}
-Struct allowing for lazy evaluation of elementwise operations on AbstractArrays.
+Struct allowing for lazy evaluation of elementwise operations on `AbstractArray`s.
 
-A LazyElementwiseOperation contains two arrays together with an operation.
-The operations are carried out when the LazyElementwiseOperation is indexed.
+A `LazyElementwiseOperation` contains two arrays together with an operation.
+The operations are carried out when the `LazyElementwiseOperation` is indexed.
 """
 struct LazyElementwiseOperation{T,D,Op,T1<:AbstractArray{T,D},T2<:AbstractArray{T,D}} <: LazyArray{T,D}
     a::T1
