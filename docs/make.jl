@@ -25,6 +25,7 @@ end
 
 pages = [
     "index.md",
+    "operator_file_format.md",
     "Submodules" => [
         "submodules/grids.md",
         "submodules/diff_ops.md",

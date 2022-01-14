@@ -10,10 +10,6 @@ export parse_tuple
 export sbp_operators_path
 
 
-# TODO: Docs for readoperator.jl
-    # Parsing as rationals is intentional, allows preserving exactness, which can be lowered using converts or promotions later.
-    # Documetning the format: Allows representing rationals as strings
-
 """
     read_stencil_set(fn; filters)
 
@@ -28,6 +24,8 @@ stencils use the `parse_stencil` functions on the fields of the stencil set.
 The reason for this is that since stencil sets are intended to be very
 general, and currently do not include any way to specify how to parse a given
 section, the exact parsing is left to the user.
+
+For more information see [Operator file format](@ref) in the documentation.
 
 See also [`sbp_operators_path`](@ref), [`get_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref),.
 """
@@ -62,7 +60,7 @@ end
 """
     parse_stencil(parsed_toml)
 
-Accepts parsed parsed_toml and reads it as a stencil
+Accepts parsed parsed_toml and reads it as a stencil.
 
 See also [`read_stencil_set`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref).
 """
