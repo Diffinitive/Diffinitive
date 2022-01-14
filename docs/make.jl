@@ -8,9 +8,14 @@ using Sbplib.RegionIndices
 using Sbplib.SbpOperators
 using Sbplib.StaticDicts
 
-
 sitename = "Sbplib.jl"
-prettyurls = false
+
+if "--prettyurls" ∈ ARGS
+    prettyurls = true
+else
+    prettyurls = false
+end
+
 pages = [
     "index.md",
     "Submodules" => [
@@ -27,4 +32,3 @@ pages = [
 
 format=Documenter.HTML(;prettyurls)
 makedocs(;sitename, pages, format)
-# TBD: Should `prettyurls` be true or false when this is deployed to a webserver?
