@@ -53,7 +53,7 @@ operator creation.
 
 * Remove order as a table name and put it as a variable.
 
-### Parsing
+### Parsing of stencil sets
 At the moment the only parsing that can be done at the top level is conversion
 from the toml file to a dict of strings. This forces the user to dig through
 the dictionary and apply the correct parsing methods for the different parts,
@@ -66,6 +66,10 @@ This mechanism should be extensible without changing the package. Perhaps
 there could be a way to register parsing functions or object types for the
 toml.
 
+If possible the goal should be for the parsing to get all the way to the
+stencils so that a user calls `read_stencil_set` and gets a
+dictionary-structure containing stencils, tuples, scalars and other types
+ready for input to the methods creating the operators.
 
 ## Variable second derivative
 

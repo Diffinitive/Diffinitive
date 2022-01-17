@@ -15,8 +15,8 @@ export sbp_operators_path
 
 Picks out a stencil set from the given toml file based on some key-value
 filters. If more than one set matches the filters an error is raised. The
-stencil set contains parsed toml intended for functions like `parse_scalar`
-and `parse_stencil`.
+returned stencil set contains parsed toml intended for functions like
+`parse_scalar` and `parse_stencil`.
 
 The stencil set is not parsed beyond the inital toml parse. To get usable
 stencils use the `parse_stencil` functions on the fields of the stencil set.
@@ -60,7 +60,7 @@ end
 """
     parse_stencil(parsed_toml)
 
-Accepts parsed parsed_toml and reads it as a stencil.
+Accepts parsed toml and reads it as a stencil.
 
 See also [`read_stencil_set`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref).
 """
@@ -79,7 +79,7 @@ end
 """
     parse_stencil(T, parsed_toml)
 
-Parses the stencil with element type `T`
+Parses the input as a stencil with element type `T`.
 """
 parse_stencil(T, parsed_toml) = Stencil{T}(parse_stencil(parsed_toml))
 
@@ -123,7 +123,7 @@ end
 """
     parse_tuple(parsed_toml)
 
-Parse `parsed_toml` as a tuple of scalars.
+Parse an array as a tuple of scalars.
 
 See also [`read_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref).
 """

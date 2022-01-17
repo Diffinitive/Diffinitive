@@ -45,7 +45,7 @@ This data is then parsed by the functions creating specific operators like
 ### Numbers
 Number can be represented as regular TOML numbers e.g. `1`, `-0.4` or
 `4.32e-3`. Alternatively they can be represented as strings which allows
-specifying fraction e.g. `"1/2"` or "0".
+specifying fraction e.g. `"1/2"` or `"0"`.
 
 All numbers are accurately converted to `Rational`s when using the
 [`parse_scalar`](@ref) function.
