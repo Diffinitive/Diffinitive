@@ -24,7 +24,7 @@ else
 end
 
 pages = [
-    "index.md",
+    "Home" => "index.md",
     "operator_file_format.md",
     "Submodules" => [
         "submodules/grids.md",
