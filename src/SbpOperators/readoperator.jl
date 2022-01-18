@@ -10,6 +10,8 @@ export parse_tuple
 export sbp_operators_path
 
 
+#REVIEW: Reference fn in doc for read_stencil_set.
+#        Is it the filename of the TOML?
 """
     read_stencil_set(fn; filters)
 
