@@ -10,7 +10,7 @@ A static dictionary implementing the interface for an `AbstractDict`. A
 
 The immutable nature means that `StaticDict` can be compared with `===`, in
 constrast to regular `Dict` or `ImmutableDict` which can not. (See
-https://github.com/JuliaLang/julia/issues/4648 for details) One important
+<https://github.com/JuliaLang/julia/issues/4648> for details) One important
 aspect of this is that `StaticDict` can be used in a struct while still
 allowing the struct to be comared using the default implementation of `==` for
 structs.
