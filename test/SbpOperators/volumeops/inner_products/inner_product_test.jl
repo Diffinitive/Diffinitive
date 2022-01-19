@@ -14,35 +14,39 @@ using Sbplib.LazyTensors
     g_3D = EquidistantGrid((10,10, 10), (0.0, 0.0, 0.0), (Lx,Ly,Lz))
     integral(H,v) = sum(H*v)
     @testset "inner_product" begin
-        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+        quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
         @testset "0D" begin
-            H = inner_product(EquidistantGrid{Float64}(), op.quadratureClosure, CenteredStencil(1.))
+            H = inner_product(EquidistantGrid{Float64}(), quadrature_interior, quadrature_closure)
             @test H == IdentityMapping{Float64}()
             @test H isa TensorMapping{T,0,0} where T
         end
         @testset "1D" begin
-            H = inner_product(g_1D, op.quadratureClosure, CenteredStencil(1.))
-            @test H == inner_product(g_1D, op.quadratureClosure, CenteredStencil(1.))
+            H = inner_product(g_1D, quadrature_interior, quadrature_closure)
+            @test H == inner_product(g_1D, quadrature_interior, quadrature_closure)
             @test H isa TensorMapping{T,1,1} where T
         end
         @testset "2D" begin
-            H = inner_product(g_2D, op.quadratureClosure, CenteredStencil(1.))
-            H_x = inner_product(restrict( g_2D,1),op.quadratureClosure, CenteredStencil(1.))
-            H_y = inner_product(restrict( g_2D,2),op.quadratureClosure, CenteredStencil(1.))
+            H = inner_product(g_2D, quadrature_interior, quadrature_closure)
+            H_x = inner_product(restrict(g_2D,1), quadrature_interior, quadrature_closure)
+            H_y = inner_product(restrict(g_2D,2), quadrature_interior, quadrature_closure)
             @test H == H_x⊗H_y
             @test H isa TensorMapping{T,2,2} where T
         end
     end
 
     @testset "Sizes" begin
-        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+        quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
         @testset "1D" begin
-            H = inner_product(g_1D, op.quadratureClosure, CenteredStencil(1.))
+            H = inner_product(g_1D, quadrature_interior, quadrature_closure)
             @test domain_size(H) == size(g_1D)
             @test range_size(H) == size(g_1D)
         end
         @testset "2D" begin
-            H = inner_product(g_2D, op.quadratureClosure, CenteredStencil(1.))
+            H = inner_product(g_2D, quadrature_interior, quadrature_closure)
             @test domain_size(H) == size(g_2D)
             @test range_size(H) == size(g_2D)
         end
@@ -58,8 +62,10 @@ using Sbplib.LazyTensors
             u = evalOn(g_1D,x->sin(x))
 
             @testset "2nd order" begin
-                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                H = inner_product(g_1D, op.quadratureClosure, CenteredStencil(1.))
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
+                H = inner_product(g_1D, quadrature_interior, quadrature_closure)
                 for i = 1:2
                     @test integral(H,v[i]) ≈ v[i+1][end] - v[i+1][1] rtol = 1e-14
                 end
@@ -67,8 +73,10 @@ using Sbplib.LazyTensors
             end
 
             @testset "4th order" begin
-                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                H = inner_product(g_1D, op.quadratureClosure, CenteredStencil(1.))
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
+                H = inner_product(g_1D, quadrature_interior, quadrature_closure)
                 for i = 1:4
                     @test integral(H,v[i]) ≈ v[i+1][end] -  v[i+1][1] rtol = 1e-14
                 end
@@ -81,14 +89,18 @@ using Sbplib.LazyTensors
             v = b*ones(Float64, size(g_2D))
             u = evalOn(g_2D,(x,y)->sin(x)+cos(y))
             @testset "2nd order" begin
-                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                H = inner_product(g_2D, op.quadratureClosure, CenteredStencil(1.))
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
+                H = inner_product(g_2D, quadrature_interior, quadrature_closure)
                 @test integral(H,v) ≈ b*Lx*Ly rtol = 1e-13
                 @test integral(H,u) ≈ π rtol = 1e-4
             end
             @testset "4th order" begin
-                op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                H = inner_product(g_2D, op.quadratureClosure, CenteredStencil(1.))
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
+                quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
+                H = inner_product(g_2D, quadrature_interior, quadrature_closure)
                 @test integral(H,v) ≈ b*Lx*Ly rtol = 1e-13
                 @test integral(H,u) ≈ π rtol = 1e-8
             end

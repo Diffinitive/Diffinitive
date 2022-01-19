@@ -8,18 +8,20 @@ using Sbplib.LazyTensors
     g_1D = EquidistantGrid(101, 0.0, 1.)
     g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
     @testset "Constructors" begin
-        op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
+        closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
         @testset "1D" begin
-            L = laplace(g_1D, op.innerStencil, op.closureStencils)
-            @test L == second_derivative(g_1D, op.innerStencil, op.closureStencils)
+            L = laplace(g_1D, inner_stencil, closure_stencils)
+            @test L == second_derivative(g_1D, inner_stencil, closure_stencils)
             @test L isa TensorMapping{T,1,1}  where T
         end
         @testset "3D" begin
-            L = laplace(g_3D, op.innerStencil, op.closureStencils)
+            L = laplace(g_3D, inner_stencil, closure_stencils)
             @test L isa TensorMapping{T,3,3} where T
-            Dxx = second_derivative(g_3D, op.innerStencil, op.closureStencils,1)
-            Dyy = second_derivative(g_3D, op.innerStencil, op.closureStencils,2)
-            Dzz = second_derivative(g_3D, op.innerStencil, op.closureStencils,3)
+            Dxx = second_derivative(g_3D, inner_stencil, closure_stencils, 1)
+            Dyy = second_derivative(g_3D, inner_stencil, closure_stencils, 2)
+            Dzz = second_derivative(g_3D, inner_stencil, closure_stencils, 3)
             @test L == Dxx + Dyy + Dzz
         end
     end
@@ -40,8 +42,10 @@ using Sbplib.LazyTensors
         # 2nd order interior stencil, 1st order boundary stencil,
         # implies that L*v should be exact for binomials up to order 2.
         @testset "2nd order" begin
-            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-            L = laplace(g_3D,op.innerStencil,op.closureStencils)
+            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+            inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
+            closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
+            L = laplace(g_3D, inner_stencil, closure_stencils)
             @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test L*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test L*polynomials[3] ≈ polynomials[1] atol = 5e-9
@@ -51,8 +55,10 @@ using Sbplib.LazyTensors
         # 4th order interior stencil, 2nd order boundary stencil,
         # implies that L*v should be exact for binomials up to order 3.
         @testset "4th order" begin
-            op = read_D2_operator(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-            L = laplace(g_3D,op.innerStencil,op.closureStencils)
+            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
+            closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
+            L = laplace(g_3D, inner_stencil, closure_stencils)
             # NOTE: high tolerances for checking the "exact" differentiation
             # due to accumulation of round-off errors/cancellation errors?
             @test L*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9

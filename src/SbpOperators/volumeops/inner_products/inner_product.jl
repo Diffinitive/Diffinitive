@@ -1,34 +1,34 @@
 """
-    inner_product(grid::EquidistantGrid, closure_stencils, inner_stencil)
+    inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
 
-Creates the discrete inner product operator `H` as a `TensorMapping` on an equidistant
-grid, defined as `(u,v)  = u'Hv` for grid functions `u,v`.
+Creates the discrete inner product operator `H` as a `TensorMapping` on an
+equidistant grid, defined as `(u,v)  = u'Hv` for grid functions `u,v`.
 
-`inner_product(grid::EquidistantGrid, closure_stencils, inner_stencil)` creates
-`H` on `grid` the using a set of stencils `closure_stencils` for the points in
-the closure regions and the stencil and `inner_stencil` in the interior.
+`inner_product` creates `H` on `grid` using the `interior_weight` for the
+interior points and the `closure_weights` for the points close to the
+boundary.
 
-On a 1-dimensional `grid`, `H` is a `VolumeOperator`. On a N-dimensional
-`grid`, `H` is the outer product of the 1-dimensional inner product operators in
-each coordinate direction. Also see the documentation of
-`SbpOperators.volume_operator(...)` for more details. On a 0-dimensional `grid`,
-`H` is a 0-dimensional `IdentityMapping`.
+On a 1-dimensional grid, `H` is a `ConstantInteriorScalingOperator`. On a
+N-dimensional grid, `H` is the outer product of the 1-dimensional inner
+product operators for each coordinate direction. Also see the documentation of
+On a 0-dimensional grid, `H` is a 0-dimensional `IdentityMapping`.
 """
-function inner_product(grid::EquidistantGrid, closure_stencils, inner_stencil)
+function inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
     Hs = ()
 
     for i ∈ 1:dimension(grid)
-        Hs = (Hs..., inner_product(restrict(grid, i), closure_stencils, inner_stencil))
+        Hs = (Hs..., inner_product(restrict(grid, i), interior_weight, closure_weights))
     end
 
     return foldl(⊗, Hs)
 end
 export inner_product
 
-function inner_product(grid::EquidistantGrid{1}, closure_stencils, inner_stencil)
-    h = spacing(grid)
-    H = SbpOperators.volume_operator(grid, scale(inner_stencil,h[1]), scale.(closure_stencils,h[1]), even, 1)
+function inner_product(grid::EquidistantGrid{1}, interior_weight, closure_weights)
+    h = spacing(grid)[1]
+
+    H = SbpOperators.ConstantInteriorScalingOperator(grid, h*interior_weight, h.*closure_weights)
     return H
 end
 
-inner_product(grid::EquidistantGrid{0}, closure_stencils, inner_stencil) = IdentityMapping{eltype(grid)}()
+inner_product(grid::EquidistantGrid{0}, interior_weight, closure_weights) = IdentityMapping{eltype(grid)}()

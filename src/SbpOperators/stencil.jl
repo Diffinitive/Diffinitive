@@ -22,6 +22,12 @@ function Stencil(weights::Vararg{T}; center::Int) where T # Type parameter T mak
     return Stencil(range, weights)
 end
 
+function Stencil{T}(s::Stencil) where T
+    return Stencil(s.range, T.(s.weights))
+end
+
+Base.convert(::Type{Stencil{T}}, stencil) where T = Stencil{T}(stencil)
+
 function CenteredStencil(weights::Vararg)
     if iseven(length(weights))
         throw(ArgumentError("a centered stencil must have an odd number of weights."))
