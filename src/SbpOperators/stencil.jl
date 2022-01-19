@@ -1,4 +1,5 @@
 export CenteredStencil
+export CenteredNestedStencil
 
 struct Stencil{T,N}
     range::Tuple{Int,Int}
@@ -77,4 +78,51 @@ Base.@propagate_inbounds @inline function apply_stencil_backwards(s::Stencil{T,N
         w += s.weights[k]*v[i - s.range[1] - k + 1]
     end
     return w
+end
+
+
+struct NestedStencil{T,N}
+    s::Stencil{Stencil{T,N},N}
+end
+
+NestedStencil(s::Vararg{Stencil}; center) = NestedStencil(Stencil(s... ; center))
+
+function NestedStencil(weights::Vararg{Tuple}; center)
+    inner_stencils = map((w,c) -> Stencil(w...,center=c), weights, 1:length(weights))
+    return NestedStencil(Stencil(inner_stencils... ; center))
+end
+
+CenteredNestedStencil(s...) = NestedStencil(CenteredStencil(s...))
+
+Base.eltype(::NestedStencil{T}) where T = T
+
+function flip(ns::NestedStencil)
+    s_flip = flip(ns.s)
+    return NestedStencil(Stencil(s_flip.range, flip.(s_flip.weights)))
+end
+
+Base.getindex(ns::NestedStencil, i::Int) = ns.s[i]
+
+"Apply inner stencils to `c` and get a concrete stencil"
+Base.@propagate_inbounds function apply_stencil(ns::NestedStencil, c::AbstractVector, i::Int)
+    weights = apply_stencil.(ns.s.weights, Ref(c), i)
+    return Stencil(ns.s.range, weights)
+end
+
+"Apply the whole nested stencil"
+Base.@propagate_inbounds function apply_stencil(ns::NestedStencil, c::AbstractVector, v::AbstractVector, i::Int)
+    s = apply_stencil(ns,c,i)
+    return apply_stencil(s, v, i)
+end
+
+"Apply inner stencils backwards to `c` and get a concrete stencil"
+Base.@propagate_inbounds @inline function apply_stencil_backwards(ns::NestedStencil, c::AbstractVector, v::AbstractVector, i::Int)
+    weights = apply_stencil_backwards.(ns.s.weights, Ref(c), i)
+    return Stencil(ns.s.range, weights)
+end
+
+"Apply the whole nested stencil backwards"
+Base.@propagate_inbounds @inline function apply_stencil_backwards(ns::NestedStencil, c::AbstractVector, v::AbstractVector, i::Int)
+    s = apply_stencil_backwards(ns,c,i)
+    return apply_stencil_backwards(s, v, i)
 end
