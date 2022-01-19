@@ -11,14 +11,14 @@ export sbp_operators_path
 
 
 """
-    read_stencil_set(fn; filters)
+    read_stencil_set(filename; filters)
 
-Picks out a stencil set from the given toml file based on some key-value
+Picks out a stencil set from a TOML file based on some key-value
 filters. If more than one set matches the filters an error is raised. The
-returned stencil set contains parsed toml intended for functions like
+returned stencil set contains parsed TOML intended for functions like
 `parse_scalar` and `parse_stencil`.
 
-The stencil set is not parsed beyond the inital toml parse. To get usable
+The stencil set is not parsed beyond the inital TOML parse. To get usable
 stencils use the `parse_stencil` functions on the fields of the stencil set.
 
 The reason for this is that since stencil sets are intended to be very
@@ -29,12 +29,13 @@ For more information see [Operator file format](@ref) in the documentation.
 
 See also [`sbp_operators_path`](@ref), [`get_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref),.
 """
-read_stencil_set(fn; filters...) = get_stencil_set(TOML.parsefile(fn); filters...)
+read_stencil_set(filename; filters...) = get_stencil_set(TOML.parsefile(filename); filters...)
 
 """
     get_stencil_set(parsed_toml; filters...)
 
-Same as `read_stencil_set` but works on already parsed TOML.
+Picks out a stencil set from an already parsed TOML based on some key-value
+filters.
 
 See also [`read_stencil_set`](@ref).
 """
@@ -60,7 +61,7 @@ end
 """
     parse_stencil(parsed_toml)
 
-Accepts parsed toml and reads it as a stencil.
+Accepts parsed TOML and reads it as a stencil.
 
 See also [`read_stencil_set`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref).
 """
