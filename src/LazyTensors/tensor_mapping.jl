@@ -1,21 +1,24 @@
 """
     TensorMapping{T,R,D}
 
-Describes a mapping of a D dimension tensor to an R dimension tensor.
+Describes a mapping of a `D` dimension tensor to an `R` dimension tensor.
 The action of the mapping is implemented through the method
-
+```julia
     apply(t::TensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {R,D,T}
+```
 
 The size of the range and domain that the operator works with should be returned by
 the functions
-
+```julia
     range_size(::TensorMapping)
     domain_size(::TensorMapping)
-
+```
 to allow querying for one or the other.
 
 Optionally the action of the transpose may be defined through
+```julia
     apply_transpose(t::TensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {R,D,T}
+```
 """
 abstract type TensorMapping{T,R,D} end
 export TensorMapping
@@ -37,11 +40,13 @@ function apply_transpose end
 export apply_transpose
 
 """
+    range_dim(::TensorMapping)
 Return the dimension of the range space of a given mapping
 """
 range_dim(::TensorMapping{T,R,D}) where {T,R,D} = R
 
 """
+    domain_dim(::TensorMapping)
 Return the dimension of the domain space of a given mapping
 """
 domain_dim(::TensorMapping{T,R,D}) where {T,R,D} = D

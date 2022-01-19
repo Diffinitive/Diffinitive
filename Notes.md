@@ -53,6 +53,23 @@ operator creation.
 
 * Remove order as a table name and put it as a variable.
 
+### Parsing of stencil sets
+At the moment the only parsing that can be done at the top level is conversion
+from the toml file to a dict of strings. This forces the user to dig through
+the dictionary and apply the correct parsing methods for the different parts,
+e.g. `parse_stencil` or `parse_tuple`. While very flexible there is a tight
+coupling between what is written in the file and what code is run to make data
+in the file usable. While this coupling is hard to avoid it should be made
+explicit. This could be done by putting a reference to a parsing function in
+the operator-storage format or somehow specifying the type of each object.
+This mechanism should be extensible without changing the package. Perhaps
+there could be a way to register parsing functions or object types for the
+toml.
+
+If possible the goal should be for the parsing to get all the way to the
+stencils so that a user calls `read_stencil_set` and gets a
+dictionary-structure containing stencils, tuples, scalars and other types
+ready for input to the methods creating the operators.
 
 ## Variable second derivative
 
@@ -321,3 +338,15 @@ We should make these test simple to run for any solver.
 See [this talk](https://www.youtube.com/watch?v=vPsfZUqI4_0) for some simple ideas for defining effecive memory usage and some comparison with peak performance.
 
 
+## Adjoint as a trait on the sbp_operator level?
+
+It would be nice to have a way of refering to adjoints with resepct to the sbp-inner-product.
+If it was possible you could reduce the number of times you have to deal with the inner product matrix.
+
+Since the LazyOperators package is sort of implementing matrix-free matrices there is no concept of inner products there at the moment. It seems to complicate large parts of the package if this was included there.
+
+A different approach would be to include it as a trait for operators so that you can specify what the adjoint for that operator is.
+
+
+## Name of the `VolumeOperator` type for constant stencils
+It seems that the name is too general. The name of the method `volume_operator` makes sense. It should return different types of `TensorMapping` specialized for the grid. A suggetion for a better name is `ConstantStencilVolumeOperator`

@@ -9,7 +9,10 @@ Creates the boundary restriction operator `e` as a `TensorMapping`
 On a one-dimensional `grid`, `e` is a `BoundaryOperator`. On a multi-dimensional `grid`, `e` is the inflation of
 a `BoundaryOperator`. Also see the documentation of `SbpOperators.boundary_operator(...)` for more details.
 """
-boundary_restriction(grid::EquidistantGrid, closure_stencil::Stencil, boundary::CartesianBoundary) = SbpOperators.boundary_operator(grid, closure_stencil, boundary)
-boundary_restriction(grid::EquidistantGrid{1}, closure_stencil::Stencil, region::Region) = boundary_restriction(grid, closure_stencil, CartesianBoundary{1,typeof(region)}())
+function boundary_restriction(grid::EquidistantGrid, closure_stencil, boundary::CartesianBoundary)
+    converted_stencil = convert(Stencil{eltype(grid)}, closure_stencil)
+    return SbpOperators.boundary_operator(grid, converted_stencil, boundary)
+end
+boundary_restriction(grid::EquidistantGrid{1}, closure_stencil, region::Region) = boundary_restriction(grid, closure_stencil, CartesianBoundary{1,typeof(region)}())
 
 export boundary_restriction

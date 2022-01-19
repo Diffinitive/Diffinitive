@@ -93,6 +93,7 @@ end
 
 
 """
+    BoundaryCondition
 A BoundaryCondition should implement the method
     sat(::DiffOp, v::AbstractArray, data::AbstractArray, ...)
 """
