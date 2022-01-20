@@ -29,7 +29,7 @@ end
 
 Base.convert(::Type{Stencil{T}}, stencil) where T = Stencil{T}(stencil)
 
-function CenteredStencil(weights::Vararg)
+function CenteredStencil(weights::Vararg{T}) where T
     if iseven(length(weights))
         throw(ArgumentError("a centered stencil must have an odd number of weights."))
     end
@@ -81,20 +81,22 @@ Base.@propagate_inbounds @inline function apply_stencil_backwards(s::Stencil{T,N
 end
 
 
-struct NestedStencil{T,N}
-    s::Stencil{Stencil{T,N},N}
+struct NestedStencil{T,N,M}
+    s::Stencil{Stencil{T,N},M}
 end
 
+# The exessive use of type parameters for the following constructors are to catch errors earlier with clearer error messages
+
 # Stencil input
-NestedStencil(s::Vararg{Stencil}; center) = NestedStencil(Stencil(s... ; center))
-CenteredNestedStencil(s::Vararg{Stencil}) = NestedStencil(CenteredStencil(s...))
+NestedStencil(s::Vararg{Stencil{T,N}}; center) where {T,N} = NestedStencil(Stencil(s... ; center))
+CenteredNestedStencil(s::Vararg{Stencil{T,N}}) where {T,N} = NestedStencil(CenteredStencil(s...))
 
 # Tuple input
-function NestedStencil(weights::Vararg{Tuple}; center)
+function NestedStencil(weights::Vararg{NTuple{N,T}}; center) where {T,N}
     inner_stencils = map(w -> Stencil(w...; center), weights)
     return NestedStencil(Stencil(inner_stencils... ; center))
 end
-function CenteredNestedStencil(weights::Vararg{Tuple})
+function CenteredNestedStencil(weights::Vararg{NTuple{N,T}}) where {T,N}
     inner_stencils = map(w->CenteredStencil(w...), weights)
     return CenteredNestedStencil(inner_stencils...)
 end
