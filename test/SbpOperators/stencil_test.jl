@@ -48,6 +48,7 @@ end
         @test NestedStencil(s1,s2,s3, center = 1) == NestedStencil(Stencil(s1,s2,s3, center=1))
 
         @test NestedStencil((-1,1,0),(-1,0,1),(0,-1,1), center=2) == ns
+        @test CenteredNestedStencil((-1,1,0),(-1,0,1),(0,-1,1)) == ns
         @test NestedStencil((-1,1,0),(-1,0,1),(0,-1,1), center=1) == NestedStencil(Stencil(
             Stencil(-1, 1, 0; center=1),
             Stencil(-1, 0, 1; center=1),

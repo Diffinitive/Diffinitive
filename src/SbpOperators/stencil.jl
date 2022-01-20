@@ -85,14 +85,19 @@ struct NestedStencil{T,N}
     s::Stencil{Stencil{T,N},N}
 end
 
+# Stencil input
 NestedStencil(s::Vararg{Stencil}; center) = NestedStencil(Stencil(s... ; center))
+CenteredNestedStencil(s::Vararg{Stencil}) = NestedStencil(CenteredStencil(s...))
 
+# Tuple input
 function NestedStencil(weights::Vararg{Tuple}; center)
     inner_stencils = map(w -> Stencil(w...; center), weights)
     return NestedStencil(Stencil(inner_stencils... ; center))
 end
-
-CenteredNestedStencil(s...) = NestedStencil(CenteredStencil(s...))
+function CenteredNestedStencil(weights::Vararg{Tuple})
+    inner_stencils = map(w->CenteredStencil(w...), weights)
+    return CenteredNestedStencil(inner_stencils...)
+end
 
 Base.eltype(::NestedStencil{T}) where T = T
 
