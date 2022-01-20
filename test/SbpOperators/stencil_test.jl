@@ -48,6 +48,12 @@ end
         @test NestedStencil(s1,s2,s3, center = 1) == NestedStencil(Stencil(s1,s2,s3, center=1))
 
         @test NestedStencil((-1,1,0),(-1,0,1),(0,-1,1), center=2) == ns
+        @test NestedStencil((-1,1,0),(-1,0,1),(0,-1,1), center=1) == NestedStencil(Stencil(
+            Stencil(-1, 1, 0; center=1),
+            Stencil(-1, 0, 1; center=1),
+            Stencil( 0,-1, 1; center=1);
+            center=1
+        ))
 
 
         @testset "Error handling" begin
@@ -58,12 +64,20 @@ end
         c = [  1,  3,  6, 10, 15, 21, 28, 36, 45, 55]
         v = [  2,  3,  5,  7, 11, 13, 17, 19, 23, 29]
 
+        # Centered
         ns = NestedStencil((-1,1,0),(-1,0,1),(0,-2,2), center=2)
-
         @test SbpOperators.apply_inner_stencils(ns, c, 4) == Stencil(4,9,10; center=2)
         @test SbpOperators.apply_inner_stencils_backwards(ns, c, 4) == Stencil(-5,-9,-8; center=2)
 
         @test SbpOperators.apply_stencil(ns, c, v, 4) == 4*5 + 9*7 + 10*11
         @test SbpOperators.apply_stencil_backwards(ns, c, v, 4) == -8*5 - 9*7 - 5*11
+
+        # Non-centered
+        ns = NestedStencil((-1,1,0),(-1,0,1),(0,-1,1), center=1)
+        @test SbpOperators.apply_inner_stencils(ns, c, 4) == Stencil(5,11,6; center=1)
+        @test SbpOperators.apply_inner_stencils_backwards(ns, c, 4) == Stencil(-4,-7,-3; center=1)
+
+        @test SbpOperators.apply_stencil(ns, c, v, 4) == 5*7 + 11*11 + 6*13
+        @test SbpOperators.apply_stencil_backwards(ns, c, v, 4) == -3*3 - 7*5 - 4*7
     end
 end
