@@ -9,6 +9,8 @@ using Sbplib.Grids
     even = 1
 end
 
+export closure_size
+
 include("stencil.jl")
 include("readoperator.jl")
 include("volumeops/volume_operator.jl")

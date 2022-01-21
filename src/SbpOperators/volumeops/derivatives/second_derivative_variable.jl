@@ -27,16 +27,18 @@ export SecondDerivativeVariable
 
 """
     SecondDerivativeVariable{T,N,M,K} <: TensorOperator{T,1}
-Implements a one-dimensional constant coefficients volume operator
+
+Implements the one-dimensional second derivative with variable coefficients.
 """
-struct SecondDerivativeVariable{T,N,M,K} <: TensorMapping{T,1,1}
+struct SecondDerivativeVariable{T,N,M,K,TArray<:AbstractVector} <: TensorMapping{T,1,1}
     inner_stencil::NestedStencil{T,N}
     closure_stencils::NTuple{M,NestedStencil{T,K}}
     size::NTuple{1,Int}
+    coefficient::TArray
 end
 
-function SecondDerivativeVariable(grid::EquidistantGrid{1}, inner_stencil, closure_stencils)
-    return SecondDerivativeVariable(inner_stencil, Tuple(closure_stencils), size(grid))
+function SecondDerivativeVariable(grid::EquidistantGrid{1}, coeff::AbstractVector, inner_stencil, closure_stencils)
+    return SecondDerivativeVariable(inner_stencil, Tuple(closure_stencils), size(grid), coeff)
 end
 
 closure_size(::SecondDerivativeVariable{T,N,M}) where {T,N,M} = M
