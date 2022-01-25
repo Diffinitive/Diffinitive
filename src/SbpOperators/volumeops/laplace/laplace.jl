@@ -29,7 +29,6 @@ using `laplace(grid,...)`.
 Note that all properties of Laplace, excluding the differential operator `Laplace.D`, are
 abstract types. For performance reasons, they should therefore be
 accessed via the provided getter functions (e.g `inner_product(::Laplace)`).
-
 """
 struct Laplace{T, Dim, TMdiffop<:TensorMapping{T,Dim,Dim}} <: TensorMapping{T,Dim,Dim}
     D::TMdiffop # Differential operator
@@ -83,7 +82,6 @@ LazyTensors.apply(L::Laplace, v::AbstractArray, I...) = LazyTensors.apply(L.D,v,
     inner_product(L::Laplace)
 
 Returns the inner product operator associated with `L`
-
 """
 inner_product(L::Laplace) = L.H
 export inner_product
@@ -93,7 +91,6 @@ export inner_product
     inverse_inner_product(L::Laplace)
 
 Returns the inverse of the inner product operator associated with `L`
-
 """
 inverse_inner_product(L::Laplace) = L.H_inv
 export inverse_inner_product
@@ -106,7 +103,6 @@ export inverse_inner_product
 
 Returns boundary restriction operator(s) associated with `L` for the boundary(s)
 identified by id(s).
-
 """
 boundary_restriction(L::Laplace, id::BoundaryIdentifier) = L.e[id]
 boundary_restriction(L::Laplace, ids::Tuple) = map(id-> L.e[id], ids)
@@ -128,7 +124,6 @@ export boundary_restriction
 
 Returns normal derivative operator(s) associated with `L` for the boundary(s)
 identified by id(s).
-
 """
 normal_derivative(L::Laplace, id::BoundaryIdentifier) = L.d[id]
 normal_derivative(L::Laplace, ids::NTuple{N,BoundaryIdentifier}) where N = ntuple(i->L.d[ids[i]],N)
@@ -143,7 +138,6 @@ export normal_derivative
 
 Returns boundary quadrature operator(s) associated with `L` for the boundary(s)
 identified by id(s).
-
 """
 boundary_quadrature(L::Laplace, id::BoundaryIdentifier) = L.H_boundary[id]
 boundary_quadrature(L::Laplace, ids::NTuple{N,BoundaryIdentifier}) where N = ntuple(i->L.H_boundary[ids[i]],N)
