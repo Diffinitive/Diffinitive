@@ -44,6 +44,17 @@ quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
             @test L == Laplace(Δ, H, Hi, e_dict, d_dict, Hb_dict)
             @test L isa TensorMapping{T,1,1}  where T
             @inferred Laplace(Δ, H, Hi, e_dict, d_dict, Hb_dict)
+            # REVIEW: The tests above seem very tied to the implementation. Is
+            # it important that the components of the operator set are stored
+            # in static dicts? Is something like below better?
+            #
+            # ```
+            # L = Laplace(g_1D, operator_path; order=4)
+            # @test L isa TensorMapping{T,1,1}  where T
+            # @test boundary_restriction(L,id_l) ==  boundary_restriction(g_1D, e_closure,id_l)
+            # ...
+            # ```
+            # I guess this is more or less simply a reorganization of the test and skipping testing for the struct layout
         end
         @testset "3D" begin
             Δ = laplace(g_3D, inner_stencil, closure_stencils)
@@ -88,6 +99,7 @@ quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
         end
     end
 
+    # REVIEW: Is this testset misplaced? Should it really be inside the "Laplace" testset?
     @testset "laplace" begin
         @testset "1D" begin
             L = laplace(g_1D, inner_stencil, closure_stencils)
