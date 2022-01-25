@@ -15,4 +15,3 @@ function normal_derivative(grid::EquidistantGrid, closure_stencil, boundary::Car
     return SbpOperators.boundary_operator(grid, scale(closure_stencil,h_inv), boundary)
 end
 normal_derivative(grid::EquidistantGrid{1}, closure_stencil, region::Region) = normal_derivative(grid, closure_stencil, CartesianBoundary{1,typeof(region)}())
-export normal_derivative

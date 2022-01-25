@@ -1,3 +1,8 @@
+export Laplace
+export laplace
+# REVIEW: Makes more sense to me to have the exports at the top of the file.
+# Might as well start fixing that.
+
 # REVIEW: The style of name `Laplace` might clash with other concepts. When
 # thinking about implementing the variable second derivative I think I will
 # have to create it as a full TM for the full dimensional problem instead of
@@ -38,7 +43,6 @@ struct Laplace{T, Dim, TMdiffop<:TensorMapping{T,Dim,Dim}} <: TensorMapping{T,Di
     d::StaticDict{<:BoundaryIdentifier,<:TensorMapping} # Normal derivative operators
     H_boundary::StaticDict{<:BoundaryIdentifier,<:TensorMapping} # Boundary quadrature operators
 end
-export Laplace
 
 function Laplace(grid, filename; order)
     
@@ -84,7 +88,6 @@ LazyTensors.apply(L::Laplace, v::AbstractArray, I...) = LazyTensors.apply(L.D,v,
 Returns the inner product operator associated with `L`
 """
 inner_product(L::Laplace) = L.H
-export inner_product
 
 
 """
@@ -93,7 +96,6 @@ export inner_product
 Returns the inverse of the inner product operator associated with `L`
 """
 inverse_inner_product(L::Laplace) = L.H_inv
-export inverse_inner_product
 
 
 """
@@ -114,7 +116,6 @@ boundary_restriction(L::Laplace, ids...) = boundary_restriction(L, ids)
 # out the interface for that now or if we save it for the future but either
 # way these methods will be affected.
 
-export boundary_restriction
 
 
 """
@@ -128,7 +129,6 @@ identified by id(s).
 normal_derivative(L::Laplace, id::BoundaryIdentifier) = L.d[id]
 normal_derivative(L::Laplace, ids::NTuple{N,BoundaryIdentifier}) where N = ntuple(i->L.d[ids[i]],N)
 normal_derivative(L::Laplace, ids::Vararg{BoundaryIdentifier,N}) where N = ntuple(i->L.d[ids[i]],N)
-export normal_derivative
 
 
 """
@@ -142,7 +142,6 @@ identified by id(s).
 boundary_quadrature(L::Laplace, id::BoundaryIdentifier) = L.H_boundary[id]
 boundary_quadrature(L::Laplace, ids::NTuple{N,BoundaryIdentifier}) where N = ntuple(i->L.H_boundary[ids[i]],N)
 boundary_quadrature(L::Laplace, ids::Vararg{BoundaryIdentifier,N}) where N = ntuple(i->L.H_boundary[ids[i]],N)
-export boundary_quadrature
 
 
 """
@@ -165,4 +164,3 @@ function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
     end
     return Δ
 end
-export laplace

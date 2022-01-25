@@ -14,5 +14,3 @@ function boundary_restriction(grid::EquidistantGrid, closure_stencil, boundary::
     return SbpOperators.boundary_operator(grid, converted_stencil, boundary)
 end
 boundary_restriction(grid::EquidistantGrid{1}, closure_stencil, region::Region) = boundary_restriction(grid, closure_stencil, CartesianBoundary{1,typeof(region)}())
-
-export boundary_restriction

@@ -22,4 +22,11 @@ include("boundaryops/boundary_operator.jl")
 include("boundaryops/boundary_restriction.jl")
 include("boundaryops/normal_derivative.jl")
 
+
+export inner_product
+export inverse_inner_product
+export boundary_restriction
+export normal_derivative
+export boundary_quadrature
+
 end # module

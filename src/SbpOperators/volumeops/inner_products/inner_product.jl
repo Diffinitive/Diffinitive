@@ -22,7 +22,6 @@ function inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
 
     return foldl(⊗, Hs)
 end
-export inner_product
 
 function inner_product(grid::EquidistantGrid{1}, interior_weight, closure_weights)
     h = spacing(grid)[1]

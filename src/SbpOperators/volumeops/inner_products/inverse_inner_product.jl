@@ -25,6 +25,5 @@ function inverse_inner_product(grid::EquidistantGrid{1}, interior_weight, closur
     H⁻¹ = SbpOperators.ConstantInteriorScalingOperator(grid, h⁻¹*1/interior_weight, h⁻¹./closure_weights)
     return H⁻¹
 end
-export inverse_inner_product
 
 inverse_inner_product(grid::EquidistantGrid{0}, interior_weight, closure_weights) = IdentityMapping{eltype(grid)}()
