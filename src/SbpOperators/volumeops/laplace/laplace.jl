@@ -1,3 +1,19 @@
+# REVIEW: The style of name `Laplace` might clash with other concepts. When
+# thinking about implementing the variable second derivative I think I will
+# have to create it as a full TM for the full dimensional problem instead of
+# building it as a 1D operator and then use that with outer products. The
+# natural name there would be `VariableSecondDerivative` (or something
+# similar). But the similarity of the two names would suggest that `Laplace`
+# and `VariableSecondDerivative` are the same kind of thing, which they
+# wouldn't be.
+#
+# How do we distinguish the kind of type we are implementing here and what we
+# could potentially do for the variable second derivative?
+#
+# I see two ways out:
+#   * Come up with a name for these sets of operators and change `Laplace` accordingly.
+#   * Come up with a name for the bare operators and change `VariableSecondDerivative` accordingly.
+
 """
     Laplace{T, Dim, TMdiffop} <: TensorMapping{T,Dim,Dim}
     Laplace(grid, filename; order)
@@ -37,6 +53,7 @@ function Laplace(grid, filename; order)
     H_closure_stencils = parse_tuple(stencil_set["H"]["closure"])
     e_closure_stencil = parse_stencil(stencil_set["e"]["closure"])
     d_closure_stencil = parse_stencil(stencil_set["d1"]["closure"])
+    # REVIEW: Do we add the methods to get rid of this in this branch or a new one?
 
     # Volume operators
     Δ =  laplace(grid, D_inner_stecil, D_closure_stencils)
@@ -45,16 +62,17 @@ function Laplace(grid, filename; order)
 
     # Boundary operator - id pairs
     ids = boundary_identifiers(grid)
-    n_ids = length(ids)
-    e_pairs = ntuple(i -> ids[i] => boundary_restriction(grid, e_closure_stencil, ids[i]), n_ids)
-    d_pairs = ntuple(i -> ids[i] => normal_derivative(grid, d_closure_stencil, ids[i]), n_ids)
-    Hᵧ_pairs = ntuple(i -> ids[i] => inner_product(boundary_grid(grid, ids[i]), H_inner_stencils, H_closure_stencils), n_ids)
+    # REVIEW: Change suggestion: Seems more readable to me but pretty subjective so feel free to ignore
+    e_pairs  = map(id -> Pair(id, boundary_restriction(grid, e_closure_stencil, id)),                            ids)
+    d_pairs  = map(id -> Pair(id, normal_derivative(grid, d_closure_stencil, id)),                               ids)
+    Hᵧ_pairs = map(id -> Pair(id, inner_product(boundary_grid(grid, id), H_inner_stencils, H_closure_stencils)), ids)
 
     return Laplace(Δ, H, H⁻¹, StaticDict(e_pairs), StaticDict(d_pairs), StaticDict(Hᵧ_pairs))
 end
 
 # TODO: Consider pretty printing of the following form
 # Base.show(io::IO, L::Laplace{T, Dim}) where {T,Dim,TM} =  print(io, "Laplace{$T, $Dim, $TM}(", L.D, L.H, L.H_inv, L.e, L.d, L.H_boundary, ")")
+# REVIEW: Should leave a todo here to update this once we have some pretty printing for tensor mappings in general.
 
 LazyTensors.range_size(L::Laplace) = LazyTensors.range_size(L.D)
 LazyTensors.domain_size(L::Laplace) = LazyTensors.domain_size(L.D)
@@ -83,7 +101,7 @@ export inverse_inner_product
 
 """
     boundary_restriction(L::Laplace, id::BoundaryIdentifier)
-    boundary_restriction(L::Laplace, ids::NTuple{N,BoundaryIdentifier})
+    boundary_restriction(L::Laplace, ids::Tuple)
     boundary_restriction(L::Laplace, ids...)
 
 Returns boundary restriction operator(s) associated with `L` for the boundary(s)
@@ -91,8 +109,15 @@ identified by id(s).
 
 """
 boundary_restriction(L::Laplace, id::BoundaryIdentifier) = L.e[id]
-boundary_restriction(L::Laplace, ids::NTuple{N,BoundaryIdentifier}) where N = ntuple(i->L.e[ids[i]],N)
-boundary_restriction(L::Laplace, ids::Vararg{BoundaryIdentifier,N}) where N = ntuple(i->L.e[ids[i]],N)
+boundary_restriction(L::Laplace, ids::Tuple) = map(id-> L.e[id], ids)
+boundary_restriction(L::Laplace, ids...) = boundary_restriction(L, ids)
+# REVIEW: I propose changing the following implementations according to the
+# above. There are some things we're missing with regards to
+# `BoundaryIdentifier`, for example we should be able to handle groups of
+# boundaries as a single `BoundaryIdentifier`. I don't know if we can figure
+# out the interface for that now or if we save it for the future but either
+# way these methods will be affected.
+
 export boundary_restriction
 
 
