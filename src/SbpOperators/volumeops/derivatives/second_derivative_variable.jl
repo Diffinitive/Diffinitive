@@ -47,18 +47,20 @@ LazyTensors.range_size(op::SecondDerivativeVariable) = op.size
 LazyTensors.domain_size(op::SecondDerivativeVariable) = op.size
 
 function LazyTensors.apply(op::SecondDerivativeVariable{T}, v::AbstractVector{T}, i::Index{Lower}) where T
-    return @inbounds apply_stencil(op.closure_stencils[Int(i)], v, Int(i))
+    return @inbounds apply_stencil(op.closure_stencils[Int(i)], op.coefficient, v, Int(i))
 end
 
 function LazyTensors.apply(op::SecondDerivativeVariable{T}, v::AbstractVector{T}, i::Index{Interior}) where T
-    return apply_stencil(op.inner_stencil, v, Int(i))
+    return apply_stencil(op.inner_stencil, op.coefficient, v, Int(i))
 end
 
 function LazyTensors.apply(op::SecondDerivativeVariable{T}, v::AbstractVector{T}, i::Index{Upper}) where T
-    return @inbounds Int(op.parity)*apply_stencil_backwards(op.closure_stencils[op.size[1]-Int(i)+1], v, Int(i))
+    return @inbounds apply_stencil_backwards(op.closure_stencils[op.size[1]-Int(i)+1], op.coefficient, v, Int(i))
 end
 
 function LazyTensors.apply(op::SecondDerivativeVariable{T}, v::AbstractVector{T}, i) where T
     r = getregion(i, closure_size(op), op.size[1])
     return LazyTensors.apply(op, v, Index(i, r))
 end
+
+# TODO: Rename SecondDerivativeVariable -> VariableSecondDerivative
