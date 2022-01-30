@@ -3,6 +3,12 @@ export laplace
 # REVIEW: Makes more sense to me to have the exports at the top of the file.
 # Might as well start fixing that.
 
+# REVIEW:
+# Design discussions has led to attempt a restructuring of Laplace to a more
+# minimal type, holding the tensor mapping and a stencil set. This allows
+# construction of associated tensor mappings, e.g. boundary operators, based on the
+# stencil set while keeping the type simpler.
+
 # REVIEW: The style of name `Laplace` might clash with other concepts. When
 # thinking about implementing the variable second derivative I think I will
 # have to create it as a full TM for the full dimensional problem instead of
