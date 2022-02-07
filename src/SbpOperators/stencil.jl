@@ -49,7 +49,8 @@ function scale(s::Stencil, a)
     return Stencil(s.range, a.*s.weights)
 end
 
-Base.eltype(::Stencil{T}) where T = T
+Base.eltype(::Stencil{T,N}) where {T,N} = T
+Base.length(::Stencil{T,N}) where {T,N} = N
 
 function flip(s::Stencil)
     range = (-s.range[2], -s.range[1])

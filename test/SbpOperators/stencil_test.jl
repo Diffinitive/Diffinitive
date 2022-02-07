@@ -9,6 +9,10 @@ import Sbplib.SbpOperators.scale
     @test s isa Stencil{Float64, 5}
 
     @test eltype(s) == Float64
+
+    @test length(s) == 5
+    @test length(Stencil((-1,2), (1,2,3,4))) == 4
+
     @test SbpOperators.scale(s, 2) == Stencil((-2,2), (2.,4.,4.,6.,8.))
 
     @test Stencil(1,2,3,4; center=1) == Stencil((0, 3),(1,2,3,4))
