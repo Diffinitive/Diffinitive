@@ -8,17 +8,15 @@ using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
 
 
 @testset "SecondDerivativeVariable" begin
-    g = EquidistantGrid(11, 0., 1.)
-    c = [  1,  3,  6, 10, 15, 21, 28, 36, 45, 55, 66]
-
     interior_stencil = CenteredNestedStencil((1/2, 1/2, 0.),(-1/2, -1., -1/2),( 0., 1/2, 1/2))
     closure_stencils = [
         NestedStencil(( 2.,  -1., 0.),(-3., 1.,  0.), (1., 0., 0.), center = 1),
     ]
 
     @testset "1D" begin
+        g = EquidistantGrid(11, 0., 1.)
+        c = [  1,  3,  6, 10, 15, 21, 28, 36, 45, 55, 66]
         @testset "Constructors" begin
-            @test SecondDerivativeVariable(interior_stencil,Tuple(closure_stencils), (4,), c) isa TensorMapping
             @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils) isa TensorMapping
         end
 
@@ -44,6 +42,21 @@ using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
             @test apply_to_functions(v=x->1., c=x->-x) == zeros(11)
             @test apply_to_functions(v=x->x, c=x-> 1.) == zeros(11)
             @test apply_to_functions(v=x->x, c=x->-x) == -ones(11)
+            @test apply_to_functions(v=x->x^2, c=x->1.) == 2ones(11)
+        end
+    end
+
+    @testset "2D" begin
+        g = EquidistantGrid((11,9), (0.,0.), (10.,8.)) # h = 1
+        c = evalOn(g, (x,y)->x+y)
+        @testset "Constructors" begin
+            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1) isa TensorMapping
+        end
+
+        @testset "sizes" begin
+        end
+
+        @testset "application" begin
         end
     end
 end
