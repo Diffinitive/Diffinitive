@@ -154,6 +154,43 @@ When do we need to know the size of the range and domain?
         - [ ] What to name this trait? Can we call it IndexStyle but not export it to avoid conflicts with Base.IndexStyle?
  - [ ] Figure out repeated application of regioned TensorMappings. Maybe an instance of a tensor mapping needs to know the exact size of the range and domain for this to work?
 
+### Ideas for information sharing functions
+```julia
+using StaticArrays
+
+function regions(op::SecondDerivativeVariable)
+    t = ntuple(i->(Interior(),),range_dim(op))
+    return Base.setindex(t, (Lower(), Interior(), Upper()), derivative_direction(op))
+end
+
+function regionsizes(op::SecondDerivativeVariable)
+    sz = tuple.(range_size(op))
+
+    cl = closuresize(op)
+    return Base.setindex(sz, (cl, n-2cl, cl), derivative_direction(op))
+end
+
+
+g = EquidistantGrid((11,9), (0.,0.), (10.,8.)) # h = 1
+c = evalOn(g, (x,y)->x+y)
+
+D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1)
+@test regions(D₂ᶜ) == (
+    (Lower(), Interior(), Upper()),
+    (Interior(),),
+)
+@test regionsizes(D₂ᶜ) == ((1,9,1),(9,))
+
+
+D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,2)
+@test regions(D₂ᶜ) == (
+    (Interior(),),
+    (Lower(), Interior(), Upper()),
+)
+@test regionsizes(D₂ᶜ) == ((11,),(1,7,1))
+```
+
+
 ## Boundschecking and dimension checking
 Does it make sense to have boundschecking only in getindex methods?
 This would mean no bounds checking in applys, however any indexing that they do would be boundschecked. The only loss would be readability of errors. But users aren't really supposed to call apply directly anyway.
