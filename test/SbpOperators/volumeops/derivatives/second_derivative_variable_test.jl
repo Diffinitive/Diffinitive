@@ -51,9 +51,19 @@ using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
         c = evalOn(g, (x,y)->x+y)
         @testset "Constructors" begin
             @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1) isa TensorMapping
+            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,2) isa TensorMapping
         end
 
         @testset "sizes" begin
+            D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1)
+            @test range_size(D₂ᶜ) == (11,9)
+            @test domain_size(D₂ᶜ) == (11,9)
+            @test closure_size(D₂ᶜ) == 1
+
+            D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,2)
+            @test range_size(D₂ᶜ) == (11,9)
+            @test domain_size(D₂ᶜ) == (11,9)
+            @test closure_size(D₂ᶜ) == 1
         end
 
         @testset "application" begin

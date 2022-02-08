@@ -51,7 +51,7 @@ end
 
 derivative_direction(::SecondDerivativeVariable{Dir}) where {Dir} = Dir
 
-closure_size(::SecondDerivativeVariable{T,N,M}) where {T,N,M} = M
+closure_size(op::SecondDerivativeVariable) = length(op.closure_stencils)
 
 LazyTensors.range_size(op::SecondDerivativeVariable) = op.size
 LazyTensors.domain_size(op::SecondDerivativeVariable) = op.size
