@@ -18,6 +18,10 @@ using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
         c = [  1,  3,  6, 10, 15, 21, 28, 36, 45, 55, 66]
         @testset "Constructors" begin
             @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils) isa TensorMapping
+
+            D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils)
+            @test range_dim(D₂ᶜ) == 1
+            @test domain_dim(D₂ᶜ) == 1
         end
 
         @testset "sizes" begin
@@ -29,7 +33,7 @@ using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
 
         @testset "application" begin
 
-            function apply_to_functions(;v,c)
+            function apply_to_functions(; v, c)
                 g = EquidistantGrid(11, 0., 10.) # h = 1
                 c̄ = evalOn(g,c)
                 v̄ = evalOn(g,v)
@@ -38,11 +42,11 @@ using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
                 return D₂ᶜ*v̄
             end
 
-            @test apply_to_functions(v=x->1., c=x->-1.) == zeros(11)
-            @test apply_to_functions(v=x->1., c=x->-x) == zeros(11)
-            @test apply_to_functions(v=x->x, c=x-> 1.) == zeros(11)
-            @test apply_to_functions(v=x->x, c=x->-x) == -ones(11)
-            @test apply_to_functions(v=x->x^2, c=x->1.) == 2ones(11)
+            @test apply_to_functions(v=x->1.,  c=x-> -1.) == zeros(11)
+            @test apply_to_functions(v=x->1.,  c=x-> -x ) == zeros(11)
+            @test apply_to_functions(v=x->x,   c=x->  1.) == zeros(11)
+            @test apply_to_functions(v=x->x,   c=x-> -x ) == -ones(11)
+            @test apply_to_functions(v=x->x^2, c=x->  1.) == 2ones(11)
         end
     end
 
@@ -52,6 +56,10 @@ using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
         @testset "Constructors" begin
             @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1) isa TensorMapping
             @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,2) isa TensorMapping
+
+            D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1)
+            @test range_dim(D₂ᶜ) == 2
+            @test domain_dim(D₂ᶜ) == 2
         end
 
         @testset "sizes" begin
@@ -67,6 +75,38 @@ using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
         end
 
         @testset "application" begin
+            function apply_to_functions(dir; v, c)
+                g = EquidistantGrid((11,9), (0.,0.), (10.,8.)) # h = 1
+                c̄ = evalOn(g,c)
+                v̄ = evalOn(g,v)
+
+                D₂ᶜ = SecondDerivativeVariable(g, c̄, interior_stencil, closure_stencils,dir)
+                return D₂ᶜ*v̄
+            end
+
+            # x-direction
+            @test apply_to_functions(1,v=(x,y)->1.,  c=(x,y)-> -1.) == zeros(11,9)
+            @test apply_to_functions(1,v=(x,y)->1.,  c=(x,y)->- x ) == zeros(11,9)
+            @test apply_to_functions(1,v=(x,y)->x,   c=(x,y)->  1.) == zeros(11,9)
+            @test apply_to_functions(1,v=(x,y)->x,   c=(x,y)-> -x ) == -ones(11,9)
+            @test apply_to_functions(1,v=(x,y)->x^2, c=(x,y)->  1.) == 2ones(11,9)
+
+            @test apply_to_functions(1,v=(x,y)->1.,  c=(x,y)->- y ) == zeros(11,9)
+            @test apply_to_functions(1,v=(x,y)->y,   c=(x,y)->  1.) == zeros(11,9)
+            @test apply_to_functions(1,v=(x,y)->y,   c=(x,y)-> -y ) == zeros(11,9)
+            @test apply_to_functions(1,v=(x,y)->y^2, c=(x,y)->  1.) == zeros(11,9)
+
+            # y-direction
+            @test apply_to_functions(2,v=(x,y)->1.,  c=(x,y)-> -1.) == zeros(11,9)
+            @test apply_to_functions(2,v=(x,y)->1.,  c=(x,y)->- y ) == zeros(11,9)
+            @test apply_to_functions(2,v=(x,y)->y,   c=(x,y)->  1.) == zeros(11,9)
+            @test apply_to_functions(2,v=(x,y)->y,   c=(x,y)-> -y ) == -ones(11,9)
+            @test apply_to_functions(2,v=(x,y)->y^2, c=(x,y)->  1.) == 2ones(11,9)
+
+            @test apply_to_functions(2,v=(x,y)->1.,  c=(x,y)->- x ) == zeros(11,9)
+            @test apply_to_functions(2,v=(x,y)->x,   c=(x,y)->  1.) == zeros(11,9)
+            @test apply_to_functions(2,v=(x,y)->x,   c=(x,y)-> -x ) == zeros(11,9)
+            @test apply_to_functions(2,v=(x,y)->x^2, c=(x,y)->  1.) == zeros(11,9)
         end
     end
 end

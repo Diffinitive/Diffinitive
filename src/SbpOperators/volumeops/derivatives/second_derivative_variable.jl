@@ -89,10 +89,11 @@ function apply_upper(op::SecondDerivativeVariable, v, I...)
     c̃ = derivative_view(op, op.coefficient, I)
 
     i = I[derivative_direction(op)]
-    return @inbounds apply_stencil_backwards(op.closure_stencils[op.size[1]-i+1], c̃, ṽ, i)
+    stencil = op.closure_stencils[op.size[derivative_direction(op)]-i+1]
+    return @inbounds apply_stencil_backwards(stencil, c̃, ṽ, i)
 end
 
-function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractVector, I::Vararg{Index})
+function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractArray, I::Vararg{Index})
     if I[derivative_direction(op)] isa Index{Lower}
         return apply_lower(op, v, Int.(I)...)
     elseif I[derivative_direction(op)] isa Index{Upper}
@@ -102,10 +103,15 @@ function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractVector, I::V
     end
 end
 
-function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractVector, I...)
-    i = I[derivative_direction(op)]
-    r = getregion(i, closure_size(op), op.size[1])
-    return LazyTensors.apply(op, v, Index(i, r))
+function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractArray, I...)
+    dir = derivative_direction(op)
+
+    i = I[dir]
+    r = getregion(i, closure_size(op), op.size[dir])
+
+    I = map(i->Index(i, Interior), I)
+    I = Base.setindex(I, Index(i, r), dir)
+    return LazyTensors.apply(op, v, I...)
 end
 
 # TODO: Rename SecondDerivativeVariable -> VariableSecondDerivative
