@@ -112,6 +112,13 @@ Base.convert(::Type{NestedStencil{T}}, stencil) where T = NestedStencil{T}(stenc
 
 Base.eltype(::NestedStencil{T}) where T = T
 
+function scale(ns::NestedStencil, a)
+    range = ns.s.range
+    weights = ns.s.weights
+
+    return NestedStencil(Stencil(range, scale.(weights,a)))
+end
+
 function flip(ns::NestedStencil)
     s_flip = flip(ns.s)
     return NestedStencil(Stencil(s_flip.range, flip.(s_flip.weights)))

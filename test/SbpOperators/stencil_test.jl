@@ -64,6 +64,11 @@ end
         end
     end
 
+    @testset "scale" begin
+        ns = NestedStencil((-1,1,0),(-1,0,1),(0,-1,1), center=2)
+        @test SbpOperators.scale(ns, 2) == NestedStencil((-2,2,0),(-2,0,2),(0,-2,2), center=2)
+    end
+
     @testset "conversion" begin
         ns = NestedStencil((-1,1,0),(-1,0,1),(0,-1,1), center=2)
         @test NestedStencil{Float64}(ns) == NestedStencil((-1.,1.,0.),(-1.,0.,1.),(0.,-1.,1.), center=2)
