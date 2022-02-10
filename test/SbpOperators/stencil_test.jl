@@ -60,9 +60,17 @@ end
             center=1
         ))
 
-
         @testset "Error handling" begin
         end
+    end
+
+    @testset "conversion" begin
+        ns = NestedStencil((-1,1,0),(-1,0,1),(0,-1,1), center=2)
+        @test NestedStencil{Float64}(ns) == NestedStencil((-1.,1.,0.),(-1.,0.,1.),(0.,-1.,1.), center=2)
+        @test NestedStencil{Rational}(ns) == NestedStencil((-1//1,1//1,0//1),(-1//1,0//1,1//1),(0//1,-1//1,1//1), center=2)
+
+        @test convert(NestedStencil{Float64}, ns) == NestedStencil((-1.,1.,0.),(-1.,0.,1.),(0.,-1.,1.), center=2)
+        @test convert(NestedStencil{Rational}, ns) == NestedStencil((-1//1,1//1,0//1),(-1//1,0//1,1//1),(0//1,-1//1,1//1), center=2)
     end
 
     @testset "apply" begin
