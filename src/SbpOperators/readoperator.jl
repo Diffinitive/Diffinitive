@@ -4,6 +4,7 @@ export read_stencil_set
 export get_stencil_set
 
 export parse_stencil
+export parse_nested_stencil
 export parse_scalar
 export parse_tuple
 
@@ -105,6 +106,25 @@ function check_stencil_toml(parsed_toml)
         throw(ArgumentError("the center of a stencil must be specified as an integer."))
     end
 end
+
+
+"""
+    parse_nested_stencil(parsed_toml)
+
+
+"""
+function parse_nested_stencil(parsed_toml)
+    if parsed_toml isa Array
+        weights = parse_stencil.(parsed_toml)
+        return CenteredNestedStencil(weights...)
+    end
+
+    center = parsed_toml["c"]
+    weights = parse_tuple.(parsed_toml["s"])
+    return NestedStencil(weights...; center)
+end
+
+
 
 """
     parse_scalar(parsed_toml)
