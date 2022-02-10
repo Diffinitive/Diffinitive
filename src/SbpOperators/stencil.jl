@@ -102,6 +102,14 @@ function CenteredNestedStencil(weights::Vararg{NTuple{N,T}}) where {T,N}
     return CenteredNestedStencil(inner_stencils...)
 end
 
+
+# Conversion
+function NestedStencil{T}(ns::NestedStencil) where T
+    return NestedStencil(Stencil{Stencil{T}}(ns.s))
+end
+
+Base.convert(::Type{NestedStencil{T}}, stencil) where T = NestedStencil{T}(stencil)
+
 Base.eltype(::NestedStencil{T}) where T = T
 
 function flip(ns::NestedStencil)
