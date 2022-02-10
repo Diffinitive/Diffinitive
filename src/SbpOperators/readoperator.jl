@@ -111,7 +111,9 @@ end
 """
     parse_nested_stencil(parsed_toml)
 
+Accept parsed TOML and read it as a nested tuple.
 
+See also [`read_stencil_set`](@ref), [`parse_stencil`](@ref).
 """
 function parse_nested_stencil(parsed_toml)
     if parsed_toml isa Array
@@ -124,6 +126,12 @@ function parse_nested_stencil(parsed_toml)
     return NestedStencil(weights...; center)
 end
 
+"""
+    parse_nested_stencil(T, parsed_toml)
+
+Parse the input as a nested stencil with element type `T`.
+"""
+parse_nested_stencil(T, parsed_toml) = NestedStencil{T}(parse_nested_stencil(parsed_toml))
 
 
 """
