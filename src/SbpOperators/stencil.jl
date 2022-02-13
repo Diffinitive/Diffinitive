@@ -2,7 +2,7 @@ export CenteredStencil
 export CenteredNestedStencil
 
 struct Stencil{T,N}
-    range::UnitRange
+    range::UnitRange{Int64}
     weights::NTuple{N,T}
 
     function Stencil(range::UnitRange,weights::NTuple{N,T}) where {T, N}
