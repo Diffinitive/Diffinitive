@@ -87,6 +87,21 @@ end
         @test convert(NestedStencil{Rational}, ns) == NestedStencil((-1//1,1//1,0//1),(-1//1,0//1,1//1),(0//1,-1//1,1//1), center=2)
     end
 
+    @testset "promotion of weights" begin
+        @test NestedStencil((-1,1,0),(-1.,0.,1.),(0,-1,1), center=2) isa NestedStencil{Float64,3,3}
+        @test NestedStencil((-1,1,0),(-1,0,1),(0//1,-1,1), center=2) isa NestedStencil{Rational{Int64},3,3}
+    end
+
+    @testset "promotion" begin
+        promote(
+            CenteredNestedStencil((-1,1,0),(-1,0,1),(0,-1,1)),
+            CenteredNestedStencil((-1.,1.,0.),(-1.,0.,1.),(0.,-1.,1.))
+        ) == (
+            CenteredNestedStencil((-1.,1.,0.),(-1.,0.,1.),(0.,-1.,1.)),
+            CenteredNestedStencil((-1.,1.,0.),(-1.,0.,1.),(0.,-1.,1.))
+        )
+    end
+
     @testset "apply" begin
         c = [  1,  3,  6, 10, 15, 21, 28, 36, 45, 55]
         v = [  2,  3,  5,  7, 11, 13, 17, 19, 23, 29]
