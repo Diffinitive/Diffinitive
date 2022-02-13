@@ -90,29 +90,38 @@ struct NestedStencil{T,N,M}
     s::Stencil{Stencil{T,N},M}
 end
 
-# The exessive use of type parameters for the following constructors are to catch errors earlier with clearer error messages
-
 # Stencil input
-NestedStencil(s::Vararg{Stencil{T,N}}; center) where {T,N} = NestedStencil(Stencil(s... ; center))
-CenteredNestedStencil(s::Vararg{Stencil{T,N}}) where {T,N} = NestedStencil(CenteredStencil(s...))
+NestedStencil(s::Vararg{Stencil}; center) = NestedStencil(Stencil(s... ; center))
+CenteredNestedStencil(s::Vararg{Stencil}) = NestedStencil(CenteredStencil(s...))
 
 # Tuple input
-function NestedStencil(weights::Vararg{NTuple{N,T}}; center) where {T,N}
+function NestedStencil(weights::Vararg{NTuple{N,Any}}; center) where N
     inner_stencils = map(w -> Stencil(w...; center), weights)
     return NestedStencil(Stencil(inner_stencils... ; center))
 end
-function CenteredNestedStencil(weights::Vararg{NTuple{N,T}}) where {T,N}
+function CenteredNestedStencil(weights::Vararg{NTuple{N,Any}}) where N
     inner_stencils = map(w->CenteredStencil(w...), weights)
     return CenteredNestedStencil(inner_stencils...)
 end
 
 
 # Conversion
-function NestedStencil{T}(ns::NestedStencil) where T
+function NestedStencil{T,N,M}(ns::NestedStencil{S,N,M}) where {T,S,N,M}
     return NestedStencil(Stencil{Stencil{T}}(ns.s))
 end
 
+function NestedStencil{T}(ns::NestedStencil{S,N,M}) where {T,S,N,M}
+    NestedStencil{T,N,M}(ns)
+end
+
+function Base.convert(::Type{NestedStencil{T,N,M}}, s::NestedStencil{S,N,M}) where {T,S,N,M}
+    return NestedStencil{T,N,M}(s)
+end
 Base.convert(::Type{NestedStencil{T}}, stencil) where T = NestedStencil{T}(stencil)
+
+function Base.promote_rule(::Type{NestedStencil{T,N,M}}, ::Type{NestedStencil{S,N,M}}) where {T,S,N,M}
+    return NestedStencil{promote_type(T,S),N,M}
+end
 
 Base.eltype(::NestedStencil{T}) where T = T
 
