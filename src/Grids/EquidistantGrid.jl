@@ -1,3 +1,11 @@
+export EquidistantGrid
+export spacing
+export inverse_spacing
+export restrict
+export boundary_identifiers
+export boundary_grid
+export refine
+
 """
     EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T})
 	EquidistantGrid{T}()
@@ -21,7 +29,7 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
     limit_upper::NTuple{Dim, T}
 
     # General constructor
-    function EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}) where Dim where T
+    function EquidistantGrid{Dim,T}(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}) where {Dim,T}
         if any(size .<= 0)
             throw(DomainError("all components of size must be postive"))
         end
@@ -30,12 +38,12 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
         end
         return new{Dim,T}(size, limit_lower, limit_upper)
     end
-
-	# Specialized constructor for 0-dimensional grid
-	EquidistantGrid{T}() where T = new{0,T}((),(),())
 end
-export EquidistantGrid
 
+function EquidistantGrid(size, limit_lower, limit_upper)
+    return EquidistantGrid{length(size), eltype(limit_lower)}(size, limit_lower, limit_upper)
+end
+EquidistantGrid{T}() where T = EquidistantGrid{0,T}((),(),()) # Convenience constructor for 0-dim grid
 
 """
     EquidistantGrid(size::Int, limit_lower::T, limit_upper::T)
@@ -65,7 +73,6 @@ dimension(grid::EquidistantGrid{Dim}) where Dim = Dim
 The spacing between the grid points of the grid.
 """
 spacing(grid::EquidistantGrid) = (grid.limit_upper.-grid.limit_lower)./(grid.size.-1)
-export spacing
 
 """
     inverse_spacing(grid::EquidistantGrid)
@@ -73,7 +80,6 @@ export spacing
 The reciprocal of the spacing between the grid points of the grid.
 """
 inverse_spacing(grid::EquidistantGrid) = 1 ./ spacing(grid)
-export inverse_spacing
 
 """
     points(grid::EquidistantGrid)
@@ -102,7 +108,6 @@ function restrict(grid::EquidistantGrid, dim)
 
     return EquidistantGrid(size, limit_lower, limit_upper)
 end
-export restrict
 
 """
     boundary_identifiers(::EquidistantGrid)
@@ -114,7 +119,6 @@ Returns a tuple containing the boundary identifiers for the grid, stored as
 	 ...)
 """
 boundary_identifiers(g::EquidistantGrid) = (((ntuple(i->(CartesianBoundary{i,Lower}(),CartesianBoundary{i,Upper}()),dimension(g)))...)...,)
-export boundary_identifiers
 
 
 """
@@ -133,5 +137,17 @@ function boundary_grid(grid::EquidistantGrid,id::CartesianBoundary)
 	end
     return restrict(grid,orth_dims)
 end
-export boundary_grid
 boundary_grid(::EquidistantGrid{1,T},::CartesianBoundary{1}) where T = EquidistantGrid{T}()
+
+
+"""
+    refine(grid::EquidistantGrid, r::Int)
+
+Refines `grid` by a factor `r`. The factor is applied to the number of
+intervals which is 1 less than the size of the grid.
+"""
+function refine(grid::EquidistantGrid, r::Int)
+    sz = size(grid)
+    new_sz = (sz .- 1).*r .+ 1
+    return EquidistantGrid{dimension(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
+end
