@@ -42,11 +42,21 @@ struct SecondDerivativeVariable{Dir,T,D,N,M,K,TArray<:AbstractArray} <: TensorMa
 end
 
 function SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, inner_stencil, closure_stencils, dir)
-    return SecondDerivativeVariable{dir, dimension(grid)}(inner_stencil, Tuple(closure_stencils), size(grid), coeff)
+    Δxᵢ = spacing(grid)[dir]
+    scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
+    scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
+    return SecondDerivativeVariable{dir, dimension(grid)}(scaled_inner_stencil, scaled_closure_stencils, size(grid), coeff)
 end
 
 function SecondDerivativeVariable(grid::EquidistantGrid{1}, coeff::AbstractVector, inner_stencil, closure_stencils)
     return SecondDerivativeVariable(grid, coeff, inner_stencil, closure_stencils, 1)
+end
+
+function SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, stencil_set, dir)
+    inner_stencil    = parse_nested_stencil(eltype(coeff), stencil_set["D2variable"]["inner_stencil"])
+    closure_stencils = parse_nested_stencil.(eltype(coeff), stencil_set["D2variable"]["closure_stencils"])
+
+    return SecondDerivativeVariable(grid, coeff, inner_stencil, closure_stencils, dir)
 end
 
 derivative_direction(::SecondDerivativeVariable{Dir}) where {Dir} = Dir

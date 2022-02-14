@@ -5,7 +5,7 @@ using Sbplib.LazyTensors
 using Sbplib.SbpOperators
 using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
 
-
+using LinearAlgebra
 
 @testset "SecondDerivativeVariable" begin
     interior_stencil = CenteredNestedStencil((1/2, 1/2, 0.),(-1/2, -1., -1/2),( 0., 1/2, 1/2))
@@ -107,6 +107,61 @@ using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
             @test apply_to_functions(2,v=(x,y)->x,   c=(x,y)->  1.) == zeros(11,9)
             @test apply_to_functions(2,v=(x,y)->x,   c=(x,y)-> -x ) == zeros(11,9)
             @test apply_to_functions(2,v=(x,y)->x^2, c=(x,y)->  1.) == zeros(11,9)
+
+
+
+            # TBD: This should be moved somewhere else right?
+            @testset "real operators" begin
+                c(x,y) = exp(x) + exp(1.5(1-y))
+                v(x,y) = sin(x) + cos(1.5(1-y))
+
+                Dxv(x,y) = cos(x)*exp(x) - (exp(x) + exp(1.5 - 1.5y))*sin(x)
+                Dyv(x,y) = -1.5(1.5exp(x) + 1.5exp(1.5 - 1.5y))*cos(1.5 - 1.5y) - 2.25exp(1.5 - 1.5y)*sin(1.5 - 1.5y)
+
+                # g₁ = EquidistantGrid((30,37), (0.,0.), (1.,2.))
+                g₁ = EquidistantGrid((60,67), (0.,0.), (1.,2.))
+                g₂ = refine(g₁,2)
+
+                c̄₁ = evalOn(g₁, c)
+                c̄₂ = evalOn(g₂, c)
+
+                v̄₁ = evalOn(g₁, v)
+                v̄₂ = evalOn(g₂, v)
+
+
+                function convergence_rate_estimate(D₁, D₂, Dv_true)
+                    Dv̄₁ = D₁*v̄₁
+                    Dv̄₂ = D₂*v̄₂
+
+                    Dv₁ = evalOn(g₁,Dv_true)
+                    Dv₂ = evalOn(g₂,Dv_true)
+
+                    e₁ = norm(Dv̄₁ - Dv₁)/norm(Dv₁)
+                    e₂ = norm(Dv̄₂ - Dv₂)/norm(Dv₂)
+
+                    return log2(e₁/e₂)
+                end
+
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 2)
+                Dx₁ = SecondDerivativeVariable(g₁, c̄₁, stencil_set, 1)
+                Dx₂ = SecondDerivativeVariable(g₂, c̄₂, stencil_set, 1)
+                @test convergence_rate_estimate(Dx₁, Dx₂, Dxv) ≈ 1.5 rtol = 1e-1
+
+                Dy₁ = SecondDerivativeVariable(g₁, c̄₁, stencil_set, 2)
+                Dy₂ = SecondDerivativeVariable(g₂, c̄₂, stencil_set, 2)
+                @test convergence_rate_estimate(Dy₁, Dy₂, Dyv) ≈ 1.5 rtol = 1e-1
+
+
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 4)
+                Dx₁ = SecondDerivativeVariable(g₁, c̄₁, stencil_set, 1)
+                Dx₂ = SecondDerivativeVariable(g₂, c̄₂, stencil_set, 1)
+                @test convergence_rate_estimate(Dx₁, Dx₂, Dxv) ≈ 2.5 rtol = 1e-1
+
+                Dy₁ = SecondDerivativeVariable(g₁, c̄₁, stencil_set, 2)
+                Dy₂ = SecondDerivativeVariable(g₂, c̄₂, stencil_set, 2)
+                @test convergence_rate_estimate(Dy₁, Dy₂, Dyv) ≈ 2.5 rtol = 2e-1
+
+            end
         end
     end
 end
