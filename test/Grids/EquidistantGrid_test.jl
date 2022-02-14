@@ -98,4 +98,14 @@ using Sbplib.RegionIndices
                 @test_throws DomainError boundary_grid(g,CartesianBoundary{4,Lower}())
             end
     end
+
+    @testset "refine" begin
+        @test refine(EquidistantGrid{Float64}(), 1) == EquidistantGrid{Float64}()
+        @test refine(EquidistantGrid{Float64}(), 2) == EquidistantGrid{Float64}()
+
+        g = EquidistantGrid((10,5),(0.,1.),(2.,3.))
+        @test refine(g, 1) == g
+        @test refine(g, 2) == EquidistantGrid((19,9),(0.,1.),(2.,3.))
+        @test refine(g, 3) == EquidistantGrid((28,13),(0.,1.),(2.,3.))
+    end
 end
