@@ -129,7 +129,10 @@ using LinearAlgebra
                 v̄₂ = evalOn(g₂, v)
 
 
-                function convergence_rate_estimate(D₁, D₂, Dv_true)
+                function convergence_rate_estimate(stencil_set, dir, Dv_true)
+                    D₁ = SecondDerivativeVariable(g₁, c̄₁, stencil_set, dir)
+                    D₂ = SecondDerivativeVariable(g₂, c̄₂, stencil_set, dir)
+
                     Dv̄₁ = D₁*v̄₁
                     Dv̄₂ = D₂*v̄₂
 
@@ -143,24 +146,12 @@ using LinearAlgebra
                 end
 
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 2)
-                Dx₁ = SecondDerivativeVariable(g₁, c̄₁, stencil_set, 1)
-                Dx₂ = SecondDerivativeVariable(g₂, c̄₂, stencil_set, 1)
-                @test convergence_rate_estimate(Dx₁, Dx₂, Dxv) ≈ 1.5 rtol = 1e-1
-
-                Dy₁ = SecondDerivativeVariable(g₁, c̄₁, stencil_set, 2)
-                Dy₂ = SecondDerivativeVariable(g₂, c̄₂, stencil_set, 2)
-                @test convergence_rate_estimate(Dy₁, Dy₂, Dyv) ≈ 1.5 rtol = 1e-1
-
+                @test convergence_rate_estimate(stencil_set, 1, Dxv) ≈ 1.5 rtol = 1e-1
+                @test convergence_rate_estimate(stencil_set, 2, Dyv) ≈ 1.5 rtol = 1e-1
 
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 4)
-                Dx₁ = SecondDerivativeVariable(g₁, c̄₁, stencil_set, 1)
-                Dx₂ = SecondDerivativeVariable(g₂, c̄₂, stencil_set, 1)
-                @test convergence_rate_estimate(Dx₁, Dx₂, Dxv) ≈ 2.5 rtol = 1e-1
-
-                Dy₁ = SecondDerivativeVariable(g₁, c̄₁, stencil_set, 2)
-                Dy₂ = SecondDerivativeVariable(g₂, c̄₂, stencil_set, 2)
-                @test convergence_rate_estimate(Dy₁, Dy₂, Dyv) ≈ 2.5 rtol = 2e-1
-
+                @test convergence_rate_estimate(stencil_set, 1, Dxv) ≈ 2.5 rtol = 1e-1
+                @test convergence_rate_estimate(stencil_set, 2, Dyv) ≈ 2.5 rtol = 2e-1
             end
         end
     end
