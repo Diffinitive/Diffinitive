@@ -43,6 +43,18 @@ import Sbplib.SbpOperators.scale
     @testset "promotion" begin
         @test promote(Stencil(1,1;center=1), Stencil(2.,2.;center=2)) == (Stencil(1.,1.;center=1), Stencil(2.,2.;center=2))
     end
+
+    @testset "type inference" begin
+        s_int = CenteredStencil(1,2,3)
+        s_float = CenteredStencil(1.,2.,3.)
+        v_int = rand(1:10,10);
+        v_float = rand(10);
+
+        @inferred SbpOperators.apply_stencil(s_int, v_int, 2)
+        @inferred SbpOperators.apply_stencil(s_float, v_float, 2)
+        @inferred SbpOperators.apply_stencil(s_int,  v_float, 2)
+        @inferred SbpOperators.apply_stencil(s_float, v_int, 2)
+    end
 end
 
 @testset "NestedStencil" begin
