@@ -3,6 +3,7 @@ using Test
 using Sbplib.Grids
 using Sbplib.LazyTensors
 using Sbplib.SbpOperators
+using Sbplib.RegionIndices
 using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
 
 using LinearAlgebra
@@ -47,6 +48,19 @@ using LinearAlgebra
             @test apply_to_functions(v=x->x,   c=x->  1.) == zeros(11)
             @test apply_to_functions(v=x->x,   c=x-> -x ) == -ones(11)
             @test apply_to_functions(v=x->x^2, c=x->  1.) == 2ones(11)
+        end
+
+        @testset "Inferred" begin
+            g = EquidistantGrid(11, 0., 10.) # h = 1
+            c̄ = evalOn(g,x-> -1)
+            v̄ = evalOn(g,x->1.)
+
+            D₂ᶜ = SecondDerivativeVariable(g, c̄, interior_stencil, closure_stencils)
+
+            @inferred SbpOperators.apply_lower(D₂ᶜ, v̄, 1)
+            @inferred SbpOperators.apply_interior(D₂ᶜ, v̄, 5)
+            @inferred SbpOperators.apply_upper(D₂ᶜ, v̄, 11)
+            @inferred (D₂ᶜ*v̄)[Index(1,Lower)]
         end
     end
 

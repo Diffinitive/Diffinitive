@@ -30,14 +30,17 @@ export SecondDerivativeVariable
 
 Implements the one-dimensional second derivative with variable coefficients.
 """
-struct SecondDerivativeVariable{Dir,T,D,N,M,K,TArray<:AbstractArray} <: TensorMapping{T,D,D}
-    inner_stencil::NestedStencil{T,N}
-    closure_stencils::NTuple{M,NestedStencil{T,K}}
+struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:NestedStencil{T},TArray<:AbstractArray} <: TensorMapping{T,D,D}
+    inner_stencil::IStencil
+    closure_stencils::NTuple{M,CStencil}
     size::NTuple{D,Int}
     coefficient::TArray
 
-    function SecondDerivativeVariable{Dir, D}(inner_stencil::NestedStencil{T,N}, closure_stencils::NTuple{M,NestedStencil{T,K}}, size::NTuple{D,Int}, coefficient::TArray) where {Dir,T,D,N,M,K,TArray<:AbstractArray}
-        return new{Dir,T,D,N,M,K,TArray}(inner_stencil,closure_stencils,size, coefficient)
+    function SecondDerivativeVariable{Dir, D}(inner_stencil::NestedStencil{T}, closure_stencils::NTuple{M,NestedStencil{T}}, size::NTuple{D,Int}, coefficient::AbstractArray) where {Dir,T,D,M}
+        IStencil = typeof(inner_stencil)
+        CStencil = eltype(closure_stencils)
+        TArray = typeof(coefficient)
+        return new{Dir,T,D,M,IStencil,CStencil,TArray}(inner_stencil,closure_stencils,size, coefficient)
     end
 end
 
