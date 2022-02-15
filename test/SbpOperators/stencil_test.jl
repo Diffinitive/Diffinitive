@@ -44,7 +44,7 @@ import Sbplib.SbpOperators.scale
         @test promote(Stencil(1,1;center=1), Stencil(2.,2.;center=2)) == (Stencil(1.,1.;center=1), Stencil(2.,2.;center=2))
     end
 
-    @testset "type inference" begin
+    @testset "type stability" begin
         s_int = CenteredStencil(1,2,3)
         s_float = CenteredStencil(1.,2.,3.)
         v_int = rand(1:10,10);
@@ -54,6 +54,8 @@ import Sbplib.SbpOperators.scale
         @inferred SbpOperators.apply_stencil(s_float, v_float, 2)
         @inferred SbpOperators.apply_stencil(s_int,  v_float, 2)
         @inferred SbpOperators.apply_stencil(s_float, v_int, 2)
+
+        # TODO: apply backwards
     end
 end
 
@@ -134,4 +136,28 @@ end
         @test SbpOperators.apply_stencil(ns, c, v, 4) == 5*7 + 11*11 + 6*13
         @test SbpOperators.apply_stencil_backwards(ns, c, v, 4) == -3*3 - 7*5 - 4*7
     end
+
+    @testset "type stability" begin
+        s_int = CenteredNestedStencil((1,2,3),(1,2,3),(1,2,3))
+        s_float = CenteredNestedStencil((1.,2.,3.),(1.,2.,3.),(1.,2.,3.))
+
+        v_int = rand(1:10,10);
+        v_float = rand(10);
+
+        c_int = rand(1:10,10);
+        c_float = rand(10);
+
+        @inferred SbpOperators.apply_stencil(s_int,   c_int, v_int,   2)
+        @inferred SbpOperators.apply_stencil(s_float, c_int, v_float, 2)
+        @inferred SbpOperators.apply_stencil(s_int,   c_int, v_float, 2)
+        @inferred SbpOperators.apply_stencil(s_float, c_int, v_int,   2)
+
+        @inferred SbpOperators.apply_stencil(s_int,   c_float, v_int,   2)
+        @inferred SbpOperators.apply_stencil(s_float, c_float, v_float, 2)
+        @inferred SbpOperators.apply_stencil(s_int,   c_float, v_float, 2)
+        @inferred SbpOperators.apply_stencil(s_float, c_float, v_int,   2)
+
+        # TODO: apply backwards
+    end
+
 end
