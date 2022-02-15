@@ -55,7 +55,10 @@ import Sbplib.SbpOperators.scale
         @inferred SbpOperators.apply_stencil(s_int,  v_float, 2)
         @inferred SbpOperators.apply_stencil(s_float, v_int, 2)
 
-        # TODO: apply backwards
+        @inferred SbpOperators.apply_stencil_backwards(s_int, v_int, 5)
+        @inferred SbpOperators.apply_stencil_backwards(s_float, v_float, 5)
+        @inferred SbpOperators.apply_stencil_backwards(s_int,  v_float, 5)
+        @inferred SbpOperators.apply_stencil_backwards(s_float, v_int, 5)
     end
 end
 
@@ -157,7 +160,15 @@ end
         @inferred SbpOperators.apply_stencil(s_int,   c_float, v_float, 2)
         @inferred SbpOperators.apply_stencil(s_float, c_float, v_int,   2)
 
-        # TODO: apply backwards
+        @inferred SbpOperators.apply_stencil_backwards(s_int,   c_int, v_int,   2)
+        @inferred SbpOperators.apply_stencil_backwards(s_float, c_int, v_float, 2)
+        @inferred SbpOperators.apply_stencil_backwards(s_int,   c_int, v_float, 2)
+        @inferred SbpOperators.apply_stencil_backwards(s_float, c_int, v_int,   2)
+
+        @inferred SbpOperators.apply_stencil_backwards(s_int,   c_float, v_int,   2)
+        @inferred SbpOperators.apply_stencil_backwards(s_float, c_float, v_float, 2)
+        @inferred SbpOperators.apply_stencil_backwards(s_int,   c_float, v_float, 2)
+        @inferred SbpOperators.apply_stencil_backwards(s_float, c_float, v_int,   2)
     end
 
 end
