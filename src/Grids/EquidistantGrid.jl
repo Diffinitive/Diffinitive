@@ -146,6 +146,8 @@ boundary_grid(::EquidistantGrid{1,T},::CartesianBoundary{1}) where T = Equidista
 
 Refines `grid` by a factor `r`. The factor is applied to the number of
 intervals which is 1 less than the size of the grid.
+
+See also: [`coarsen`](@ref)
 """
 function refine(grid::EquidistantGrid, r::Int)
     sz = size(grid)
@@ -153,6 +155,15 @@ function refine(grid::EquidistantGrid, r::Int)
     return EquidistantGrid{dimension(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
 end
 
+"""
+    coarsen(grid::EquidistantGrid, r::Int)
+
+Coarsens `grid` by a factor `r`. The factor is applied to the number of
+intervals which is 1 less than the size of the grid. If the number of
+intervals are not divisible by `r` an error is raised.
+
+See also: [`refine`](@ref)
+"""
 function coarsen(grid::EquidistantGrid, r::Int)
     sz = size(grid)
 
