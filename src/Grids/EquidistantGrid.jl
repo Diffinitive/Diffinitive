@@ -8,28 +8,15 @@ export refine
 export coarsen
 
 """
-    EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T})
-	EquidistantGrid{T}()
+    EquidistantGrid{Dim,T<:Real} <: AbstractGrid
 
-`EquidistantGrid` is a grid with equidistant grid spacing per coordinat direction.
-
-`EquidistantGrid(size, limit_lower, limit_upper)` construct the grid with the
-domain defined by the two points P1, and P2 given by `limit_lower` and
-`limit_upper`. The length of the domain sides are given by the components of
-(P2-P1). E.g for a 2D grid with P1=(-1,0) and P2=(1,2) the domain is defined
-as (-1,1)x(0,2). The side lengths of the grid are not allowed to be negative.
-The number of equidistantly spaced points in each coordinate direction are given
-by `size`.
-
-`EquidistantGrid{T}()` constructs a 0-dimensional grid.
-
+`Dim`-dimensional equidistant grid with coordinates of type `T`.
 """
 struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
     size::NTuple{Dim, Int}
     limit_lower::NTuple{Dim, T}
     limit_upper::NTuple{Dim, T}
 
-    # General constructor
     function EquidistantGrid{Dim,T}(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T}) where {Dim,T}
         if any(size .<= 0)
             throw(DomainError("all components of size must be postive"))
@@ -41,9 +28,28 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
     end
 end
 
+"""
+    EquidistantGrid(size, limit_lower, limit_upper)
+
+Construct an equidistant grid with corners at the coordinates `limit_lower` and
+`limit_upper`.
+
+The length of the domain sides are given by the components of
+`limit_upper-limit_lower`. E.g for a 2D grid with `limit_lower=(-1,0)` and `limit_upper=(1,2)` the domain is defined
+as `(-1,1)x(0,2)`. The side lengths of the grid are not allowed to be negative.
+
+The number of equidistantly spaced points in each coordinate direction are given
+by the tuple `size`.
+"""
 function EquidistantGrid(size, limit_lower, limit_upper)
     return EquidistantGrid{length(size), eltype(limit_lower)}(size, limit_lower, limit_upper)
 end
+
+"""
+    EquidistantGrid{T}()
+
+Constructs a 0-dimensional grid.
+"""
 EquidistantGrid{T}() where T = EquidistantGrid{0,T}((),(),()) # Convenience constructor for 0-dim grid
 
 """
@@ -71,14 +77,14 @@ dimension(grid::EquidistantGrid{Dim}) where Dim = Dim
 """
     spacing(grid::EquidistantGrid)
 
-The spacing between the grid points of the grid.
+The spacing between grid points.
 """
 spacing(grid::EquidistantGrid) = (grid.limit_upper.-grid.limit_lower)./(grid.size.-1)
 
 """
     inverse_spacing(grid::EquidistantGrid)
 
-The reciprocal of the spacing between the grid points of the grid.
+The reciprocal of the spacing between grid points.
 """
 inverse_spacing(grid::EquidistantGrid) = 1 ./ spacing(grid)
 
@@ -100,7 +106,7 @@ end
 """
     restrict(::EquidistantGrid, dim)
 
-Pick out given dimensions from the grid and return a grid for them
+Pick out given dimensions from the grid and return a grid for them.
 """
 function restrict(grid::EquidistantGrid, dim)
     size = grid.size[dim]
