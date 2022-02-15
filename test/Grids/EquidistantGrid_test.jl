@@ -98,4 +98,26 @@ using Sbplib.RegionIndices
                 @test_throws DomainError boundary_grid(g,CartesianBoundary{4,Lower}())
             end
     end
+
+    @testset "refine" begin
+        @test refine(EquidistantGrid{Float64}(), 1) == EquidistantGrid{Float64}()
+        @test refine(EquidistantGrid{Float64}(), 2) == EquidistantGrid{Float64}()
+
+        g = EquidistantGrid((10,5),(0.,1.),(2.,3.))
+        @test refine(g, 1) == g
+        @test refine(g, 2) == EquidistantGrid((19,9),(0.,1.),(2.,3.))
+        @test refine(g, 3) == EquidistantGrid((28,13),(0.,1.),(2.,3.))
+    end
+
+    @testset "coarsen" begin
+        @test coarsen(EquidistantGrid{Float64}(), 1) == EquidistantGrid{Float64}()
+        @test coarsen(EquidistantGrid{Float64}(), 2) == EquidistantGrid{Float64}()
+
+        g = EquidistantGrid((7,13),(0.,1.),(2.,3.))
+        @test coarsen(g, 1) == g
+        @test coarsen(g, 2) == EquidistantGrid((4,7),(0.,1.),(2.,3.))
+        @test coarsen(g, 3) == EquidistantGrid((3,5),(0.,1.),(2.,3.))
+
+        @test_throws DomainError(4, "Size minus 1 must be divisible by the ratio.") coarsen(g, 4) == EquidistantGrid((3,5),(0.,1.),(2.,3.))
+    end
 end
