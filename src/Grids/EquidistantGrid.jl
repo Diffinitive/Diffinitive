@@ -5,6 +5,7 @@ export restrict
 export boundary_identifiers
 export boundary_grid
 export refine
+export coarsen
 
 """
     EquidistantGrid(size::NTuple{Dim, Int}, limit_lower::NTuple{Dim, T}, limit_upper::NTuple{Dim, T})
@@ -149,5 +150,17 @@ intervals which is 1 less than the size of the grid.
 function refine(grid::EquidistantGrid, r::Int)
     sz = size(grid)
     new_sz = (sz .- 1).*r .+ 1
+    return EquidistantGrid{dimension(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
+end
+
+function coarsen(grid::EquidistantGrid, r::Int)
+    sz = size(grid)
+
+    if !all(n -> (n % r == 0), sz.-1)
+        throw(DomainError(r, "Size minus 1 must be divisible by the ratio."))
+    end
+
+    new_sz = (sz .- 1).÷r .+ 1
+
     return EquidistantGrid{dimension(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
 end
