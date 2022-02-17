@@ -75,10 +75,6 @@ function derivative_view(op, a, I)
 
     Iview = Base.setindex(I,:,d)
     return @view a[Iview...]
-
-    # D = domain_dim(op)
-    # Iₗ, _, Iᵣ = split_tuple(I, Val(d-1), Val(1),  Val(D-d))
-    # return @view a[Iₗ..., :, Iᵣ...]
 end
 
 function apply_lower(op::SecondDerivativeVariable, v, I...)
