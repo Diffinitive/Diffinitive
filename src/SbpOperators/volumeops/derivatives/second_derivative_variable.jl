@@ -1,34 +1,10 @@
 export SecondDerivativeVariable
 
-# """
-#     SecondDerivativeVariable(grid, inner_stencil, closure_stencils, parity, direction)
-
-# Creates a volume operator on a `Dim`-dimensional grid acting along the
-# specified coordinate `direction`. The action of the operator is determined by
-# the stencils `inner_stencil` and `closure_stencils`. When `Dim=1`, the
-# corresponding `SecondDerivativeVariable` tensor mapping is returned. When `Dim>1`, the
-# returned operator is the appropriate outer product of a one-dimensional
-# operators and `IdentityMapping`s, e.g for `Dim=3` the volume operator in the
-# y-direction is `I⊗op⊗I`.
-# """
-# function volume_operator(grid::EquidistantGrid, inner_stencil, closure_stencils, parity, direction)
-#     #TODO: Check that direction <= Dim?
-
-#     # Create 1D volume operator in along coordinate direction
-#     op = SecondDerivativeVariable(restrict(grid, direction), inner_stencil, closure_stencils, parity)
-#     # Create 1D IdentityMappings for each coordinate direction
-#     one_d_grids = restrict.(Ref(grid), Tuple(1:dimension(grid)))
-#     Is = IdentityMapping{eltype(grid)}.(size.(one_d_grids))
-#     # Formulate the correct outer product sequence of the identity mappings and
-#     # the volume operator
-#     parts = Base.setindex(Is, op, direction)
-#     return foldl(⊗, parts)
-# end
-
+# REVIEW: Fixa docs
 """
-    SecondDerivativeVariable{T,N,M,K} <: TensorOperator{T,1}
+    SecondDerivativeVariable{Dir,T,D,...} <: TensorMapping{T,D,D}
 
-Implements the one-dimensional second derivative with variable coefficients.
+A second derivative operator in direction `Dir` with a variable coefficient.
 """
 struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:NestedStencil{T},TArray<:AbstractArray} <: TensorMapping{T,D,D}
     inner_stencil::IStencil
@@ -122,5 +98,3 @@ function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractArray, I...)
     I = Base.setindex(I, Index(i, r), dir)
     return LazyTensors.apply(op, v, I...)
 end
-
-# TODO: Rename SecondDerivativeVariable -> VariableSecondDerivative
