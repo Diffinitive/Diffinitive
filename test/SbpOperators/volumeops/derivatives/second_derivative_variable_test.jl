@@ -123,9 +123,6 @@ using LinearAlgebra
             @test apply_to_functions(2,v=(x,y)->x^2, c=(x,y)->  1.) == zeros(11,9)
 
 
-
-            # TBD: This should be moved somewhere else right?
-            # REVIEW: Better name for testset
             @testset "standard diagonal operators" begin
                 c(x,y) = exp(x) + exp(1.5(1-y))
                 v(x,y) = sin(x) + cos(1.5(1-y))
@@ -133,7 +130,6 @@ using LinearAlgebra
                 Dxv(x,y) = cos(x)*exp(x) - (exp(x) + exp(1.5 - 1.5y))*sin(x)
                 Dyv(x,y) = -1.5(1.5exp(x) + 1.5exp(1.5 - 1.5y))*cos(1.5 - 1.5y) - 2.25exp(1.5 - 1.5y)*sin(1.5 - 1.5y)
 
-                # g₁ = EquidistantGrid((30,37), (0.,0.), (1.,2.))
                 g₁ = EquidistantGrid((60,67), (0.,0.), (1.,2.))
                 g₂ = refine(g₁,2)
 

@@ -31,6 +31,26 @@ function SecondDerivativeVariable(grid::EquidistantGrid{1}, coeff::AbstractVecto
     return SecondDerivativeVariable(grid, coeff, inner_stencil, closure_stencils, 1)
 end
 
+@doc raw"""
+    SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, stencil_set, dir)
+
+Create a `TensorMapping` for the second derivative with a variable coefficient
+`coeff` on `grid` from the stencils in `stencil_set`. The direction is
+determined by `dir`.
+
+`coeff` is a grid function on `grid`.
+
+# Example
+With
+```
+D = SecondDerivativeVariable(g, c, stencil_set, 2)
+```
+then `D*u` approximates
+```math
+\frac{\partial}{\partial y} c(x,y) \frac{\partial u}{\partial y},
+```
+on ``(0,1)⨯(0,1)`` represented by `g`.
+"""
 function SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, stencil_set, dir)
     inner_stencil    = parse_nested_stencil(eltype(coeff), stencil_set["D2variable"]["inner_stencil"])
     closure_stencils = parse_nested_stencil.(eltype(coeff), stencil_set["D2variable"]["closure_stencils"])
