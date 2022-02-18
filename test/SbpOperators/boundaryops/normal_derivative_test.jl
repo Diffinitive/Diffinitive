@@ -45,24 +45,24 @@ import Sbplib.SbpOperators.BoundaryOperator
             d_s = normal_derivative(g_2D, d_closure, CartesianBoundary{2,Lower}())
             d_n = normal_derivative(g_2D, d_closure, CartesianBoundary{2,Upper}())
 
-            @test d_w*v ≈ v∂x[1,:] atol = 1e-13
-            @test d_e*v ≈ -v∂x[end,:] atol = 1e-13
-            @test d_s*v ≈ v∂y[:,1] atol = 1e-13
-            @test d_n*v ≈ -v∂y[:,end] atol = 1e-13
+            @test d_w*v ≈ -v∂x[1,:] atol = 1e-13
+            @test d_e*v ≈ v∂x[end,:] atol = 1e-13
+            @test d_s*v ≈ -v∂y[:,1] atol = 1e-13
+            @test d_n*v ≈ v∂y[:,end] atol = 1e-13
         end
 
         @testset "4th order" begin
-            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         	d_closure = parse_stencil(stencil_set["d1"]["closure"])
             d_w = normal_derivative(g_2D, d_closure, CartesianBoundary{1,Lower}())
             d_e = normal_derivative(g_2D, d_closure, CartesianBoundary{1,Upper}())
             d_s = normal_derivative(g_2D, d_closure, CartesianBoundary{2,Lower}())
             d_n = normal_derivative(g_2D, d_closure, CartesianBoundary{2,Upper}())
 
-            @test d_w*v ≈ v∂x[1,:] atol = 1e-13
-            @test d_e*v ≈ -v∂x[end,:] atol = 1e-13
-            @test d_s*v ≈ v∂y[:,1] atol = 1e-13
-            @test d_n*v ≈ -v∂y[:,end] atol = 1e-13
+            @test d_w*v ≈ -v∂x[1,:] atol = 1e-13
+            @test d_e*v ≈ v∂x[end,:] atol = 1e-13
+            @test d_s*v ≈ -v∂y[:,1] atol = 1e-13
+            @test d_n*v ≈ v∂y[:,end] atol = 1e-13
         end
     end
 end
