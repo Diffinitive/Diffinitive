@@ -50,7 +50,7 @@ using LinearAlgebra
             @test apply_to_functions(v=x->x^2, c=x->  1.) == 2ones(11)
         end
 
-        @testset "Inferred" begin
+        @testset "type stability" begin
             g = EquidistantGrid(11, 0., 10.) # h = 1
             c̄ = evalOn(g,x-> -1)
             v̄ = evalOn(g,x->1.)
@@ -125,7 +125,8 @@ using LinearAlgebra
 
 
             # TBD: This should be moved somewhere else right?
-            @testset "real operators" begin
+            # REVIEW: Better name for testset
+            @testset "standard diagonal operators" begin
                 c(x,y) = exp(x) + exp(1.5(1-y))
                 v(x,y) = sin(x) + cos(1.5(1-y))
 
