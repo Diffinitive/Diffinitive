@@ -112,9 +112,18 @@ function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractArray, I...)
     dir = derivative_direction(op)
 
     i = I[dir]
-    r = getregion(i, closure_size(op), op.size[dir])
 
     I = map(i->Index(i, Interior), I)
-    I = Base.setindex(I, Index(i, r), dir)
-    return LazyTensors.apply(op, v, I...)
+    if 0 < i <= closure_size(op)
+        I = Base.setindex(I, Index(i, Lower), dir)
+        return LazyTensors.apply(op, v, I...)
+    elseif closure_size(op) < i <= op.size[dir]-closure_size(op)
+        I = Base.setindex(I, Index(i, Interior), dir)
+        return LazyTensors.apply(op, v, I...)
+    elseif op.size[dir]-closure_size(op) < i <= op.size[dir]
+        I = Base.setindex(I, Index(i, Upper), dir)
+        return LazyTensors.apply(op, v, I...)
+    else
+        error("Bounds error") # TODO: Make this more standard
+    end
 end
