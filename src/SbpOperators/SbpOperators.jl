@@ -3,7 +3,6 @@ module SbpOperators
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using Sbplib.Grids
-using Sbplib.StaticDicts
 
 @enum Parity begin
     odd = -1
@@ -23,10 +22,13 @@ include("boundaryops/boundary_restriction.jl")
 include("boundaryops/normal_derivative.jl")
 
 
+export boundary_quadrature
+export boundary_restriction
 export inner_product
 export inverse_inner_product
-export boundary_restriction
+export Laplace
+export laplace
 export normal_derivative
-export boundary_quadrature
+export second_derivative
 
 end # module
