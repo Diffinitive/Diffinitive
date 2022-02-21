@@ -31,3 +31,15 @@ function inner_product(grid::EquidistantGrid{1}, interior_weight, closure_weight
 end
 
 inner_product(grid::EquidistantGrid{0}, interior_weight, closure_weights) = IdentityMapping{eltype(grid)}()
+
+"""
+    inner_product(grid, stencil_set)
+
+Creates a `inner_product` operator on `grid` given a parsed TOML
+`stencil_set`.
+"""
+function inner_product(grid, stencil_set)
+    inner_stencil = parse_scalar(stencil_set["H"]["inner"])
+    closure_stencils = parse_tuple(stencil_set["H"]["closure"])
+    return inner_product(grid, inner_stencil, closure_stencils)
+end
