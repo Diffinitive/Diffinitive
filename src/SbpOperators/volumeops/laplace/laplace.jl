@@ -1,12 +1,11 @@
 """
-    Laplace{T, DiffOp} <: TensorMapping{T,Dim,Dim}
-    Laplace(grid::Equidistant, stencil_set)
+    Laplace{T, Dim, DiffOp} <: TensorMapping{T, Dim, Dim}
 
 Implements the Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
 `TensorMapping`. Additionally `Laplace` stores the stencil set (parsed from TOML) 
 used to construct the `TensorMapping`.
 """
-struct Laplace{T, DiffOp<:TensorMapping{T,Dim,Dim}} <: TensorMapping{T,Dim,Dim}
+struct Laplace{T, Dim, DiffOp<:TensorMapping{T, Dim, Dim}} <: TensorMapping{T, Dim, Dim}
     D::DiffOp# Differential operator
     stencil_set # Stencil set of the operator
 end
@@ -17,7 +16,7 @@ end
 Creates the `Laplace`` operator `Δ` on `grid` given a parsed TOML
 `stencil_set`. See also [`laplace`](@ref).
 """
-function Laplace(grid::Equidistant, stencil_set)
+function Laplace(grid::EquidistantGrid, stencil_set)
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
     Δ = laplace(grid, inner_stencil,closure_stencils)
@@ -44,8 +43,8 @@ On a one-dimensional `grid`, `Δ` is equivalent to `second_derivative`. On a
 multi-dimensional `grid`, `Δ` is the sum of multi-dimensional `second_derivative`s
 where the sum is carried out lazily.  See also [`second_derivative`](@ref).
 """
-function laplace(grid::Equidistant, inner_stencil, closure_stencils)
-    second_derivative(grid, inner_stencil, closure_stencils, 1)
+function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
+    Δ = second_derivative(grid, inner_stencil, closure_stencils, 1)
     for d = 2:dimension(grid)
         Δ += second_derivative(grid, inner_stencil, closure_stencils, d)
     end

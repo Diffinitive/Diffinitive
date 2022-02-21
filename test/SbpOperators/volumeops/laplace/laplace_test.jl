@@ -3,19 +3,17 @@ using Test
 using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
-using Sbplib.RegionIndices
 
 # Default stencils (4th order)
 operator_path = sbp_operators_path()*"standard_diagonal.toml"
 stencil_set = read_stencil_set(operator_path; order=4)
 inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
 closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
+g_1D = EquidistantGrid(101, 0.0, 1.)
+g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
 
 @testset "Laplace" begin
-    g_1D = EquidistantGrid(101, 0.0, 1.)
-    g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
     @testset "Constructors" begin
-
         @testset "1D" begin
             Δ = laplace(g_1D, inner_stencil, closure_stencils)
             @test Laplace(g_1D, stencil_set) == Laplace(Δ, stencil_set)

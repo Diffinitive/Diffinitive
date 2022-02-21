@@ -2,7 +2,6 @@ using Test
 
 using Sbplib.SbpOperators
 using Sbplib.Grids
-using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 
 import Sbplib.SbpOperators.BoundaryOperator
@@ -15,14 +14,12 @@ import Sbplib.SbpOperators.BoundaryOperator
 
     @testset "boundary_restriction" begin
         @testset "1D" begin
-            e_l = boundary_restriction(g_1D,e_closure,Lower())
-            @test e_l == boundary_restriction(g_1D,e_closure,CartesianBoundary{1,Lower}())
+            e_l = boundary_restriction(g_1D,e_closure,CartesianBoundary{1,Lower}())
             @test e_l == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),Lower())
             @test e_l isa BoundaryOperator{T,Lower} where T
             @test e_l isa TensorMapping{T,0,1} where T
 
-            e_r = boundary_restriction(g_1D,e_closure,Upper())
-            @test e_r == boundary_restriction(g_1D,e_closure,CartesianBoundary{1,Upper}())
+            e_r = boundary_restriction(g_1D,e_closure,CartesianBoundary{1,Upper}())
             @test e_r == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),Upper())
             @test e_r isa BoundaryOperator{T,Upper} where T
             @test e_r isa TensorMapping{T,0,1} where T
@@ -37,8 +34,8 @@ import Sbplib.SbpOperators.BoundaryOperator
 
     @testset "Application" begin
         @testset "1D" begin
-            e_l = boundary_restriction(g_1D, e_closure, CartesianBoundary{1,Lower}())
-            e_r = boundary_restriction(g_1D, e_closure, CartesianBoundary{1,Upper}())
+            (e_l, e_r) = 
+                map(id -> boundary_restriction(g_1D, e_closure, id), boundary_identifiers(g_1D))
 
             v = evalOn(g_1D,x->1+x^2)
             u = fill(3.124)
@@ -49,10 +46,8 @@ import Sbplib.SbpOperators.BoundaryOperator
         end
 
         @testset "2D" begin
-            e_w = boundary_restriction(g_2D, e_closure, CartesianBoundary{1,Lower}())
-            e_e = boundary_restriction(g_2D, e_closure, CartesianBoundary{1,Upper}())
-            e_s = boundary_restriction(g_2D, e_closure, CartesianBoundary{2,Lower}())
-            e_n = boundary_restriction(g_2D, e_closure, CartesianBoundary{2,Upper}())
+            (e_w, e_e, e_s, e_n) = 
+                map(id -> boundary_restriction(g_2D, e_closure, id), boundary_identifiers(g_2D))
 
             v = rand(11, 15)
             u = fill(3.124)
