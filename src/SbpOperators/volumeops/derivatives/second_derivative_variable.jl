@@ -103,8 +103,10 @@ function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractArray, I::Va
         return apply_lower(op, v, Int.(I)...)
     elseif I[derivative_direction(op)] isa Index{Upper}
         return apply_upper(op, v, Int.(I)...)
-    else
+    elseif I[derivative_direction(op)] isa Index{Interior}
         return apply_interior(op, v, Int.(I)...)
+    else
+        error("Invalid region")
     end
 end
 
