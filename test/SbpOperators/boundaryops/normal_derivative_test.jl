@@ -41,10 +41,10 @@ import Sbplib.SbpOperators.BoundaryOperator
             (d_w, d_e, d_s, d_n) = 
                 map(id -> normal_derivative(g_2D, d_closure, id), boundary_identifiers(g_2D))
 
-            @test d_w*v ≈ v∂x[1,:] atol = 1e-13
-            @test d_e*v ≈ -v∂x[end,:] atol = 1e-13
-            @test d_s*v ≈ v∂y[:,1] atol = 1e-13
-            @test d_n*v ≈ -v∂y[:,end] atol = 1e-13
+            @test d_w*v ≈ -v∂x[1,:] atol = 1e-13
+            @test d_e*v ≈ v∂x[end,:] atol = 1e-13
+            @test d_s*v ≈ -v∂y[:,1] atol = 1e-13
+            @test d_n*v ≈ v∂y[:,end] atol = 1e-13
         end
 
         @testset "4th order" begin
@@ -53,10 +53,10 @@ import Sbplib.SbpOperators.BoundaryOperator
             (d_w, d_e, d_s, d_n) = 
                 map(id -> normal_derivative(g_2D, d_closure, id), boundary_identifiers(g_2D))
 
-            @test d_w*v ≈ v∂x[1,:] atol = 1e-13
-            @test d_e*v ≈ -v∂x[end,:] atol = 1e-13
-            @test d_s*v ≈ v∂y[:,1] atol = 1e-13
-            @test d_n*v ≈ -v∂y[:,end] atol = 1e-13
+            @test d_w*v ≈ -v∂x[1,:] atol = 1e-13
+            @test d_e*v ≈ v∂x[end,:] atol = 1e-13
+            @test d_s*v ≈ -v∂y[:,1] atol = 1e-13
+            @test d_n*v ≈ v∂y[:,end] atol = 1e-13
         end
     end
 end
