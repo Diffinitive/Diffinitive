@@ -430,3 +430,28 @@ function Base.showerror(io::IO, err::SizeMismatch)
     print(io, "SizeMismatch: ")
     print(io, "domain size $(domain_size(err.tm)) of TensorMapping not matching size $(err.sz)")
 end
+
+function apply_with_region(op, v, boundary_width::Integer, dim_size::Integer, i)
+    if 0 < i <= boundary_width
+        return LazyTensors.apply(op,v,Index(i,Lower))
+    elseif boundary_width < i <= dim_size-boundary_width
+        return LazyTensors.apply(op,v,Index(i,Interior))
+    elseif dim_size-boundary_width < i <= dim_size
+        return LazyTensors.apply(op,v,Index(i,Upper))
+    else
+        error("Bounds error") # TODO: Make this more standard
+    end
+end
+# TBD: Can these methods be merge by having a function as an arguement instead?
+# TODO: Add inference test that show where things break and how this rewrite fixes it.
+function apply_transpose_with_region(op, v, boundary_width::Integer, dim_size::Integer, i)
+    if 0 < i <= boundary_width
+        return LazyTensors.apply_transpose(op,v,Index(i,Lower))
+    elseif boundary_width < i <= dim_size-boundary_width
+        return LazyTensors.apply_transpose(op,v,Index(i,Interior))
+    elseif dim_size-boundary_width < i <= dim_size
+        return LazyTensors.apply_transpose(op,v,Index(i,Upper))
+    else
+        error("Bounds error") # TODO: Make this more standard
+    end
+end

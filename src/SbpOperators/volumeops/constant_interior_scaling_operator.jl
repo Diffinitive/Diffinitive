@@ -41,8 +41,7 @@ function LazyTensors.apply(op::ConstantInteriorScalingOperator{T}, v::AbstractVe
 end
 
 function LazyTensors.apply(op::ConstantInteriorScalingOperator{T}, v::AbstractVector{T}, i) where T
-    r = getregion(i, closure_size(op), op.size[1])
-    return LazyTensors.apply(op, v, Index(i, r))
+    return LazyTensors.apply_with_region(op, v, closure_size(op), op.size[1], i)
 end
 
 LazyTensors.apply_transpose(op::ConstantInteriorScalingOperator, v, i) = apply(op, v, i)
