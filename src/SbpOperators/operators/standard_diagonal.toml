@@ -31,7 +31,7 @@ D2.closure_stencils = [
 ]
 
 e.closure = ["1"]
-d1.closure = {s = ["-3/2", "2", "-1/2"], c = 1}
+d1.closure = {s = ["3/2", "-2", "1/2"], c = 1}
 
 [[stencil_set]]
 
@@ -57,4 +57,4 @@ D2.closure_stencils = [
 ]
 
 e.closure = ["1"]
-d1.closure = {s = ["-11/6", "3", "-3/2", "1/3"], c = 1}
+d1.closure = {s = ["11/6", "-3", "3/2", "-1/3"], c = 1}
