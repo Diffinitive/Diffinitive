@@ -84,6 +84,5 @@ function LazyTensors.apply_transpose(op::BoundaryOperator{T}, v::AbstractArray{T
 end
 
 function LazyTensors.apply_transpose(op::BoundaryOperator{T}, v::AbstractArray{T,0}, i) where T
-    r = getregion(i, closure_size(op), op.size)
-    apply_transpose(op, v, Index(i,r))
+    return LazyTensors.apply_transpose_with_region(op, v, closure_size(op), op.size[1], i)
 end

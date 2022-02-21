@@ -56,6 +56,5 @@ function LazyTensors.apply(op::VolumeOperator{T}, v::AbstractVector{T}, i::Index
 end
 
 function LazyTensors.apply(op::VolumeOperator{T}, v::AbstractVector{T}, i) where T
-    r = getregion(i, closure_size(op), op.size[1])
-    return LazyTensors.apply(op, v, Index(i, r))
+    return LazyTensors.apply_with_region(op, v, closure_size(op), op.size[1], i)
 end
