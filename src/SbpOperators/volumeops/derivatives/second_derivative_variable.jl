@@ -129,3 +129,55 @@ function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractArray, I...)
         error("Bounds error") # TODO: Make this more standard
     end
 end
+
+
+## 2D Specific implementations to avoid instability
+## TODO: Should really be solved by fixing the general methods instead
+
+
+## x-direction
+function apply_lower(op::SecondDerivativeVariable{1}, v, i, j)
+    ṽ = @view v[:,j]
+    c̃ = @view op.coefficient[:,j]
+
+    return @inbounds apply_stencil(op.closure_stencils[i], c̃, ṽ, i)
+end
+
+function apply_interior(op::SecondDerivativeVariable{1}, v, i, j)
+    ṽ = @view v[:,j]
+    c̃ = @view op.coefficient[:,j]
+
+    return @inbounds apply_stencil(op.inner_stencil, c̃, ṽ, i)
+end
+
+function apply_upper(op::SecondDerivativeVariable{1}, v, i, j)
+    ṽ = @view v[:,j]
+    c̃ = @view op.coefficient[:,j]
+
+    stencil = op.closure_stencils[op.size[derivative_direction(op)]-i+1]
+    return @inbounds apply_stencil_backwards(stencil, c̃, ṽ, i)
+end
+
+
+## y-direction
+function apply_lower(op::SecondDerivativeVariable{2}, v, i, j)
+    ṽ = @view v[i,:]
+    c̃ = @view op.coefficient[i,:]
+
+    return @inbounds apply_stencil(op.closure_stencils[j], c̃, ṽ, j)
+end
+
+function apply_interior(op::SecondDerivativeVariable{2}, v, i, j)
+    ṽ = @view v[i,:]
+    c̃ = @view op.coefficient[i,:]
+
+    return @inbounds apply_stencil(op.inner_stencil, c̃, ṽ, j)
+end
+
+function apply_upper(op::SecondDerivativeVariable{2}, v, i, j)
+    ṽ = @view v[i,:]
+    c̃ = @view op.coefficient[i,:]
+
+    stencil = op.closure_stencils[op.size[derivative_direction(op)]-j+1]
+    return @inbounds apply_stencil_backwards(stencil, c̃, ṽ, j)
+end
