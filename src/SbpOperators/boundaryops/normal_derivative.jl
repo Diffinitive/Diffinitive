@@ -20,4 +20,4 @@ end
 Creates a `normal_derivative` operator on `grid` given a parsed TOML
 `stencil_set`.
 """
-normal_derivative(grid, stencil_set, boundary) = normal_derivative(grid, parse_stencil(stencil_set["e"]["closure"]), boundary)
+normal_derivative(grid, stencil_set, boundary) = normal_derivative(grid, parse_stencil(stencil_set["d1"]["closure"]), boundary)
