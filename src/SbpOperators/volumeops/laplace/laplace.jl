@@ -11,9 +11,9 @@ struct Laplace{T, Dim, DiffOp<:TensorMapping{T, Dim, Dim}} <: TensorMapping{T, D
 end
 
 """
-    `Laplace(grid::Equidistant, stencil_set)`
+    Laplace(grid::Equidistant, stencil_set)
 
-Creates the `Laplace`` operator `Δ` on `grid` given a parsed TOML
+Creates the `Laplace` operator `Δ` on `grid` given a parsed TOML
 `stencil_set`. See also [`laplace`](@ref).
 """
 function Laplace(grid::EquidistantGrid, stencil_set)

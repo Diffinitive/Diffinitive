@@ -12,6 +12,7 @@ On a 1-dimensional grid, `H` is a `ConstantInteriorScalingOperator`. On a
 N-dimensional grid, `H` is the outer product of the 1-dimensional inner
 product operators for each coordinate direction. On a 0-dimensional grid,
 `H` is a 0-dimensional `IdentityMapping`.
+See also [`ConstantInteriorScalingOperator`](@ref).
 """
 function inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
     Hs = ()

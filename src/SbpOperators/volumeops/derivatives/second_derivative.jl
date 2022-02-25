@@ -9,7 +9,7 @@ for the points in the closure regions.
 
 On a one-dimensional `grid`, `D2` is a `VolumeOperator`. On a multi-dimensional `grid`, `D2` is the outer product of the
 one-dimensional operator with the `IdentityMapping`s in orthogonal coordinate dirrections.
-Also see the documentation of `SbpOperators.volume_operator(...)` for more details.
+See also [`volume_operator`](@ref).
 """
 function second_derivative(grid::EquidistantGrid, inner_stencil, closure_stencils, direction)
     h_inv = inverse_spacing(grid)[direction]

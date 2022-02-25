@@ -6,7 +6,7 @@ Creates the normal derivative boundary operator `d` as a `TensorMapping`
 `d` computes the normal derivative of a grid function  on `boundary` a `Stencil` `closure_stencil`.
 `d'` is the prolongation of the normal derivative of a grid function to the whole grid using the same `closure_stencil`.
 On a one-dimensional `grid`, `d` is a `BoundaryOperator`. On a multi-dimensional `grid`, `d` is the inflation of
-a `BoundaryOperator`. See also [`SbpOperators.boundary_operator`](@ref).
+a `BoundaryOperator`. See also [`boundary_operator`](@ref).
 """
 function normal_derivative(grid, closure_stencil::Stencil, boundary)
     direction = dim(boundary)
