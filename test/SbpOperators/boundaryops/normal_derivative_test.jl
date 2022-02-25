@@ -3,7 +3,7 @@ using Test
 using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
-
+using Sbplib.RegionIndices
 import Sbplib.SbpOperators.BoundaryOperator
 
 @testset "normal_derivative" begin
@@ -14,6 +14,7 @@ import Sbplib.SbpOperators.BoundaryOperator
     	d_closure = parse_stencil(stencil_set["d1"]["closure"])
         @testset "1D" begin
             d_l = normal_derivative(g_1D, d_closure, CartesianBoundary{1,Lower}())
+            @test d_l == normal_derivative(g_1D, stencil_set, CartesianBoundary{1,Lower}())
             @test d_l isa BoundaryOperator{T,Lower} where T
             @test d_l isa TensorMapping{T,0,1} where T
         end
@@ -24,6 +25,7 @@ import Sbplib.SbpOperators.BoundaryOperator
             Iy = IdentityMapping{Float64}((size(g_2D)[2],))
             d_l = normal_derivative(restrict(g_2D,1),d_closure,CartesianBoundary{1,Lower}())
             d_r = normal_derivative(restrict(g_2D,2),d_closure,CartesianBoundary{1,Upper}())
+            @test d_w == normal_derivative(g_2D, stencil_set, CartesianBoundary{1,Lower}())
             @test d_w ==  d_l⊗Iy
             @test d_n ==  Ix⊗d_r
             @test d_w isa TensorMapping{T,1,2} where T

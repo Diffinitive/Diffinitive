@@ -3,7 +3,7 @@ using Test
 using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
-
+using Sbplib.RegionIndices
 import Sbplib.SbpOperators.BoundaryOperator
 
 @testset "boundary_restriction" begin
@@ -15,11 +15,13 @@ import Sbplib.SbpOperators.BoundaryOperator
     @testset "boundary_restriction" begin
         @testset "1D" begin
             e_l = boundary_restriction(g_1D,e_closure,CartesianBoundary{1,Lower}())
+            @test e_l == boundary_restriction(g_1D,stencil_set,CartesianBoundary{1,Lower}())
             @test e_l == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),Lower())
             @test e_l isa BoundaryOperator{T,Lower} where T
             @test e_l isa TensorMapping{T,0,1} where T
 
             e_r = boundary_restriction(g_1D,e_closure,CartesianBoundary{1,Upper}())
+            @test e_r == boundary_restriction(g_1D,stencil_set,CartesianBoundary{1,Upper}())
             @test e_r == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),Upper())
             @test e_r isa BoundaryOperator{T,Upper} where T
             @test e_r isa TensorMapping{T,0,1} where T
@@ -27,6 +29,7 @@ import Sbplib.SbpOperators.BoundaryOperator
 
         @testset "2D" begin
             e_w = boundary_restriction(g_2D,e_closure,CartesianBoundary{1,Upper}())
+            @test e_w == boundary_restriction(g_2D,stencil_set,CartesianBoundary{1,Upper}())
             @test e_w isa InflatedTensorMapping
             @test e_w isa TensorMapping{T,1,2} where T
         end
