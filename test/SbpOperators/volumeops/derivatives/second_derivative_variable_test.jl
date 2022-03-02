@@ -16,13 +16,17 @@ using LinearAlgebra
 
     @testset "1D" begin
         g = EquidistantGrid(11, 0., 1.)
-        c = [  1,  3,  6, 10, 15, 21, 28, 36, 45, 55, 66]
+        c = [  1.,  3.,  6., 10., 15., 21., 28., 36., 45., 55., 66.]
         @testset "Constructors" begin
             @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils) isa TensorMapping
 
             D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils)
             @test range_dim(D₂ᶜ) == 1
             @test domain_dim(D₂ᶜ) == 1
+
+
+            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 2)
+            @test SecondDerivativeVariable(g, c, stencil_set, 1) isa SecondDerivativeVariable
         end
 
         @testset "sizes" begin
@@ -74,6 +78,9 @@ using LinearAlgebra
             D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1)
             @test range_dim(D₂ᶜ) == 2
             @test domain_dim(D₂ᶜ) == 2
+
+            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 2)
+            @test SecondDerivativeVariable(g, c, stencil_set, 1) isa SecondDerivativeVariable
         end
 
         @testset "sizes" begin

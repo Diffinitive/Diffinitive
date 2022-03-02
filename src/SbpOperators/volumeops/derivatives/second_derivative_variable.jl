@@ -27,7 +27,7 @@ function SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, i
     return SecondDerivativeVariable{dir, dimension(grid)}(scaled_inner_stencil, scaled_closure_stencils, size(grid), coeff)
 end
 
-function SecondDerivativeVariable(grid::EquidistantGrid{1}, coeff::AbstractVector, inner_stencil, closure_stencils)
+function SecondDerivativeVariable(grid::EquidistantGrid{1}, coeff::AbstractVector, inner_stencil::NestedStencil, closure_stencils)
     return SecondDerivativeVariable(grid, coeff, inner_stencil, closure_stencils, 1)
 end
 
