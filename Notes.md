@@ -148,6 +148,9 @@ When do we need to know the size of the range and domain?
  - [ ] Can we have a trait to tell if a TensorMapping is transposable?
  - [ ] Is it ok to have "Constructors" for abstract types which create subtypes? For example a Grids() functions that gives different kind of grids based on input?
 
+## Identifiers for regions
+The identifiers (`Upper`, `Lower`, `Interior`) used for region indecies should probabily be included in the grid module. This allows new grid types to come with their own regions.
+
 ## Regions and tensormappings
 - [ ] Use a trait to indicate if a TensorMapping uses indices with regions.
     The default should be that they do NOT.
