@@ -27,6 +27,16 @@ using LinearAlgebra
 
             stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 2)
             @test SecondDerivativeVariable(g, c, stencil_set, 1) isa SecondDerivativeVariable
+
+            @testset "checking c" begin
+                c_short = rand(5)
+                c_long = rand(16)
+                c_higher_dimension = rand(11,11)
+
+                @test_throws DimensionMismatch("the size (5,) of the coefficient does not match the size (11,) of the grid") SecondDerivativeVariable(g, c_short, interior_stencil, closure_stencils)
+                @test_throws DimensionMismatch("the size (16,) of the coefficient does not match the size (11,) of the grid") SecondDerivativeVariable(g, c_long, interior_stencil, closure_stencils)
+                @test_throws ArgumentError("The coefficient has dimension 2 while the grid is dimension 1") SecondDerivativeVariable(g, c_higher_dimension, interior_stencil, closure_stencils,1)
+            end
         end
 
         @testset "sizes" begin

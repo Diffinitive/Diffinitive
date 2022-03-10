@@ -21,6 +21,8 @@ struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:N
 end
 
 function SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, inner_stencil, closure_stencils, dir)
+    check_coefficient(grid, coeff)
+
     Δxᵢ = spacing(grid)[dir]
     scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
     scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
@@ -51,11 +53,21 @@ then `D*u` approximates
 ```
 on ``(0,1)⨯(0,1)`` represented by `g`.
 """
-function SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, stencil_set, dir)
+function SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, stencil_set, dir::Int)
     inner_stencil    = parse_nested_stencil(eltype(coeff), stencil_set["D2variable"]["inner_stencil"])
     closure_stencils = parse_nested_stencil.(eltype(coeff), stencil_set["D2variable"]["closure_stencils"])
 
     return SecondDerivativeVariable(grid, coeff, inner_stencil, closure_stencils, dir)
+end
+
+function check_coefficient(grid, coeff)
+    if dimension(grid) != ndims(coeff)
+        throw(ArgumentError("The coefficient has dimension $(ndims(coeff)) while the grid is dimension $(dimension(grid))"))
+    end
+
+    if size(grid) != size(coeff)
+        throw(DimensionMismatch("the size $(size(coeff)) of the coefficient does not match the size $(size(grid)) of the grid"))
+    end
 end
 
 derivative_direction(::SecondDerivativeVariable{Dir}) where {Dir} = Dir
