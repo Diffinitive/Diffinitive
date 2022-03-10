@@ -24,7 +24,7 @@ abstract type TensorMapping{T,R,D} end
 export TensorMapping
 
 """
-    apply(t::TensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {R,D,T}
+    apply(t::TensorMapping{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg) where {R,D,T}
 
 Return the result of the mapping for a given index.
 """
@@ -32,7 +32,7 @@ function apply end
 export apply
 
 """
-    apply_transpose(t::TensorMapping{T,R,D}, v::AbstractArray{T,R}, I::Vararg) where {R,D,T}
+    apply_transpose(t::TensorMapping{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg) where {R,D,T}
 
 Return the result of the transposed mapping for a given index.
 """
