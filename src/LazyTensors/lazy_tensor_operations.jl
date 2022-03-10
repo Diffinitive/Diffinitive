@@ -1,3 +1,13 @@
+export LazyTensorMappingApplication
+export LazyTensorMappingTranspose
+export TensorMappingComposition
+export LazyLinearMap
+export IdentityMapping
+export InflatedTensorMapping
+export LazyOuterProduct
+export ⊗
+export SizeMismatch
+
 """
     LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
 
@@ -17,7 +27,6 @@ struct LazyTensorMappingApplication{T,R,D, TM<:TensorMapping{<:Any,R,D}, AA<:Abs
     end
 end
 # TODO: Do boundschecking on creation!
-export LazyTensorMappingApplication
 
 Base.getindex(ta::LazyTensorMappingApplication{T,R}, I::Vararg{Any,R}) where {T,R} = apply(ta.t, ta.o, I...)
 Base.size(ta::LazyTensorMappingApplication) = range_size(ta.t)
@@ -45,7 +54,6 @@ the appropriate methods of `m`.
 struct LazyTensorMappingTranspose{T,R,D, TM<:TensorMapping{T,R,D}} <: TensorMapping{T,D,R}
     tm::TM
 end
-export LazyTensorMappingTranspose
 
 # # TBD: Should this be implemented on a type by type basis or through a trait to provide earlier errors?
 # Jonatan 2020-09-25: Is the problem that you can take the transpose of any TensorMapping even if it doesn't implement `apply_transpose`?
@@ -92,7 +100,6 @@ struct TensorMappingComposition{T,R,K,D, TM1<:TensorMapping{T,R,K}, TM2<:TensorM
         return new{T,R,K,D, typeof(t1), typeof(t2)}(t1,t2)
     end
 end
-export TensorMappingComposition
 
 range_size(tm::TensorMappingComposition) = range_size(tm.t1)
 domain_size(tm::TensorMappingComposition) = domain_size(tm.t2)
@@ -129,7 +136,6 @@ struct LazyLinearMap{T,R,D, RD, AA<:AbstractArray{T,RD}} <: TensorMapping{T,R,D}
         return new{T,R,D,RD,AA}(A,range_indicies,domain_indicies)
     end
 end
-export LazyLinearMap
 
 range_size(llm::LazyLinearMap) = size(llm.A)[[llm.range_indicies...]]
 domain_size(llm::LazyLinearMap) = size(llm.A)[[llm.domain_indicies...]]
@@ -157,7 +163,6 @@ dimensional ones through outer products. Also used in the Implementation for Inf
 struct IdentityMapping{T,D} <: TensorMapping{T,D,D}
     size::NTuple{D,Int}
 end
-export IdentityMapping
 
 IdentityMapping{T}(size::NTuple{D,Int}) where {T,D} = IdentityMapping{T,D}(size)
 IdentityMapping{T}(size::Vararg{Int,D}) where {T,D} = IdentityMapping{T,D}(size)
@@ -214,7 +219,6 @@ struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after, TM<:Tenso
         return new{T,R,D,D_before,R_middle,D_middle,D_after, typeof(tm)}(before, tm, after)
     end
 end
-export InflatedTensorMapping
 """
     InflatedTensorMapping(before, tm, after)
     InflatedTensorMapping(before,tm)
@@ -400,7 +404,6 @@ To apply ``A⊗B⊗C`` we evaluate
 ```
 """
 function LazyOuterProduct end
-export LazyOuterProduct
 
 function LazyOuterProduct(tm1::TensorMapping{T}, tm2::TensorMapping{T}) where T
     itm1 = InflatedTensorMapping(tm1, IdentityMapping{T}(range_size(tm2)))
@@ -416,7 +419,6 @@ LazyOuterProduct(t1::IdentityMapping, t2::TensorMapping) = InflatedTensorMapping
 LazyOuterProduct(tms::Vararg{TensorMapping}) = foldl(LazyOuterProduct, tms)
 
 ⊗(a::TensorMapping, b::TensorMapping) = LazyOuterProduct(a,b)
-export ⊗
 
 
 function check_domain_size(tm::TensorMapping, sz)
@@ -429,7 +431,6 @@ struct SizeMismatch <: Exception
     tm::TensorMapping
     sz
 end
-export SizeMismatch
 
 function Base.showerror(io::IO, err::SizeMismatch)
     print(io, "SizeMismatch: ")
