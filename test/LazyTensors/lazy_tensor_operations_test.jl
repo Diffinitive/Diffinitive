@@ -74,6 +74,28 @@ end
     v = [[1 2];[3 4]]
     @test m*v == [[2 4];[6 8]]
     @test (m*v)[2,1] == 6
+
+    @testset "Promotion" begin
+        m = ScalingOperator{Int,1}(2,(3,))
+        v = [1.,2.,3.]
+        @test m*v isa AbstractVector{Float64}
+        @test m*v == [2.,4.,6.]
+
+        m = ScalingOperator{Int,2}(2,(2,2))
+        v = [[1. 2.];[3. 4.]]
+        @test m*v == [[2. 4.];[6. 8.]]
+        @test (m*v)[2,1] == 6.
+
+        m = ScalingOperator{ComplexF64,1}(2. +2. *im,(3,))
+        v = [1.,2.,3.]
+        @test m*v isa AbstractVector{ComplexF64}
+        @test m*v == [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
+
+        m = ScalingOperator{ComplexF64,1}(1,(3,))
+        v = [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
+        @test m*v isa AbstractVector{ComplexF64}
+        @test m*v == [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
+    end
 end
 
 @testset "TensorMapping binary operations" begin
