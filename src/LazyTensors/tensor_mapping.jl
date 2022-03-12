@@ -10,7 +10,7 @@ export range_size, domain_size
 Describes a mapping of a `D` dimension tensor to an `R` dimension tensor.
 The action of the mapping is implemented through the method
 ```julia
-    apply(t::TensorMapping{T,R,D}, v::AbstractArray{T,D}, I::Vararg) where {R,D,T}
+    apply(t::TensorMapping{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg) where {R,D,T}
 ```
 
 The size of the range and domain that the operator works with should be returned by
