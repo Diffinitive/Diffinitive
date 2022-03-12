@@ -15,7 +15,7 @@ end
 export LazyTensorMappingApplication
 
 Base.getindex(ta::LazyTensorMappingApplication{T,R}, I::Vararg{Any,R}) where {T,R} = apply(ta.t, ta.o, I...)
-Base.getindex(ta::LazyTensorMappingApplication{T,1}, I::CartesianIndex{1}) where {T} = apply(ta.t, ta.o, I.I...)
+Base.getindex(ta::LazyTensorMappingApplication{T,1}, I::CartesianIndex{1}) where {T} = apply(ta.t, ta.o, I.I...) # Would otherwise be caught in the previes method.
 Base.size(ta::LazyTensorMappingApplication) = range_size(ta.t)
 # TODO: What else is needed to implement the AbstractArray interface?
 
