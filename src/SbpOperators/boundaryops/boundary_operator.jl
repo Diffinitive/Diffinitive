@@ -62,28 +62,28 @@ closure_size(::BoundaryOperator{T,R,N}) where {T,R,N} = N
 LazyTensors.range_size(op::BoundaryOperator) = ()
 LazyTensors.domain_size(op::BoundaryOperator) = (op.size,)
 
-function LazyTensors.apply(op::BoundaryOperator{T,Lower}, v::AbstractVector{T}) where T
+function LazyTensors.apply(op::BoundaryOperator{<:Any,Lower}, v::AbstractVector)
     apply_stencil(op.stencil,v,1)
 end
 
-function LazyTensors.apply(op::BoundaryOperator{T,Upper}, v::AbstractVector{T}) where T
+function LazyTensors.apply(op::BoundaryOperator{<:Any,Upper}, v::AbstractVector)
     apply_stencil_backwards(op.stencil,v,op.size)
 end
 
-function LazyTensors.apply_transpose(op::BoundaryOperator{T,Lower}, v::AbstractArray{T,0}, i::Index{Lower}) where T
+function LazyTensors.apply_transpose(op::BoundaryOperator{<:Any,Lower}, v::AbstractArray{<:Any,0}, i::Index{Lower})
     return op.stencil[Int(i)-1]*v[]
 end
 
-function LazyTensors.apply_transpose(op::BoundaryOperator{T,Upper}, v::AbstractArray{T,0}, i::Index{Upper}) where T
+function LazyTensors.apply_transpose(op::BoundaryOperator{<:Any,Upper}, v::AbstractArray{<:Any,0}, i::Index{Upper})
     return op.stencil[op.size[1] - Int(i)]*v[]
 end
 
 # Catch all combinations of Lower, Upper and Interior not caught by the two previous methods.
-function LazyTensors.apply_transpose(op::BoundaryOperator{T}, v::AbstractArray{T,0}, i::Index) where T
-    return zero(T)
+function LazyTensors.apply_transpose(op::BoundaryOperator, v::AbstractArray{<:Any,0}, i::Index)
+    return zero(eltype(v))
 end
 
-function LazyTensors.apply_transpose(op::BoundaryOperator{T}, v::AbstractArray{T,0}, i) where T
+function LazyTensors.apply_transpose(op::BoundaryOperator, v::AbstractArray{<:Any,0}, i)
     r = getregion(i, closure_size(op), op.size)
     apply_transpose(op, v, Index(i,r))
 end

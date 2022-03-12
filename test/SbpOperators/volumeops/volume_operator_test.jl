@@ -89,6 +89,8 @@ import Sbplib.SbpOperators.even
     @testset "Application" begin
         @test op_x*v ≈ rx rtol = 1e-14
         @test op_y*v ≈ ry rtol = 1e-14
+
+        @test (op_x*rand(ComplexF64,size(g_2D)))[2,2] isa ComplexF64
     end
 
     @testset "Regions" begin

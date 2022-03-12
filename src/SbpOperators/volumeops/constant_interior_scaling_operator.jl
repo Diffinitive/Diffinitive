@@ -28,19 +28,19 @@ LazyTensors.range_size(op::ConstantInteriorScalingOperator) = (op.size,)
 LazyTensors.domain_size(op::ConstantInteriorScalingOperator) = (op.size,)
 
 # TBD: @inbounds in apply methods?
-function LazyTensors.apply(op::ConstantInteriorScalingOperator{T}, v::AbstractVector{T}, i::Index{Lower}) where T
+function LazyTensors.apply(op::ConstantInteriorScalingOperator, v::AbstractVector, i::Index{Lower})
     return op.closure_weights[Int(i)]*v[Int(i)]
 end
 
-function LazyTensors.apply(op::ConstantInteriorScalingOperator{T}, v::AbstractVector{T}, i::Index{Interior}) where T
+function LazyTensors.apply(op::ConstantInteriorScalingOperator, v::AbstractVector, i::Index{Interior})
     return op.interior_weight*v[Int(i)]
 end
 
-function LazyTensors.apply(op::ConstantInteriorScalingOperator{T}, v::AbstractVector{T}, i::Index{Upper}) where T
+function LazyTensors.apply(op::ConstantInteriorScalingOperator, v::AbstractVector, i::Index{Upper})
     return op.closure_weights[op.size[1]-Int(i)+1]*v[Int(i)]
 end
 
-function LazyTensors.apply(op::ConstantInteriorScalingOperator{T}, v::AbstractVector{T}, i) where T
+function LazyTensors.apply(op::ConstantInteriorScalingOperator, v::AbstractVector, i)
     r = getregion(i, closure_size(op), op.size[1])
     return LazyTensors.apply(op, v, Index(i, r))
 end
