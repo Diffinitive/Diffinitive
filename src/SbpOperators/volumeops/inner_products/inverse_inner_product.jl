@@ -9,7 +9,8 @@ On a 1-dimensional grid, `H⁻¹` is a `ConstantInteriorScalingOperator`. On an
 N-dimensional grid, `H⁻¹` is the outer product of the 1-dimensional inverse
 inner product operators for each coordinate direction. On a 0-dimensional
 `grid`, `H⁻¹` is a 0-dimensional `IdentityMapping`. 
-See also [`ConstantInteriorScalingOperator`](@ref).
+
+See also: [`ConstantInteriorScalingOperator`](@ref).
 """
 function inverse_inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
     H⁻¹s = ()
@@ -39,4 +40,4 @@ function inverse_inner_product(grid, stencil_set)
     inner_stencil = parse_scalar(stencil_set["H"]["inner"])
     closure_stencils = parse_tuple(stencil_set["H"]["closure"])
     return inverse_inner_product(grid, inner_stencil, closure_stencils)
-end 
+end

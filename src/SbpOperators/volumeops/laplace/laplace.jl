@@ -41,7 +41,9 @@ for the points in the closure regions.
 
 On a one-dimensional `grid`, `Δ` is equivalent to `second_derivative`. On a
 multi-dimensional `grid`, `Δ` is the sum of multi-dimensional `second_derivative`s
-where the sum is carried out lazily.  See also [`second_derivative`](@ref).
+where the sum is carried out lazily.
+
+See also: [`second_derivative`](@ref).
 """
 function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
     Δ = second_derivative(grid, inner_stencil, closure_stencils, 1)
