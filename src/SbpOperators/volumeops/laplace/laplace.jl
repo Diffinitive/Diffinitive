@@ -6,7 +6,7 @@ Implements the Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` a
 used to construct the `TensorMapping`.
 """
 struct Laplace{T, Dim, TM<:TensorMapping{T, Dim, Dim}} <: TensorMapping{T, Dim, Dim}
-    D::TM# Differential operator
+    D::TM       # Difference operator
     stencil_set # Stencil set of the operator
 end
 
@@ -52,3 +52,4 @@ function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
     end
     return Δ
 end
+# REVIEW: Do we need this method? Couldn't it just be inlined in the constructor on :19?

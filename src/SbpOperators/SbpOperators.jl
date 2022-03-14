@@ -30,5 +30,7 @@ export Laplace
 export laplace
 export normal_derivative
 export second_derivative
+# REVIEW: Should the exports be placed here or at the top of each file where the thing is defined?
+# We currently have a mix of placing it at the place of definition and at the top of each file. This is a "new" way of doing it.
 
 end # module
