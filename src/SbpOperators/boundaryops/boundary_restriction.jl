@@ -1,3 +1,6 @@
+# TODO: The type parameter closure_stencil::Stencil is required since there isnt any suitable type
+# for stencil_set. We should consider adding type ::StencilSet and dispatch on that instead.
+# The same goes for other operators
 """
     boundary_restriction(grid, closure_stencil::Stencil, boundary)
 
