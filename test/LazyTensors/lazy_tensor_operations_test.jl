@@ -47,6 +47,9 @@ end
     @test_broken BoundsError == (m*m*v)[7]
     @test_throws MethodError m*m
 
+    @test (m*v)[CartesianIndex(2)] == (:apply,v,(2,))
+    @test (m*m*v)[CartesianIndex(2)] == (:apply,m*v,(2,))
+
     m = SizeDoublingMapping{Int, 2, 1}((3,))
     @test_throws MethodError m*ones(Int,2,2)
     @test_throws MethodError m*m*v
@@ -55,6 +58,9 @@ end
     v = ones(3,3)
     @test size(m*v) == 2 .*size(v)
     @test (m*v)[1,2] == (:apply,v,(1,2))
+
+    @test (m*v)[CartesianIndex(2,3)] == (:apply,v,(2,3))
+    @test (m*m*v)[CartesianIndex(4,3)] == (:apply,m*v,(4,3))
 
     struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
         λ::T
