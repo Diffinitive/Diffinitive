@@ -42,6 +42,9 @@ import Sbplib.SbpOperators.BoundaryOperator
         	d_closure = parse_stencil(stencil_set["d1"]["closure"])
             d_w, d_e, d_s, d_n =
                 map(id -> normal_derivative(g_2D, d_closure, id), boundary_identifiers(g_2D))
+            # REVIEW: Would prefere to write this as
+            # d_w, d_e, d_s, d_n = normal_derivative.(Ref(g_2D), Ref(d_closure), boundary_identifiers(g_2D))
+            # to avoid the line break
 
             @test d_w*v ≈ -v∂x[1,:] atol = 1e-13
             @test d_e*v ≈ v∂x[end,:] atol = 1e-13
@@ -54,7 +57,7 @@ import Sbplib.SbpOperators.BoundaryOperator
         	d_closure = parse_stencil(stencil_set["d1"]["closure"])
             d_w, d_e, d_s, d_n =
                 map(id -> normal_derivative(g_2D, d_closure, id), boundary_identifiers(g_2D))
-
+            # REVIEW: Same as above
             @test d_w*v ≈ -v∂x[1,:] atol = 1e-13
             @test d_e*v ≈ v∂x[end,:] atol = 1e-13
             @test d_s*v ≈ -v∂y[:,1] atol = 1e-13
