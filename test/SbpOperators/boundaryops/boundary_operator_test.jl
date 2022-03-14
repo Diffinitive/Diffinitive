@@ -72,6 +72,14 @@ import Sbplib.SbpOperators.boundary_operator
             @test (op_r*v)[1] == 2*v[end] + v[end-1] + 3*v[end-2]
             @test op_l'*u == [2*u[]; u[]; 3*u[]; zeros(8)]
             @test op_r'*u == [zeros(8); 3*u[]; u[]; 2*u[]]
+
+            v = evalOn(g_1D, x->1. +x*im)
+            @test (op_l*v)[] isa ComplexF64
+
+            u = fill(1. +im)
+            @test (op_l'*u)[1] isa ComplexF64
+            @test (op_l'*u)[5] isa ComplexF64
+            @test (op_l'*u)[11] isa ComplexF64
         end
 
         @testset "2D" begin

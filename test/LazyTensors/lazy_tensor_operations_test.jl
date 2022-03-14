@@ -80,6 +80,28 @@ end
     v = [[1 2];[3 4]]
     @test m*v == [[2 4];[6 8]]
     @test (m*v)[2,1] == 6
+
+    @testset "Promotion" begin
+        m = ScalingOperator{Int,1}(2,(3,))
+        v = [1.,2.,3.]
+        @test m*v isa AbstractVector{Float64}
+        @test m*v == [2.,4.,6.]
+
+        m = ScalingOperator{Int,2}(2,(2,2))
+        v = [[1. 2.];[3. 4.]]
+        @test m*v == [[2. 4.];[6. 8.]]
+        @test (m*v)[2,1] == 6.
+
+        m = ScalingOperator{ComplexF64,1}(2. +2. *im,(3,))
+        v = [1.,2.,3.]
+        @test m*v isa AbstractVector{ComplexF64}
+        @test m*v == [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
+
+        m = ScalingOperator{ComplexF64,1}(1,(3,))
+        v = [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
+        @test m*v isa AbstractVector{ComplexF64}
+        @test m*v == [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
+    end
 end
 
 @testset "TensorMapping binary operations" begin
@@ -107,6 +129,8 @@ end
 
     @test range_size(A+B) == range_size(A) == range_size(B)
     @test domain_size(A+B) == domain_size(A) == domain_size(B)
+
+    @test ((A+B)*ComplexF64[1.1,1.2,1.3])[3] isa ComplexF64
 end
 
 
@@ -129,6 +153,9 @@ end
 
     v = rand(2)
     @test (Ã∘B̃)'*v ≈ B'*A'*v rtol=1e-14
+
+    @test (Ã∘B̃*ComplexF64[1.,2.,3.,4.])[1] isa ComplexF64
+    @test ((Ã∘B̃)'*ComplexF64[1.,2.])[1] isa ComplexF64
 end
 
 @testset "LazyLinearMap" begin
@@ -191,6 +218,10 @@ end
     for sz ∈ [(4,5),(3,),(5,6,4)]
         I = IdentityMapping{Float64}(sz)
         v = rand(sz...)
+        @test I*v == v
+        @test I'*v == v
+
+        v = rand(ComplexF64,sz...)
         @test I*v == v
         @test I'*v == v
 
@@ -320,6 +351,16 @@ end
                 true_value = tests[i][3](v)
                 @test tm'*v ≈ true_value rtol=1e-14
             end
+        end
+
+        @testset "application to other type" begin
+            tm = InflatedTensorMapping(I(3,2), A, I(4))
+
+            v = rand(ComplexF64, domain_size(tm)...)
+            @test (tm*v)[1,2,3,1] isa ComplexF64
+
+            v = rand(ComplexF64, domain_size(tm')...)
+            @test (tm'*v)[1,2,2,1] isa ComplexF64
         end
 
         @testset "Inference of application" begin
