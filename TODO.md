@@ -7,7 +7,6 @@
 ## Coding
  - [ ] Add new Laplace operator to DiffOps, probably named WaveEqOp(?!!?)
  - [ ] Create a struct that bundles the necessary Tensor operators for solving the wave equation.
- - [ ] Add a quick and simple way of running all tests for all subpackages.
  - [ ] Replace getindex hack for flattening tuples with flatten_tuple. (eg. `getindex.(range_size.(L.D2),1)`)
  - [ ] Use `@inferred` in a lot of tests.
  - [ ] Make sure we are setting tolerances in tests in a consistent way
