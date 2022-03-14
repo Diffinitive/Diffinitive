@@ -1,5 +1,14 @@
 module SbpOperators
 
+export boundary_quadrature
+export boundary_restriction
+export inner_product
+export inverse_inner_product
+export Laplace
+export laplace
+export normal_derivative
+export second_derivative
+
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using Sbplib.Grids
@@ -20,17 +29,5 @@ include("volumeops/inner_products/inverse_inner_product.jl")
 include("boundaryops/boundary_operator.jl")
 include("boundaryops/boundary_restriction.jl")
 include("boundaryops/normal_derivative.jl")
-
-
-export boundary_quadrature
-export boundary_restriction
-export inner_product
-export inverse_inner_product
-export Laplace
-export laplace
-export normal_derivative
-export second_derivative
-# REVIEW: Should the exports be placed here or at the top of each file where the thing is defined?
-# We currently have a mix of placing it at the place of definition and at the top of each file. This is a "new" way of doing it.
 
 end # module
