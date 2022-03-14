@@ -32,8 +32,8 @@ import Sbplib.SbpOperators.boundary_operator
             @test e_w isa TensorMapping{T,1,2} where T
         end
     end
-    op_l, op_r = map(id -> boundary_operator(g_1D, closure_stencil, id), boundary_identifiers(g_1D))
-    op_w, op_e, op_s, op_n = map(id -> boundary_operator(g_2D, closure_stencil, id), boundary_identifiers(g_2D))
+    op_l, op_r = boundary_operator.(Ref(g_1D), Ref(closure_stencil), boundary_identifiers(g_1D))
+    op_w, op_e, op_s, op_n = boundary_operator.(Ref(g_2D), Ref(closure_stencil), boundary_identifiers(g_2D))
 
     @testset "Sizes" begin
         @testset "1D" begin

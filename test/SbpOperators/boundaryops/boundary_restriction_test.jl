@@ -37,10 +37,7 @@ import Sbplib.SbpOperators.BoundaryOperator
 
     @testset "Application" begin
         @testset "1D" begin
-            e_l, e_r =
-                map(id -> boundary_restriction(g_1D, e_closure, id), boundary_identifiers(g_1D))
-            # REVIEW: Same as normal_derivative:45
-
+            e_l, e_r = boundary_restriction.(Ref(g_1D), Ref(e_closure), boundary_identifiers(g_1D))
             v = evalOn(g_1D,x->1+x^2)
             u = fill(3.124)
 
@@ -50,10 +47,7 @@ import Sbplib.SbpOperators.BoundaryOperator
         end
 
         @testset "2D" begin
-            e_w, e_e, e_s, e_n =
-                map(id -> boundary_restriction(g_2D, e_closure, id), boundary_identifiers(g_2D))
-            # REVIEW: Same as normal_derivative:45
-
+            e_w, e_e, e_s, e_n = boundary_restriction.(Ref(g_2D), Ref(e_closure), boundary_identifiers(g_2D))
             v = rand(11, 15)
             u = fill(3.124)
 
