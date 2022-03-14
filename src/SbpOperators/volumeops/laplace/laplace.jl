@@ -1,12 +1,12 @@
 """
-    Laplace{T, Dim, DiffOp} <: TensorMapping{T, Dim, Dim}
+    Laplace{T, Dim, TM} <: TensorMapping{T, Dim, Dim}
 
 Implements the Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
 `TensorMapping`. Additionally `Laplace` stores the stencil set (parsed from TOML) 
 used to construct the `TensorMapping`.
 """
-struct Laplace{T, Dim, DiffOp<:TensorMapping{T, Dim, Dim}} <: TensorMapping{T, Dim, Dim}
-    D::DiffOp# Differential operator
+struct Laplace{T, Dim, TM<:TensorMapping{T, Dim, Dim}} <: TensorMapping{T, Dim, Dim}
+    D::TM# Differential operator
     stencil_set # Stencil set of the operator
 end
 
