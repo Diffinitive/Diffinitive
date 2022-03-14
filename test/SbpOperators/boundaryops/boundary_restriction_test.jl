@@ -37,7 +37,7 @@ import Sbplib.SbpOperators.BoundaryOperator
 
     @testset "Application" begin
         @testset "1D" begin
-            (e_l, e_r) = 
+            e_l, e_r =
                 map(id -> boundary_restriction(g_1D, e_closure, id), boundary_identifiers(g_1D))
 
             v = evalOn(g_1D,x->1+x^2)
@@ -49,7 +49,7 @@ import Sbplib.SbpOperators.BoundaryOperator
         end
 
         @testset "2D" begin
-            (e_w, e_e, e_s, e_n) = 
+            e_w, e_e, e_s, e_n =
                 map(id -> boundary_restriction(g_2D, e_closure, id), boundary_identifiers(g_2D))
 
             v = rand(11, 15)

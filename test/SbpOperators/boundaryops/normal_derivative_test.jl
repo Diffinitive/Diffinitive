@@ -40,7 +40,7 @@ import Sbplib.SbpOperators.BoundaryOperator
         @testset "2nd order" begin
         	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
         	d_closure = parse_stencil(stencil_set["d1"]["closure"])
-            (d_w, d_e, d_s, d_n) = 
+            d_w, d_e, d_s, d_n =
                 map(id -> normal_derivative(g_2D, d_closure, id), boundary_identifiers(g_2D))
 
             @test d_w*v ≈ -v∂x[1,:] atol = 1e-13
@@ -52,7 +52,7 @@ import Sbplib.SbpOperators.BoundaryOperator
         @testset "4th order" begin
             stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         	d_closure = parse_stencil(stencil_set["d1"]["closure"])
-            (d_w, d_e, d_s, d_n) = 
+            d_w, d_e, d_s, d_n =
                 map(id -> normal_derivative(g_2D, d_closure, id), boundary_identifiers(g_2D))
 
             @test d_w*v ≈ -v∂x[1,:] atol = 1e-13
