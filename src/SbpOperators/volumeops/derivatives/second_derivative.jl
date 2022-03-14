@@ -17,3 +17,5 @@ function second_derivative(grid::EquidistantGrid, inner_stencil, closure_stencil
     return SbpOperators.volume_operator(grid, scale(inner_stencil,h_inv^2), scale.(closure_stencils,h_inv^2), even, direction)
 end
 second_derivative(grid::EquidistantGrid{1}, inner_stencil, closure_stencils) = second_derivative(grid,inner_stencil,closure_stencils,1)
+
+# REVIEW: Stencil set method?
