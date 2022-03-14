@@ -52,4 +52,3 @@ function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
     end
     return Δ
 end
-# REVIEW: Do we need this method? Couldn't it just be inlined in the constructor on :19?
