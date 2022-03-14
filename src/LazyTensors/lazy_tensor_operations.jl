@@ -1,3 +1,5 @@
+using Sbplib.RegionIndices
+
 """
     LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
 
