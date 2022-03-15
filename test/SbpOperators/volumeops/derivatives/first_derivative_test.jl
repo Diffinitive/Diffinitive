@@ -37,7 +37,7 @@ end
         @test first_derivative(g₂, interior_stencil, closure_stencils, 2) isa TensorMapping{Float64,2,2}
     end
 
-    @testset "Accuracy" begin
+    @testset "Accuracy conditions" begin
         N = 20
         g = EquidistantGrid(N, 0//1,2//1)
         @testset for order ∈ [2,4]
@@ -64,6 +64,17 @@ end
                 x, = points(g)[10]
                 @test (D₁*v)[10] == monomial(x,k-1)
             end
+        end
+    end
+
+    @testset "Accuracy on function" begin
+        g = EquidistantGrid(30, 0.,1.)
+        v = evalOn(g, x->exp(x))
+        @testset for (order, tol) ∈ [(2, 6e-3),(4, 2e-4)]
+            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order)
+            D₁ = first_derivative(g, stencil_set, 1)
+
+            @test D₁*v ≈ v rtol=tol
         end
     end
 end
