@@ -1,13 +1,3 @@
-export LazyTensorMappingApplication
-export LazyTensorMappingTranspose
-export TensorMappingComposition
-export LazyLinearMap
-export IdentityMapping
-export InflatedTensorMapping
-export LazyOuterProduct
-export ⊗
-export SizeMismatch
-
 """
     LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
 
