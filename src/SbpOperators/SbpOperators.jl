@@ -1,5 +1,14 @@
 module SbpOperators
 
+export boundary_quadrature
+export boundary_restriction
+export inner_product
+export inverse_inner_product
+export Laplace
+export laplace
+export normal_derivative
+export second_derivative
+
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using Sbplib.Grids

@@ -22,6 +22,8 @@
  - [ ] Add possibility to create tensor mapping application with `()`, e.g `D1(v) <=> D1*v`?
  - [ ] Add custom pretty printing to LazyTensors/SbpOperators to enhance readability of e.g error messages.
        See (https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing)
+ - [ ] Move export statements to top of each module
+ - [ ] Add a type StencilSet for easier dispatch
 
 ## Repo
  - [ ] Rename repo to Sbplib.jl
