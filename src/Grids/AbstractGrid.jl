@@ -7,7 +7,7 @@ Should implement
 
 """
 abstract type AbstractGrid end
-
+export AbstractGrid
 function dimension end
 function points end
 export dimension, points

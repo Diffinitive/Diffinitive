@@ -4,6 +4,7 @@ using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
 
+import Sbplib.SbpOperators.ConstantInteriorScalingOperator
 
 @testset "Diagonal-stencil inner_product" begin
     Lx = π/2.
@@ -19,18 +20,21 @@ using Sbplib.LazyTensors
         quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
         @testset "0D" begin
             H = inner_product(EquidistantGrid{Float64}(), quadrature_interior, quadrature_closure)
+            @test H == inner_product(EquidistantGrid{Float64}(), stencil_set)
             @test H == IdentityMapping{Float64}()
             @test H isa TensorMapping{T,0,0} where T
         end
         @testset "1D" begin
             H = inner_product(g_1D, quadrature_interior, quadrature_closure)
-            @test H == inner_product(g_1D, quadrature_interior, quadrature_closure)
+            @test H == inner_product(g_1D, stencil_set)
+            @test H isa ConstantInteriorScalingOperator
             @test H isa TensorMapping{T,1,1} where T
         end
         @testset "2D" begin
             H = inner_product(g_2D, quadrature_interior, quadrature_closure)
             H_x = inner_product(restrict(g_2D,1), quadrature_interior, quadrature_closure)
             H_y = inner_product(restrict(g_2D,2), quadrature_interior, quadrature_closure)
+            @test H == inner_product(g_2D, stencil_set)
             @test H == H_x⊗H_y
             @test H isa TensorMapping{T,2,2} where T
         end

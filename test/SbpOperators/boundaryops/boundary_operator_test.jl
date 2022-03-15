@@ -32,14 +32,8 @@ import Sbplib.SbpOperators.boundary_operator
             @test e_w isa TensorMapping{T,1,2} where T
         end
     end
-
-    op_l = boundary_operator(g_1D, closure_stencil, CartesianBoundary{1,Lower}())
-    op_r = boundary_operator(g_1D, closure_stencil, CartesianBoundary{1,Upper}())
-
-    op_w = boundary_operator(g_2D, closure_stencil, CartesianBoundary{1,Lower}())
-    op_e = boundary_operator(g_2D, closure_stencil, CartesianBoundary{1,Upper}())
-    op_s = boundary_operator(g_2D, closure_stencil, CartesianBoundary{2,Lower}())
-    op_n = boundary_operator(g_2D, closure_stencil, CartesianBoundary{2,Upper}())
+    op_l, op_r = boundary_operator.(Ref(g_1D), Ref(closure_stencil), boundary_identifiers(g_1D))
+    op_w, op_e, op_s, op_n = boundary_operator.(Ref(g_2D), Ref(closure_stencil), boundary_identifiers(g_2D))
 
     @testset "Sizes" begin
         @testset "1D" begin
