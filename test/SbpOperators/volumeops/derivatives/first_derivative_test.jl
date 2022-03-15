@@ -1,9 +1,11 @@
 using Test
 
+
 using Sbplib.SbpOperators
 using Sbplib.Grids
+using Sbplib.LazyTensors
 
-using Sbplib.SbpOperators: closure_size
+using Sbplib.SbpOperators: closure_size, Stencil
 
 """
     monomial(x,k)
@@ -19,14 +21,30 @@ function monomial(x,k)
 end
 
 @testset "first_derivative" begin
-    @testset "accuracy" begin
+    @testset "Constructors" begin
+        stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+
+        g₁ = EquidistantGrid(11, 0., 1.)
+        g₂ = EquidistantGrid((11,14), (0.,1.), (1.,3.))
+
+        @test first_derivative(g₁, stencil_set, 1) isa TensorMapping{Float64,1,1}
+        @test first_derivative(g₂, stencil_set, 2) isa TensorMapping{Float64,2,2}
+
+        interior_stencil = CenteredStencil(-1,0,1)
+        closure_stencils = [Stencil(-1,1, center=1)]
+
+        @test first_derivative(g₁, interior_stencil, closure_stencils, 1) isa TensorMapping{Float64,1,1}
+        @test first_derivative(g₂, interior_stencil, closure_stencils, 2) isa TensorMapping{Float64,2,2}
+    end
+
+    @testset "Accuracy" begin
         N = 20
         g = EquidistantGrid(N, 0//1,2//1)
         @testset for order ∈ [2,4]
             stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order)
             D₁ = first_derivative(g, stencil_set, 1)
 
-            @testset "boundary accuracy $k" for k ∈ 0:order÷2
+            @testset "boundary x^$k" for k ∈ 0:order÷2
                 v = evalOn(g, x->monomial(x,k))
 
                 @testset for i ∈ 1:closure_size(D₁)
@@ -40,7 +58,7 @@ end
                 end
             end
 
-            @testset "interior accuracy $k" for k ∈ 0:order
+            @testset "interior x^$k" for k ∈ 0:order
                 v = evalOn(g, x->monomial(x,k))
 
                 x, = points(g)[10]
