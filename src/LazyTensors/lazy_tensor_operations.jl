@@ -1,15 +1,5 @@
 using Sbplib.RegionIndices
 
-export LazyTensorMappingApplication
-export LazyTensorMappingTranspose
-export TensorMappingComposition
-export LazyLinearMap
-export IdentityMapping
-export InflatedTensorMapping
-export LazyOuterProduct
-export ⊗
-export SizeMismatch
-
 """
     LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
 
@@ -24,7 +14,8 @@ struct LazyTensorMappingApplication{T,R,D, TM<:TensorMapping{<:Any,R,D}, AA<:Abs
     o::AA
 
     function LazyTensorMappingApplication(t::TensorMapping{<:Any,R,D}, o::AbstractArray{<:Any,D}) where {R,D}
-        T = promote_type(eltype(t), eltype(o))
+        I = ntuple(i->1, range_dim(t))
+        T = typeof(apply(t,o,I...))
         return new{T,R,D,typeof(t), typeof(o)}(t,o)
     end
 end
