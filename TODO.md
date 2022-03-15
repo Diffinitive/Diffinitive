@@ -1,6 +1,7 @@
 # TODO
 
 
+## Coding
  - [ ] Ändra namn på variabler och funktioner så att det följer style-guide
  - [ ] Add new Laplace operator to DiffOps, probably named WaveEqOp(?!!?)
  - [ ] Create a struct that bundles the necessary Tensor operators for solving the wave equation.
@@ -21,6 +22,8 @@
  - [ ] Add custom pretty printing to LazyTensors/SbpOperators to enhance readability of e.g error messages.
        See (https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing)
  - [ ] Samla noggrannhets- och SBP-ness-tester för alla operatorer på ett ställe
+ - [ ] Move export statements to top of each module
+ - [ ] Add a type StencilSet for easier dispatch
 
 
  - [ ] Gå igenom alla typ parametrar och kolla om de är motiverade. Både i signaturer och typer, tex D i VariableSecondDerivative. Kan vi använda promote istället?

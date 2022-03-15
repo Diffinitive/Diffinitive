@@ -10,8 +10,10 @@ boundary.
 
 On a 1-dimensional grid, `H` is a `ConstantInteriorScalingOperator`. On a
 N-dimensional grid, `H` is the outer product of the 1-dimensional inner
-product operators for each coordinate direction. Also see the documentation of
-On a 0-dimensional grid, `H` is a 0-dimensional `IdentityMapping`.
+product operators for each coordinate direction. On a 0-dimensional grid,
+`H` is a 0-dimensional `IdentityMapping`.
+
+See also: [`ConstantInteriorScalingOperator`](@ref).
 """
 function inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
     Hs = ()
@@ -22,7 +24,6 @@ function inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
 
     return foldl(⊗, Hs)
 end
-export inner_product
 
 function inner_product(grid::EquidistantGrid{1}, interior_weight, closure_weights)
     h = spacing(grid)[1]
@@ -32,3 +33,15 @@ function inner_product(grid::EquidistantGrid{1}, interior_weight, closure_weight
 end
 
 inner_product(grid::EquidistantGrid{0}, interior_weight, closure_weights) = IdentityMapping{eltype(grid)}()
+
+"""
+    inner_product(grid, stencil_set)
+
+Creates a `inner_product` operator on `grid` given a parsed TOML
+`stencil_set`.
+"""
+function inner_product(grid, stencil_set)
+    inner_stencil = parse_scalar(stencil_set["H"]["inner"])
+    closure_stencils = parse_tuple(stencil_set["H"]["closure"])
+    return inner_product(grid, inner_stencil, closure_stencils)
+end

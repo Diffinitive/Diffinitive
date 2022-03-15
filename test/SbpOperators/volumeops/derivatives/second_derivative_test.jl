@@ -7,7 +7,8 @@ using Sbplib.LazyTensors
 import Sbplib.SbpOperators.VolumeOperator
 
 @testset "SecondDerivative" begin
-    stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+    operator_path = sbp_operators_path()*"standard_diagonal.toml"
+    stencil_set = read_stencil_set(operator_path; order=4)
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
     Lx = 3.5
@@ -17,8 +18,9 @@ import Sbplib.SbpOperators.VolumeOperator
 
     @testset "Constructors" begin
         @testset "1D" begin
-            Dₓₓ = second_derivative(g_1D,inner_stencil,closure_stencils)
-            @test Dₓₓ == second_derivative(g_1D,inner_stencil,closure_stencils,1)
+            Dₓₓ = second_derivative(g_1D,inner_stencil,closure_stencils,1)
+            @test Dₓₓ == second_derivative(g_1D,inner_stencil,closure_stencils)
+            @test Dₓₓ == second_derivative(g_1D,stencil_set,1)
             @test Dₓₓ isa VolumeOperator
         end
         @testset "2D" begin
@@ -26,6 +28,7 @@ import Sbplib.SbpOperators.VolumeOperator
             D2 = second_derivative(g_1D,inner_stencil,closure_stencils)
             I = IdentityMapping{Float64}(size(g_2D)[2])
             @test Dₓₓ == D2⊗I
+            @test Dₓₓ == second_derivative(g_2D,stencil_set,1)
             @test Dₓₓ isa TensorMapping{T,2,2} where T
         end
     end
@@ -47,7 +50,7 @@ import Sbplib.SbpOperators.VolumeOperator
             # 2nd order interior stencil, 1nd order boundary stencil,
             # implies that L*v should be exact for monomials up to order 2.
             @testset "2nd order" begin
-                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                stencil_set = read_stencil_set(operator_path; order=2)
                 inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
 			    closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
                 Dₓₓ = second_derivative(g_1D,inner_stencil,closure_stencils)
@@ -60,7 +63,7 @@ import Sbplib.SbpOperators.VolumeOperator
             # 4th order interior stencil, 2nd order boundary stencil,
             # implies that L*v should be exact for monomials up to order 3.
             @testset "4th order" begin
-                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                stencil_set = read_stencil_set(operator_path; order=4)
                 inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
 			    closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
                 Dₓₓ = second_derivative(g_1D,inner_stencil,closure_stencils)
@@ -88,7 +91,7 @@ import Sbplib.SbpOperators.VolumeOperator
             # 2nd order interior stencil, 1st order boundary stencil,
             # implies that L*v should be exact for binomials up to order 2.
             @testset "2nd order" begin
-                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                stencil_set = read_stencil_set(operator_path; order=2)
                 inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
                 closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
                 Dyy = second_derivative(g_2D,inner_stencil,closure_stencils,2)
@@ -101,7 +104,7 @@ import Sbplib.SbpOperators.VolumeOperator
             # 4th order interior stencil, 2nd order boundary stencil,
             # implies that L*v should be exact for binomials up to order 3.
             @testset "4th order" begin
-                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                stencil_set = read_stencil_set(operator_path; order=4)
                 inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
                 closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
                 Dyy = second_derivative(g_2D,inner_stencil,closure_stencils,2)
