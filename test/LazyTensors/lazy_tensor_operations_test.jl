@@ -36,10 +36,8 @@ end
 
     m = SizeDoublingMapping{Int, 1, 1}((3,))
     v = [0,1,2]
-    @test m*v isa AbstractVector{Int}
     @test size(m*v) == 2 .*size(v)
     @test (m*v)[0] == (:apply,v,(0,))
-    @test m*m*v isa AbstractVector{Int}
     @test (m*m*v)[1] == (:apply,m*v,(1,))
     @test (m*m*v)[3] == (:apply,m*v,(3,))
     @test (m*m*v)[6] == (:apply,m*v,(6,))
@@ -81,26 +79,41 @@ end
     @test m*v == [[2 4];[6 8]]
     @test (m*v)[2,1] == 6
 
-    @testset "Promotion" begin
+    @testset "Type calculation" begin
         m = ScalingOperator{Int,1}(2,(3,))
         v = [1.,2.,3.]
         @test m*v isa AbstractVector{Float64}
         @test m*v == [2.,4.,6.]
+        @inferred m*v
+        @inferred (m*v)[1]
 
         m = ScalingOperator{Int,2}(2,(2,2))
         v = [[1. 2.];[3. 4.]]
         @test m*v == [[2. 4.];[6. 8.]]
         @test (m*v)[2,1] == 6.
+        @inferred m*v
+        @inferred (m*v)[1]
 
         m = ScalingOperator{ComplexF64,1}(2. +2. *im,(3,))
         v = [1.,2.,3.]
         @test m*v isa AbstractVector{ComplexF64}
         @test m*v == [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
+        @inferred m*v
+        @inferred (m*v)[1]
 
         m = ScalingOperator{ComplexF64,1}(1,(3,))
         v = [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
         @test m*v isa AbstractVector{ComplexF64}
         @test m*v == [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
+        @inferred m*v
+        @inferred (m*v)[1]
+
+        m = ScalingOperator{Float64,1}(2., (3,))
+        v = [[1,2,3], [3,2,1],[1,3,1]]
+        @test m*v isa AbstractVector{Vector{Float64}}
+        @test m*v == [[2.,4.,6.], [6.,4.,2.],[2.,6.,2.]]
+        @inferred m*v
+        @inferred (m*v)[1]
     end
 end
 
