@@ -7,6 +7,7 @@ export inverse_inner_product
 export Laplace
 export laplace
 export normal_derivative
+export first_derivative
 export second_derivative
 
 using Sbplib.RegionIndices
@@ -22,6 +23,7 @@ include("stencil.jl")
 include("readoperator.jl")
 include("volumeops/volume_operator.jl")
 include("volumeops/constant_interior_scaling_operator.jl")
+include("volumeops/derivatives/first_derivative.jl")
 include("volumeops/derivatives/second_derivative.jl")
 include("volumeops/laplace/laplace.jl")
 include("volumeops/inner_products/inner_product.jl")
