@@ -24,6 +24,9 @@ using Sbplib.Grids
     @test a*v == [.1,.2,.5,.5,.5,.2,.1]
     @test a'*v == [.1,.2,.5,.5,.5,.2,.1]
 
+    @test (a*rand(ComplexF64, domain_size(a)... ))[1] isa ComplexF64
+    @test (a'*rand(ComplexF64, domain_size(a')...))[1] isa ComplexF64
+
     @test range_size(a) == (7,)
     @test domain_size(a) == (7,)
 
