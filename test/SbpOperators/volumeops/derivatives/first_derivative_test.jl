@@ -22,7 +22,7 @@ end
 
 @testset "first_derivative" begin
     @testset "Constructors" begin
-        stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+        stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order=2)
 
         g₁ = EquidistantGrid(11, 0., 1.)
         g₂ = EquidistantGrid((11,14), (0.,1.), (1.,3.))
@@ -42,7 +42,7 @@ end
         N = 20
         g = EquidistantGrid(N, 0//1,2//1)
         @testset for order ∈ [2,4]
-            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order)
+            stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order)
             D₁ = first_derivative(g, stencil_set, 1)
 
             @testset "boundary x^$k" for k ∈ 0:order÷2
@@ -72,7 +72,7 @@ end
         g = EquidistantGrid(30, 0.,1.)
         v = evalOn(g, x->exp(x))
         @testset for (order, tol) ∈ [(2, 6e-3),(4, 2e-4)]
-            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order)
+            stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order)
             D₁ = first_derivative(g, stencil_set, 1)
 
             @test D₁*v ≈ v rtol=tol

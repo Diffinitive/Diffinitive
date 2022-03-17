@@ -21,11 +21,14 @@ second_derivative(grid::EquidistantGrid{1}, inner_stencil::Stencil, closure_sten
 """
     second_derivative(grid, stencil_set, direction)
 
-Creates a `second_derivative` operator on `grid` along coordinate dimension `direction` given a parsed TOML
-`stencil_set`.
+Creates a `second_derivative` operator on `grid` along coordinate dimension `direction` given a `stencil_set`.
 """
-function second_derivative(grid::EquidistantGrid, stencil_set, direction)
+function second_derivative(grid::EquidistantGrid, stencil_set::StencilSet, direction)
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
     second_derivative(grid,inner_stencil,closure_stencils,direction);
 end 
+
+# TODO: Not possible to remove ::Stencil from second_derivative(grid::EquidistantGrid{1},...) due to type deduction failing. 
+# Is this due to the type ambuguity of StencilSet? Possible to address in some other way? 
+# If not, should we drop ::StencilSet from the method above (it is not required)?

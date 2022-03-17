@@ -18,14 +18,18 @@ function first_derivative(grid::EquidistantGrid, inner_stencil, closure_stencils
 end
 first_derivative(grid::EquidistantGrid{1}, inner_stencil::Stencil, closure_stencils) = first_derivative(grid,inner_stencil,closure_stencils,1)
 
+
 """
     first_derivative(grid, stencil_set, direction)
 
-Creates a `first_derivative` operator on `grid` along coordinate dimension `direction` given a parsed TOML
-`stencil_set`.
+Creates a `first_derivative` operator on `grid` along coordinate dimension `direction` given a `stencil_set`.
 """
-function first_derivative(grid::EquidistantGrid, stencil_set, direction)
+function first_derivative(grid::EquidistantGrid, stencil_set::StencilSet, direction)
     inner_stencil = parse_stencil(stencil_set["D1"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D1"]["closure_stencils"])
     first_derivative(grid,inner_stencil,closure_stencils,direction);
 end
+
+# TODO: Not possible to remove ::Stencil from first_derivative(grid::EquidistantGrid{1},...) due to type deduction failing. 
+# Is this due to the type ambuguity of StencilSet? Possible to address in some other way? 
+# If not, should we drop ::StencilSet from the method above (it is not required)?

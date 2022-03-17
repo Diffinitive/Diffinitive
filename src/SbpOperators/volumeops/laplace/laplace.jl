@@ -2,19 +2,20 @@
     Laplace{T, Dim, TM} <: TensorMapping{T, Dim, Dim}
 
 Implements the Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
-`TensorMapping`. Additionally `Laplace` stores the stencil set (parsed from TOML) 
+`TensorMapping`. Additionally `Laplace` stores the `StencilSet`
 used to construct the `TensorMapping`.
 """
 struct Laplace{T, Dim, TM<:TensorMapping{T, Dim, Dim}} <: TensorMapping{T, Dim, Dim}
     D::TM       # Difference operator
-    stencil_set # Stencil set of the operator
+    stencil_set::StencilSet # Stencil set of the operator
 end
 
 """
     Laplace(grid::Equidistant, stencil_set)
 
-Creates the `Laplace` operator `Δ` on `grid` given a parsed TOML
-`stencil_set`. See also [`laplace`](@ref).
+Creates the `Laplace` operator `Δ` on `grid` given a `stencil_set`. 
+
+See also [`laplace`](@ref).
 """
 function Laplace(grid::EquidistantGrid, stencil_set)
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])

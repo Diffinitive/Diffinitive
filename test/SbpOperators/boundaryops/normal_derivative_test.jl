@@ -10,7 +10,7 @@ import Sbplib.SbpOperators.BoundaryOperator
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,12), (0.0, 0.0), (1.0,1.0))
     @testset "normal_derivative" begin
-    	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+    	stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order=4)
     	d_closure = parse_stencil(stencil_set["d1"]["closure"])
         @testset "1D" begin
             d_l = normal_derivative(g_1D, d_closure, CartesianBoundary{1,Lower}())
@@ -38,7 +38,7 @@ import Sbplib.SbpOperators.BoundaryOperator
         v∂y = evalOn(g_2D, (x,y)-> 2*(y-1) + x)
         # TODO: Test for higher order polynomials?
         @testset "2nd order" begin
-        	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+        	stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order=2)
         	d_closure = parse_stencil(stencil_set["d1"]["closure"])
             d_w, d_e, d_s, d_n = normal_derivative.(Ref(g_2D), Ref(d_closure), boundary_identifiers(g_2D))
 
@@ -49,7 +49,7 @@ import Sbplib.SbpOperators.BoundaryOperator
         end
 
         @testset "4th order" begin
-            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+            stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         	d_closure = parse_stencil(stencil_set["d1"]["closure"])
             d_w, d_e, d_s, d_n = normal_derivative.(Ref(g_2D), Ref(d_closure), boundary_identifiers(g_2D))
             

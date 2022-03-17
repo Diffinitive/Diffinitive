@@ -8,7 +8,7 @@ import Sbplib.SbpOperators.VolumeOperator
 
 @testset "SecondDerivative" begin
     operator_path = sbp_operators_path()*"standard_diagonal.toml"
-    stencil_set = read_stencil_set(operator_path; order=4)
+    stencil_set = StencilSet(operator_path; order=4)
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
     Lx = 3.5
@@ -50,7 +50,7 @@ import Sbplib.SbpOperators.VolumeOperator
             # 2nd order interior stencil, 1nd order boundary stencil,
             # implies that L*v should be exact for monomials up to order 2.
             @testset "2nd order" begin
-                stencil_set = read_stencil_set(operator_path; order=2)
+                stencil_set = StencilSet(operator_path; order=2)
                 inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
 			    closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
                 Dₓₓ = second_derivative(g_1D,inner_stencil,closure_stencils)
@@ -63,7 +63,7 @@ import Sbplib.SbpOperators.VolumeOperator
             # 4th order interior stencil, 2nd order boundary stencil,
             # implies that L*v should be exact for monomials up to order 3.
             @testset "4th order" begin
-                stencil_set = read_stencil_set(operator_path; order=4)
+                stencil_set = StencilSet(operator_path; order=4)
                 inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
 			    closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
                 Dₓₓ = second_derivative(g_1D,inner_stencil,closure_stencils)
@@ -91,7 +91,7 @@ import Sbplib.SbpOperators.VolumeOperator
             # 2nd order interior stencil, 1st order boundary stencil,
             # implies that L*v should be exact for binomials up to order 2.
             @testset "2nd order" begin
-                stencil_set = read_stencil_set(operator_path; order=2)
+                stencil_set = StencilSet(operator_path; order=2)
                 inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
                 closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
                 Dyy = second_derivative(g_2D,inner_stencil,closure_stencils,2)
@@ -104,7 +104,7 @@ import Sbplib.SbpOperators.VolumeOperator
             # 4th order interior stencil, 2nd order boundary stencil,
             # implies that L*v should be exact for binomials up to order 3.
             @testset "4th order" begin
-                stencil_set = read_stencil_set(operator_path; order=4)
+                stencil_set = StencilSet(operator_path; order=4)
                 inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
                 closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
                 Dyy = second_derivative(g_2D,inner_stencil,closure_stencils,2)

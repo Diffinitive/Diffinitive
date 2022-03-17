@@ -37,8 +37,7 @@ inner_product(grid::EquidistantGrid{0}, interior_weight, closure_weights) = Iden
 """
     inner_product(grid, stencil_set)
 
-Creates a `inner_product` operator on `grid` given a parsed TOML
-`stencil_set`.
+Creates a `inner_product` operator on `grid` given a `stencil_set`.
 """
 function inner_product(grid, stencil_set)
     inner_stencil = parse_scalar(stencil_set["H"]["inner"])
