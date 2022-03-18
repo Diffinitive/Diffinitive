@@ -54,21 +54,21 @@ range_size(tmt::LazyTensorTranspose) = domain_size(tmt.tm)
 domain_size(tmt::LazyTensorTranspose) = range_size(tmt.tm)
 
 # TODO: Rename this
-struct LazyLazyTensorBinaryOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
+struct LazyTensorBinaryOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
     tm1::T1
     tm2::T2
 
-    @inline function LazyLazyTensorBinaryOperation{Op,T,R,D}(tm1::T1,tm2::T2) where {Op,T,R,D, T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}}
+    @inline function LazyTensorBinaryOperation{Op,T,R,D}(tm1::T1,tm2::T2) where {Op,T,R,D, T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}}
         return new{Op,T,R,D,T1,T2}(tm1,tm2)
     end
 end
 # TODO: Boundschecking in constructor.
 
-apply(tmBinOp::LazyLazyTensorBinaryOperation{:+,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) + apply(tmBinOp.tm2, v, I...)
-apply(tmBinOp::LazyLazyTensorBinaryOperation{:-,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) - apply(tmBinOp.tm2, v, I...)
+apply(tmBinOp::LazyTensorBinaryOperation{:+,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) + apply(tmBinOp.tm2, v, I...)
+apply(tmBinOp::LazyTensorBinaryOperation{:-,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) - apply(tmBinOp.tm2, v, I...)
 
-range_size(tmBinOp::LazyLazyTensorBinaryOperation) = range_size(tmBinOp.tm1)
-domain_size(tmBinOp::LazyLazyTensorBinaryOperation) = domain_size(tmBinOp.tm1)
+range_size(tmBinOp::LazyTensorBinaryOperation) = range_size(tmBinOp.tm1)
+domain_size(tmBinOp::LazyTensorBinaryOperation) = domain_size(tmBinOp.tm1)
 
 
 """
