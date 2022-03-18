@@ -169,26 +169,25 @@ apply(tmi::IdentityTensor{T,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) whe
 apply_transpose(tmi::IdentityTensor{T,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 
 """
-    Base.:∘(tm, tmi)
-    Base.:∘(tmi, tm)
+    LazyTensorComposition(tm, tmi::IdentityTensor)
+    LazyTensorComposition(tmi::IdentityTensor, tm)
 
 Composes a `Tensormapping` `tm` with an `IdentityTensor` `tmi`, by returning `tm`
 """
-@inline function Base.:∘(tm::LazyTensor{T,R,D}, tmi::IdentityTensor{T,D}) where {T,R,D}
+function LazyTensorComposition(tm::LazyTensor{T,R,D}, tmi::IdentityTensor{T,D}) where {T,R,D}
     @boundscheck check_domain_size(tm, range_size(tmi))
     return tm
 end
 
-@inline function Base.:∘(tmi::IdentityTensor{T,R}, tm::LazyTensor{T,R,D}) where {T,R,D}
+function LazyTensorComposition(tmi::IdentityTensor{T,R}, tm::LazyTensor{T,R,D}) where {T,R,D}
     @boundscheck check_domain_size(tmi, range_size(tm))
     return tm
 end
 # Specialization for the case where tm is an IdentityTensor. Required to resolve ambiguity.
-@inline function Base.:∘(tm::IdentityTensor{T,D}, tmi::IdentityTensor{T,D}) where {T,D}
+function LazyTensorComposition(tm::IdentityTensor{T,D}, tmi::IdentityTensor{T,D}) where {T,D}
     @boundscheck check_domain_size(tm, range_size(tmi))
     return tmi
 end
-# TODO: Implement the above as LazyTensorComposition instead
 # TODO: Move the operator definitions to one place
 
 """
@@ -206,9 +205,6 @@ LazyTensors.apply_transpose(tm::ScalingTensor{T,D}, v::AbstractArray{<:Any,D}, I
 
 LazyTensors.range_size(m::ScalingTensor) = m.size
 LazyTensors.domain_size(m::ScalingTensor) = m.size
-
-# TODO: Rename everything with mapping
-# TODO: Remove ScalingOperator from tests
 
 """
     InflatedLazyTensor{T,R,D} <: LazyTensor{T,R,D}
