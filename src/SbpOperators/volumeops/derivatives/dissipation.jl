@@ -1,3 +1,12 @@
+function dissipation(g::EquidistantGrid, p, direction)
+    h_inv = inverse_spacing(g)[direction]
+
+    # D = volume_operator(g,CenteredStencil(1),(CenteredStencil(1)), )
+    return nothing, nothing
+end
+
+dissipation(g::EquidistantGrid{1}, p) = dissipation(g, p, 1)
+
 function dissipation_interior_weights(p)
    if p == 0
        return (1,)

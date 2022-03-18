@@ -1,8 +1,8 @@
 using Test
 
 using Sbplib.SbpOperators
-# using Sbplib.Grids
-# using Sbplib.LazyTensors
+using Sbplib.Grids
+using Sbplib.LazyTensors
 
 using Sbplib.SbpOperators: Stencil
 
@@ -12,6 +12,44 @@ using Sbplib.SbpOperators: midpoint, midpoint_transpose
 using Sbplib.SbpOperators: dissipation_lower_closure_size, dissipation_upper_closure_size
 using Sbplib.SbpOperators: dissipation_lower_closure_stencils,dissipation_upper_closure_stencils
 using Sbplib.SbpOperators: dissipation_transpose_lower_closure_stencils, dissipation_transpose_upper_closure_stencils
+
+"""
+    monomial(x,k)
+
+Evaluates ``x^k/k!` with the convetion that it is ``0`` for all ``k<0``.
+Has the property that ``d/dx monomial(x,k) = monomial(x,k-1)``
+"""
+function monomial(x,k)
+    if k < 0
+        return zero(x)
+    end
+    x^k/factorial(k)
+end
+
+@testset "dissipation" begin
+    g = EquidistantGrid(20, 0., 11.)
+    D,Dᵀ = dissipation(g, 1)
+
+    @test D isa TensorMapping{Float64,1,1} where T
+    @test Dᵀ isa TensorMapping{Float64,1,1} where T
+
+     @testset "Accuracy conditions" begin
+        N = 20
+        g = EquidistantGrid(N, 0//1,2//1)
+        @testset "D_$p" for p ∈ [1,2,3,4]
+            D,Dᵀ = dissipation(g, p)
+
+            @testset "x^$k" for k ∈ 0:1
+                v = evalOn(g, x->monomial(x,k))
+
+                x, = points(g)[10]
+                @test (D*v)[10] == monomial(x,k-1)
+            end
+
+            # Test Dᵀ works backwards and interior forwards
+        end
+    end
+end
 
 @testset "dissipation_interior_weights" begin
     @test dissipation_interior_weights(1) == (-1, 1)
