@@ -11,7 +11,7 @@ export LazyOuterProduct
 export ⊗
 export SizeMismatch
 
-include("tensor_mapping.jl")
+include("lazy_tensor.jl")
 include("lazy_array.jl")
 include("lazy_tensor_operations.jl")
 
