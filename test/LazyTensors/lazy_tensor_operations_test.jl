@@ -60,55 +60,46 @@ end
     @test (m*v)[CartesianIndex(2,3)] == (:apply,v,(2,3))
     @test (m*m*v)[CartesianIndex(4,3)] == (:apply,m*v,(4,3))
 
-    struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
-        λ::T
-        size::NTuple{D,Int}
-    end
-
-    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Vararg{Any,D}) where {T,D} = m.λ*v[I...]
-    LazyTensors.range_size(m::ScalingOperator) = m.size
-    LazyTensors.domain_size(m::ScalingOperator) = m.size
-
-    m = ScalingOperator{Int,1}(2,(3,))
+    m = ScalingTensor(2,(3,))
     v = [1,2,3]
     @test m*v isa AbstractVector
     @test m*v == [2,4,6]
 
-    m = ScalingOperator{Int,2}(2,(2,2))
+    m = ScalingTensor(2,(2,2))
     v = [[1 2];[3 4]]
     @test m*v == [[2 4];[6 8]]
     @test (m*v)[2,1] == 6
 
     @testset "Type calculation" begin
-        m = ScalingOperator{Int,1}(2,(3,))
+        m = ScalingTensor(2,(3,))
         v = [1.,2.,3.]
         @test m*v isa AbstractVector{Float64}
         @test m*v == [2.,4.,6.]
         @inferred m*v
         @inferred (m*v)[1]
 
-        m = ScalingOperator{Int,2}(2,(2,2))
+        m = ScalingTensor(2,(2,2))
         v = [[1. 2.];[3. 4.]]
         @test m*v == [[2. 4.];[6. 8.]]
         @test (m*v)[2,1] == 6.
         @inferred m*v
         @inferred (m*v)[1]
 
-        m = ScalingOperator{ComplexF64,1}(2. +2. *im,(3,))
+        m = ScalingTensor(2. +2. *im,(3,))
         v = [1.,2.,3.]
         @test m*v isa AbstractVector{ComplexF64}
         @test m*v == [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
         @inferred m*v
         @inferred (m*v)[1]
 
-        m = ScalingOperator{ComplexF64,1}(1,(3,))
+        m = ScalingTensor(1,(3,))
         v = [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
         @test m*v isa AbstractVector{ComplexF64}
         @test m*v == [2. + 2. *im, 4. + 4. *im, 6. + 6. *im]
         @inferred m*v
         @inferred (m*v)[1]
 
-        m = ScalingOperator{Float64,1}(2., (3,))
+        m = ScalingTensor(2., (3,))
         v = [[1,2,3], [3,2,1],[1,3,1]]
         @test m*v isa AbstractVector{Vector{Float64}}
         @test m*v == [[2.,4.,6.], [6.,4.,2.],[2.,6.,2.]]
@@ -118,18 +109,8 @@ end
 end
 
 @testset "TensorMapping binary operations" begin
-    struct ScalarMapping{T,R,D} <: TensorMapping{T,R,D}
-        λ::T
-        range_size::NTuple{R,Int}
-        domain_size::NTuple{D,Int}
-    end
-
-    LazyTensors.apply(m::ScalarMapping{T,R}, v, I::Vararg{Any,R}) where {T,R} = m.λ*v[I...]
-    LazyTensors.range_size(m::ScalarMapping) = m.domain_size
-    LazyTensors.domain_size(m::ScalarMapping) = m.range_size
-
-    A = ScalarMapping{Float64,1,1}(2.0, (3,), (3,))
-    B = ScalarMapping{Float64,1,1}(3.0, (3,), (3,))
+    A = ScalingTensor(2.0, (3,))
+    B = ScalingTensor(3.0, (3,))
 
     v = [1.1,1.2,1.3]
     for i ∈ eachindex(v)
@@ -139,6 +120,9 @@ end
     for i ∈ eachindex(v)
         @test ((A-B)*v)[i] == 2*v[i] - 3*v[i]
     end
+
+    # TODO: Test with size changing tm
+    # TODO: Test for mismatch in dimensions (SizeMismatch?)
 
     @test range_size(A+B) == range_size(A) == range_size(B)
     @test domain_size(A+B) == domain_size(A) == domain_size(B)
@@ -391,16 +375,7 @@ end
         end
 
         @testset "Inference of application" begin
-            struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
-                λ::T
-                size::NTuple{D,Int}
-            end
-
-            LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Vararg{Any,D}) where {T,D} = m.λ*v[I...]
-            LazyTensors.range_size(m::ScalingOperator) = m.size
-            LazyTensors.domain_size(m::ScalingOperator) = m.size
-
-            tm = InflatedTensorMapping(I(2,3),ScalingOperator(2.0, (3,2)),I(3,4))
+            tm = InflatedTensorMapping(I(2,3),ScalingTensor(2.0, (3,2)),I(3,4))
             v = rand(domain_size(tm)...)
 
             @inferred apply(tm,v,1,2,3,2,2,4)
@@ -409,7 +384,7 @@ end
     end
 
     @testset "InflatedTensorMapping of InflatedTensorMapping" begin
-        A = ScalingOperator(2.0,(2,3))
+        A = ScalingTensor(2.0,(2,3))
         itm = InflatedTensorMapping(I(3,2), A, I(4))
         @test  InflatedTensorMapping(I(4), itm, I(2)) == InflatedTensorMapping(I(4,3,2), A, I(4,2))
         @test  InflatedTensorMapping(itm, I(2)) == InflatedTensorMapping(I(3,2), A, I(4,2))
@@ -481,18 +456,10 @@ end
 
 
 @testset "LazyOuterProduct" begin
-    struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
-        λ::T
-        size::NTuple{D,Int}
-    end
 
-    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Vararg{Any,D}) where {T,D} = m.λ*v[I...]
-    LazyTensors.range_size(m::ScalingOperator) = m.size
-    LazyTensors.domain_size(m::ScalingOperator) = m.size
-
-    A = ScalingOperator(2.0, (5,))
-    B = ScalingOperator(3.0, (3,))
-    C = ScalingOperator(5.0, (3,2))
+    A = ScalingTensor(2.0, (5,))
+    B = ScalingTensor(3.0, (3,))
+    C = ScalingTensor(5.0, (3,2))
 
     AB = LazyOuterProduct(A,B)
     @test AB isa TensorMapping{T,2,2} where T
