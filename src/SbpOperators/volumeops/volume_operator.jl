@@ -12,16 +12,10 @@ y-direction is `I⊗op⊗I`.
 function volume_operator(grid::EquidistantGrid, inner_stencil, closure_stencils, parity, direction)
     #TODO: Check that direction <= Dim?
 
-    # Create 1D volume operator in along coordinate direction
     op = VolumeOperator(restrict(grid, direction), inner_stencil, closure_stencils, parity)
-    # Create 1D IdentityMappings for each coordinate direction
-    one_d_grids = restrict.(Ref(grid), Tuple(1:dimension(grid)))
-    Is = IdentityMapping{eltype(grid)}.(size.(one_d_grids))
-    # Formulate the correct outer product sequence of the identity mappings and
-    # the volume operator
-    parts = Base.setindex(Is, op, direction)
-    return foldl(⊗, parts)
+    return LazyTensors.inflate(op, size(grid), direction)
 end
+# TBD: Should the inflation happen here or should we remove this method and do it at the caller instead?
 
 """
     VolumeOperator{T,N,M,K} <: TensorOperator{T,1}
@@ -59,3 +53,4 @@ function LazyTensors.apply(op::VolumeOperator, v::AbstractVector, i)
     r = getregion(i, closure_size(op), op.size[1])
     return LazyTensors.apply(op, v, Index(i, r))
 end
+# TODO: Move this to LazyTensors when we have the region communication down.

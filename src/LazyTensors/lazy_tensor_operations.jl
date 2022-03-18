@@ -413,6 +413,19 @@ LazyOuterProduct(tms::Vararg{TensorMapping}) = foldl(LazyOuterProduct, tms)
 ⊗(a::TensorMapping, b::TensorMapping) = LazyOuterProduct(a,b)
 
 
+"""
+    inflate(tm, sz, dir)
+
+Inflate `tm` with identity tensors in all directions `d` for `d != dir`.
+
+# TODO: Describe when it is useful
+"""
+function inflate(tm::TensorMapping, sz, dir)
+    Is = IdentityMapping{eltype(tm)}.(sz)
+    parts = Base.setindex(Is, tm, dir)
+    return foldl(⊗, parts)
+end
+
 function check_domain_size(tm::TensorMapping, sz)
     if domain_size(tm) != sz
         throw(SizeMismatch(tm,sz))

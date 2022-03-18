@@ -527,3 +527,26 @@ end
     end
 
 end
+
+@testset "inflate" begin
+    struct ScalingOperator{T,D} <: TensorMapping{T,D,D}
+        λ::T
+        size::NTuple{D,Int}
+    end
+
+    LazyTensors.apply(m::ScalingOperator{T,D}, v, I::Vararg{Any,D}) where {T,D} = m.λ*v[I...]
+    LazyTensors.range_size(m::ScalingOperator) = m.size
+    LazyTensors.domain_size(m::ScalingOperator) = m.size
+
+
+    I = LazyTensors.inflate(IdentityMapping(),(3,4,5,6), 2)
+    @test I isa TensorMapping{Float64, 3,3}
+    @test range_size(I) == (3,5,6)
+    @test domain_size(I) == (3,5,6)
+
+    # TODO: More tests
+
+    # Check that the dir is inbounds
+
+    # tm = ScalingOperator(2., (4,))
+end
