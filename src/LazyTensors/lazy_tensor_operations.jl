@@ -194,7 +194,7 @@ end
 """
     ScalingTensor{T,D} <: TensorMapping{T,D,D}
 
-A Lazy tensor operator that scales its input with `λ`.
+A lazy tensor that scales its input with `λ`.
 """
 struct ScalingTensor{T,D} <: TensorMapping{T,D,D}
     λ::T
