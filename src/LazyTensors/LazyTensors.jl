@@ -22,8 +22,8 @@ Base.:*(a::LazyTensor, b::LazyTensor) = throw(MethodError(Base.:*,(a,b)))
 Base.:*(a::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*,(a,args...))
 
 # Addition and subtraction of lazy tensors
-Base.:+(tm1::LazyTensor{T,R,D}, tm2::LazyTensor{T,R,D}) where {T,R,D} = LazyTensorBinaryOperation{:+,T,R,D}(tm1,tm2)
-Base.:-(tm1::LazyTensor{T,R,D}, tm2::LazyTensor{T,R,D}) where {T,R,D} = LazyTensorBinaryOperation{:-,T,R,D}(tm1,tm2)
+Base.:+(s::LazyTensor, t::LazyTensor) = LazyTensorBinaryOperation{:+}(s,t)
+Base.:-(s::LazyTensor, t::LazyTensor) = LazyTensorBinaryOperation{:-}(s,t)
 
 # Composing lazy tensors
 Base.:∘(s::LazyTensor, t::LazyTensor) = LazyTensorComposition(s,t)

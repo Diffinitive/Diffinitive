@@ -1,6 +1,7 @@
 # TBD: Is there a good way to split this file?
 # TODO: Split out functions for composition
 # TODO: We need to be really careful about good error messages.
+# TODO: Go over type parameters
 
 """
     LazyTensorApplication{T,R,D} <: LazyArray{T,R}
@@ -58,11 +59,13 @@ struct LazyTensorBinaryOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T
     tm1::T1
     tm2::T2
 
-    @inline function LazyTensorBinaryOperation{Op,T,R,D}(tm1::T1,tm2::T2) where {Op,T,R,D, T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}}
+    function LazyTensorBinaryOperation{Op,T,R,D}(tm1::T1,tm2::T2) where {Op,T,R,D, T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}}
         return new{Op,T,R,D,T1,T2}(tm1,tm2)
     end
 end
 # TODO: Boundschecking in constructor.
+
+LazyTensorBinaryOperation{Op}(s,t) where Op = LazyTensorBinaryOperation{Op,eltype(s), range_dim(s), domain_dim(s)}(s,t)
 
 apply(tmBinOp::LazyTensorBinaryOperation{:+,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) + apply(tmBinOp.tm2, v, I...)
 apply(tmBinOp::LazyTensorBinaryOperation{:-,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) - apply(tmBinOp.tm2, v, I...)
@@ -80,7 +83,7 @@ struct LazyTensorComposition{T,R,K,D, TM1<:LazyTensor{T,R,K}, TM2<:LazyTensor{T,
     t1::TM1
     t2::TM2
 
-    @inline function LazyTensorComposition(t1::LazyTensor{T,R,K}, t2::LazyTensor{T,K,D}) where {T,R,K,D}
+    function LazyTensorComposition(t1::LazyTensor{T,R,K}, t2::LazyTensor{T,K,D}) where {T,R,K,D}
         @boundscheck check_domain_size(t1, range_size(t2))
         return new{T,R,K,D, typeof(t1), typeof(t2)}(t1,t2)
     end
