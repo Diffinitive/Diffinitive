@@ -16,7 +16,15 @@ function second_derivative(grid::EquidistantGrid, inner_stencil, closure_stencil
     h_inv = inverse_spacing(grid)[direction]
     return SbpOperators.volume_operator(grid, scale(inner_stencil,h_inv^2), scale.(closure_stencils,h_inv^2), even, direction)
 end
-second_derivative(grid::EquidistantGrid{1}, inner_stencil::Stencil, closure_stencils) = second_derivative(grid,inner_stencil,closure_stencils,1)
+
+
+"""
+    second_derivative(grid, inner_stencil, closure_stencils)
+
+Creates a `second_derivative` operator on a 1D `grid` given `inner_stencil` and `closure_stencils`.
+"""
+second_derivative(grid::EquidistantGrid{1}, inner_stencil::Stencil, closure_stencils) = second_derivative(grid, inner_stencil, closure_stencils,1)
+
 
 """
     second_derivative(grid, stencil_set, direction)
@@ -27,8 +35,12 @@ function second_derivative(grid::EquidistantGrid, stencil_set::StencilSet, direc
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
     second_derivative(grid,inner_stencil,closure_stencils,direction);
-end 
+end
 
-# TODO: Not possible to remove ::Stencil from second_derivative(grid::EquidistantGrid{1},...) due to type deduction failing. 
-# Is this due to the type ambuguity of StencilSet? Possible to address in some other way? 
-# If not, should we drop ::StencilSet from the method above (it is not required)?
+
+"""
+    second_derivative(grid, stencil_set)
+
+Creates a `second_derivative` operator on a 1D `grid` given a `stencil_set`.
+"""
+second_derivative(grid::EquidistantGrid{1}, stencil_set) = second_derivative(grid, stencil_set, 1)

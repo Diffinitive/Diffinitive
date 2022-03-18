@@ -14,12 +14,7 @@ export sbp_operators_path
 
 A `StencilSet` contains a set of associated stencils. The stencils
 are are stored in a table, and can be accesed by indexing into the `StencilSet`.
-"""
-struct StencilSet
-    table
-end
 
-"""
     StencilSet(filename; filters)
 
 Creates a `StencilSet` from a TOML file based on some key-value
@@ -38,7 +33,13 @@ For more information see [Operator file format](@ref) in the documentation.
 
 See also [`sbp_operators_path`](@ref), [`get_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref),.
 """
-StencilSet(filename; filters...) = StencilSet(get_stencil_set(TOML.parsefile(filename); filters...))
+struct StencilSet
+    table
+    function StencilSet(filename; filters...)
+        return new(get_stencil_set(TOML.parsefile(filename); filters...))
+    end
+end
+
 Base.getindex(set::StencilSet,I...) = set.table[I...]
 
 """
