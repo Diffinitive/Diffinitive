@@ -5,6 +5,7 @@ export LazyTensorMappingTranspose
 export TensorMappingComposition
 export LazyLinearMap
 export IdentityMapping
+export ScalingTensor
 export InflatedTensorMapping
 export LazyOuterProduct
 export ⊗

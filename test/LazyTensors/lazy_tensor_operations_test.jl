@@ -263,6 +263,20 @@ end
     @test_throws SizeMismatch I1∘I2
 end
 
+@testset "ScalingTensor" begin
+    st = ScalingTensor(2.,(3,4))
+    @test st isa TensorMapping{Float64, 2, 2}
+    @test range_size(st) == (3,4)
+    @test domain_size(st) == (3,4)
+
+    v = rand(3,4)
+    @test st*v == 2.0 .* v
+    @test st'*v == 2.0 .* v
+
+    @inferred (st*v)[2,2]
+    @inferred (st'*v)[2,2]
+end
+
 @testset "InflatedTensorMapping" begin
     I(sz...) = IdentityMapping(sz...)
 

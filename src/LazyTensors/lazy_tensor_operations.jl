@@ -1,3 +1,5 @@
+# TBD: Is there a good way to split this file?
+
 """
     LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
 
@@ -186,7 +188,27 @@ end
     @boundscheck check_domain_size(tm, range_size(tmi))
     return tmi
 end
+# TODO: Implement the above as TensorMappingComposition instead
+# TODO: Move the operator definitions to one place
 
+"""
+    ScalingTensor{T,D} <: TensorMapping{T,D,D}
+
+A Lazy tensor operator that scales its input with `λ`.
+"""
+struct ScalingTensor{T,D} <: TensorMapping{T,D,D}
+    λ::T
+    size::NTuple{D,Int}
+end
+
+LazyTensors.apply(tm::ScalingTensor{T,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {T,D} = tm.λ*v[I...]
+LazyTensors.apply_transpose(tm::ScalingTensor{T,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {T,D} = tm.λ*v[I...]
+
+LazyTensors.range_size(m::ScalingTensor) = m.size
+LazyTensors.domain_size(m::ScalingTensor) = m.size
+
+# TODO: Rename everything with mapping
+# TODO: Remove ScalingOperator from tests
 
 """
     InflatedTensorMapping{T,R,D} <: TensorMapping{T,R,D}
