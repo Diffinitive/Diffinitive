@@ -12,6 +12,7 @@ export ⊗
 export SizeMismatch
 
 include("lazy_tensor.jl")
+include("tensor_types.jl")
 include("lazy_array.jl")
 include("lazy_tensor_operations.jl")
 include("tuple_manipulation.jl")
