@@ -1,12 +1,12 @@
 module LazyTensors
 
-export LazyTensorMappingApplication
-export LazyTensorMappingTranspose
-export TensorMappingComposition
+export LazyTensorApplication
+export LazyTensorTranspose
+export LazyTensorComposition
 export LazyLinearMap
-export IdentityMapping
+export IdentityTensor
 export ScalingTensor
-export InflatedTensorMapping
+export InflatedLazyTensor
 export LazyOuterProduct
 export ⊗
 export SizeMismatch

@@ -6,7 +6,7 @@ specified `boundary`. The action of the operator is determined by `closure_stenc
 
 When `Dim=1`, the corresponding `BoundaryOperator` tensor mapping is returned.
 When `Dim>1`, the `BoundaryOperator` `op` is inflated by the outer product
-of `IdentityMappings` in orthogonal coordinate directions, e.g for `Dim=3`,
+of `IdentityTensors` in orthogonal coordinate directions, e.g for `Dim=3`,
 the boundary restriction operator in the y-direction direction is `Ix⊗op⊗Iz`.
 """
 function boundary_operator(grid::EquidistantGrid, closure_stencil, boundary::CartesianBoundary)
@@ -17,9 +17,9 @@ function boundary_operator(grid::EquidistantGrid, closure_stencil, boundary::Car
     d = dim(boundary)
     op = BoundaryOperator(restrict(grid, d), closure_stencil, r)
 
-    # Create 1D IdentityMappings for each coordinate direction
+    # Create 1D IdentityTensors for each coordinate direction
     one_d_grids = restrict.(Ref(grid), Tuple(1:dimension(grid)))
-    Is = IdentityMapping{eltype(grid)}.(size.(one_d_grids))
+    Is = IdentityTensor{eltype(grid)}.(size.(one_d_grids))
 
     # Formulate the correct outer product sequence of the identity mappings and
     # the boundary operator
@@ -28,15 +28,15 @@ function boundary_operator(grid::EquidistantGrid, closure_stencil, boundary::Car
 end
 
 """
-    BoundaryOperator{T,R,N} <: TensorMapping{T,0,1}
+    BoundaryOperator{T,R,N} <: LazyTensor{T,0,1}
 
-Implements the boundary operator `op` for 1D as a `TensorMapping`
+Implements the boundary operator `op` for 1D as a `LazyTensor`
 
 `op` is the restriction of a grid function to the boundary using some closure `Stencil{T,N}`.
 The boundary to restrict to is determined by `R`.
 `op'` is the prolongation of a zero dimensional array to the whole grid using the same closure stencil.
 """
-struct BoundaryOperator{T,R<:Region,N} <: TensorMapping{T,0,1}
+struct BoundaryOperator{T,R<:Region,N} <: LazyTensor{T,0,1}
     stencil::Stencil{T,N}
     size::Int
 end

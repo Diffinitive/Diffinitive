@@ -12,7 +12,7 @@
  - [ ] Make sure we are setting tolerances in tests in a consistent way
  - [ ] Add check for correct domain sizes to lazy tensor operations using SizeMismatch
  - [ ] Write down some coding guideline or checklist for code conventions. For example i,j,... for indices and I for multi-index
- - [ ] Add boundschecking in TensorMappingApplication
+ - [ ] Add boundschecking in LazyTensorApplication
  - [ ] Start renaming things in LazyTensors
  - [ ] Clean up RegionIndices
     1. [ ] Write tests for how things should work
