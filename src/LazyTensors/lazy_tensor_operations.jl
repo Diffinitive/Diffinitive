@@ -1,5 +1,3 @@
-# TODO: Go over type parameters
-
 """
     LazyTensorApplication{T,R,D} <: LazyArray{T,R}
 
@@ -59,10 +57,11 @@ struct LazyTensorBinaryOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T
     tm2::T2
 
     function LazyTensorBinaryOperation{Op,T,R,D}(tm1::T1,tm2::T2) where {Op,T,R,D, T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}}
+        @boundscheck check_domain_size(tm2, domain_size(tm1))
+        @boundscheck check_range_size(tm2, range_size(tm1))
         return new{Op,T,R,D,T1,T2}(tm1,tm2)
     end
 end
-# TODO: Boundschecking in constructor.
 
 LazyTensorBinaryOperation{Op}(s,t) where Op = LazyTensorBinaryOperation{Op,eltype(s), range_dim(s), domain_dim(s)}(s,t)
 

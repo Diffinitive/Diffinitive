@@ -4,15 +4,26 @@ using Sbplib.RegionIndices
 
 using Tullio
 
+struct DummyMapping{T,R,D} <: LazyTensor{T,R,D} end
+
+LazyTensors.apply(m::DummyMapping{T,R}, v, I::Vararg{Any,R}) where {T,R} = :apply
+LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, I::Vararg{Any,D}) where {T,R,D} = :apply_transpose
+
+LazyTensors.range_size(m::DummyMapping) = :range_size
+LazyTensors.domain_size(m::DummyMapping) = :domain_size
+
+
+struct SizeDoublingMapping{T,R,D} <: LazyTensor{T,R,D}
+    domain_size::NTuple{D,Int}
+end
+
+LazyTensors.apply(m::SizeDoublingMapping{T,R}, v, i::Vararg{Any,R}) where {T,R} = (:apply,v,i)
+LazyTensors.range_size(m::SizeDoublingMapping) = 2 .* m.domain_size
+LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
+
+
+
 @testset "Mapping transpose" begin
-    struct DummyMapping{T,R,D} <: LazyTensor{T,R,D} end
-
-    LazyTensors.apply(m::DummyMapping{T,R}, v, I::Vararg{Any,R}) where {T,R} = :apply
-    LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, I::Vararg{Any,D}) where {T,R,D} = :apply_transpose
-
-    LazyTensors.range_size(m::DummyMapping) = :range_size
-    LazyTensors.domain_size(m::DummyMapping) = :domain_size
-
     m = DummyMapping{Float64,2,3}()
     @test m' isa LazyTensor{Float64, 3,2}
     @test m'' == m
@@ -26,14 +37,6 @@ end
 
 
 @testset "LazyTensorApplication" begin
-    struct SizeDoublingMapping{T,R,D} <: LazyTensor{T,R,D}
-        domain_size::NTuple{D,Int}
-    end
-
-    LazyTensors.apply(m::SizeDoublingMapping{T,R}, v, i::Vararg{Any,R}) where {T,R} = (:apply,v,i)
-    LazyTensors.range_size(m::SizeDoublingMapping) = 2 .* m.domain_size
-    LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
-
     m = SizeDoublingMapping{Int, 1, 1}((3,))
     mm = SizeDoublingMapping{Int, 1, 1}((6,))
     v = [0,1,2]
@@ -139,13 +142,20 @@ end
         @test ((A-B)*v)[i] == 2*v[i] - 3*v[i]
     end
 
-    # TODO: Test with size changing tm
-    # TODO: Test for mismatch in dimensions (DomainSizeMismatch?)
 
     @test range_size(A+B) == range_size(A) == range_size(B)
     @test domain_size(A+B) == domain_size(A) == domain_size(B)
 
     @test ((A+B)*ComplexF64[1.1,1.2,1.3])[3] isa ComplexF64
+
+    @testset "Error on unmatched sizes" begin
+        @test_throws Union{DomainSizeMismatch, RangeSizeMismatch} ScalingTensor(2.0, (3,)) + ScalingTensor(2.0, (4,))
+
+        @test_throws DomainSizeMismatch ScalingTensor(2.0, (4,)) + SizeDoublingMapping{Float64,1,1}((2,))
+        @test_throws DomainSizeMismatch SizeDoublingMapping{Float64,1,1}((2,)) + ScalingTensor(2.0, (4,))
+        @test_throws RangeSizeMismatch ScalingTensor(2.0, (2,)) + SizeDoublingMapping{Float64,1,1}((2,))
+        @test_throws RangeSizeMismatch SizeDoublingMapping{Float64,1,1}((2,)) + ScalingTensor(2.0, (2,))
+    end
 end
 
 
