@@ -38,9 +38,9 @@ using Sbplib.LazyTensors
     @test A∘I1 == A
     @test I2∘A == A
     @test I1∘I1 == I1
-    @test_throws SizeMismatch I1∘A
-    @test_throws SizeMismatch A∘I2
-    @test_throws SizeMismatch I1∘I2
+    @test_throws DomainSizeMismatch I1∘A
+    @test_throws DomainSizeMismatch A∘I2
+    @test_throws DomainSizeMismatch I1∘I2
 end
 
 
