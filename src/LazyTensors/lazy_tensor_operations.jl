@@ -1,6 +1,4 @@
-# TODO: We need to be really careful about good error messages.
 # TODO: Go over type parameters
-
 
 """
     LazyTensorApplication{T,R,D} <: LazyArray{T,R}
@@ -16,17 +14,19 @@ struct LazyTensorApplication{T,R,D, TM<:LazyTensor{<:Any,R,D}, AA<:AbstractArray
     o::AA
 
     function LazyTensorApplication(t::LazyTensor{<:Any,R,D}, o::AbstractArray{<:Any,D}) where {R,D}
+        @boundscheck check_domain_size(t, size(o))
         I = ntuple(i->1, range_dim(t))
         T = typeof(apply(t,o,I...))
         return new{T,R,D,typeof(t), typeof(o)}(t,o)
     end
 end
-# TODO: Do boundschecking on creation!
 
-Base.getindex(ta::LazyTensorApplication{T,R}, I::Vararg{Any,R}) where {T,R} = apply(ta.t, ta.o, I...)
-Base.getindex(ta::LazyTensorApplication{T,1}, I::CartesianIndex{1}) where {T} = apply(ta.t, ta.o, I.I...) # Would otherwise be caught in the previous method.
+function Base.getindex(ta::LazyTensorApplication{T,R}, I::Vararg{Any,R}) where {T,R}
+    @boundscheck checkbounds(ta, Int.(I)...)
+    return apply(ta.t, ta.o, I...)
+end
+Base.getindex(ta::LazyTensorApplication{T,1} where T, I::CartesianIndex{1}) = ta[Tuple(I)...] # Would otherwise be caught in the previous method.
 Base.size(ta::LazyTensorApplication) = range_size(ta.t)
-# TODO: What else is needed to implement the AbstractArray interface?
 
 
 """

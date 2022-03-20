@@ -34,32 +34,27 @@ end
     LazyTensors.range_size(m::SizeDoublingMapping) = 2 .* m.domain_size
     LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
 
-
     m = SizeDoublingMapping{Int, 1, 1}((3,))
+    mm = SizeDoublingMapping{Int, 1, 1}((6,))
     v = [0,1,2]
     @test size(m*v) == 2 .*size(v)
-    @test (m*v)[0] == (:apply,v,(0,))
-    @test (m*m*v)[1] == (:apply,m*v,(1,))
-    @test (m*m*v)[3] == (:apply,m*v,(3,))
-    @test (m*m*v)[6] == (:apply,m*v,(6,))
-    @test_broken BoundsError == (m*m*v)[0]
-    @test_broken BoundsError == (m*m*v)[7]
+    @test (m*v)[1] == (:apply,v,(1,))
+    @test (mm*m*v)[1] == (:apply,m*v,(1,))
+    @test (mm*m*v)[3] == (:apply,m*v,(3,))
+    @test (mm*m*v)[6] == (:apply,m*v,(6,))
     @test_throws MethodError m*m
 
     @test (m*v)[CartesianIndex(2)] == (:apply,v,(2,))
-    @test (m*m*v)[CartesianIndex(2)] == (:apply,m*v,(2,))
-
-    m = SizeDoublingMapping{Int, 2, 1}((3,))
-    @test_throws MethodError m*ones(Int,2,2)
-    @test_throws MethodError m*m*v
+    @test (mm*m*v)[CartesianIndex(2)] == (:apply,m*v,(2,))
 
     m = SizeDoublingMapping{Float64, 2, 2}((3,3))
+    mm = SizeDoublingMapping{Float64, 2, 2}((6,6))
     v = ones(3,3)
     @test size(m*v) == 2 .*size(v)
     @test (m*v)[1,2] == (:apply,v,(1,2))
 
     @test (m*v)[CartesianIndex(2,3)] == (:apply,v,(2,3))
-    @test (m*m*v)[CartesianIndex(4,3)] == (:apply,m*v,(4,3))
+    @test (mm*m*v)[CartesianIndex(4,3)] == (:apply,m*v,(4,3))
 
     m = ScalingTensor(2,(3,))
     v = [1,2,3]
@@ -70,6 +65,27 @@ end
     v = [[1 2];[3 4]]
     @test m*v == [[2 4];[6 8]]
     @test (m*v)[2,1] == 6
+
+    @testset "Error on index out of bounds" begin
+        m = SizeDoublingMapping{Int, 1, 1}((3,))
+        v = [0,1,2]
+
+        @test_throws BoundsError (m*v)[0]
+        @test_throws BoundsError (m*v)[7]
+    end
+
+    @testset "Error on unmatched dimensions" begin
+        v = [0,1,2]
+        m = SizeDoublingMapping{Int, 2, 1}((3,))
+        @test_throws MethodError m*ones(Int,2,2)
+        @test_throws MethodError m*m*v
+    end
+
+    @testset "Error on unmatched sizes" begin
+        @test_throws SizeMismatch ScalingTensor(2,(2,))*ones(3)
+        @test_throws SizeMismatch ScalingTensor(2,(2,))*ScalingTensor(2,(3,))*ones(3)
+    end
+
 
     @testset "Type calculation" begin
         m = ScalingTensor(2,(3,))
