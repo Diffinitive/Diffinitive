@@ -64,15 +64,13 @@ LazyElementwiseOperation{T,D,Op}(a::T,b::AbstractArray{T,D}) where {T,D,Op} = La
 
 Base.size(v::LazyElementwiseOperation) = size(v.a)
 
-evaluate(leo::LazyElementwiseOperation{T,D,:+}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] + leo.b[I...]
-evaluate(leo::LazyElementwiseOperation{T,D,:-}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] - leo.b[I...]
-evaluate(leo::LazyElementwiseOperation{T,D,:*}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] * leo.b[I...]
-evaluate(leo::LazyElementwiseOperation{T,D,:/}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] / leo.b[I...]
+evaluate(leo::LazyElementwiseOperation{T,D,:+}, I::Vararg{Int,D}) where {T,D} = @inbounds leo.a[I...] + leo.b[I...]
+evaluate(leo::LazyElementwiseOperation{T,D,:-}, I::Vararg{Int,D}) where {T,D} = @inbounds leo.a[I...] - leo.b[I...]
+evaluate(leo::LazyElementwiseOperation{T,D,:*}, I::Vararg{Int,D}) where {T,D} = @inbounds leo.a[I...] * leo.b[I...]
+evaluate(leo::LazyElementwiseOperation{T,D,:/}, I::Vararg{Int,D}) where {T,D} = @inbounds leo.a[I...] / leo.b[I...]
 
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D}, I::Vararg{Int,D}) where {T,D}
-    @boundscheck if !checkbounds(Bool, leo.a, I...)
-        throw(BoundsError([leo], I...))
-    end
+function Base.getindex(leo::LazyElementwiseOperation{T,D}, I::Vararg{Int,D}) where {T,D}
+    @boundscheck checkbounds(leo.a, I...)
     return evaluate(leo, I...)
 end
 

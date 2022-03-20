@@ -25,7 +25,7 @@ using Tullio
 end
 
 
-@testset "TensorApplication" begin
+@testset "LazyTensorApplication" begin
     struct SizeDoublingMapping{T,R,D} <: LazyTensor{T,R,D}
         domain_size::NTuple{D,Int}
     end
