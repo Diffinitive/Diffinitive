@@ -77,4 +77,3 @@ The type of elements the LazyTensor acts on.
 """
 Base.eltype(::LazyTensor{T}) where T = T
 
-# TODO: Think about boundschecking!
