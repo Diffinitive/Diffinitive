@@ -82,8 +82,8 @@ end
     end
 
     @testset "Error on unmatched sizes" begin
-        @test_throws SizeMismatch ScalingTensor(2,(2,))*ones(3)
-        @test_throws SizeMismatch ScalingTensor(2,(2,))*ScalingTensor(2,(3,))*ones(3)
+        @test_throws DomainSizeMismatch ScalingTensor(2,(2,))*ones(3)
+        @test_throws DomainSizeMismatch ScalingTensor(2,(2,))*ScalingTensor(2,(3,))*ones(3)
     end
 
 
@@ -140,7 +140,7 @@ end
     end
 
     # TODO: Test with size changing tm
-    # TODO: Test for mismatch in dimensions (SizeMismatch?)
+    # TODO: Test for mismatch in dimensions (DomainSizeMismatch?)
 
     @test range_size(A+B) == range_size(A) == range_size(B)
     @test domain_size(A+B) == domain_size(A) == domain_size(B)
@@ -159,7 +159,7 @@ end
     @test Ã∘B̃ isa LazyTensorComposition
     @test range_size(Ã∘B̃) == (2,)
     @test domain_size(Ã∘B̃) == (4,)
-    @test_throws SizeMismatch B̃∘Ã
+    @test_throws DomainSizeMismatch B̃∘Ã
 
     # @test @inbounds B̃∘Ã # Should not error even though dimensions don't match. (Since ]test runs with forced boundschecking this is currently not testable 2020-10-16)
 

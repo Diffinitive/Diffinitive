@@ -9,7 +9,8 @@ export ScalingTensor
 export InflatedLazyTensor
 export LazyOuterProduct
 export ⊗
-export SizeMismatch
+export DomainSizeMismatch
+export RangeSizeMismatch
 
 include("lazy_tensor.jl")
 include("tensor_types.jl")

@@ -271,16 +271,33 @@ LazyOuterProduct(tms::Vararg{LazyTensor}) = foldl(LazyOuterProduct, tms)
 
 function check_domain_size(tm::LazyTensor, sz)
     if domain_size(tm) != sz
-        throw(SizeMismatch(tm,sz))
+        throw(DomainSizeMismatch(tm,sz))
     end
 end
 
-struct SizeMismatch <: Exception
+function check_range_size(tm::LazyTensor, sz)
+    if range_size(tm) != sz
+        throw(RangeSizeMismatch(tm,sz))
+    end
+end
+
+struct DomainSizeMismatch <: Exception
     tm::LazyTensor
     sz
 end
 
-function Base.showerror(io::IO, err::SizeMismatch)
-    print(io, "SizeMismatch: ")
+function Base.showerror(io::IO, err::DomainSizeMismatch)
+    print(io, "DomainSizeMismatch: ")
     print(io, "domain size $(domain_size(err.tm)) of LazyTensor not matching size $(err.sz)")
+end
+
+
+struct RangeSizeMismatch <: Exception
+    tm::LazyTensor
+    sz
+end
+
+function Base.showerror(io::IO, err::RangeSizeMismatch)
+    print(io, "RangeSizeMismatch: ")
+    print(io, "range size $(range_size(err.tm)) of LazyTensor not matching size $(err.sz)")
 end
