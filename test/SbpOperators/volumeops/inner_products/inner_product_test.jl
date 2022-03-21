@@ -21,14 +21,14 @@ import Sbplib.SbpOperators.ConstantInteriorScalingOperator
         @testset "0D" begin
             H = inner_product(EquidistantGrid{Float64}(), quadrature_interior, quadrature_closure)
             @test H == inner_product(EquidistantGrid{Float64}(), stencil_set)
-            @test H == IdentityMapping{Float64}()
-            @test H isa TensorMapping{T,0,0} where T
+            @test H == IdentityTensor{Float64}()
+            @test H isa LazyTensor{T,0,0} where T
         end
         @testset "1D" begin
             H = inner_product(g_1D, quadrature_interior, quadrature_closure)
             @test H == inner_product(g_1D, stencil_set)
             @test H isa ConstantInteriorScalingOperator
-            @test H isa TensorMapping{T,1,1} where T
+            @test H isa LazyTensor{T,1,1} where T
         end
         @testset "2D" begin
             H = inner_product(g_2D, quadrature_interior, quadrature_closure)
@@ -36,7 +36,7 @@ import Sbplib.SbpOperators.ConstantInteriorScalingOperator
             H_y = inner_product(restrict(g_2D,2), quadrature_interior, quadrature_closure)
             @test H == inner_product(g_2D, stencil_set)
             @test H == H_x⊗H_y
-            @test H isa TensorMapping{T,2,2} where T
+            @test H isa LazyTensor{T,2,2} where T
         end
     end
 

@@ -59,8 +59,6 @@ using Sbplib.RegionIndices
     end
     @test_throws BoundsError (v1 +̃  v2)[4]
     v2 = [1., 2, 3, 4]
-    # Test that size of arrays is asserted when not specified inbounds
-    # TODO: Replace these errors with SizeMismatch
     @test_throws DimensionMismatch v1 +̃ v2
 
     # Test operations on LazyArray
@@ -76,8 +74,6 @@ using Sbplib.RegionIndices
     end
     @test_throws BoundsError (v1 + v2)[4]
     v2 = [1., 2, 3, 4]
-    # Test that size of arrays is asserted when not specified inbounds
-    # TODO: Replace these errors with SizeMismatch
     @test_throws DimensionMismatch v1 + v2
 end
 
