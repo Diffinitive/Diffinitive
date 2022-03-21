@@ -14,7 +14,9 @@ See also: [`volume_operator`](@ref).
 """
 function first_derivative(grid::EquidistantGrid, inner_stencil, closure_stencils, direction)
     h_inv = inverse_spacing(grid)[direction]
-    return SbpOperators.volume_operator(grid, scale(inner_stencil,h_inv), scale.(closure_stencils,h_inv), odd, direction)
+
+    D₁ = VolumeOperator(restrict(grid, direction), scale(inner_stencil,h_inv), scale.(closure_stencils,h_inv), odd)
+    return LazyTensors.inflate(D₁, size(grid), direction)
 end
 first_derivative(grid::EquidistantGrid{1}, inner_stencil::Stencil, closure_stencils) = first_derivative(grid,inner_stencil,closure_stencils,1)
 

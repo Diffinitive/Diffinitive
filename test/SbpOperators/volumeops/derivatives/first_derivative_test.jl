@@ -77,6 +77,9 @@ end
 
             @test D₁*v ≈ v rtol=tol
         end
+
+
+        # TODO: Different directions
     end
 end
 
