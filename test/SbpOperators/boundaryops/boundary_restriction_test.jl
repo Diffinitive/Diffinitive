@@ -30,7 +30,7 @@ import Sbplib.SbpOperators.BoundaryOperator
         @testset "2D" begin
             e_w = boundary_restriction(g_2D,e_closure,CartesianBoundary{1,Upper}())
             @test e_w == boundary_restriction(g_2D,stencil_set,CartesianBoundary{1,Upper}())
-            @test e_w isa InflatedLazyTensor
+            @test e_w isa InflatedTensor
             @test e_w isa LazyTensor{T,1,2} where T
         end
     end

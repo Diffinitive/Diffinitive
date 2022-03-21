@@ -2,7 +2,7 @@
     IdentityTensor{T,D} <: LazyTensor{T,D,D}
 
 The lazy identity LazyTensor for a given size. Usefull for building up higher dimensional tensor mappings from lower
-dimensional ones through outer products. Also used in the Implementation for InflatedLazyTensor.
+dimensional ones through outer products. Also used in the Implementation for InflatedTensor.
 """
 struct IdentityTensor{T,D} <: LazyTensor{T,D,D}
     size::NTuple{D,Int}
@@ -37,20 +37,20 @@ LazyTensors.domain_size(m::ScalingTensor) = m.size
 
 
 """
-    LazyLinearMap{T,R,D,...}(A, range_indicies, domain_indicies)
+    DenseTensor{T,R,D,...}(A, range_indicies, domain_indicies)
 
 LazyTensor defined by the AbstractArray A. `range_indicies` and `domain_indicies` define which indicies of A should
 be considerd the range and domain of the LazyTensor. Each set of indices must be ordered in ascending order.
 
-For instance, if A is a m x n matrix, and range_size = (1,), domain_size = (2,), then the LazyLinearMap performs the
+For instance, if A is a m x n matrix, and range_size = (1,), domain_size = (2,), then the DenseTensor performs the
 standard matrix-vector product on vectors of size n.
 """
-struct LazyLinearMap{T,R,D, RD, AA<:AbstractArray{T,RD}} <: LazyTensor{T,R,D}
+struct DenseTensor{T,R,D, RD, AA<:AbstractArray{T,RD}} <: LazyTensor{T,R,D}
     A::AA
     range_indicies::NTuple{R,Int}
     domain_indicies::NTuple{D,Int}
 
-    function LazyLinearMap(A::AA, range_indicies::NTuple{R,Int}, domain_indicies::NTuple{D,Int}) where {T,R,D, RD, AA<:AbstractArray{T,RD}}
+    function DenseTensor(A::AA, range_indicies::NTuple{R,Int}, domain_indicies::NTuple{D,Int}) where {T,R,D, RD, AA<:AbstractArray{T,RD}}
         if !issorted(range_indicies) || !issorted(domain_indicies)
             throw(DomainError("range_indicies and domain_indicies must be sorted in ascending order"))
         end
@@ -59,10 +59,10 @@ struct LazyLinearMap{T,R,D, RD, AA<:AbstractArray{T,RD}} <: LazyTensor{T,R,D}
     end
 end
 
-range_size(llm::LazyLinearMap) = size(llm.A)[[llm.range_indicies...]]
-domain_size(llm::LazyLinearMap) = size(llm.A)[[llm.domain_indicies...]]
+range_size(llm::DenseTensor) = size(llm.A)[[llm.range_indicies...]]
+domain_size(llm::DenseTensor) = size(llm.A)[[llm.domain_indicies...]]
 
-function apply(llm::LazyLinearMap{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
+function apply(llm::DenseTensor{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
     view_index = ntuple(i->:,ndims(llm.A))
     for i ∈ 1:R
         view_index = Base.setindex(view_index, Int(I[i]), llm.range_indicies[i])
@@ -71,6 +71,6 @@ function apply(llm::LazyLinearMap{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{A
     return sum(A_view.*v)
 end
 
-function apply_transpose(llm::LazyLinearMap{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D}
-    apply(LazyLinearMap(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
+function apply_transpose(llm::DenseTensor{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D}
+    apply(DenseTensor(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
 end
