@@ -365,9 +365,10 @@ end
     @test range_size(I) == (3,5,6)
     @test domain_size(I) == (3,5,6)
 
-    # TODO: More tests
+    @test LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 1) == InflatedLazyTensor(IdentityTensor{Float64}(),ScalingTensor(1., (4,)),IdentityTensor(4,5,6))
+    @test LazyTensors.inflate(ScalingTensor(2., (1,)),(3,4,5,6), 2) == InflatedLazyTensor(IdentityTensor(3),ScalingTensor(2., (1,)),IdentityTensor(5,6))
+    @test LazyTensors.inflate(ScalingTensor(3., (6,)),(3,4,5,6), 4) == InflatedLazyTensor(IdentityTensor(3,4,5),ScalingTensor(3., (6,)),IdentityTensor{Float64}())
 
-    # Check that the dir is inbounds
-
-    # tm = ScalingOperator(2., (4,))
+    @test_throws BoundsError LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 0)
+    @test_throws BoundsError LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 5)
 end
