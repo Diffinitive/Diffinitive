@@ -1,14 +1,14 @@
 """
     second_derivative(grid::EquidistantGrid, inner_stencil, closure_stencils, direction)
 
-Creates the second-derivative operator `D2` as a `TensorMapping`
+Creates the second-derivative operator `D2` as a `LazyTensor`
 
 `D2` approximates the second-derivative d²/dξ² on `grid` along the coordinate dimension specified by
 `direction`, using the stencil `inner_stencil` in the interior and a set of stencils `closure_stencils`
 for the points in the closure regions.
 
 On a one-dimensional `grid`, `D2` is a `VolumeOperator`. On a multi-dimensional `grid`, `D2` is the outer product of the
-one-dimensional operator with the `IdentityMapping`s in orthogonal coordinate dirrections.
+one-dimensional operator with the `IdentityTensor`s in orthogonal coordinate dirrections.
 
 See also: [`volume_operator`](@ref).
 """

@@ -30,8 +30,8 @@ end
     g = EquidistantGrid(20, 0., 11.)
     D,Dᵀ = dissipation(g, 1)
 
-    @test D isa TensorMapping{Float64,1,1} where T
-    @test Dᵀ isa TensorMapping{Float64,1,1} where T
+    @test D isa LazyTensor{Float64,1,1} where T
+    @test Dᵀ isa LazyTensor{Float64,1,1} where T
 
      @testset "Accuracy conditions" begin
         N = 20
