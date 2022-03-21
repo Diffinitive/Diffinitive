@@ -221,7 +221,7 @@ end
     @testset "Application" begin
         # Testing regular application and transposed application with inflation "before", "after" and "before and after".
         # The inflated tensor mappings are chosen to preserve, reduce and increase the dimension of the result compared to the input.
-        tests = [
+        cases = [
             (
                 InflatedLazyTensor(I(3,2), A, I(4)),
                 (v-> @tullio res[a,b,c,d] := Ã[c,i]*v[a,b,i,d]), # Expected result of apply
@@ -269,22 +269,12 @@ end
             ),
         ]
 
-        @testset "apply" begin
-            for i ∈ 1:length(tests)
-                tm = tests[i][1]
-                v = rand(domain_size(tm)...)
-                true_value = tests[i][2](v)
-                @test tm*v ≈ true_value rtol=1e-14
-            end
-        end
+        @testset "$tm" for (tm, true_apply, true_apply_transpose) ∈ cases
+            v = rand(domain_size(tm)...)
+            @test tm*v ≈ true_apply(v) rtol=1e-14
 
-        @testset "apply_transpose" begin
-            for i ∈ 1:length(tests)
-                tm = tests[i][1]
-                v = rand(range_size(tm)...)
-                true_value = tests[i][3](v)
-                @test tm'*v ≈ true_value rtol=1e-14
-            end
+            v = rand(range_size(tm)...)
+            @test tm'*v ≈ true_apply_transpose(v) rtol=1e-14
         end
 
         @testset "application to other type" begin
