@@ -21,9 +21,9 @@ end
 
 function Base.getindex(ta::LazyTensorApplication{T,R}, I::Vararg{Any,R}) where {T,R}
     @boundscheck checkbounds(ta, Int.(I)...)
-    return apply(ta.t, ta.o, I...)
+    return @inbounds apply(ta.t, ta.o, I...)
 end
-Base.getindex(ta::LazyTensorApplication{T,1} where T, I::CartesianIndex{1}) = ta[Tuple(I)...] # Would otherwise be caught in the previous method.
+Base.@propagate_inbounds @Base.getindex(ta::LazyTensorApplication{T,1} where T, I::CartesianIndex{1}) = ta[Tuple(I)...] # Would otherwise be caught in the previous method.
 Base.size(ta::LazyTensorApplication) = range_size(ta.t)
 
 
