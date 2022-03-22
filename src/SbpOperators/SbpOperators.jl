@@ -30,7 +30,7 @@ using Sbplib.Grids
 end
 
 include("stencil.jl")
-include("readoperator.jl")
+include("stencil_set.jl")
 include("volumeops/volume_operator.jl")
 include("volumeops/constant_interior_scaling_operator.jl")
 include("volumeops/derivatives/first_derivative.jl")
