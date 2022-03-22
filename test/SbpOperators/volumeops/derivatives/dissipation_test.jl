@@ -59,17 +59,17 @@ end
 end
 
 @testset "dissipation_interior_stencil" begin
-    @test dissipation_interior_stencil(1) == Stencil(-1,1, center=2)
-    @test dissipation_interior_stencil(2) == Stencil(1,-2,1, center=2)
-    @test dissipation_interior_stencil(3) == Stencil(-1,3,-3,1, center=3)
-    @test dissipation_interior_stencil(4) == Stencil(1, -4, 6, -4, 1, center=3)
+    @test dissipation_interior_stencil(dissipation_interior_weights(1)) == Stencil(-1,1, center=2)
+    @test dissipation_interior_stencil(dissipation_interior_weights(2)) == Stencil(1,-2,1, center=2)
+    @test dissipation_interior_stencil(dissipation_interior_weights(3)) == Stencil(-1,3,-3,1, center=3)
+    @test dissipation_interior_stencil(dissipation_interior_weights(4)) == Stencil(1, -4, 6, -4, 1, center=3)
 end
 
 @testset "dissipation_transpose_interior_stencil" begin
-    @test dissipation_transpose_interior_stencil(1) == Stencil(-1,1, center=1)
-    @test dissipation_transpose_interior_stencil(2) == Stencil(1,-2,1, center=2)
-    @test dissipation_transpose_interior_stencil(3) == Stencil(-1,3,-3,1, center=2)
-    @test dissipation_transpose_interior_stencil(4) == Stencil(1, -4, 6, -4, 1, center=3)
+    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(1)) == Stencil(-1,1, center=1)
+    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(2)) == Stencil(1,-2,1, center=2)
+    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(3)) == Stencil(-1,3,-3,1, center=2)
+    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(4)) == Stencil(1, -4, 6, -4, 1, center=3)
 end
 
 @testset "midpoint" begin
