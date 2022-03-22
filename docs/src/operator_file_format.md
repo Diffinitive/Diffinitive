@@ -16,7 +16,7 @@ of the included stencil sets can be computed using
 ```
 Advanced user might want to get access to the individual objects of an
 operator file. This can be accomplished using functions such as
-* [`StencilSet`](@ref)
+* [`read_stencil_set`](@ref)
 * [`parse_scalar`](@ref)
 * [`parse_stencil`](@ref)
 * [`parse_tuple`](@ref)

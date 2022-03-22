@@ -35,7 +35,7 @@ inverse_inner_product(grid::EquidistantGrid{0}, interior_weight, closure_weights
 
 Creates a `inverse_inner_product` operator on `grid` given a `stencil_set`.
 """
-function inverse_inner_product(grid, stencil_set)
+function inverse_inner_product(grid, stencil_set::StencilSet)
     inner_stencil = parse_scalar(stencil_set["H"]["inner"])
     closure_stencils = parse_tuple(stencil_set["H"]["closure"])
     return inverse_inner_product(grid, inner_stencil, closure_stencils)

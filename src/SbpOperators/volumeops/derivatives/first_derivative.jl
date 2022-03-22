@@ -43,4 +43,4 @@ end
 
 Creates a `first_derivative` operator on a 1D `grid` given a `stencil_set`.
 """
-first_derivative(grid::EquidistantGrid{1}, stencil_set) = first_derivative(grid, stencil_set, 1)
+first_derivative(grid::EquidistantGrid{1}, stencil_set::StencilSet) = first_derivative(grid, stencil_set, 1)

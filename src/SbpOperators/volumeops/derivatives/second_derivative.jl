@@ -43,4 +43,4 @@ end
 
 Creates a `second_derivative` operator on a 1D `grid` given a `stencil_set`.
 """
-second_derivative(grid::EquidistantGrid{1}, stencil_set) = second_derivative(grid, stencil_set, 1)
+second_derivative(grid::EquidistantGrid{1}, stencil_set::StencilSet) = second_derivative(grid, stencil_set, 1)

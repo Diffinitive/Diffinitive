@@ -17,7 +17,7 @@ Creates the `Laplace` operator `Δ` on `grid` given a `stencil_set`.
 
 See also [`laplace`](@ref).
 """
-function Laplace(grid::EquidistantGrid, stencil_set)
+function Laplace(grid::EquidistantGrid, stencil_set::StencilSet)
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
     Δ = laplace(grid, inner_stencil,closure_stencils)
