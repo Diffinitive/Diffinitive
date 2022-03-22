@@ -1,11 +1,26 @@
-function dissipation(g::EquidistantGrid, p, direction)
-    h_inv = inverse_spacing(g)[direction]
+function undevided_dissipation(g::EquidistantGrid, p, direction)
+    T = eltype(g)
+    interior_weights = T.(dissipation_interior_weights(p))
 
-    # D = volume_operator(g,CenteredStencil(1),(CenteredStencil(1)), )
-    return nothing, nothing
+    D  = stencil_operator_distinct_closures(
+        g,
+        dissipation_interior_stencil(interior_weights),
+        dissipation_lower_closure_stencils(interior_weights),
+        dissipation_upper_closure_stencils(interior_weights),
+        direction,
+    )
+    Dᵀ = stencil_operator_distinct_closures(
+        g,
+        dissipation_transpose_interior_stencil(interior_weights),
+        dissipation_transpose_lower_closure_stencils(interior_weights),
+        dissipation_transpose_upper_closure_stencils(interior_weights),
+        direction,
+    )
+
+    return D, Dᵀ
 end
 
-dissipation(g::EquidistantGrid{1}, p) = dissipation(g, p, 1)
+undevided_dissipation(g::EquidistantGrid{1}, p) = undevided_dissipation(g, p, 1)
 
 function dissipation_interior_weights(p)
    if p == 0

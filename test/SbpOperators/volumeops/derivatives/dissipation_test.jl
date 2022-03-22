@@ -26,27 +26,36 @@ function monomial(x,k)
     x^k/factorial(k)
 end
 
-@testset "dissipation" begin
+@testset "undevided_dissipation" begin
     g = EquidistantGrid(20, 0., 11.)
-    D,Dᵀ = dissipation(g, 1)
+    D,Dᵀ = undevided_dissipation(g, 1)
 
-    @test_broken D isa LazyTensor{Float64,1,1} where T
-    @test_broken Dᵀ isa LazyTensor{Float64,1,1} where T
+    @test D isa LazyTensor{Float64,1,1} where T
+    @test Dᵀ isa LazyTensor{Float64,1,1} where T
 
      @testset "Accuracy conditions" begin
         N = 20
         g = EquidistantGrid(N, 0//1,2//1)
+        h = spacing(g)[1]
         @testset "D_$p" for p ∈ [1,2,3,4]
-            D,Dᵀ = dissipation(g, p)
+            D,Dᵀ = undevided_dissipation(g, p)
 
-            @testset "x^$k" for k ∈ 0:1
-                v = evalOn(g, x->monomial(x,k))
+            @testset "x^$k" for k ∈ 0:p
+                v  = evalOn(g, x->monomial(x,k))
+                vₚₓ = evalOn(g, x->monomial(x,k-p))
 
-                x, = points(g)[10]
-                @test_broken (D*v)[10] == monomial(x,k-1)
+                @test D*v == h^p * vₚₓ
             end
 
-            # Test Dᵀ works backwards and interior forwards
+
+            @testset "x^$k" for k ∈ 0:p
+                v  = evalOn(g, x->monomial(x,k))
+                vₚₓ = evalOn(g, x->monomial(x,k-p))
+
+                for i ∈ SbpOperators.lower_closure_size(Dᵀ)+1:N-SbpOperators.upper_closure_size(Dᵀ)
+                    @test (Dᵀ*v)[i] == h^p * vₚₓ[i]
+                end
+            end
         end
     end
 end
