@@ -28,7 +28,7 @@ import Sbplib.SbpOperators.boundary_operator
 
         @testset "2D" begin
             e_w = boundary_operator(g_2D,closure_stencil,CartesianBoundary{1,Upper}())
-            @test e_w isa InflatedLazyTensor
+            @test e_w isa InflatedTensor
             @test e_w isa LazyTensor{T,1,2} where T
         end
     end

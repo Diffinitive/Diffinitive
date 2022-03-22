@@ -136,12 +136,9 @@ When do we need to know the size of the range and domain?
 
 ## Reasearch and thinking
  - [ ] Use a trait to indicate that a LazyTensor har the same range and domain?
- - [ ] Rename all the Tensor stuff to just LazyOperator, LazyApplication and so on?
  - [ ] Check how the native julia doc generator works
     - [ ] Check if Vidars design docs fit in there
  - [ ] Create a macro @lazy which replaces a binary op (+,-) by its lazy equivalent? Would be a neat way to indicate which evaluations are lazy without cluttering/confusing with special characters.
- - [ ] Specificera operatorer i TOML eller något liknande?
- H.. H_gamma etc.)
  - [ ] Dispatch on Lower() instead of the type Lower so `::Lower` instead of `::Type{Lower}` ???
  	Seems better unless there is some specific reason to use the type instead of the value.
  - [ ] How do we handle mixes of periodic and non-periodic grids? Seems it should be supported on the grid level and on the 1d operator level. Between there it should be transparent.

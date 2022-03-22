@@ -2,21 +2,22 @@
     Laplace{T, Dim, TM} <: LazyTensor{T, Dim, Dim}
 
 Implements the Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
-`LazyTensor`. Additionally `Laplace` stores the stencil set (parsed from TOML)
-used to construct the `LazyTensor`.
+`LazyTensor`. Additionally `Laplace` stores the `StencilSet`
+used to construct the `LazyTensor `.
 """
 struct Laplace{T, Dim, TM<:LazyTensor{T, Dim, Dim}} <: LazyTensor{T, Dim, Dim}
     D::TM       # Difference operator
-    stencil_set # Stencil set of the operator
+    stencil_set::StencilSet # Stencil set of the operator
 end
 
 """
     Laplace(grid::Equidistant, stencil_set)
 
-Creates the `Laplace` operator `Δ` on `grid` given a parsed TOML
-`stencil_set`. See also [`laplace`](@ref).
+Creates the `Laplace` operator `Δ` on `grid` given a `stencil_set`. 
+
+See also [`laplace`](@ref).
 """
-function Laplace(grid::EquidistantGrid, stencil_set)
+function Laplace(grid::EquidistantGrid, stencil_set::StencilSet)
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
     Δ = laplace(grid, inner_stencil,closure_stencils)

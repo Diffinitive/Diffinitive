@@ -69,7 +69,7 @@ end
 @testset "laplace" begin
     @testset "1D" begin
         Δ = laplace(g_1D, inner_stencil, closure_stencils)
-        @test Δ == second_derivative(g_1D, inner_stencil, closure_stencils)
+        @test Δ == second_derivative(g_1D, inner_stencil, closure_stencils, 1)
         @test Δ isa LazyTensor{T,1,1}  where T
     end
     @testset "3D" begin

@@ -1,5 +1,15 @@
 module SbpOperators
 
+# Stencil set
+export StencilSet
+export read_stencil_set
+export get_stencil_set
+export parse_stencil
+export parse_scalar
+export parse_tuple
+export sbp_operators_path
+
+# Operators
 export boundary_quadrature
 export boundary_restriction
 export inner_product
@@ -21,7 +31,7 @@ using Sbplib.Grids
 end
 
 include("stencil.jl")
-include("readoperator.jl")
+include("stencil_set.jl")
 include("volumeops/volume_operator.jl")
 include("volumeops/stencil_operator_distinct_closures.jl")
 include("volumeops/constant_interior_scaling_operator.jl")

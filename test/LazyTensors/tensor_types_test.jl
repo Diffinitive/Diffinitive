@@ -32,7 +32,7 @@ using Sbplib.LazyTensors
     @inferred domain_dim(I)
 
     Ã = rand(4,2)
-    A = LazyLinearMap(Ã,(1,),(2,))
+    A = DenseTensor(Ã,(1,),(2,))
     I1 = IdentityTensor{Float64}(2)
     I2 = IdentityTensor{Float64}(4)
     @test A∘I1 == A
@@ -59,15 +59,15 @@ end
 end
 
 
-@testset "LazyLinearMap" begin
+@testset "DenseTensor" begin
     # Test a standard matrix-vector product
     # mapping vectors of size 4 to vectors of size 3.
     A = rand(3,4)
-    Ã = LazyLinearMap(A, (1,), (2,))
+    Ã = DenseTensor(A, (1,), (2,))
     v = rand(4)
     w = rand(3)
 
-    @test Ã isa LazyLinearMap{T,1,1} where T
+    @test Ã isa DenseTensor{T,1,1} where T
     @test Ã isa LazyTensor{T,1,1} where T
     @test range_size(Ã) == (3,)
     @test domain_size(Ã) == (4,)
@@ -77,12 +77,12 @@ end
     @test Ã'*w ≈ A'*w
 
     A = rand(2,3,4)
-    @test_throws DomainError LazyLinearMap(A, (3,1), (2,))
+    @test_throws DomainError DenseTensor(A, (3,1), (2,))
 
     # Test more exotic mappings
     B = rand(3,4,2)
     # Map vectors of size 2 to matrices of size (3,4)
-    B̃ = LazyLinearMap(B, (1,2), (3,))
+    B̃ = DenseTensor(B, (1,2), (3,))
     v = rand(2)
 
     @test range_size(B̃) == (3,4)
@@ -92,7 +92,7 @@ end
     @test B̃*v ≈ B[:,:,1]*v[1] + B[:,:,2]*v[2] atol=5e-13
 
     # Map matrices of size (3,2) to vectors of size 4
-    B̃ = LazyLinearMap(B, (2,), (1,3))
+    B̃ = DenseTensor(B, (2,), (1,3))
     v = rand(3,2)
 
     @test range_size(B̃) == (4,)
