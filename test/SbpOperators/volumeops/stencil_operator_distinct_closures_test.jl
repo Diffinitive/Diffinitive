@@ -10,6 +10,33 @@ import Sbplib.SbpOperators.StencilOperatorDistinctClosures
 import Sbplib.SbpOperators.stencil_operator_distinct_closures
 
 @testset "stencil_operator_distinct_closures" begin
+    lower_closure = (
+        Stencil(-1,1, center=1),
+    )
+
+    inner_stencil = Stencil(-2,2, center=1)
+
+    upper_closure = (
+        Stencil(-3,3, center=1),
+        Stencil(-4,4, center=2),
+    )
+
+    g₁ = EquidistantGrid(5, 0., 1.)
+    g₂ = EquidistantGrid((5,5), (0.,0.), (1.,1.))
+    h = 1/4
+
+    A₁  = stencil_operator_distinct_closures(g₁, inner_stencil, lower_closure, upper_closure, 1)
+    A₂¹ = stencil_operator_distinct_closures(g₂, inner_stencil, lower_closure, upper_closure, 1)
+    A₂² = stencil_operator_distinct_closures(g₂, inner_stencil, lower_closure, upper_closure, 2)
+
+    v₁ = evalOn(g₁, x->x)
+
+    u = [1., 2., 2., 3., 4.]*h
+    @test A₁*v₁ == u
+
+    v₂ = evalOn(g₂, (x,y)-> x + 3y)
+    @test A₂¹*v₂ == repeat(u, 1, 5)
+    @test A₂²*v₂ == repeat(3u', 5, 1)
 end
 
 @testset "StencilOperatorDistinctClosures" begin
