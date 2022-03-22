@@ -43,16 +43,16 @@ end
     g = EquidistantGrid(11, 0., 1.)
 
     lower_closure = (
-        Stencil(-1,1,0, center=1),
-        Stencil(-2,2,0, center=2),
+        Stencil(-1,1, center=1),
+        Stencil(-2,2, center=2),
     )
 
     inner_stencil = Stencil(-3,3, center=1)
 
     upper_closure = (
         Stencil(4,-4,4, center=1),
-        Stencil(0,-5,5, center=2),
-        Stencil(0,-6,6, center=3),
+        Stencil(5,-5,5, center=2),
+        Stencil(6,-6,6, center=3),
     )
 
     A = StencilOperatorDistinctClosures(g, inner_stencil, lower_closure, upper_closure)
@@ -77,7 +77,7 @@ end
 
         # Upper closure
         @test LazyTensors.apply(A, v,  9) ≈ 4*(v[9] - v[10] + v[11])
-        @test LazyTensors.apply(A, v, 10) ≈ 5*(     - v[10] + v[11])
-        @test LazyTensors.apply(A, v, 11) ≈ 6*(     - v[10] + v[11])
+        @test LazyTensors.apply(A, v, 10) ≈ 5*(v[9] - v[10] + v[11])
+        @test LazyTensors.apply(A, v, 11) ≈ 6*(v[9] - v[10] + v[11])
     end
 end
