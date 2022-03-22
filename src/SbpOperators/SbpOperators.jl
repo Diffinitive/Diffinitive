@@ -23,6 +23,7 @@ end
 include("stencil.jl")
 include("readoperator.jl")
 include("volumeops/volume_operator.jl")
+include("volumeops/stencil_operator_distinct_closures.jl")
 include("volumeops/constant_interior_scaling_operator.jl")
 include("volumeops/derivatives/first_derivative.jl")
 include("volumeops/derivatives/second_derivative.jl")
