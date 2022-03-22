@@ -36,7 +36,7 @@ LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
 end
 
 
-@testset "LazyTensorApplication" begin
+@testset "TensorApplication" begin
     m = SizeDoublingMapping{Int, 1, 1}((3,))
     mm = SizeDoublingMapping{Int, 1, 1}((6,))
     v = [0,1,2]
@@ -159,14 +159,14 @@ end
 end
 
 
-@testset "LazyTensorComposition" begin
+@testset "TensorComposition" begin
     A = rand(2,3)
     B = rand(3,4)
 
-    Ã = LazyLinearMap(A, (1,), (2,))
-    B̃ = LazyLinearMap(B, (1,), (2,))
+    Ã = DenseTensor(A, (1,), (2,))
+    B̃ = DenseTensor(B, (1,), (2,))
 
-    @test Ã∘B̃ isa LazyTensorComposition
+    @test Ã∘B̃ isa TensorComposition
     @test range_size(Ã∘B̃) == (2,)
     @test domain_size(Ã∘B̃) == (4,)
     @test_throws DomainSizeMismatch B̃∘Ã
@@ -184,38 +184,38 @@ end
 end
 
 
-@testset "InflatedLazyTensor" begin
+@testset "InflatedTensor" begin
     I(sz...) = IdentityTensor(sz...)
 
     Ã = rand(4,2)
     B̃ = rand(4,2,3)
     C̃ = rand(4,2,3)
 
-    A = LazyLinearMap(Ã,(1,),(2,))
-    B = LazyLinearMap(B̃,(1,2),(3,))
-    C = LazyLinearMap(C̃,(1,),(2,3))
+    A = DenseTensor(Ã,(1,),(2,))
+    B = DenseTensor(B̃,(1,2),(3,))
+    C = DenseTensor(C̃,(1,),(2,3))
 
     @testset "Constructors" begin
-        @test InflatedLazyTensor(I(3,2), A, I(4)) isa LazyTensor{Float64, 4, 4}
-        @test InflatedLazyTensor(I(3,2), B, I(4)) isa LazyTensor{Float64, 5, 4}
-        @test InflatedLazyTensor(I(3), C, I(2,3)) isa LazyTensor{Float64, 4, 5}
-        @test InflatedLazyTensor(C, I(2,3)) isa LazyTensor{Float64, 3, 4}
-        @test InflatedLazyTensor(I(3), C) isa LazyTensor{Float64, 2, 3}
-        @test InflatedLazyTensor(I(3), I(2,3)) isa LazyTensor{Float64, 3, 3}
+        @test InflatedTensor(I(3,2), A, I(4)) isa LazyTensor{Float64, 4, 4}
+        @test InflatedTensor(I(3,2), B, I(4)) isa LazyTensor{Float64, 5, 4}
+        @test InflatedTensor(I(3), C, I(2,3)) isa LazyTensor{Float64, 4, 5}
+        @test InflatedTensor(C, I(2,3)) isa LazyTensor{Float64, 3, 4}
+        @test InflatedTensor(I(3), C) isa LazyTensor{Float64, 2, 3}
+        @test InflatedTensor(I(3), I(2,3)) isa LazyTensor{Float64, 3, 3}
     end
 
     @testset "Range and domain size" begin
-        @test range_size(InflatedLazyTensor(I(3,2), A, I(4))) == (3,2,4,4)
-        @test domain_size(InflatedLazyTensor(I(3,2), A, I(4))) == (3,2,2,4)
+        @test range_size(InflatedTensor(I(3,2), A, I(4))) == (3,2,4,4)
+        @test domain_size(InflatedTensor(I(3,2), A, I(4))) == (3,2,2,4)
 
-        @test range_size(InflatedLazyTensor(I(3,2), B, I(4))) == (3,2,4,2,4)
-        @test domain_size(InflatedLazyTensor(I(3,2), B, I(4))) == (3,2,3,4)
+        @test range_size(InflatedTensor(I(3,2), B, I(4))) == (3,2,4,2,4)
+        @test domain_size(InflatedTensor(I(3,2), B, I(4))) == (3,2,3,4)
 
-        @test range_size(InflatedLazyTensor(I(3), C, I(2,3))) == (3,4,2,3)
-        @test domain_size(InflatedLazyTensor(I(3), C, I(2,3))) == (3,2,3,2,3)
+        @test range_size(InflatedTensor(I(3), C, I(2,3))) == (3,4,2,3)
+        @test domain_size(InflatedTensor(I(3), C, I(2,3))) == (3,2,3,2,3)
 
-        @inferred range_size(InflatedLazyTensor(I(3,2), A, I(4))) == (3,2,4,4)
-        @inferred domain_size(InflatedLazyTensor(I(3,2), A, I(4))) == (3,2,2,4)
+        @inferred range_size(InflatedTensor(I(3,2), A, I(4))) == (3,2,4,4)
+        @inferred domain_size(InflatedTensor(I(3,2), A, I(4))) == (3,2,2,4)
     end
 
     @testset "Application" begin
@@ -223,47 +223,47 @@ end
         # The inflated tensor mappings are chosen to preserve, reduce and increase the dimension of the result compared to the input.
         cases = [
             (
-                InflatedLazyTensor(I(3,2), A, I(4)),
+                InflatedTensor(I(3,2), A, I(4)),
                 (v-> @tullio res[a,b,c,d] := Ã[c,i]*v[a,b,i,d]), # Expected result of apply
                 (v-> @tullio res[a,b,c,d] := Ã[i,c]*v[a,b,i,d]), # Expected result of apply_transpose
             ),
             (
-                InflatedLazyTensor(I(3,2), B, I(4)),
+                InflatedTensor(I(3,2), B, I(4)),
                 (v-> @tullio res[a,b,c,d,e] := B̃[c,d,i]*v[a,b,i,e]),
                 (v-> @tullio res[a,b,c,d] := B̃[i,j,c]*v[a,b,i,j,d]),
             ),
             (
-                InflatedLazyTensor(I(3,2), C, I(4)),
+                InflatedTensor(I(3,2), C, I(4)),
                 (v-> @tullio res[a,b,c,d] := C̃[c,i,j]*v[a,b,i,j,d]),
                 (v-> @tullio res[a,b,c,d,e] := C̃[i,c,d]*v[a,b,i,e]),
             ),
             (
-                InflatedLazyTensor(I(3,2), A),
+                InflatedTensor(I(3,2), A),
                 (v-> @tullio res[a,b,c] := Ã[c,i]*v[a,b,i]),
                 (v-> @tullio res[a,b,c] := Ã[i,c]*v[a,b,i]),
             ),
             (
-                InflatedLazyTensor(I(3,2), B),
+                InflatedTensor(I(3,2), B),
                 (v-> @tullio res[a,b,c,d] := B̃[c,d,i]*v[a,b,i]),
                 (v-> @tullio res[a,b,c] := B̃[i,j,c]*v[a,b,i,j]),
             ),
             (
-                InflatedLazyTensor(I(3,2), C),
+                InflatedTensor(I(3,2), C),
                 (v-> @tullio res[a,b,c] := C̃[c,i,j]*v[a,b,i,j]),
                 (v-> @tullio res[a,b,c,d] := C̃[i,c,d]*v[a,b,i]),
             ),
             (
-                InflatedLazyTensor(A,I(4)),
+                InflatedTensor(A,I(4)),
                 (v-> @tullio res[a,b] := Ã[a,i]*v[i,b]),
                 (v-> @tullio res[a,b] := Ã[i,a]*v[i,b]),
             ),
             (
-                InflatedLazyTensor(B,I(4)),
+                InflatedTensor(B,I(4)),
                 (v-> @tullio res[a,b,c] := B̃[a,b,i]*v[i,c]),
                 (v-> @tullio res[a,b] := B̃[i,j,a]*v[i,j,b]),
             ),
             (
-                InflatedLazyTensor(C,I(4)),
+                InflatedTensor(C,I(4)),
                 (v-> @tullio res[a,b] := C̃[a,i,j]*v[i,j,b]),
                 (v-> @tullio res[a,b,c] := C̃[i,a,b]*v[i,c]),
             ),
@@ -278,7 +278,7 @@ end
         end
 
         @testset "application to other type" begin
-            tm = InflatedLazyTensor(I(3,2), A, I(4))
+            tm = InflatedTensor(I(3,2), A, I(4))
 
             v = rand(ComplexF64, domain_size(tm)...)
             @test (tm*v)[1,2,3,1] isa ComplexF64
@@ -288,7 +288,7 @@ end
         end
 
         @testset "Inference of application" begin
-            tm = InflatedLazyTensor(I(2,3),ScalingTensor(2.0, (3,2)),I(3,4))
+            tm = InflatedTensor(I(2,3),ScalingTensor(2.0, (3,2)),I(3,4))
             v = rand(domain_size(tm)...)
 
             @inferred apply(tm,v,1,2,3,2,2,4)
@@ -296,14 +296,14 @@ end
         end
     end
 
-    @testset "InflatedLazyTensor of InflatedLazyTensor" begin
+    @testset "InflatedTensor of InflatedTensor" begin
         A = ScalingTensor(2.0,(2,3))
-        itm = InflatedLazyTensor(I(3,2), A, I(4))
-        @test  InflatedLazyTensor(I(4), itm, I(2)) == InflatedLazyTensor(I(4,3,2), A, I(4,2))
-        @test  InflatedLazyTensor(itm, I(2)) == InflatedLazyTensor(I(3,2), A, I(4,2))
-        @test  InflatedLazyTensor(I(4), itm) == InflatedLazyTensor(I(4,3,2), A, I(4))
+        itm = InflatedTensor(I(3,2), A, I(4))
+        @test  InflatedTensor(I(4), itm, I(2)) == InflatedTensor(I(4,3,2), A, I(4,2))
+        @test  InflatedTensor(itm, I(2)) == InflatedTensor(I(3,2), A, I(4,2))
+        @test  InflatedTensor(I(4), itm) == InflatedTensor(I(4,3,2), A, I(4))
 
-        @test InflatedLazyTensor(I(2), I(2), I(2)) isa InflatedLazyTensor # The constructor should always return its type.
+        @test InflatedTensor(I(2), I(2), I(2)) isa InflatedTensor # The constructor should always return its type.
     end
 end
 
@@ -335,8 +335,8 @@ end
     v₁ = rand(2,4,3)
     v₂ = rand(4,3,2)
 
-    Ã = LazyLinearMap(A,(1,),(2,))
-    B̃ = LazyLinearMap(B,(1,),(2,3))
+    Ã = DenseTensor(A,(1,),(2,))
+    B̃ = DenseTensor(B,(1,),(2,3))
 
     ÃB̃ = LazyOuterProduct(Ã,B̃)
     @tullio ABv[i,k] := A[i,j]*B[k,l,m]*v₁[j,l,m]
@@ -349,13 +349,13 @@ end
     @testset "Indentity mapping arguments" begin
         @test LazyOuterProduct(IdentityTensor(3,2), IdentityTensor(1,2)) == IdentityTensor(3,2,1,2)
 
-        Ã = LazyLinearMap(A,(1,),(2,))
-        @test LazyOuterProduct(IdentityTensor(3,2), Ã) == InflatedLazyTensor(IdentityTensor(3,2),Ã)
-        @test LazyOuterProduct(Ã, IdentityTensor(3,2)) == InflatedLazyTensor(Ã,IdentityTensor(3,2))
+        Ã = DenseTensor(A,(1,),(2,))
+        @test LazyOuterProduct(IdentityTensor(3,2), Ã) == InflatedTensor(IdentityTensor(3,2),Ã)
+        @test LazyOuterProduct(Ã, IdentityTensor(3,2)) == InflatedTensor(Ã,IdentityTensor(3,2))
 
         I1 = IdentityTensor(3,2)
         I2 = IdentityTensor(4)
-        @test I1⊗Ã⊗I2 == InflatedLazyTensor(I1, Ã, I2)
+        @test I1⊗Ã⊗I2 == InflatedTensor(I1, Ã, I2)
     end
 end
 
@@ -365,9 +365,9 @@ end
     @test range_size(I) == (3,5,6)
     @test domain_size(I) == (3,5,6)
 
-    @test LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 1) == InflatedLazyTensor(IdentityTensor{Float64}(),ScalingTensor(1., (4,)),IdentityTensor(4,5,6))
-    @test LazyTensors.inflate(ScalingTensor(2., (1,)),(3,4,5,6), 2) == InflatedLazyTensor(IdentityTensor(3),ScalingTensor(2., (1,)),IdentityTensor(5,6))
-    @test LazyTensors.inflate(ScalingTensor(3., (6,)),(3,4,5,6), 4) == InflatedLazyTensor(IdentityTensor(3,4,5),ScalingTensor(3., (6,)),IdentityTensor{Float64}())
+    @test LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 1) == InflatedTensor(IdentityTensor{Float64}(),ScalingTensor(1., (4,)),IdentityTensor(4,5,6))
+    @test LazyTensors.inflate(ScalingTensor(2., (1,)),(3,4,5,6), 2) == InflatedTensor(IdentityTensor(3),ScalingTensor(2., (1,)),IdentityTensor(5,6))
+    @test LazyTensors.inflate(ScalingTensor(3., (6,)),(3,4,5,6), 4) == InflatedTensor(IdentityTensor(3,4,5),ScalingTensor(3., (6,)),IdentityTensor{Float64}())
 
     @test_throws BoundsError LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 0)
     @test_throws BoundsError LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 5)

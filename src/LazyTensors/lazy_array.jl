@@ -36,7 +36,7 @@ Base.size(lfa::LazyFunctionArray) = lfa.size
 
 function Base.getindex(lfa::LazyFunctionArray{F,T,D}, I::Vararg{Int,D}) where {F,T,D}
     @boundscheck checkbounds(lfa, I...)
-    return lfa.f(I...)
+    return @inbounds lfa.f(I...)
 end
 
 
@@ -64,14 +64,14 @@ LazyElementwiseOperation{T,D,Op}(a::T,b::AbstractArray{T,D}) where {T,D,Op} = La
 
 Base.size(v::LazyElementwiseOperation) = size(v.a)
 
-evaluate(leo::LazyElementwiseOperation{T,D,:+}, I::Vararg{Int,D}) where {T,D} = @inbounds leo.a[I...] + leo.b[I...]
-evaluate(leo::LazyElementwiseOperation{T,D,:-}, I::Vararg{Int,D}) where {T,D} = @inbounds leo.a[I...] - leo.b[I...]
-evaluate(leo::LazyElementwiseOperation{T,D,:*}, I::Vararg{Int,D}) where {T,D} = @inbounds leo.a[I...] * leo.b[I...]
-evaluate(leo::LazyElementwiseOperation{T,D,:/}, I::Vararg{Int,D}) where {T,D} = @inbounds leo.a[I...] / leo.b[I...]
+Base.@propagate_inbounds evaluate(leo::LazyElementwiseOperation{T,D,:+}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] + leo.b[I...]
+Base.@propagate_inbounds evaluate(leo::LazyElementwiseOperation{T,D,:-}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] - leo.b[I...]
+Base.@propagate_inbounds evaluate(leo::LazyElementwiseOperation{T,D,:*}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] * leo.b[I...]
+Base.@propagate_inbounds evaluate(leo::LazyElementwiseOperation{T,D,:/}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] / leo.b[I...]
 
 function Base.getindex(leo::LazyElementwiseOperation{T,D}, I::Vararg{Int,D}) where {T,D}
     @boundscheck checkbounds(leo.a, I...)
-    return evaluate(leo, I...)
+    return @inbounds evaluate(leo, I...)
 end
 
 # Define lazy operations for AbstractArrays. Operations constructs a LazyElementwiseOperation which
