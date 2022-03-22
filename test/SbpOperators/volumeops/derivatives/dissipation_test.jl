@@ -145,18 +145,18 @@ end
 @testset "dissipation_transpose_lower_closure_stencils" begin
     cases = (
         (-1,1) => (
-            Stencil(-1,-1,    center=1),
+            Stencil(-1,-1, 0, center=1),
             Stencil( 1, 1,-1, center=2),
         ),
         (1,-2,1) => (
-            Stencil( 1, 1,    center=1),
-            Stencil(-2,-2, 1,  center=2),
+            Stencil( 1, 1, 0, 0, center=1),
+            Stencil(-2,-2, 1, 0, center=2),
             Stencil( 1, 1,-2, 1, center=3),
         ),
         (-1,3,-3,1) => (
-            Stencil(-1,-1,-1,          center=1),
-            Stencil( 3, 3, 3,-1,       center=2),
-            Stencil(-3,-3,-3, 3,-1,    center=3),
+            Stencil(-1,-1,-1, 0, 0, 0, center=1),
+            Stencil( 3, 3, 3,-1, 0, 0, center=2),
+            Stencil(-3,-3,-3, 3,-1, 0, center=3),
             Stencil( 1, 1, 1,-3, 3,-1, center=4),
         ),
     )
@@ -169,18 +169,18 @@ end
     cases = (
         (-1,1) => (
             Stencil( 1,-1, center = 1),
-            Stencil(    1, center = 1),
+            Stencil( 0, 1, center = 2),
         ),
         (1,-2,1) => (
-            Stencil( 1, -2, 1, 1, center=2),
-            Stencil(     1,-2,-2, center=2),
-            Stencil(        1, 1, center=2),
+            Stencil( 1,-2, 1, 1, center=2),
+            Stencil( 0, 1,-2,-2, center=3),
+            Stencil( 0, 0, 1, 1, center=4),
         ),
         (-1,3,-3,1) => (
             Stencil( 1,-3, 3,-1,-1, center=2),
-            Stencil(    1,-3, 3, 3, center=2),
-            Stencil(       1,-3,-3, center=2),
-            Stencil(          1, 1, center=2),
+            Stencil( 0, 1,-3, 3, 3, center=3),
+            Stencil( 0, 0, 1,-3,-3, center=4),
+            Stencil( 0, 0, 0, 1, 1, center=5),
         ),
     )
     @testset "interior_weights = $w" for (w, closure_stencils) ∈ cases
