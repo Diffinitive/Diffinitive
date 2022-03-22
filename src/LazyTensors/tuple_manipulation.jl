@@ -74,3 +74,23 @@ Takes a nested tuple and flattens the whole structure
 flatten_tuple(t::NTuple{N, Number} where N) = t
 flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
 flatten_tuple(ts::Vararg) = flatten_tuple(ts)
+
+
+function left_pad_tuple(t, val, N)
+    if N < length(t)
+        throw(DomainError(N, "Can't pad tuple of length $(length(t)) to $N elements"))
+    end
+
+    padding = ntuple(i->val, N-length(t))
+    return (padding..., t...)
+end
+
+function right_pad_tuple(t, val, N)
+    if N < length(t)
+        throw(DomainError(N, "Can't pad tuple of length $(length(t)) to $N elements"))
+    end
+
+    padding = ntuple(i->val, N-length(t))
+    return (t..., padding...)
+end
+
