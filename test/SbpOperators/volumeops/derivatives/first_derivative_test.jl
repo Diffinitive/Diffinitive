@@ -29,12 +29,14 @@ end
         
         @test first_derivative(g₁, stencil_set, 1) isa TensorMapping{Float64,1,1}
         @test first_derivative(g₂, stencil_set, 2) isa TensorMapping{Float64,2,2}
+        @test first_derivative(g₁, stencil_set, 1) == first_derivative(g₁, stencil_set)
 
         interior_stencil = CenteredStencil(-1,0,1)
         closure_stencils = [Stencil(-1,1, center=1)]
 
         @test first_derivative(g₁, interior_stencil, closure_stencils, 1) isa TensorMapping{Float64,1,1}
         @test first_derivative(g₁, interior_stencil, closure_stencils, 1) isa VolumeOperator
+        @test first_derivative(g₁, interior_stencil, closure_stencils, 1) == first_derivative(g₁, interior_stencil, closure_stencils)
         @test first_derivative(g₂, interior_stencil, closure_stencils, 2) isa TensorMapping{Float64,2,2}
     end
 
