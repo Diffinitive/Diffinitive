@@ -4,7 +4,7 @@ using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
 using Sbplib.RegionIndices
-import Sbplib.SbpOperators.BoundaryOperator
+using Sbplib.SbpOperators: BoundaryOperator, Stencil
 
 @testset "boundary_restriction" begin
 	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 4)
