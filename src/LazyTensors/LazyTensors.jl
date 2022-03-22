@@ -1,7 +1,7 @@
 module LazyTensors
 
 export TensorApplication
-export LazyTensorTranspose
+export TensorTranspose
 export TensorComposition
 export DenseTensor
 export IdentityTensor
@@ -24,8 +24,8 @@ Base.:*(a::LazyTensor, b::LazyTensor) = throw(MethodError(Base.:*,(a,b)))
 Base.:*(a::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*,(a,args...))
 
 # Addition and subtraction of lazy tensors
-Base.:+(s::LazyTensor, t::LazyTensor) = LazyTensorBinaryOperation{:+}(s,t)
-Base.:-(s::LazyTensor, t::LazyTensor) = LazyTensorBinaryOperation{:-}(s,t)
+Base.:+(s::LazyTensor, t::LazyTensor) = ElementwiseTensorOperation{:+}(s,t)
+Base.:-(s::LazyTensor, t::LazyTensor) = ElementwiseTensorOperation{:-}(s,t)
 
 # Composing lazy tensors
 Base.:∘(s::LazyTensor, t::LazyTensor) = TensorComposition(s,t)

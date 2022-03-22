@@ -28,7 +28,7 @@ Base.size(ta::TensorApplication) = range_size(ta.t)
 
 
 """
-    LazyTensorTranspose{T,R,D} <: LazyTensor{T,D,R}
+    TensorTranspose{T,R,D} <: LazyTensor{T,D,R}
 
 Struct for lazy transpose of a LazyTensor.
 
@@ -36,40 +36,40 @@ If a mapping implements the the `apply_transpose` method this allows working wit
 the transpose of mapping `m` by using `m'`. `m'` will work as a regular LazyTensor lazily calling
 the appropriate methods of `m`.
 """
-struct LazyTensorTranspose{T,R,D, TM<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
+struct TensorTranspose{T,R,D, TM<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
     tm::TM
 end
 
 # # TBD: Should this be implemented on a type by type basis or through a trait to provide earlier errors?
 # Jonatan 2020-09-25: Is the problem that you can take the transpose of any LazyTensor even if it doesn't implement `apply_transpose`?
-Base.adjoint(tm::LazyTensor) = LazyTensorTranspose(tm)
-Base.adjoint(tmt::LazyTensorTranspose) = tmt.tm
+Base.adjoint(tm::LazyTensor) = TensorTranspose(tm)
+Base.adjoint(tmt::TensorTranspose) = tmt.tm
 
-apply(tmt::LazyTensorTranspose{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D} = apply_transpose(tmt.tm, v, I...)
-apply_transpose(tmt::LazyTensorTranspose{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmt.tm, v, I...)
+apply(tmt::TensorTranspose{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D} = apply_transpose(tmt.tm, v, I...)
+apply_transpose(tmt::TensorTranspose{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmt.tm, v, I...)
 
-range_size(tmt::LazyTensorTranspose) = domain_size(tmt.tm)
-domain_size(tmt::LazyTensorTranspose) = range_size(tmt.tm)
+range_size(tmt::TensorTranspose) = domain_size(tmt.tm)
+domain_size(tmt::TensorTranspose) = range_size(tmt.tm)
 
 
-struct LazyTensorBinaryOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
+struct ElementwiseTensorOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
     tm1::T1
     tm2::T2
 
-    function LazyTensorBinaryOperation{Op,T,R,D}(tm1::T1,tm2::T2) where {Op,T,R,D, T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}}
+    function ElementwiseTensorOperation{Op,T,R,D}(tm1::T1,tm2::T2) where {Op,T,R,D, T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}}
         @boundscheck check_domain_size(tm2, domain_size(tm1))
         @boundscheck check_range_size(tm2, range_size(tm1))
         return new{Op,T,R,D,T1,T2}(tm1,tm2)
     end
 end
 
-LazyTensorBinaryOperation{Op}(s,t) where Op = LazyTensorBinaryOperation{Op,eltype(s), range_dim(s), domain_dim(s)}(s,t)
+ElementwiseTensorOperation{Op}(s,t) where Op = ElementwiseTensorOperation{Op,eltype(s), range_dim(s), domain_dim(s)}(s,t)
 
-apply(tmBinOp::LazyTensorBinaryOperation{:+,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) + apply(tmBinOp.tm2, v, I...)
-apply(tmBinOp::LazyTensorBinaryOperation{:-,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) - apply(tmBinOp.tm2, v, I...)
+apply(tmBinOp::ElementwiseTensorOperation{:+,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) + apply(tmBinOp.tm2, v, I...)
+apply(tmBinOp::ElementwiseTensorOperation{:-,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) - apply(tmBinOp.tm2, v, I...)
 
-range_size(tmBinOp::LazyTensorBinaryOperation) = range_size(tmBinOp.tm1)
-domain_size(tmBinOp::LazyTensorBinaryOperation) = domain_size(tmBinOp.tm1)
+range_size(tmBinOp::ElementwiseTensorOperation) = range_size(tmBinOp.tm1)
+domain_size(tmBinOp::ElementwiseTensorOperation) = domain_size(tmBinOp.tm1)
 
 
 """
