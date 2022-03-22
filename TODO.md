@@ -10,10 +10,7 @@
  - [ ] Replace getindex hack for flattening tuples with flatten_tuple. (eg. `getindex.(range_size.(L.D2),1)`)
  - [ ] Use `@inferred` in a lot of tests.
  - [ ] Make sure we are setting tolerances in tests in a consistent way
- - [ ] Add check for correct domain sizes to lazy tensor operations using SizeMismatch
  - [ ] Write down some coding guideline or checklist for code conventions. For example i,j,... for indices and I for multi-index
- - [ ] Add boundschecking in TensorApplication
- - [ ] Start renaming things in LazyTensors
  - [ ] Clean up RegionIndices
     1. [ ] Write tests for how things should work
     2. [ ] Update RegionIndices accordingly
