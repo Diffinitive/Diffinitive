@@ -7,7 +7,7 @@ using Sbplib.RegionIndices
 using Sbplib.SbpOperators: BoundaryOperator, Stencil
 
 @testset "boundary_restriction" begin
-	stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order = 4)
+	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 4)
 	e_closure = parse_stencil(stencil_set["e"]["closure"])
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))

@@ -12,7 +12,7 @@ import Sbplib.SbpOperators.ConstantInteriorScalingOperator
     g_1D = EquidistantGrid(77, 0.0, Lx)
     g_2D = EquidistantGrid((77,66), (0.0, 0.0), (Lx,Ly))
     @testset "inverse_inner_product" begin
-        stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
         quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
         @testset "0D" begin
@@ -38,7 +38,7 @@ import Sbplib.SbpOperators.ConstantInteriorScalingOperator
     end
 
     @testset "Sizes" begin
-        stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
         quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
         @testset "1D" begin
@@ -58,7 +58,7 @@ import Sbplib.SbpOperators.ConstantInteriorScalingOperator
             v = evalOn(g_1D,x->sin(x))
             u = evalOn(g_1D,x->x^3-x^2+1)
             @testset "2nd order" begin
-                stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
                 quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
                 quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_1D, quadrature_interior, quadrature_closure)
@@ -67,7 +67,7 @@ import Sbplib.SbpOperators.ConstantInteriorScalingOperator
                 @test Hi*H*u ≈ u rtol = 1e-15
             end
             @testset "4th order" begin
-                stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
                 quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
                 quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_1D, quadrature_interior, quadrature_closure)
@@ -80,7 +80,7 @@ import Sbplib.SbpOperators.ConstantInteriorScalingOperator
             v = evalOn(g_2D,(x,y)->sin(x)+cos(y))
             u = evalOn(g_2D,(x,y)->x*y + x^5 - sqrt(y))
             @testset "2nd order" begin
-                stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
                 quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
                 quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_2D, quadrature_interior, quadrature_closure)
@@ -89,7 +89,7 @@ import Sbplib.SbpOperators.ConstantInteriorScalingOperator
                 @test Hi*H*u ≈ u rtol = 1e-15
             end
             @testset "4th order" begin
-                stencil_set = StencilSet(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
                 quadrature_interior = parse_scalar(stencil_set["H"]["inner"])
                 quadrature_closure = parse_tuple(stencil_set["H"]["closure"])
                 H = inner_product(g_2D, quadrature_interior, quadrature_closure)

@@ -1,13 +1,5 @@
 using TOML
 
-export StencilSet
-export get_stencil_set
-
-export parse_stencil
-export parse_scalar
-export parse_tuple
-
-export sbp_operators_path
 
 """
     StencilSet
@@ -22,7 +14,7 @@ Base.getindex(set::StencilSet,I...) = set.table[I...]
 
 
 """
-    StencilSet(filename; filters)
+read_stencil_set(filename; filters)
 
 Creates a `StencilSet` from a TOML file based on some key-value
 filters. If more than one set matches the filters an error is raised. The
@@ -38,9 +30,9 @@ section, the exact parsing is left to the user.
 
 For more information see [Operator file format](@ref) in the documentation.
 
-See also [`sbp_operators_path`](@ref), [`get_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref),.
+See also [`StencilSet`](@ref), [`sbp_operators_path`](@ref), [`get_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref).
 """
-StencilSet(filename; filters...) = StencilSet(get_stencil_set(TOML.parsefile(filename); filters...))
+read_stencil_set(filename; filters...) = StencilSet(get_stencil_set(TOML.parsefile(filename); filters...))
 
 
 """
@@ -49,7 +41,7 @@ StencilSet(filename; filters...) = StencilSet(get_stencil_set(TOML.parsefile(fil
 Picks out a stencil set from an already parsed TOML based on some key-value
 filters.
 
-See also [`StencilSet`](@ref).
+See also [`read_stencil_set`](@ref).
 """
 function get_stencil_set(parsed_toml; filters...)
     matches = findall(parsed_toml["stencil_set"]) do set
@@ -75,7 +67,7 @@ end
 
 Accepts parsed TOML and reads it as a stencil.
 
-See also [`StencilSet`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref).
+See also [`read_stencil_set`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref).
 """
 function parse_stencil(parsed_toml)
     check_stencil_toml(parsed_toml)
@@ -123,7 +115,7 @@ end
 
 Parse a scalar, represented as a string or a number in the TOML, and return it as a `Rational`
 
-See also [`StencilSet`](@ref), [`parse_stencil`](@ref) [`parse_tuple`](@ref).
+See also [`read_stencil_set`](@ref), [`parse_stencil`](@ref) [`parse_tuple`](@ref).
 """
 function parse_scalar(parsed_toml)
     try
@@ -138,7 +130,7 @@ end
 
 Parse an array as a tuple of scalars.
 
-See also [`StencilSet`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref).
+See also [`read_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref).
 """
 function parse_tuple(parsed_toml)
     if !(parsed_toml isa Array)
@@ -167,6 +159,6 @@ end
 
 Calculate the path for the operators folder with included stencil sets.
 
-See also [`StencilSet`](@ref)
+See also [`StencilSet`](@ref), [`read_stencil_set`](@ref).
 """
 sbp_operators_path() = (@__DIR__) * "/operators/"

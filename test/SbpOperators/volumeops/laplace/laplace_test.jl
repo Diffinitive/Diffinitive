@@ -6,7 +6,7 @@ using Sbplib.LazyTensors
 
 # Default stencils (4th order)
 operator_path = sbp_operators_path()*"standard_diagonal.toml"
-stencil_set = StencilSet(operator_path; order=4)
+stencil_set = read_stencil_set(operator_path; order=4)
 inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
 closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
 g_1D = EquidistantGrid(101, 0.0, 1.)
@@ -42,7 +42,7 @@ g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
         # 2nd order interior stencil, 1st order boundary stencil,
         # implies that L*v should be exact for binomials up to order 2.
         @testset "2nd order" begin
-            stencil_set = StencilSet(operator_path; order=2)
+            stencil_set = read_stencil_set(operator_path; order=2)
             Δ = Laplace(g_3D, stencil_set)
             @test Δ*polynomials[1] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
             @test Δ*polynomials[2] ≈ zeros(Float64, size(g_3D)...) atol = 5e-9
@@ -53,7 +53,7 @@ g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
         # 4th order interior stencil, 2nd order boundary stencil,
         # implies that L*v should be exact for binomials up to order 3.
         @testset "4th order" begin
-            stencil_set = StencilSet(operator_path; order=4)
+            stencil_set = read_stencil_set(operator_path; order=4)
             Δ = Laplace(g_3D, stencil_set)
             # NOTE: high tolerances for checking the "exact" differentiation
             # due to accumulation of round-off errors/cancellation errors?
