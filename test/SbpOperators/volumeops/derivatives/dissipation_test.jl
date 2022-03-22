@@ -36,7 +36,7 @@ end
      @testset "Accuracy conditions" begin
         N = 20
         g = EquidistantGrid(N, 0//1,2//1)
-        h = spacing(g)[1]
+        h = only(spacing(g))
         @testset "D_$p" for p ∈ [1,2,3,4]
             D,Dᵀ = undevided_dissipation(g, p)
 
@@ -46,16 +46,35 @@ end
 
                 @test D*v == h^p * vₚₓ
             end
+        end
+    end
 
+    @testset "tanspose equality" begin
+        function get_matrix(D)
+            N = only(range_size(D))
+            M = only(domain_size(D))
 
-            @testset "x^$k" for k ∈ 0:p
-                v  = evalOn(g, x->monomial(x,k))
-                vₚₓ = evalOn(g, x->monomial(x,k-p))
-
-                for i ∈ SbpOperators.lower_closure_size(Dᵀ)+1:N-SbpOperators.upper_closure_size(Dᵀ)
-                    @test (Dᵀ*v)[i] == h^p * vₚₓ[i]
+            Dmat = zeros(N,M)
+            e = zeros(M)
+            for i ∈ 1:M
+                if i > 1
+                    e[i-1] = 0.
                 end
+                e[i] = 1.
+                Dmat[:,i] = D*e
             end
+
+            return Dmat
+        end
+
+        g = EquidistantGrid(11, 0., 1.)
+        @testset "D_$p" for p ∈ [1,2,3,4]
+            D,Dᵀ = undevided_dissipation(g, p)
+
+            D̄  = get_matrix(D)
+            D̄ᵀ = get_matrix(Dᵀ)
+
+            @test D̄ == D̄ᵀ'
         end
     end
 end
@@ -68,17 +87,17 @@ end
 end
 
 @testset "dissipation_interior_stencil" begin
-    @test dissipation_interior_stencil(dissipation_interior_weights(1)) == Stencil(-1,1, center=2)
-    @test dissipation_interior_stencil(dissipation_interior_weights(2)) == Stencil(1,-2,1, center=2)
-    @test dissipation_interior_stencil(dissipation_interior_weights(3)) == Stencil(-1,3,-3,1, center=3)
-    @test dissipation_interior_stencil(dissipation_interior_weights(4)) == Stencil(1, -4, 6, -4, 1, center=3)
+    @test dissipation_interior_stencil(dissipation_interior_weights(1)) == Stencil(-1, 1, center=2)
+    @test dissipation_interior_stencil(dissipation_interior_weights(2)) == Stencil( 1,-2, 1, center=2)
+    @test dissipation_interior_stencil(dissipation_interior_weights(3)) == Stencil(-1, 3,-3, 1, center=3)
+    @test dissipation_interior_stencil(dissipation_interior_weights(4)) == Stencil( 1,-4, 6,-4, 1, center=3)
 end
 
 @testset "dissipation_transpose_interior_stencil" begin
-    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(1)) == Stencil(-1,1, center=1)
-    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(2)) == Stencil(1,-2,1, center=2)
-    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(3)) == Stencil(-1,3,-3,1, center=2)
-    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(4)) == Stencil(1, -4, 6, -4, 1, center=3)
+    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(1)) == Stencil(1,-1, center=1)
+    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(2)) == Stencil(1,-2, 1, center=2)
+    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(3)) == Stencil(1,-3, 3,-1, center=2)
+    @test dissipation_transpose_interior_stencil(dissipation_interior_weights(4)) == Stencil(1,-4, 6,-4, 1, center=3)
 end
 
 @testset "midpoint" begin

@@ -33,8 +33,16 @@ end
 midpoint(weights) = length(weights)÷2 + 1
 midpoint_transpose(weights) = length(weights)+1 - midpoint(weights)
 
-dissipation_interior_stencil(weights) =           Stencil(weights..., center=midpoint(weights))
-dissipation_transpose_interior_stencil(weights) = Stencil(weights..., center=midpoint_transpose(weights))
+function dissipation_interior_stencil(weights)
+    return Stencil(weights..., center=midpoint(weights))
+end
+function dissipation_transpose_interior_stencil(weights)
+    if iseven(length(weights))
+        weights = map(-, weights)
+    end
+
+    return Stencil(weights..., center=midpoint_transpose(weights))
+end
 
 dissipation_lower_closure_size(weights) = midpoint(weights) - 1
 dissipation_upper_closure_size(weights) = length(weights) - midpoint(weights)
