@@ -1,204 +1,137 @@
 """
-    LazyTensorMappingApplication{T,R,D} <: LazyArray{T,R}
+    TensorApplication{T,R,D} <: LazyArray{T,R}
 
-Struct for lazy application of a TensorMapping. Created using `*`.
+Struct for lazy application of a LazyTensor. Created using `*`.
 
-Allows the result of a `TensorMapping` applied to a vector to be treated as an `AbstractArray`.
-With a mapping `m` and a vector `v` the LazyTensorMappingApplication object can be created by `m*v`.
+Allows the result of a `LazyTensor` applied to a vector to be treated as an `AbstractArray`.
+With a mapping `m` and a vector `v` the TensorApplication object can be created by `m*v`.
 The actual result will be calcualted when indexing into `m*v`.
 """
-struct LazyTensorMappingApplication{T,R,D, TM<:TensorMapping{<:Any,R,D}, AA<:AbstractArray{<:Any,D}} <: LazyArray{T,R}
+struct TensorApplication{T,R,D, TM<:LazyTensor{<:Any,R,D}, AA<:AbstractArray{<:Any,D}} <: LazyArray{T,R}
     t::TM
     o::AA
 
-    function LazyTensorMappingApplication(t::TensorMapping{<:Any,R,D}, o::AbstractArray{<:Any,D}) where {R,D}
+    function TensorApplication(t::LazyTensor{<:Any,R,D}, o::AbstractArray{<:Any,D}) where {R,D}
+        @boundscheck check_domain_size(t, size(o))
         I = ntuple(i->1, range_dim(t))
         T = typeof(apply(t,o,I...))
         return new{T,R,D,typeof(t), typeof(o)}(t,o)
     end
 end
-# TODO: Do boundschecking on creation!
 
-Base.getindex(ta::LazyTensorMappingApplication{T,R}, I::Vararg{Any,R}) where {T,R} = apply(ta.t, ta.o, I...)
-Base.getindex(ta::LazyTensorMappingApplication{T,1}, I::CartesianIndex{1}) where {T} = apply(ta.t, ta.o, I.I...) # Would otherwise be caught in the previous method.
-Base.size(ta::LazyTensorMappingApplication) = range_size(ta.t)
-# TODO: What else is needed to implement the AbstractArray interface?
+function Base.getindex(ta::TensorApplication{T,R}, I::Vararg{Any,R}) where {T,R}
+    @boundscheck checkbounds(ta, Int.(I)...)
+    return @inbounds apply(ta.t, ta.o, I...)
+end
+Base.@propagate_inbounds Base.getindex(ta::TensorApplication{T,1} where T, I::CartesianIndex{1}) = ta[Tuple(I)...] # Would otherwise be caught in the previous method.
+Base.size(ta::TensorApplication) = range_size(ta.t)
 
-Base.:*(a::TensorMapping, v::AbstractArray) = LazyTensorMappingApplication(a,v)
-Base.:*(a::TensorMapping, b::TensorMapping) = throw(MethodError(Base.:*,(a,b)))
-Base.:*(a::TensorMapping, args::Union{TensorMapping, AbstractArray}...) = foldr(*,(a,args...))
-
-# # We need the associativity to be a→b→c = a→(b→c), which is the case for '→'
-# # Should we overload some other infix binary opesrator?
-# →(tm::TensorMapping{T,R,D}, o::AbstractArray{T,D}) where {T,R,D} = LazyTensorMappingApplication(tm,o)
-# TODO: We need to be really careful about good error messages.
-# For example what happens if you try to multiply LazyTensorMappingApplication with a TensorMapping(wrong order)?
 
 """
-    LazyTensorMappingTranspose{T,R,D} <: TensorMapping{T,D,R}
+    TensorTranspose{T,R,D} <: LazyTensor{T,D,R}
 
-Struct for lazy transpose of a TensorMapping.
+Struct for lazy transpose of a LazyTensor.
 
 If a mapping implements the the `apply_transpose` method this allows working with
-the transpose of mapping `m` by using `m'`. `m'` will work as a regular TensorMapping lazily calling
+the transpose of mapping `m` by using `m'`. `m'` will work as a regular LazyTensor lazily calling
 the appropriate methods of `m`.
 """
-struct LazyTensorMappingTranspose{T,R,D, TM<:TensorMapping{T,R,D}} <: TensorMapping{T,D,R}
+struct TensorTranspose{T,R,D, TM<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
     tm::TM
 end
 
 # # TBD: Should this be implemented on a type by type basis or through a trait to provide earlier errors?
-# Jonatan 2020-09-25: Is the problem that you can take the transpose of any TensorMapping even if it doesn't implement `apply_transpose`?
-Base.adjoint(tm::TensorMapping) = LazyTensorMappingTranspose(tm)
-Base.adjoint(tmt::LazyTensorMappingTranspose) = tmt.tm
+# Jonatan 2020-09-25: Is the problem that you can take the transpose of any LazyTensor even if it doesn't implement `apply_transpose`?
+Base.adjoint(tm::LazyTensor) = TensorTranspose(tm)
+Base.adjoint(tmt::TensorTranspose) = tmt.tm
 
-apply(tmt::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D} = apply_transpose(tmt.tm, v, I...)
-apply_transpose(tmt::LazyTensorMappingTranspose{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmt.tm, v, I...)
+apply(tmt::TensorTranspose{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D} = apply_transpose(tmt.tm, v, I...)
+apply_transpose(tmt::TensorTranspose{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmt.tm, v, I...)
 
-range_size(tmt::LazyTensorMappingTranspose) = domain_size(tmt.tm)
-domain_size(tmt::LazyTensorMappingTranspose) = range_size(tmt.tm)
+range_size(tmt::TensorTranspose) = domain_size(tmt.tm)
+domain_size(tmt::TensorTranspose) = range_size(tmt.tm)
 
 
-struct LazyTensorMappingBinaryOperation{Op,T,R,D,T1<:TensorMapping{T,R,D},T2<:TensorMapping{T,R,D}} <: TensorMapping{T,D,R}
+struct ElementwiseTensorOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
     tm1::T1
     tm2::T2
 
-    @inline function LazyTensorMappingBinaryOperation{Op,T,R,D}(tm1::T1,tm2::T2) where {Op,T,R,D, T1<:TensorMapping{T,R,D},T2<:TensorMapping{T,R,D}}
+    function ElementwiseTensorOperation{Op,T,R,D}(tm1::T1,tm2::T2) where {Op,T,R,D, T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}}
+        @boundscheck check_domain_size(tm2, domain_size(tm1))
+        @boundscheck check_range_size(tm2, range_size(tm1))
         return new{Op,T,R,D,T1,T2}(tm1,tm2)
     end
 end
-# TODO: Boundschecking in constructor.
 
-apply(tmBinOp::LazyTensorMappingBinaryOperation{:+,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) + apply(tmBinOp.tm2, v, I...)
-apply(tmBinOp::LazyTensorMappingBinaryOperation{:-,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) - apply(tmBinOp.tm2, v, I...)
+ElementwiseTensorOperation{Op}(s,t) where Op = ElementwiseTensorOperation{Op,eltype(s), range_dim(s), domain_dim(s)}(s,t)
 
-range_size(tmBinOp::LazyTensorMappingBinaryOperation) = range_size(tmBinOp.tm1)
-domain_size(tmBinOp::LazyTensorMappingBinaryOperation) = domain_size(tmBinOp.tm1)
+apply(tmBinOp::ElementwiseTensorOperation{:+,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) + apply(tmBinOp.tm2, v, I...)
+apply(tmBinOp::ElementwiseTensorOperation{:-,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmBinOp.tm1, v, I...) - apply(tmBinOp.tm2, v, I...)
 
-Base.:+(tm1::TensorMapping{T,R,D}, tm2::TensorMapping{T,R,D}) where {T,R,D} = LazyTensorMappingBinaryOperation{:+,T,R,D}(tm1,tm2)
-Base.:-(tm1::TensorMapping{T,R,D}, tm2::TensorMapping{T,R,D}) where {T,R,D} = LazyTensorMappingBinaryOperation{:-,T,R,D}(tm1,tm2)
+range_size(tmBinOp::ElementwiseTensorOperation) = range_size(tmBinOp.tm1)
+domain_size(tmBinOp::ElementwiseTensorOperation) = domain_size(tmBinOp.tm1)
+
 
 """
-    TensorMappingComposition{T,R,K,D}
+    TensorComposition{T,R,K,D}
 
-Lazily compose two `TensorMapping`s, so that they can be handled as a single `TensorMapping`.
+Lazily compose two `LazyTensor`s, so that they can be handled as a single `LazyTensor`.
 """
-struct TensorMappingComposition{T,R,K,D, TM1<:TensorMapping{T,R,K}, TM2<:TensorMapping{T,K,D}} <: TensorMapping{T,R,D}
+struct TensorComposition{T,R,K,D, TM1<:LazyTensor{T,R,K}, TM2<:LazyTensor{T,K,D}} <: LazyTensor{T,R,D}
     t1::TM1
     t2::TM2
 
-    @inline function TensorMappingComposition(t1::TensorMapping{T,R,K}, t2::TensorMapping{T,K,D}) where {T,R,K,D}
+    function TensorComposition(t1::LazyTensor{T,R,K}, t2::LazyTensor{T,K,D}) where {T,R,K,D}
         @boundscheck check_domain_size(t1, range_size(t2))
         return new{T,R,K,D, typeof(t1), typeof(t2)}(t1,t2)
     end
 end
 
-range_size(tm::TensorMappingComposition) = range_size(tm.t1)
-domain_size(tm::TensorMappingComposition) = domain_size(tm.t2)
+range_size(tm::TensorComposition) = range_size(tm.t1)
+domain_size(tm::TensorComposition) = domain_size(tm.t2)
 
-function apply(c::TensorMappingComposition{T,R,K,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,K,D}
+function apply(c::TensorComposition{T,R,K,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,K,D}
     apply(c.t1, c.t2*v, I...)
 end
 
-function apply_transpose(c::TensorMappingComposition{T,R,K,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,K,D}
+function apply_transpose(c::TensorComposition{T,R,K,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,K,D}
     apply_transpose(c.t2, c.t1'*v, I...)
 end
 
-Base.@propagate_inbounds Base.:∘(s::TensorMapping, t::TensorMapping) = TensorMappingComposition(s,t)
 
 """
-    LazyLinearMap{T,R,D,...}(A, range_indicies, domain_indicies)
+    TensorComposition(tm, tmi::IdentityTensor)
+    TensorComposition(tmi::IdentityTensor, tm)
 
-TensorMapping defined by the AbstractArray A. `range_indicies` and `domain_indicies` define which indicies of A should
-be considerd the range and domain of the TensorMapping. Each set of indices must be ordered in ascending order.
-
-For instance, if A is a m x n matrix, and range_size = (1,), domain_size = (2,), then the LazyLinearMap performs the
-standard matrix-vector product on vectors of size n.
+Composes a `Tensormapping` `tm` with an `IdentityTensor` `tmi`, by returning `tm`
 """
-struct LazyLinearMap{T,R,D, RD, AA<:AbstractArray{T,RD}} <: TensorMapping{T,R,D}
-    A::AA
-    range_indicies::NTuple{R,Int}
-    domain_indicies::NTuple{D,Int}
-
-    function LazyLinearMap(A::AA, range_indicies::NTuple{R,Int}, domain_indicies::NTuple{D,Int}) where {T,R,D, RD, AA<:AbstractArray{T,RD}}
-        if !issorted(range_indicies) || !issorted(domain_indicies)
-            throw(DomainError("range_indicies and domain_indicies must be sorted in ascending order"))
-        end
-
-        return new{T,R,D,RD,AA}(A,range_indicies,domain_indicies)
-    end
-end
-
-range_size(llm::LazyLinearMap) = size(llm.A)[[llm.range_indicies...]]
-domain_size(llm::LazyLinearMap) = size(llm.A)[[llm.domain_indicies...]]
-
-function apply(llm::LazyLinearMap{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
-    view_index = ntuple(i->:,ndims(llm.A))
-    for i ∈ 1:R
-        view_index = Base.setindex(view_index, Int(I[i]), llm.range_indicies[i])
-    end
-    A_view = @view llm.A[view_index...]
-    return sum(A_view.*v)
-end
-
-function apply_transpose(llm::LazyLinearMap{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D}
-    apply(LazyLinearMap(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
-end
-
-
-"""
-    IdentityMapping{T,D} <: TensorMapping{T,D,D}
-
-The lazy identity TensorMapping for a given size. Usefull for building up higher dimensional tensor mappings from lower
-dimensional ones through outer products. Also used in the Implementation for InflatedTensorMapping.
-"""
-struct IdentityMapping{T,D} <: TensorMapping{T,D,D}
-    size::NTuple{D,Int}
-end
-
-IdentityMapping{T}(size::NTuple{D,Int}) where {T,D} = IdentityMapping{T,D}(size)
-IdentityMapping{T}(size::Vararg{Int,D}) where {T,D} = IdentityMapping{T,D}(size)
-IdentityMapping(size::Vararg{Int,D}) where D = IdentityMapping{Float64,D}(size)
-
-range_size(tmi::IdentityMapping) = tmi.size
-domain_size(tmi::IdentityMapping) = tmi.size
-
-apply(tmi::IdentityMapping{T,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
-apply_transpose(tmi::IdentityMapping{T,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
-
-"""
-    Base.:∘(tm, tmi)
-    Base.:∘(tmi, tm)
-
-Composes a `Tensormapping` `tm` with an `IdentityMapping` `tmi`, by returning `tm`
-"""
-@inline function Base.:∘(tm::TensorMapping{T,R,D}, tmi::IdentityMapping{T,D}) where {T,R,D}
+function TensorComposition(tm::LazyTensor{T,R,D}, tmi::IdentityTensor{T,D}) where {T,R,D}
     @boundscheck check_domain_size(tm, range_size(tmi))
     return tm
 end
 
-@inline function Base.:∘(tmi::IdentityMapping{T,R}, tm::TensorMapping{T,R,D}) where {T,R,D}
+function TensorComposition(tmi::IdentityTensor{T,R}, tm::LazyTensor{T,R,D}) where {T,R,D}
     @boundscheck check_domain_size(tmi, range_size(tm))
     return tm
 end
-# Specialization for the case where tm is an IdentityMapping. Required to resolve ambiguity.
-@inline function Base.:∘(tm::IdentityMapping{T,D}, tmi::IdentityMapping{T,D}) where {T,D}
+# Specialization for the case where tm is an IdentityTensor. Required to resolve ambiguity.
+function TensorComposition(tm::IdentityTensor{T,D}, tmi::IdentityTensor{T,D}) where {T,D}
     @boundscheck check_domain_size(tm, range_size(tmi))
     return tmi
 end
 
 
 """
-    InflatedTensorMapping{T,R,D} <: TensorMapping{T,R,D}
+    InflatedTensor{T,R,D} <: LazyTensor{T,R,D}
 
-An inflated `TensorMapping` with dimensions added before and afer its actual dimensions.
+An inflated `LazyTensor` with dimensions added before and afer its actual dimensions.
 """
-struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after, TM<:TensorMapping{T,R_middle,D_middle}} <: TensorMapping{T,R,D}
-    before::IdentityMapping{T,D_before}
+struct InflatedTensor{T,R,D,D_before,R_middle,D_middle,D_after, TM<:LazyTensor{T,R_middle,D_middle}} <: LazyTensor{T,R,D}
+    before::IdentityTensor{T,D_before}
     tm::TM
-    after::IdentityMapping{T,D_after}
+    after::IdentityTensor{T,D_after}
 
-    function InflatedTensorMapping(before, tm::TensorMapping{T}, after) where T
+    function InflatedTensor(before, tm::LazyTensor{T}, after) where T
         R_before = range_dim(before)
         R_middle = range_dim(tm)
         R_after = range_dim(after)
@@ -211,36 +144,37 @@ struct InflatedTensorMapping{T,R,D,D_before,R_middle,D_middle,D_after, TM<:Tenso
         return new{T,R,D,D_before,R_middle,D_middle,D_after, typeof(tm)}(before, tm, after)
     end
 end
+
 """
-    InflatedTensorMapping(before, tm, after)
-    InflatedTensorMapping(before,tm)
-    InflatedTensorMapping(tm,after)
+    InflatedTensor(before, tm, after)
+    InflatedTensor(before,tm)
+    InflatedTensor(tm,after)
 
-The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityMapping`s.
+The outer product of `before`, `tm` and `after`, where `before` and `after` are `IdentityTensor`s.
 
-If one of `before` or `after` is left out, a 0-dimensional `IdentityMapping` is used as the default value.
+If one of `before` or `after` is left out, a 0-dimensional `IdentityTensor` is used as the default value.
 
-If `tm` already is an `InflatedTensorMapping`, `before` and `after` will be extended instead of
-creating a nested `InflatedTensorMapping`.
+If `tm` already is an `InflatedTensor`, `before` and `after` will be extended instead of
+creating a nested `InflatedTensor`.
 """
-InflatedTensorMapping(::IdentityMapping, ::TensorMapping, ::IdentityMapping)
+InflatedTensor(::IdentityTensor, ::LazyTensor, ::IdentityTensor)
 
-function InflatedTensorMapping(before, itm::InflatedTensorMapping, after)
-    return InflatedTensorMapping(
-        IdentityMapping(before.size...,  itm.before.size...),
+function InflatedTensor(before, itm::InflatedTensor, after)
+    return InflatedTensor(
+        IdentityTensor(before.size...,  itm.before.size...),
         itm.tm,
-        IdentityMapping(itm.after.size..., after.size...),
+        IdentityTensor(itm.after.size..., after.size...),
     )
 end
 
-InflatedTensorMapping(before::IdentityMapping, tm::TensorMapping{T}) where T = InflatedTensorMapping(before,tm,IdentityMapping{T}())
-InflatedTensorMapping(tm::TensorMapping{T}, after::IdentityMapping) where T = InflatedTensorMapping(IdentityMapping{T}(),tm,after)
+InflatedTensor(before::IdentityTensor, tm::LazyTensor{T}) where T = InflatedTensor(before,tm,IdentityTensor{T}())
+InflatedTensor(tm::LazyTensor{T}, after::IdentityTensor) where T = InflatedTensor(IdentityTensor{T}(),tm,after)
 # Resolve ambiguity between the two previous methods
-InflatedTensorMapping(I1::IdentityMapping{T}, I2::IdentityMapping{T}) where T = InflatedTensorMapping(I1,I2,IdentityMapping{T}())
+InflatedTensor(I1::IdentityTensor{T}, I2::IdentityTensor{T}) where T = InflatedTensor(I1,I2,IdentityTensor{T}())
 
-# TODO: Implement some pretty printing in terms of ⊗. E.g InflatedTensorMapping(I(3),B,I(2)) -> I(3)⊗B⊗I(2)
+# TODO: Implement some pretty printing in terms of ⊗. E.g InflatedTensor(I(3),B,I(2)) -> I(3)⊗B⊗I(2)
 
-function range_size(itm::InflatedTensorMapping)
+function range_size(itm::InflatedTensor)
     return flatten_tuple(
         range_size(itm.before),
         range_size(itm.tm),
@@ -248,7 +182,7 @@ function range_size(itm::InflatedTensorMapping)
     )
 end
 
-function domain_size(itm::InflatedTensorMapping)
+function domain_size(itm::InflatedTensor)
     return flatten_tuple(
         domain_size(itm.before),
         domain_size(itm.tm),
@@ -256,7 +190,7 @@ function domain_size(itm::InflatedTensorMapping)
     )
 end
 
-function apply(itm::InflatedTensorMapping{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
+function apply(itm::InflatedTensor{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
     dim_before = range_dim(itm.before)
     dim_domain = domain_dim(itm.tm)
     dim_range = range_dim(itm.tm)
@@ -268,7 +202,7 @@ function apply(itm::InflatedTensorMapping{T,R,D}, v::AbstractArray{<:Any,D}, I::
     return apply(itm.tm, v_inner, inner_index...)
 end
 
-function apply_transpose(itm::InflatedTensorMapping{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D}
+function apply_transpose(itm::InflatedTensor{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D}
     dim_before = range_dim(itm.before)
     dim_domain = domain_dim(itm.tm)
     dim_range = range_dim(itm.tm)
@@ -281,87 +215,10 @@ function apply_transpose(itm::InflatedTensorMapping{T,R,D}, v::AbstractArray{<:A
 end
 
 
-"""
-    split_index(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val{dim_after}, I...)
-
-Splits the multi-index `I` into two parts. One part which is expected to be
-used as a view, and one which is expected to be used as an index.
-Eg.
-```
-split_index(Val(1),Val(3),Val(2),Val(1),(1,2,3,4)) -> (1,:,:,:,4), (2,3)
-```
-
-`dim_view` controls how many colons are in the view, and `dim_index` controls
-how many elements are extracted from the middle.
-`dim_before` and `dim_after` decides the length of the index parts before and after the colons in the view index.
-
-Arguments should satisfy `length(I) == dim_before+B_domain+dim_after`.
-
-The returned values satisfy
- * `length(view_index) == dim_before + dim_view + dim_after`
- * `length(I_middle) == dim_index`
-"""
-function split_index(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val{dim_after}, I...) where {dim_before,dim_view, dim_index,dim_after}
-    I_before, I_middle, I_after = split_tuple(I, Val(dim_before), Val(dim_index))
-
-    view_index = (I_before..., ntuple((i)->:, dim_view)..., I_after...)
-
-    return view_index, I_middle
-end
-
-# TODO: Can this be replaced by something more elegant while still being type stable? 2020-10-21
-# See:
-# https://github.com/JuliaLang/julia/issues/34884
-# https://github.com/JuliaLang/julia/issues/30386
-"""
-    slice_tuple(t, Val(l), Val(u))
-
-Get a slice of a tuple in a type stable way.
-Equivalent to `t[l:u]` but type stable.
-"""
-function slice_tuple(t,::Val{L},::Val{U}) where {L,U}
-    return ntuple(i->t[i+L-1], U-L+1)
-end
-
-"""
-    split_tuple(t::Tuple{...}, ::Val{M}) where {N,M}
-
-Split the tuple `t` into two parts. the first part is `M` long.
-E.g
-```julia
-split_tuple((1,2,3,4),Val(3)) -> (1,2,3), (4,)
-```
-"""
-function split_tuple(t::NTuple{N,Any},::Val{M}) where {N,M}
-    return slice_tuple(t,Val(1), Val(M)), slice_tuple(t,Val(M+1), Val(N))
-end
-
-"""
-    split_tuple(t::Tuple{...},::Val{M},::Val{K}) where {N,M,K}
-
-Same as `split_tuple(t::NTuple{N},::Val{M})` but splits the tuple in three parts. With the first
-two parts having lenght `M` and `K`.
-"""
-function split_tuple(t::NTuple{N,Any},::Val{M},::Val{K}) where {N,M,K}
-    p1, tail = split_tuple(t, Val(M))
-    p2, p3 = split_tuple(tail, Val(K))
-    return p1,p2,p3
-end
-
-
-"""
-    flatten_tuple(t)
-
-Takes a nested tuple and flattens the whole structure
-"""
-flatten_tuple(t::NTuple{N, Number} where N) = t
-flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
-flatten_tuple(ts::Vararg) = flatten_tuple(ts)
-
 @doc raw"""
     LazyOuterProduct(tms...)
 
-Creates a `TensorMappingComposition` for the outerproduct of `tms...`.
+Creates a `TensorComposition` for the outerproduct of `tms...`.
 This is done by separating the outer product into regular products of outer products involving only identity mappings and one non-identity mapping.
 
 First let
@@ -397,34 +254,49 @@ To apply ``A⊗B⊗C`` we evaluate
 """
 function LazyOuterProduct end
 
-function LazyOuterProduct(tm1::TensorMapping{T}, tm2::TensorMapping{T}) where T
-    itm1 = InflatedTensorMapping(tm1, IdentityMapping{T}(range_size(tm2)))
-    itm2 = InflatedTensorMapping(IdentityMapping{T}(domain_size(tm1)),tm2)
+function LazyOuterProduct(tm1::LazyTensor{T}, tm2::LazyTensor{T}) where T
+    itm1 = InflatedTensor(tm1, IdentityTensor{T}(range_size(tm2)))
+    itm2 = InflatedTensor(IdentityTensor{T}(domain_size(tm1)),tm2)
 
     return itm1∘itm2
 end
 
-LazyOuterProduct(t1::IdentityMapping{T}, t2::IdentityMapping{T}) where T = IdentityMapping{T}(t1.size...,t2.size...)
-LazyOuterProduct(t1::TensorMapping, t2::IdentityMapping) = InflatedTensorMapping(t1, t2)
-LazyOuterProduct(t1::IdentityMapping, t2::TensorMapping) = InflatedTensorMapping(t1, t2)
+LazyOuterProduct(t1::IdentityTensor{T}, t2::IdentityTensor{T}) where T = IdentityTensor{T}(t1.size...,t2.size...)
+LazyOuterProduct(t1::LazyTensor, t2::IdentityTensor) = InflatedTensor(t1, t2)
+LazyOuterProduct(t1::IdentityTensor, t2::LazyTensor) = InflatedTensor(t1, t2)
 
-LazyOuterProduct(tms::Vararg{TensorMapping}) = foldl(LazyOuterProduct, tms)
-
-⊗(a::TensorMapping, b::TensorMapping) = LazyOuterProduct(a,b)
+LazyOuterProduct(tms::Vararg{LazyTensor}) = foldl(LazyOuterProduct, tms)
 
 
-function check_domain_size(tm::TensorMapping, sz)
+function check_domain_size(tm::LazyTensor, sz)
     if domain_size(tm) != sz
-        throw(SizeMismatch(tm,sz))
+        throw(DomainSizeMismatch(tm,sz))
     end
 end
 
-struct SizeMismatch <: Exception
-    tm::TensorMapping
+function check_range_size(tm::LazyTensor, sz)
+    if range_size(tm) != sz
+        throw(RangeSizeMismatch(tm,sz))
+    end
+end
+
+struct DomainSizeMismatch <: Exception
+    tm::LazyTensor
     sz
 end
 
-function Base.showerror(io::IO, err::SizeMismatch)
-    print(io, "SizeMismatch: ")
-    print(io, "domain size $(domain_size(err.tm)) of TensorMapping not matching size $(err.sz)")
+function Base.showerror(io::IO, err::DomainSizeMismatch)
+    print(io, "DomainSizeMismatch: ")
+    print(io, "domain size $(domain_size(err.tm)) of LazyTensor not matching size $(err.sz)")
+end
+
+
+struct RangeSizeMismatch <: Exception
+    tm::LazyTensor
+    sz
+end
+
+function Base.showerror(io::IO, err::RangeSizeMismatch)
+    print(io, "RangeSizeMismatch: ")
+    print(io, "range size $(range_size(err.tm)) of LazyTensor not matching size $(err.sz)")
 end

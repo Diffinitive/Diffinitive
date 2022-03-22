@@ -18,18 +18,18 @@ import Sbplib.SbpOperators.boundary_operator
             op_l = BoundaryOperator{Lower}(closure_stencil,size(g_1D)[1])
             @test op_l == BoundaryOperator(g_1D,closure_stencil,Lower())
             @test op_l == boundary_operator(g_1D,closure_stencil,CartesianBoundary{1,Lower}())
-            @test op_l isa TensorMapping{T,0,1} where T
+            @test op_l isa LazyTensor{T,0,1} where T
 
             op_r = BoundaryOperator{Upper}(closure_stencil,size(g_1D)[1])
             @test op_r == BoundaryOperator(g_1D,closure_stencil,Upper())
             @test op_r == boundary_operator(g_1D,closure_stencil,CartesianBoundary{1,Upper}())
-            @test op_r isa TensorMapping{T,0,1} where T
+            @test op_r isa LazyTensor{T,0,1} where T
         end
 
         @testset "2D" begin
             e_w = boundary_operator(g_2D,closure_stencil,CartesianBoundary{1,Upper}())
-            @test e_w isa InflatedTensorMapping
-            @test e_w isa TensorMapping{T,1,2} where T
+            @test e_w isa InflatedTensor
+            @test e_w isa LazyTensor{T,1,2} where T
         end
     end
     op_l, op_r = boundary_operator.(Ref(g_1D), Ref(closure_stencil), boundary_identifiers(g_1D))

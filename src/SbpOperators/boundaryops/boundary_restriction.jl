@@ -1,7 +1,7 @@
 """
     boundary_restriction(grid, closure_stencil::Stencil, boundary)
 
-Creates boundary restriction operators `e` as `TensorMapping`s on `boundary`
+Creates boundary restriction operators `e` as `LazyTensor`s on `boundary`
 
 `e` is the restriction of a grid function to `boundary` using a `Stencil` `closure_stencil`.
 `e'` is the prolongation of a grid function on `boundary` to the whole grid using the same `closure_stencil`.

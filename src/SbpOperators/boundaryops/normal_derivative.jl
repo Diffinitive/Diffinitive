@@ -1,7 +1,7 @@
 """
     normal_derivative(grid, closure_stencil::Stencil, boundary)
 
-Creates the normal derivative boundary operator `d` as a `TensorMapping`
+Creates the normal derivative boundary operator `d` as a `LazyTensor`
 
 `d` computes the normal derivative of a grid function  on `boundary` a `Stencil` `closure_stencil`.
 `d'` is the prolongation of the normal derivative of a grid function to the whole grid using the same `closure_stencil`.

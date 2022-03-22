@@ -17,12 +17,12 @@ g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
         @testset "1D" begin
             Δ = laplace(g_1D, inner_stencil, closure_stencils)
             @test Laplace(g_1D, stencil_set) == Laplace(Δ, stencil_set)
-            @test Laplace(g_1D, stencil_set) isa TensorMapping{T,1,1}  where T
+            @test Laplace(g_1D, stencil_set) isa LazyTensor{T,1,1}  where T
         end
         @testset "3D" begin
             Δ = laplace(g_3D, inner_stencil, closure_stencils)
             @test Laplace(g_3D, stencil_set) == Laplace(Δ,stencil_set)
-            @test Laplace(g_3D, stencil_set) isa TensorMapping{T,3,3} where T
+            @test Laplace(g_3D, stencil_set) isa LazyTensor{T,3,3} where T
         end
     end
 
@@ -70,16 +70,16 @@ end
     @testset "1D" begin
         Δ = laplace(g_1D, inner_stencil, closure_stencils)
         @test Δ == second_derivative(g_1D, inner_stencil, closure_stencils, 1)
-        @test Δ isa TensorMapping{T,1,1}  where T
+        @test Δ isa LazyTensor{T,1,1}  where T
     end
     @testset "3D" begin
         Δ = laplace(g_3D, inner_stencil, closure_stencils)
-        @test Δ isa TensorMapping{T,3,3} where T
+        @test Δ isa LazyTensor{T,3,3} where T
         Dxx = second_derivative(g_3D, inner_stencil, closure_stencils, 1)
         Dyy = second_derivative(g_3D, inner_stencil, closure_stencils, 2)
         Dzz = second_derivative(g_3D, inner_stencil, closure_stencils, 3)
         @test Δ == Dxx + Dyy + Dzz
-        @test Δ isa TensorMapping{T,3,3} where T
+        @test Δ isa LazyTensor{T,3,3} where T
     end
 end
 

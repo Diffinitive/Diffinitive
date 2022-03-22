@@ -27,10 +27,10 @@ import Sbplib.SbpOperators.VolumeOperator
         @testset "2D" begin
             Dₓₓ = second_derivative(g_2D,inner_stencil,closure_stencils,1)
             D2 = second_derivative(g_1D,inner_stencil,closure_stencils,1)
-            I = IdentityMapping{Float64}(size(g_2D)[2])
+            I = IdentityTensor{Float64}(size(g_2D)[2])
             @test Dₓₓ == D2⊗I
             @test Dₓₓ == second_derivative(g_2D,stencil_set,1)
-            @test Dₓₓ isa TensorMapping{T,2,2} where T
+            @test Dₓₓ isa LazyTensor{T,2,2} where T
         end
     end
 

@@ -22,8 +22,8 @@ using Sbplib.LazyTensors
 #     v[:,2] = [7, 8, 9, 10]
 #     v[:,1] = [10, 11, 12, 13]
 #
-#     @test e_w  isa TensorMapping{T,2,1} where T
-#     @test e_w' isa TensorMapping{T,1,2} where T
+#     @test e_w  isa LazyTensor{T,2,1} where T
+#     @test e_w' isa LazyTensor{T,1,2} where T
 #
 #     @test domain_size(e_w, (3,2)) == (2,)
 #     @test domain_size(e_e, (3,2)) == (2,)
@@ -81,8 +81,8 @@ using Sbplib.LazyTensors
 #     v∂x = evalOn(g, (x,y)-> 2*x + y)
 #     v∂y = evalOn(g, (x,y)-> 2*(y-1) + x)
 #
-#     @test d_w  isa TensorMapping{T,2,1} where T
-#     @test d_w' isa TensorMapping{T,1,2} where T
+#     @test d_w  isa LazyTensor{T,2,1} where T
+#     @test d_w' isa LazyTensor{T,1,2} where T
 #
 #     @test domain_size(d_w, (3,2)) == (2,)
 #     @test domain_size(d_e, (3,2)) == (2,)
