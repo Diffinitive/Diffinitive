@@ -29,3 +29,19 @@ import Sbplib.SbpOperators.Stencil
         @test convert(Stencil{Rational}, Stencil(1.,2.,3.,4.,5.; center=2)) == Stencil(1//1,2//1,3//1,4//1,5//1; center=2)
     end
 end
+
+@testset "left_pad" begin
+    @test SbpOperators.left_pad(Stencil(1,1, center = 1), 2) == Stencil(1,1, center=1)
+    @test SbpOperators.left_pad(Stencil(1,1, center = 1), 3) == Stencil(0,1,1, center=2)
+    @test SbpOperators.left_pad(Stencil(2,3, center = 2), 4) == Stencil(0,0,2,3, center=4)
+
+    @test SbpOperators.left_pad(Stencil(2.,3., center = 2), 4) == Stencil(0.,0.,2.,3., center=4)
+end
+
+@testset "right_pad" begin
+    @test SbpOperators.right_pad(Stencil(1,1, center = 1), 2) == Stencil(1,1, center=1)
+    @test SbpOperators.right_pad(Stencil(1,1, center = 1), 3) == Stencil(1,1,0, center=1)
+    @test SbpOperators.right_pad(Stencil(2,3, center = 2), 4) == Stencil(2,3,0,0, center=2)
+
+    @test SbpOperators.right_pad(Stencil(2.,3., center = 2), 4) == Stencil(2.,3.,0.,0., center=2)
+end

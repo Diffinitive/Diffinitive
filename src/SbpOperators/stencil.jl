@@ -78,3 +78,18 @@ Base.@propagate_inbounds @inline function apply_stencil_backwards(s::Stencil{T,N
     end
     return w
 end
+
+
+function left_pad(s::Stencil, N)
+    weights = LazyTensors.left_pad_tuple(s.weights, zero(eltype(s)), N)
+    range = (s.range[1] - (N - length(s.weights)) ,s.range[2])
+
+    return Stencil(range, weights)
+end
+
+function right_pad(s::Stencil, N)
+    weights = LazyTensors.right_pad_tuple(s.weights, zero(eltype(s)), N)
+    range = (s.range[1], s.range[2] + (N - length(s.weights)))
+
+    return Stencil(range, weights)
+end
