@@ -69,6 +69,7 @@ end
     end
 
     @testset "Accuracy on function" begin
+        # 1D
         g = EquidistantGrid(30, 0.,1.)
         v = evalOn(g, x->exp(x))
         @testset for (order, tol) ∈ [(2, 6e-3),(4, 2e-4)]
@@ -76,6 +77,18 @@ end
             D₁ = first_derivative(g, stencil_set, 1)
 
             @test D₁*v ≈ v rtol=tol
+        end
+
+        # 2D
+        g = EquidistantGrid((30,60), (0.,0.),(1.,2.))
+        v = evalOn(g, (x,y)->exp(0.8x+1.2*y))
+        @testset for (order, tol) ∈ [(2, 6e-3),(4, 3e-4)]
+            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order)
+            Dx = first_derivative(g, stencil_set, 1)
+            Dy = first_derivative(g, stencil_set, 2)
+
+            @test Dx*v ≈ 0.8v rtol=tol
+            @test Dy*v ≈ 1.2v rtol=tol
         end
     end
 end
