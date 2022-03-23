@@ -26,9 +26,9 @@ function monomial(x,k)
     x^k/factorial(k)
 end
 
-@testset "undevided_dissipation" begin
+@testset "undivided_dissipation" begin
     g = EquidistantGrid(20, 0., 11.)
-    D,Dᵀ = undevided_dissipation(g, 1)
+    D,Dᵀ = undivided_dissipation(g, 1)
 
     @test D isa LazyTensor{Float64,1,1} where T
     @test Dᵀ isa LazyTensor{Float64,1,1} where T
@@ -38,7 +38,7 @@ end
         g = EquidistantGrid(N, 0//1,2//1)
         h = only(spacing(g))
         @testset "D_$p" for p ∈ [1,2,3,4]
-            D,Dᵀ = undevided_dissipation(g, p)
+            D,Dᵀ = undivided_dissipation(g, p)
 
             @testset "x^$k" for k ∈ 0:p
                 v  = evalOn(g, x->monomial(x,k))
@@ -69,7 +69,7 @@ end
 
         g = EquidistantGrid(11, 0., 1.)
         @testset "D_$p" for p ∈ [1,2,3,4]
-            D,Dᵀ = undevided_dissipation(g, p)
+            D,Dᵀ = undivided_dissipation(g, p)
 
             D̄  = get_matrix(D)
             D̄ᵀ = get_matrix(Dᵀ)

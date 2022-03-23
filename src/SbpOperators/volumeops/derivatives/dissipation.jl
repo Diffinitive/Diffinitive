@@ -1,4 +1,4 @@
-function undevided_dissipation(g::EquidistantGrid, p, direction)
+function undivided_dissipation(g::EquidistantGrid, p, direction)
     T = eltype(g)
     interior_weights = T.(dissipation_interior_weights(p))
 
@@ -20,7 +20,7 @@ function undevided_dissipation(g::EquidistantGrid, p, direction)
     return D, Dᵀ
 end
 
-undevided_dissipation(g::EquidistantGrid{1}, p) = undevided_dissipation(g, p, 1)
+undivided_dissipation(g::EquidistantGrid{1}, p) = undivided_dissipation(g, p, 1)
 
 function dissipation_interior_weights(p)
    if p == 0
