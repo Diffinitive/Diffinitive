@@ -22,31 +22,31 @@ import Sbplib.SbpOperators.even
             op = VolumeOperator(inner_stencil,closure_stencils,(11,),even)
             @test op == VolumeOperator(g_1D,inner_stencil,closure_stencils,even)
             @test op == volume_operator(g_1D,inner_stencil,closure_stencils,even,1)
-            @test op isa TensorMapping{T,1,1} where T
+            @test op isa LazyTensor{T,1,1} where T
         end
         @testset "2D" begin
             op_x = volume_operator(g_2D,inner_stencil,closure_stencils,even,1)
             op_y = volume_operator(g_2D,inner_stencil,closure_stencils,even,2)
-            Ix = IdentityMapping{Float64}((11,))
-            Iy = IdentityMapping{Float64}((12,))
+            Ix = IdentityTensor{Float64}((11,))
+            Iy = IdentityTensor{Float64}((12,))
             @test op_x == VolumeOperator(inner_stencil,closure_stencils,(11,),even)⊗Iy
             @test op_y == Ix⊗VolumeOperator(inner_stencil,closure_stencils,(12,),even)
-            @test op_x isa TensorMapping{T,2,2} where T
-            @test op_y isa TensorMapping{T,2,2} where T
+            @test op_x isa LazyTensor{T,2,2} where T
+            @test op_y isa LazyTensor{T,2,2} where T
         end
         @testset "3D" begin
             op_x = volume_operator(g_3D,inner_stencil,closure_stencils,even,1)
             op_y = volume_operator(g_3D,inner_stencil,closure_stencils,even,2)
             op_z = volume_operator(g_3D,inner_stencil,closure_stencils,even,3)
-            Ix = IdentityMapping{Float64}((11,))
-            Iy = IdentityMapping{Float64}((12,))
-            Iz = IdentityMapping{Float64}((10,))
+            Ix = IdentityTensor{Float64}((11,))
+            Iy = IdentityTensor{Float64}((12,))
+            Iz = IdentityTensor{Float64}((10,))
             @test op_x == VolumeOperator(inner_stencil,closure_stencils,(11,),even)⊗Iy⊗Iz
             @test op_y == Ix⊗VolumeOperator(inner_stencil,closure_stencils,(12,),even)⊗Iz
             @test op_z == Ix⊗Iy⊗VolumeOperator(inner_stencil,closure_stencils,(10,),even)
-            @test op_x isa TensorMapping{T,3,3} where T
-            @test op_y isa TensorMapping{T,3,3} where T
-            @test op_z isa TensorMapping{T,3,3} where T
+            @test op_x isa LazyTensor{T,3,3} where T
+            @test op_y isa LazyTensor{T,3,3} where T
+            @test op_z isa LazyTensor{T,3,3} where T
         end
     end
 

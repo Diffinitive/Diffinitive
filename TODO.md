@@ -9,10 +9,7 @@
  - [ ] Use `@inferred` in a lot of tests.
  - [ ] Replace `@inferred` tests with a benchmark suite that automatically tests for regressions.
  - [ ] Make sure we are setting tolerances in tests in a consistent way
- - [ ] Add check for correct domain sizes to lazy tensor operations using SizeMismatch
  - [ ] Write down some coding guideline or checklist for code conventions. For example i,j,... for indices and I for multi-index
- - [ ] Add boundschecking in TensorMappingApplication
- - [ ] Start renaming things in LazyTensors
  - [ ] Clean up RegionIndices
     1. [ ] Write tests for how things should work
     2. [ ] Update RegionIndices accordingly
@@ -23,7 +20,6 @@
        See (https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing)
  - [ ] Samla noggrannhets- och SBP-ness-tester för alla operatorer på ett ställe
  - [ ] Move export statements to top of each module
- - [ ] Add a type StencilSet for easier dispatch
 
 
  - [ ] Gå igenom alla typ parametrar och kolla om de är motiverade. Både i signaturer och typer, tex D i VariableSecondDerivative. Kan vi använda promote istället?

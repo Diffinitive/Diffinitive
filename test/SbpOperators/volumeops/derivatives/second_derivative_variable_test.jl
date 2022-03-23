@@ -18,7 +18,7 @@ using LinearAlgebra
         g = EquidistantGrid(11, 0., 1.)
         c = [  1.,  3.,  6., 10., 15., 21., 28., 36., 45., 55., 66.]
         @testset "Constructors" begin
-            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils) isa TensorMapping
+            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils) isa LazyTensor
 
             D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils)
             @test range_dim(D₂ᶜ) == 1
@@ -82,8 +82,8 @@ using LinearAlgebra
         g = EquidistantGrid((11,9), (0.,0.), (10.,8.)) # h = 1
         c = evalOn(g, (x,y)->x+y)
         @testset "Constructors" begin
-            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1) isa TensorMapping
-            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,2) isa TensorMapping
+            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1) isa LazyTensor
+            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,2) isa LazyTensor
 
             D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1)
             @test range_dim(D₂ᶜ) == 2

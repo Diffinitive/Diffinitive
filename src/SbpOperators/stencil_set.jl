@@ -1,25 +1,27 @@
 using TOML
 
-export read_stencil_set
-export get_stencil_set
 
-export parse_stencil
-export parse_nested_stencil
-export parse_scalar
-export parse_tuple
+"""
+    StencilSet
 
-export sbp_operators_path
+A `StencilSet` contains a set of associated stencils. The stencils
+are are stored in a table, and can be accesed by indexing into the `StencilSet`.
+"""
+struct StencilSet
+    table
+end
+Base.getindex(set::StencilSet,I...) = set.table[I...]
 
 
 """
-    read_stencil_set(filename; filters)
+read_stencil_set(filename; filters)
 
-Picks out a stencil set from a TOML file based on some key-value
+Creates a `StencilSet` from a TOML file based on some key-value
 filters. If more than one set matches the filters an error is raised. The
-returned stencil set contains parsed TOML intended for functions like
+table of the `StencilSet` is a parsed TOML intended for functions like
 `parse_scalar` and `parse_stencil`.
 
-The stencil set is not parsed beyond the inital TOML parse. To get usable
+The `StencilSet` table is not parsed beyond the inital TOML parse. To get usable
 stencils use the `parse_stencil` functions on the fields of the stencil set.
 
 The reason for this is that since stencil sets are intended to be very
@@ -28,9 +30,10 @@ section, the exact parsing is left to the user.
 
 For more information see [Operator file format](@ref) in the documentation.
 
-See also [`sbp_operators_path`](@ref), [`get_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref),.
+See also [`StencilSet`](@ref), [`sbp_operators_path`](@ref), [`get_stencil_set`](@ref), [`parse_stencil`](@ref), [`parse_scalar`](@ref), [`parse_tuple`](@ref).
 """
-read_stencil_set(filename; filters...) = get_stencil_set(TOML.parsefile(filename); filters...)
+read_stencil_set(filename; filters...) = StencilSet(get_stencil_set(TOML.parsefile(filename); filters...))
+
 
 """
     get_stencil_set(parsed_toml; filters...)
@@ -183,6 +186,6 @@ end
 
 Calculate the path for the operators folder with included stencil sets.
 
-See also [`read_stencil_set`](@ref)
+See also [`StencilSet`](@ref), [`read_stencil_set`](@ref).
 """
 sbp_operators_path() = (@__DIR__) * "/operators/"

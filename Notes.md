@@ -132,20 +132,17 @@ When do we need to know the size of the range and domain?
  * When doing specialised computations for different parts of the range/domain?
  * More?
 
- Maybe if we should have dynamic sizing it could be only for the range. `domain_size` would not be implemented. And the `range_size` would be a function of a vector that the TensorMapping is applied to.
+ Maybe if we should have dynamic sizing it could be only for the range. `domain_size` would not be implemented. And the `range_size` would be a function of a vector that the LazyTensor is applied to.
 
 ## Reasearch and thinking
- - [ ] Use a trait to indicate that a TensorMapping har the same range and domain?
- - [ ] Rename all the Tensor stuff to just LazyOperator, LazyApplication and so on?
+ - [ ] Use a trait to indicate that a LazyTensor har the same range and domain?
  - [ ] Check how the native julia doc generator works
     - [ ] Check if Vidars design docs fit in there
  - [ ] Create a macro @lazy which replaces a binary op (+,-) by its lazy equivalent? Would be a neat way to indicate which evaluations are lazy without cluttering/confusing with special characters.
- - [ ] Specificera operatorer i TOML eller något liknande?
- H.. H_gamma etc.)
  - [ ] Dispatch on Lower() instead of the type Lower so `::Lower` instead of `::Type{Lower}` ???
  	Seems better unless there is some specific reason to use the type instead of the value.
  - [ ] How do we handle mixes of periodic and non-periodic grids? Seems it should be supported on the grid level and on the 1d operator level. Between there it should be transparent.
- - [ ] Can we have a trait to tell if a TensorMapping is transposable?
+ - [ ] Can we have a trait to tell if a LazyTensor is transposable?
  - [ ] Is it ok to have "Constructors" for abstract types which create subtypes? For example a Grids() functions that gives different kind of grids based on input?
  - [ ] Figure out how to treat the borrowing parameters of operators. Include in into the struct? Expose via function dispatched on the operator type and grid?
 
@@ -153,10 +150,10 @@ When do we need to know the size of the range and domain?
 The identifiers (`Upper`, `Lower`, `Interior`) used for region indecies should probabily be included in the grid module. This allows new grid types to come with their own regions.
 
 ## Regions and tensormappings
-- [ ] Use a trait to indicate if a TensorMapping uses indices with regions.
+- [ ] Use a trait to indicate if a LazyTensor uses indices with regions.
     The default should be that they do NOT.
         - [ ] What to name this trait? Can we call it IndexStyle but not export it to avoid conflicts with Base.IndexStyle?
- - [ ] Figure out repeated application of regioned TensorMappings. Maybe an instance of a tensor mapping needs to know the exact size of the range and domain for this to work?
+ - [ ] Figure out repeated application of regioned LazyTensors. Maybe an instance of a tensor mapping needs to know the exact size of the range and domain for this to work?
 
 ### Ideas for information sharing functions
 ```julia
@@ -301,16 +298,16 @@ Note: Behöver bestämma om eval on skickar in `x̄` eller `x̄...` till `f`. El
 Vi kan ha tensor-operatorer som agerar på ett skalärt fält och ger ett vektorfält eller tensorfält.
 Vi kan också ha tensor-operatorer som agerar på ett vektorfält eller tensorfält och ger ett skalärt fält.
 
-TBD: Just nu gör `apply_transpose` antagandet att domän-typen är samma som range-typen. Det behöver vi på något sätt bryta. Ett alternativ är låta en TensorMapping ha `T_domain` och `T_range` istället för bara `T`. Känns dock lite grötigt. Ett annat alternativ skulle vara någon typ av trait för transpose? Den skulle kunna innehålla typen som transponatet agerar på? Vet inte om det fungerar dock.
+TBD: Just nu gör `apply_transpose` antagandet att domän-typen är samma som range-typen. Det behöver vi på något sätt bryta. Ett alternativ är låta en LazyTensor ha `T_domain` och `T_range` istället för bara `T`. Känns dock lite grötigt. Ett annat alternativ skulle vara någon typ av trait för transpose? Den skulle kunna innehålla typen som transponatet agerar på? Vet inte om det fungerar dock.
 
-TBD: Vad är målet med `T`-parametern för en TensorMapping? Om vi vill kunna applicera en difference operator på vad som helst kan man inte anta att en `TensorMapping{T}` bara agerar på instanser av `T`.
+TBD: Vad är målet med `T`-parametern för en LazyTensor? Om vi vill kunna applicera en difference operator på vad som helst kan man inte anta att en `LazyTensor{T}` bara agerar på instanser av `T`.
 
 Man kan implementera `∇` som en tensormapping som agerar på T och returnerar `StaticVector{N,T} where N`.
 (Man skulle eventuellt också kunna låta den agera på `StaticMatrix{N,T,D} where N` och returnera `StaticMatrix{M,T,D+1}`. Frågan är om man vinner något på det...)
 
-Skulle kunna ha en funktion `range_type(::TensorMapping, ::Type{domain_type})`
+Skulle kunna ha en funktion `range_type(::LazyTensor, ::Type{domain_type})`
 
-Kanske kan man implementera `⋅(tm::TensorMapping{R,D}, v::AbstractArray{T,D})` där T är en AbstractArray, tm på något sätt har komponenter, lika många som T har element.
+Kanske kan man implementera `⋅(tm::LazyTensor{R,D}, v::AbstractArray{T,D})` där T är en AbstractArray, tm på något sätt har komponenter, lika många som T har element.
 
 ### Ratade alternativ:
 
@@ -342,7 +339,7 @@ Påverkas detta av hur vi förväntar oss kunna skapa lata gridfunktioner?
 En viktig operation för vektor fält är att kunna få ut komponenter som grid-funktioner. Detta behöver antagligen kunna ske lazy.
 Det finns ett par olika lösningar:
 * Implementera en egen typ av view som tar hand om detta. Eller Accessors.jl?
-* Använda en TensorMapping
+* Använda en LazyTensor
 * Någon typ av lazy-broadcast
 * En lazy array som applicerar en funktion för varje element.
 
@@ -389,4 +386,4 @@ A different approach would be to include it as a trait for operators so that you
 
 
 ## Name of the `VolumeOperator` type for constant stencils
-It seems that the name is too general. The name of the method `volume_operator` makes sense. It should return different types of `TensorMapping` specialized for the grid. A suggetion for a better name is `ConstantStencilVolumeOperator`
+It seems that the name is too general. The name of the method `volume_operator` makes sense. It should return different types of `LazyTensor` specialized for the grid. A suggetion for a better name is `ConstantStencilVolumeOperator`

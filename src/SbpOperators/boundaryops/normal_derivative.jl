@@ -1,7 +1,7 @@
 """
     normal_derivative(grid, closure_stencil::Stencil, boundary)
 
-Creates the normal derivative boundary operator `d` as a `TensorMapping`
+Creates the normal derivative boundary operator `d` as a `LazyTensor`
 
 `d` computes the normal derivative of a grid function  on `boundary` a `Stencil` `closure_stencil`.
 `d'` is the prolongation of the normal derivative of a grid function to the whole grid using the same `closure_stencil`.
@@ -10,7 +10,7 @@ a `BoundaryOperator`.
 
 See also: [`boundary_operator`](@ref).
 """
-function normal_derivative(grid, closure_stencil::Stencil, boundary)
+function normal_derivative(grid, closure_stencil, boundary)
     direction = dim(boundary)
     h_inv = inverse_spacing(grid)[direction]
     return SbpOperators.boundary_operator(grid, scale(closure_stencil,h_inv), boundary)
@@ -19,7 +19,6 @@ end
 """
     normal_derivative(grid, stencil_set, boundary)
 
-Creates a `normal_derivative` operator on `grid` given a parsed TOML
-`stencil_set`.
+Creates a `normal_derivative` operator on `grid` given a `stencil_set`.
 """
-normal_derivative(grid, stencil_set, boundary) = normal_derivative(grid, parse_stencil(stencil_set["d1"]["closure"]), boundary)
+normal_derivative(grid, stencil_set::StencilSet, boundary) = normal_derivative(grid, parse_stencil(stencil_set["d1"]["closure"]), boundary)

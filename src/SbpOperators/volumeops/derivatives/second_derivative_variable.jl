@@ -2,11 +2,11 @@ export SecondDerivativeVariable
 
 # REVIEW: Fixa docs
 """
-    SecondDerivativeVariable{Dir,T,D,...} <: TensorMapping{T,D,D}
+    SecondDerivativeVariable{Dir,T,D,...} <: LazyTensor{T,D,D}
 
 A second derivative operator in direction `Dir` with a variable coefficient.
 """
-struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:NestedStencil{T},TArray<:AbstractArray} <: TensorMapping{T,D,D}
+struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:NestedStencil{T},TArray<:AbstractArray} <: LazyTensor{T,D,D}
     inner_stencil::IStencil
     closure_stencils::NTuple{M,CStencil}
     size::NTuple{D,Int}
@@ -36,7 +36,7 @@ end
 @doc raw"""
     SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, stencil_set, dir)
 
-Create a `TensorMapping` for the second derivative with a variable coefficient
+Create a `LazyTensor` for the second derivative with a variable coefficient
 `coeff` on `grid` from the stencils in `stencil_set`. The direction is
 determined by `dir`.
 

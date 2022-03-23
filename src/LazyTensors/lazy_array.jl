@@ -36,7 +36,7 @@ Base.size(lfa::LazyFunctionArray) = lfa.size
 
 function Base.getindex(lfa::LazyFunctionArray{F,T,D}, I::Vararg{Int,D}) where {F,T,D}
     @boundscheck checkbounds(lfa, I...)
-    return lfa.f(I...)
+    return @inbounds lfa.f(I...)
 end
 
 
@@ -61,25 +61,17 @@ struct LazyElementwiseOperation{T,D,Op,T1<:AbstractArray{T,D},T2<:AbstractArray{
 end
 LazyElementwiseOperation{T,D,Op}(a::AbstractArray{T,D},b::T) where {T,D,Op} = LazyElementwiseOperation{T,D,Op}(a, LazyConstantArray(b, size(a)))
 LazyElementwiseOperation{T,D,Op}(a::T,b::AbstractArray{T,D}) where {T,D,Op} = LazyElementwiseOperation{T,D,Op}(LazyConstantArray(a,  size(b)), b)
-# TODO: Move Op to be the first parameter? Compare to Binary operations
 
 Base.size(v::LazyElementwiseOperation) = size(v.a)
 
-evaluate(leo::LazyElementwiseOperation{T,D,:+}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] + leo.b[I...]
-evaluate(leo::LazyElementwiseOperation{T,D,:-}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] - leo.b[I...]
-evaluate(leo::LazyElementwiseOperation{T,D,:*}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] * leo.b[I...]
-evaluate(leo::LazyElementwiseOperation{T,D,:/}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] / leo.b[I...]
+Base.@propagate_inbounds evaluate(leo::LazyElementwiseOperation{T,D,:+}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] + leo.b[I...]
+Base.@propagate_inbounds evaluate(leo::LazyElementwiseOperation{T,D,:-}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] - leo.b[I...]
+Base.@propagate_inbounds evaluate(leo::LazyElementwiseOperation{T,D,:*}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] * leo.b[I...]
+Base.@propagate_inbounds evaluate(leo::LazyElementwiseOperation{T,D,:/}, I::Vararg{Int,D}) where {T,D} = leo.a[I...] / leo.b[I...]
 
-# TODO: Make sure boundschecking is done properly and that the lenght of the vectors are equal
-# NOTE: Boundschecking in getindex functions now assumes that the size of the
-# vectors in the LazyElementwiseOperation are the same size. If we remove the
-# size assertion in the constructor we might have to handle
-# boundschecking differently.
-Base.@propagate_inbounds @inline function Base.getindex(leo::LazyElementwiseOperation{T,D}, I::Vararg{Int,D}) where {T,D}
-    @boundscheck if !checkbounds(Bool, leo.a, I...)
-        throw(BoundsError([leo], I...))
-    end
-    return evaluate(leo, I...)
+function Base.getindex(leo::LazyElementwiseOperation{T,D}, I::Vararg{Int,D}) where {T,D}
+    @boundscheck checkbounds(leo.a, I...)
+    return @inbounds evaluate(leo, I...)
 end
 
 # Define lazy operations for AbstractArrays. Operations constructs a LazyElementwiseOperation which

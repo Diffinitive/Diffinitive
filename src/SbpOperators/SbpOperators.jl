@@ -1,5 +1,16 @@
 module SbpOperators
 
+# Stencil set
+export StencilSet
+export read_stencil_set
+export get_stencil_set
+export parse_stencil
+export parse_nested_stencil
+export parse_scalar
+export parse_tuple
+export sbp_operators_path
+
+# Operators
 export boundary_quadrature
 export boundary_restriction
 export inner_product
@@ -22,7 +33,7 @@ end
 export closure_size
 
 include("stencil.jl")
-include("readoperator.jl")
+include("stencil_set.jl")
 include("volumeops/volume_operator.jl")
 include("volumeops/constant_interior_scaling_operator.jl")
 include("volumeops/derivatives/first_derivative.jl")
