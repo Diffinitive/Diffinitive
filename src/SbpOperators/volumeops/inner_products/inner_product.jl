@@ -1,7 +1,7 @@
 """
     inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
 
-Creates the discrete inner product operator `H` as a `TensorMapping` on an
+Creates the discrete inner product operator `H` as a `LazyTensor` on an
 equidistant grid, defined as `(u,v)  = u'Hv` for grid functions `u,v`.
 
 `inner_product` creates `H` on `grid` using the `interior_weight` for the
@@ -11,7 +11,7 @@ boundary.
 On a 1-dimensional grid, `H` is a `ConstantInteriorScalingOperator`. On a
 N-dimensional grid, `H` is the outer product of the 1-dimensional inner
 product operators for each coordinate direction. On a 0-dimensional grid,
-`H` is a 0-dimensional `IdentityMapping`.
+`H` is a 0-dimensional `IdentityTensor`.
 
 See also: [`ConstantInteriorScalingOperator`](@ref).
 """
@@ -32,15 +32,14 @@ function inner_product(grid::EquidistantGrid{1}, interior_weight, closure_weight
     return H
 end
 
-inner_product(grid::EquidistantGrid{0}, interior_weight, closure_weights) = IdentityMapping{eltype(grid)}()
+inner_product(grid::EquidistantGrid{0}, interior_weight, closure_weights) = IdentityTensor{eltype(grid)}()
 
 """
     inner_product(grid, stencil_set)
 
-Creates a `inner_product` operator on `grid` given a parsed TOML
-`stencil_set`.
+Creates a `inner_product` operator on `grid` given a `stencil_set`.
 """
-function inner_product(grid, stencil_set)
+function inner_product(grid, stencil_set::StencilSet)
     inner_stencil = parse_scalar(stencil_set["H"]["inner"])
     closure_stencils = parse_tuple(stencil_set["H"]["closure"])
     return inner_product(grid, inner_stencil, closure_stencils)
