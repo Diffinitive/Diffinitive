@@ -3,9 +3,10 @@ module LazyTensors
 export TensorApplication
 export TensorTranspose
 export TensorComposition
-export DenseTensor
 export IdentityTensor
 export ScalingTensor
+export DiagonalTensor
+export DenseTensor
 export InflatedTensor
 export LazyOuterProduct
 export ⊗
