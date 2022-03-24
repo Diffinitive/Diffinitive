@@ -12,19 +12,14 @@ the boundary restriction operator in the y-direction direction is `Ix⊗op⊗Iz`
 function boundary_operator(grid::EquidistantGrid, closure_stencil, boundary::CartesianBoundary)
     #TODO:Check that dim(boundary) <= Dim?
 
-    # Create 1D boundary operator
-    r = region(boundary)
     d = dim(boundary)
-    op = BoundaryOperator(restrict(grid, d), closure_stencil, r)
+    op = BoundaryOperator(restrict(grid, d), closure_stencil, region(boundary))
 
     # Create 1D IdentityTensors for each coordinate direction
     one_d_grids = restrict.(Ref(grid), Tuple(1:dimension(grid)))
     Is = IdentityTensor{eltype(grid)}.(size.(one_d_grids))
 
-    # Formulate the correct outer product sequence of the identity mappings and
-    # the boundary operator
-    parts = Base.setindex(Is, op, d)
-    return foldl(⊗, parts)
+    return LazyTensors.inflate(op, size(grid), d)
 end
 
 """

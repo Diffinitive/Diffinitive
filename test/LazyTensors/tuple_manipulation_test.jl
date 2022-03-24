@@ -60,3 +60,19 @@ end
     @test LazyTensors.flatten_tuple((1,2,(3,(4,5)),6)) == (1,2,3,4,5,6)
     @test LazyTensors.flatten_tuple(((1,2),(3,4),(5,),6)) == (1,2,3,4,5,6)
 end
+
+@testset "left_pad_tuple" begin
+    @test LazyTensors.left_pad_tuple((1,2), 0, 2) == (1,2)
+    @test LazyTensors.left_pad_tuple((1,2), 0, 3) == (0,1,2)
+    @test LazyTensors.left_pad_tuple((3,2), 1, 6) == (1,1,1,1,3,2)
+
+    @test_throws DomainError(0, "Can't pad tuple of length 2 to 0 elements") LazyTensors.left_pad_tuple((1,2), 0, 0) == (1,2)
+end
+
+@testset "right_pad_tuple" begin
+    @test LazyTensors.right_pad_tuple((1,2), 0, 2) == (1,2)
+    @test LazyTensors.right_pad_tuple((1,2), 0, 3) == (1,2,0)
+    @test LazyTensors.right_pad_tuple((3,2), 1, 6) == (3,2,1,1,1,1)
+
+    @test_throws DomainError(0, "Can't pad tuple of length 2 to 0 elements") LazyTensors.right_pad_tuple((1,2), 0, 0) == (1,2)
+end

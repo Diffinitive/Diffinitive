@@ -270,6 +270,20 @@ LazyOuterProduct(t1::IdentityTensor, t2::LazyTensor) = InflatedTensor(t1, t2)
 LazyOuterProduct(tms::Vararg{LazyTensor}) = foldl(LazyOuterProduct, tms)
 
 
+
+"""
+    inflate(tm, sz, dir)
+
+Inflate `tm` with identity tensors in all directions `d` for `d != dir`.
+
+# TODO: Describe when it is useful
+"""
+function inflate(tm::LazyTensor, sz, dir)
+    Is = IdentityTensor{eltype(tm)}.(sz)
+    parts = Base.setindex(Is, tm, dir)
+    return foldl(⊗, parts)
+end
+
 function check_domain_size(tm::LazyTensor, sz)
     if domain_size(tm) != sz
         throw(DomainSizeMismatch(tm,sz))

@@ -20,6 +20,7 @@ export laplace
 export normal_derivative
 export first_derivative
 export second_derivative
+export undivided_dissipation
 
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
@@ -35,10 +36,12 @@ export closure_size
 include("stencil.jl")
 include("stencil_set.jl")
 include("volumeops/volume_operator.jl")
+include("volumeops/stencil_operator_distinct_closures.jl")
 include("volumeops/constant_interior_scaling_operator.jl")
 include("volumeops/derivatives/first_derivative.jl")
 include("volumeops/derivatives/second_derivative.jl")
 include("volumeops/derivatives/second_derivative_variable.jl")
+include("volumeops/derivatives/dissipation.jl")
 include("volumeops/laplace/laplace.jl")
 include("volumeops/inner_products/inner_product.jl")
 include("volumeops/inner_products/inverse_inner_product.jl")
