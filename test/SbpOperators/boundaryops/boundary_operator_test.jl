@@ -9,7 +9,7 @@ import Sbplib.SbpOperators.BoundaryOperator
 import Sbplib.SbpOperators.boundary_operator
 
 @testset "BoundaryOperator" begin
-    closure_stencil = Stencil((0,2), (2.,1.,3.))
+    closure_stencil = Stencil(2.,1.,3.; center = 1)
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
 
