@@ -24,7 +24,7 @@ function volume_operator(grid::EquidistantGrid, inner_stencil, closure_stencils,
 end
 
 """
-    VolumeOperator{T,N,M,K} <: TensorOperator{T,1}
+    VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
 Implements a one-dimensional constant coefficients volume operator
 """
 struct VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
