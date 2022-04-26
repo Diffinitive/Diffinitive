@@ -67,6 +67,11 @@ Base.eachindex(grid::EquidistantGrid) = CartesianIndices(grid.size)
 
 Base.size(g::EquidistantGrid) = g.size
 
+function Base.getindex(g::EquidistantGrid, I...)
+    h = spacing(g)
+    return g.limit_lower .+ (I.-1).*h
+end
+
 """
     dimension(grid::EquidistantGrid)
 
