@@ -43,6 +43,17 @@ using Sbplib.RegionIndices
         @test [gp[i]...] ≈ [p[i]...] atol=5e-13
     end
 
+
+    @testset "getindex" begin
+        g = EquidistantGrid((5,3), (-1.0,0.0), (0.0,7.11))
+        @test g[1,1] == (-1.0,0.0)
+        @test g[1,3] == (-1.0,7.11)
+        @test g[5,1] == (0.0,0.0)
+        @test g[5,3] == (0.0,7.11)
+
+        @test g[4,2] == (-0.25,7.11/2)
+    end
+
     # restrict
     g = EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))
     @test restrict(g, 1) == EquidistantGrid(5,0.0,2.0)
