@@ -52,6 +52,8 @@ using Sbplib.RegionIndices
         @test g[5,3] == (0.0,7.11)
 
         @test g[4,2] == (-0.25,7.11/2)
+
+        @test g[CartesianIndex(1,3)] == (-1.0,7.11)
     end
 
     # restrict
