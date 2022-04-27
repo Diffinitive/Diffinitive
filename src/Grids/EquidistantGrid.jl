@@ -44,6 +44,7 @@ by the tuple `size`.
 function EquidistantGrid(size, limit_lower, limit_upper)
     return EquidistantGrid{length(size), eltype(limit_lower)}(size, limit_lower, limit_upper)
 end
+# TBD: Should it be an AbstractArray?
 
 """
     EquidistantGrid{T}()
@@ -67,10 +68,13 @@ Base.eachindex(grid::EquidistantGrid) = CartesianIndices(grid.size)
 
 Base.size(g::EquidistantGrid) = g.size
 
-function Base.getindex(g::EquidistantGrid, I...)
+function Base.getindex(g::EquidistantGrid, I::Vararg{Int})
     h = spacing(g)
     return g.limit_lower .+ (I.-1).*h
 end
+
+Base.getindex(g::EquidistantGrid, I::CartesianIndex) = g[Tuple(I)...]
+# TBD: Can this method be removed if `EquidistantGrid` is an AbstractArray?
 
 """
     dimension(grid::EquidistantGrid)
