@@ -49,7 +49,7 @@ end
         end
     end
 
-    @testset "tanspose equality" begin
+    @testset "transpose equality" begin
         function get_matrix(D)
             N = only(range_size(D))
             M = only(domain_size(D))

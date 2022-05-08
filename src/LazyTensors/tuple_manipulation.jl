@@ -75,7 +75,7 @@ flatten_tuple(t::NTuple{N, Number} where N) = t
 flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
 flatten_tuple(ts::Vararg) = flatten_tuple(ts)
 
-
+# REVIEW: Add documentation
 function left_pad_tuple(t, val, N)
     if N < length(t)
         throw(DomainError(N, "Can't pad tuple of length $(length(t)) to $N elements"))
@@ -85,6 +85,7 @@ function left_pad_tuple(t, val, N)
     return (padding..., t...)
 end
 
+# REVIEW: Add documentation
 function right_pad_tuple(t, val, N)
     if N < length(t)
         throw(DomainError(N, "Can't pad tuple of length $(length(t)) to $N elements"))

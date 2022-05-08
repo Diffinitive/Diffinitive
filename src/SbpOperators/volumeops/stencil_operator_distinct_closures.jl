@@ -1,3 +1,4 @@
+# REVIEW: Add documentation
 function stencil_operator_distinct_closures(grid::EquidistantGrid, inner_stencil, lower_closure, upper_closure, direction)
     op = StencilOperatorDistinctClosures(restrict(grid, direction), inner_stencil, lower_closure, upper_closure)
     return LazyTensors.inflate(op, size(grid), direction)

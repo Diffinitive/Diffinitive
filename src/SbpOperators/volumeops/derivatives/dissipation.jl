@@ -1,3 +1,9 @@
+# REVIEW: Add documentation. Also would it be more correct to
+# call these undivided_differences instead of dissipation?
+# If I understand it correctly, this method simply provides
+# the operators required in order to compose a dissipation operator
+# and the dissipation operator are formed by a linear combination
+# of the products of Dᵀ and D for different orders.
 function undivided_dissipation(g::EquidistantGrid, p, direction)
     T = eltype(g)
     interior_weights = T.(dissipation_interior_weights(p))

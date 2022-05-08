@@ -268,7 +268,7 @@ LazyOuterProduct(t1::IdentityTensor, t2::LazyTensor) = InflatedTensor(t1, t2)
 LazyOuterProduct(tms::Vararg{LazyTensor}) = foldl(LazyOuterProduct, tms)
 
 
-
+# REVIEW: Address TODO below
 """
     inflate(tm, sz, dir)
 
