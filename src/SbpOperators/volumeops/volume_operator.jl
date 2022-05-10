@@ -18,7 +18,7 @@ end
 # TBD: Should the inflation happen here or should we remove this method and do it at the caller instead?
 
 """
-    VolumeOperator{T,N,M,K} <: TensorOperator{T,1}
+    VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
 Implements a one-dimensional constant coefficients volume operator
 """
 struct VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}

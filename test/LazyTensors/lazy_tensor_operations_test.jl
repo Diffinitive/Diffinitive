@@ -181,6 +181,14 @@ end
 
     @test (Ã∘B̃*ComplexF64[1.,2.,3.,4.])[1] isa ComplexF64
     @test ((Ã∘B̃)'*ComplexF64[1.,2.])[1] isa ComplexF64
+
+    a = 2.
+    v = rand(3)
+    @test a*Ã isa TensorComposition
+    @test a*Ã == Ã*a
+    @test range_size(a*Ã) == range_size(Ã)
+    @test domain_size(a*Ã) == domain_size(Ã)
+    @test a*Ã*v == a.*A*v
 end
 
 
