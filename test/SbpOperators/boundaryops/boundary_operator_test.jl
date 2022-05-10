@@ -10,7 +10,7 @@ import Sbplib.SbpOperators.BoundaryOperator
 # TODO: What should happen to all the commented tests? Deleted? Replicated for user code?
 
 @testset "BoundaryOperator" begin
-    closure_stencil = Stencil((0,2), (2.,1.,3.))
+    closure_stencil = Stencil(2.,1.,3.; center = 1)
     g_1D = EquidistantGrid(11, 0.0, 1.0)
     g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
 
@@ -27,7 +27,7 @@ import Sbplib.SbpOperators.BoundaryOperator
 
         # @testset "2D" begin
         #     e_w = boundary_operator(g_2D,closure_stencil,CartesianBoundary{1,Upper}())
-        #     @test e_w isa InflatedLazyTensor
+        #     @test e_w isa InflatedTensor
         #     @test e_w isa LazyTensor{T,1,2} where T
         # end
     end

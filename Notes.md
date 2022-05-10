@@ -136,12 +136,9 @@ When do we need to know the size of the range and domain?
 
 ## Reasearch and thinking
  - [ ] Use a trait to indicate that a LazyTensor har the same range and domain?
- - [ ] Rename all the Tensor stuff to just LazyOperator, LazyApplication and so on?
  - [ ] Check how the native julia doc generator works
     - [ ] Check if Vidars design docs fit in there
  - [ ] Create a macro @lazy which replaces a binary op (+,-) by its lazy equivalent? Would be a neat way to indicate which evaluations are lazy without cluttering/confusing with special characters.
- - [ ] Specificera operatorer i TOML eller något liknande?
- H.. H_gamma etc.)
  - [ ] Dispatch on Lower() instead of the type Lower so `::Lower` instead of `::Type{Lower}` ???
  	Seems better unless there is some specific reason to use the type instead of the value.
  - [ ] How do we handle mixes of periodic and non-periodic grids? Seems it should be supported on the grid level and on the 1d operator level. Between there it should be transparent.
@@ -149,11 +146,51 @@ When do we need to know the size of the range and domain?
  - [ ] Is it ok to have "Constructors" for abstract types which create subtypes? For example a Grids() functions that gives different kind of grids based on input?
  - [ ] Figure out how to treat the borrowing parameters of operators. Include in into the struct? Expose via function dispatched on the operator type and grid?
 
+## Identifiers for regions
+The identifiers (`Upper`, `Lower`, `Interior`) used for region indecies should probabily be included in the grid module. This allows new grid types to come with their own regions.
+
 ## Regions and tensormappings
 - [ ] Use a trait to indicate if a LazyTensor uses indices with regions.
     The default should be that they do NOT.
         - [ ] What to name this trait? Can we call it IndexStyle but not export it to avoid conflicts with Base.IndexStyle?
  - [ ] Figure out repeated application of regioned LazyTensors. Maybe an instance of a tensor mapping needs to know the exact size of the range and domain for this to work?
+
+### Ideas for information sharing functions
+```julia
+using StaticArrays
+
+function regions(op::SecondDerivativeVariable)
+    t = ntuple(i->(Interior(),),range_dim(op))
+    return Base.setindex(t, (Lower(), Interior(), Upper()), derivative_direction(op))
+end
+
+function regionsizes(op::SecondDerivativeVariable)
+    sz = tuple.(range_size(op))
+
+    cl = closuresize(op)
+    return Base.setindex(sz, (cl, n-2cl, cl), derivative_direction(op))
+end
+
+
+g = EquidistantGrid((11,9), (0.,0.), (10.,8.)) # h = 1
+c = evalOn(g, (x,y)->x+y)
+
+D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1)
+@test regions(D₂ᶜ) == (
+    (Lower(), Interior(), Upper()),
+    (Interior(),),
+)
+@test regionsizes(D₂ᶜ) == ((1,9,1),(9,))
+
+
+D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,2)
+@test regions(D₂ᶜ) == (
+    (Interior(),),
+    (Lower(), Interior(), Upper()),
+)
+@test regionsizes(D₂ᶜ) == ((11,),(1,7,1))
+```
+
 
 ## Boundschecking and dimension checking
 Does it make sense to have boundschecking only in getindex methods?

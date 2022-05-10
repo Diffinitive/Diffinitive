@@ -4,7 +4,7 @@ using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
 using Sbplib.RegionIndices
-import Sbplib.SbpOperators.BoundaryOperator
+using Sbplib.SbpOperators: BoundaryOperator, Stencil
 
 @testset "boundary_restriction" begin
 	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 4)
@@ -30,7 +30,7 @@ import Sbplib.SbpOperators.BoundaryOperator
         @testset "2D" begin
             e_w = boundary_restriction(g_2D,e_closure,CartesianBoundary{1,Upper}())
             @test e_w == boundary_restriction(g_2D,stencil_set,CartesianBoundary{1,Upper}())
-            @test e_w isa InflatedLazyTensor
+            @test e_w isa InflatedTensor
             @test e_w isa LazyTensor{T,1,2} where T
         end
     end

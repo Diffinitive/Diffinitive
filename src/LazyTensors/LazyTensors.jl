@@ -1,12 +1,13 @@
 module LazyTensors
 
-export LazyTensorApplication
-export LazyTensorTranspose
-export LazyTensorComposition
-export LazyLinearMap
+export TensorApplication
+export TensorTranspose
+export TensorComposition
 export IdentityTensor
 export ScalingTensor
-export InflatedLazyTensor
+export DiagonalTensor
+export DenseTensor
+export InflatedTensor
 export LazyOuterProduct
 export ⊗
 export DomainSizeMismatch
@@ -19,16 +20,16 @@ include("lazy_tensor_operations.jl")
 include("tuple_manipulation.jl")
 
 # Applying lazy tensors to vectors
-Base.:*(a::LazyTensor, v::AbstractArray) = LazyTensorApplication(a,v)
+Base.:*(a::LazyTensor, v::AbstractArray) = TensorApplication(a,v)
 Base.:*(a::LazyTensor, b::LazyTensor) = throw(MethodError(Base.:*,(a,b)))
 Base.:*(a::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*,(a,args...))
 
 # Addition and subtraction of lazy tensors
-Base.:+(s::LazyTensor, t::LazyTensor) = LazyTensorBinaryOperation{:+}(s,t)
-Base.:-(s::LazyTensor, t::LazyTensor) = LazyTensorBinaryOperation{:-}(s,t)
+Base.:+(s::LazyTensor, t::LazyTensor) = ElementwiseTensorOperation{:+}(s,t)
+Base.:-(s::LazyTensor, t::LazyTensor) = ElementwiseTensorOperation{:-}(s,t)
 
 # Composing lazy tensors
-Base.:∘(s::LazyTensor, t::LazyTensor) = LazyTensorComposition(s,t)
+Base.:∘(s::LazyTensor, t::LazyTensor) = TensorComposition(s,t)
 
 # Outer products of tensors
 ⊗(a::LazyTensor, b::LazyTensor) = LazyOuterProduct(a,b)

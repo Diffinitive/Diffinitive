@@ -18,16 +18,31 @@ function first_derivative(grid::EquidistantGrid, inner_stencil, closure_stencils
     D₁ = VolumeOperator(restrict(grid, direction), scale(inner_stencil,h_inv), scale.(closure_stencils,h_inv), odd)
     return LazyTensors.inflate(D₁, size(grid), direction)
 end
-first_derivative(grid::EquidistantGrid{1}, inner_stencil::Stencil, closure_stencils) = first_derivative(grid,inner_stencil,closure_stencils,1)
+
 
 """
-    first_derivative(grid, stencil_set, direction)
+    first_derivative(grid, inner_stencil, closure_stencils)
 
-Creates a `first_derivative` operator on `grid` along coordinate dimension `direction` given a parsed TOML
-`stencil_set`.
+Creates a `first_derivative` operator on a 1D `grid` given `inner_stencil` and `closure_stencils`.
 """
-function first_derivative(grid::EquidistantGrid, stencil_set, direction)
+first_derivative(grid::EquidistantGrid{1}, inner_stencil::Stencil, closure_stencils) = first_derivative(grid, inner_stencil, closure_stencils, 1)
+
+
+"""
+    first_derivative(grid, stencil_set::StencilSet, direction)
+
+Creates a `first_derivative` operator on `grid` along coordinate dimension `direction` given a `stencil_set`.
+"""
+function first_derivative(grid::EquidistantGrid, stencil_set::StencilSet, direction)
     inner_stencil = parse_stencil(stencil_set["D1"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D1"]["closure_stencils"])
     first_derivative(grid,inner_stencil,closure_stencils,direction);
 end
+
+
+"""
+    first_derivative(grid, stencil_set)
+
+Creates a `first_derivative` operator on a 1D `grid` given a `stencil_set`.
+"""
+first_derivative(grid::EquidistantGrid{1}, stencil_set::StencilSet) = first_derivative(grid, stencil_set, 1)
