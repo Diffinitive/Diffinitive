@@ -37,6 +37,24 @@ LazyTensors.domain_size(m::ScalingTensor) = m.size
 
 
 """
+    DiagonalTensor{T,D,...} <: LazyTensor{T,D,D}
+    DiagonalTensor(a::AbstractArray)
+
+A lazy tensor with diagonal `a`.
+"""
+struct DiagonalTensor{T,D,AT<:AbstractArray{T,D}} <: LazyTensor{T,D,D}
+    diagonal::AT
+end
+
+range_size(tm::DiagonalTensor) = size(tm.diagonal)
+domain_size(tm::DiagonalTensor) = size(tm.diagonal)
+
+
+LazyTensors.apply(tm::DiagonalTensor{T,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {T,D} = tm.diagonal[I...]*v[I...]
+LazyTensors.apply_transpose(tm::DiagonalTensor{T,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {T,D} = tm.diagonal[I...]*v[I...]
+
+
+"""
     DenseTensor{T,R,D,...}(A, range_indicies, domain_indicies)
 
 LazyTensor defined by the AbstractArray A. `range_indicies` and `domain_indicies` define which indicies of A should

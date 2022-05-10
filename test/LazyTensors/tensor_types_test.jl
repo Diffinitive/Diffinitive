@@ -1,5 +1,6 @@
 using Test
 using Sbplib.LazyTensors
+using BenchmarkTools
 
 @testset "IdentityTensor" begin
     @test IdentityTensor{Float64}((4,5)) isa IdentityTensor{T,2} where T
@@ -56,6 +57,47 @@ end
 
     @inferred (st*v)[2,2]
     @inferred (st'*v)[2,2]
+end
+
+@testset "DiagonalTensor" begin
+    @test DiagonalTensor([1,2,3,4]) isa LazyTensor{Int,1,1}
+    @test DiagonalTensor([1 2 3; 4 5 6]) isa LazyTensor{Int,2,2}
+    @test DiagonalTensor([1. 2. 3.; 4. 5. 6.]) isa LazyTensor{Float64,2,2}
+
+    @test range_size(DiagonalTensor([1,2,3,4])) == (4,)
+    @test domain_size(DiagonalTensor([1,2,3,4])) == (4,)
+
+    @test range_size(DiagonalTensor([1 2 3; 4 5 6])) == (2,3)
+    @test domain_size(DiagonalTensor([1 2 3; 4 5 6])) == (2,3)
+
+    @testset "apply size=$sz" for sz ∈ [(4,),(3,2),(3,4,2)]
+        diag = rand(sz...)
+        tm = DiagonalTensor(diag)
+
+        v = rand(sz...)
+
+        @test tm*v == diag.*v
+        @test tm'*v == diag.*v
+    end
+
+
+    @testset "allocations size=$sz" for sz ∈ [(4,),(3,2),(3,4,2)]
+        diag = rand(sz...)
+        tm = DiagonalTensor(diag)
+
+        v = rand(sz...)
+
+        @test tm*v == diag.*v
+        @test tm'*v == diag.*v
+    end
+
+    sz = (3,2)
+    diag = rand(sz...)
+    tm = DiagonalTensor(diag)
+
+    v = rand(sz...)
+    LazyTensors.apply(tm,v, 2,1)
+    @test (@ballocated LazyTensors.apply($tm,$v, 2,1)) == 0
 end
 
 

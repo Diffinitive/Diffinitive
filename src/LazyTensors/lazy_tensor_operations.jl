@@ -98,7 +98,6 @@ function apply_transpose(c::TensorComposition{T,R,K,D}, v::AbstractArray{<:Any,R
     apply_transpose(c.t2, c.t1'*v, I...)
 end
 
-
 """
     TensorComposition(tm, tmi::IdentityTensor)
     TensorComposition(tmi::IdentityTensor, tm)
@@ -120,6 +119,8 @@ function TensorComposition(tm::IdentityTensor{T,D}, tmi::IdentityTensor{T,D}) wh
     return tmi
 end
 
+Base.:*(a::T, tm::LazyTensor{T}) where T = TensorComposition(ScalingTensor{T,range_dim(tm)}(a,range_size(tm)), tm)
+Base.:*(tm::LazyTensor{T}, a::T) where T = a*tm
 
 """
     InflatedTensor{T,R,D} <: LazyTensor{T,R,D}
