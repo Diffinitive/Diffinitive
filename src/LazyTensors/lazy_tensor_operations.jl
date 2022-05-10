@@ -270,11 +270,20 @@ LazyOuterProduct(tms::Vararg{LazyTensor}) = foldl(LazyOuterProduct, tms)
 
 
 """
-    inflate(tm, sz, dir)
+    inflate(tm::LazyTensor, sz, dir)
 
-Inflate `tm` with identity tensors in all directions `d` for `d != dir`.
+Inflate `tm` such that it gets the size `sz` in all directions except `dir`.
+Here `sz[dir]` is ignored and replaced with the range and domains size of
+`tm`.
 
-# TODO: Describe when it is useful
+An example of when this operation is useful is when extending a one
+dimensional difference operator `D` to a 2D grid of a ceratin size. In that
+case we could have
+
+```julia
+Dx = inflate(D, (10,10), 1)
+Dy = inflate(D, (10,10), 2)
+```
 """
 function inflate(tm::LazyTensor, sz, dir)
     Is = IdentityTensor{eltype(tm)}.(sz)

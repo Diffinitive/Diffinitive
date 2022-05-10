@@ -21,6 +21,7 @@ function boundary_operator(grid::EquidistantGrid, closure_stencil, boundary::Car
 
     return LazyTensors.inflate(op, size(grid), d)
 end
+# TBD: Should the inflation happen here or should we remove this method and do it at the caller instead?
 
 """
     BoundaryOperator{T,R,N} <: LazyTensor{T,0,1}
