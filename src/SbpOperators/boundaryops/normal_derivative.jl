@@ -8,7 +8,7 @@ Creates the normal derivative boundary operator `d` as a `LazyTensor`
 On a one-dimensional `grid`, `d` is a `BoundaryOperator`. On a multi-dimensional `grid`, `d` is the inflation of
 a `BoundaryOperator`.
 
-See also: [`boundary_operator`](@ref).
+See also: [`BoundaryOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
 function normal_derivative(grid, closure_stencil, boundary)
     direction = dim(boundary)

@@ -8,7 +8,7 @@ Creates boundary restriction operators `e` as `LazyTensor`s on `boundary`
 On a one-dimensional `grid`, `e` is a `BoundaryOperator`. On a multi-dimensional `grid`, `e` is the inflation of
 a `BoundaryOperator`.
 
-See also: [`boundary_operator`](@ref).
+See also: [`BoundaryOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
 function boundary_restriction(grid, closure_stencil, boundary)
     converted_stencil = convert(Stencil{eltype(grid)}, closure_stencil)

@@ -7,10 +7,10 @@ Creates the first-derivative operator `D1` as a `LazyTensor`
 `direction`, using the stencil `inner_stencil` in the interior and a set of stencils `closure_stencils`
 for the points in the closure regions.
 
-On a one-dimensional `grid`, `D1` is a `VolumeOperator`. On a multi-dimensional `grid`, `D1` is the outer product of the
-one-dimensional operator with the `IdentityTensor`s in orthogonal coordinate dirrections.
+On a one-dimensional `grid`, `D1` is a `VolumeOperator`. On a multi-dimensional `grid`, `D1` is the inflation of
+a `VolumeOperator`.
 
-See also: [`volume_operator`](@ref).
+See also: [`VolumeOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
 function first_derivative(grid::EquidistantGrid, inner_stencil, closure_stencils, direction)
     h_inv = inverse_spacing(grid)[direction]
