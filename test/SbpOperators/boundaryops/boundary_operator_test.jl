@@ -7,6 +7,7 @@ using Sbplib.RegionIndices
 import Sbplib.SbpOperators.Stencil
 import Sbplib.SbpOperators.BoundaryOperator
 
+# REVIEW: Remove the commented tests. It is tested in the user code.
 # TODO: What should happen to all the commented tests? Deleted? Replicated for user code?
 
 @testset "BoundaryOperator" begin

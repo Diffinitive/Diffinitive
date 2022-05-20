@@ -10,6 +10,9 @@ import Sbplib.SbpOperators.VolumeOperator
 import Sbplib.SbpOperators.odd
 import Sbplib.SbpOperators.even
 
+# REVIEW: Remove the commented tests for 2D (it is tested in the user code), but
+# change testset Regions and testset Inferred, to test the 1D operators.
+
 @testset "VolumeOperator" begin
     inner_stencil = CenteredStencil(1/4, 2/4, 1/4)
     closure_stencils = (Stencil(1/2, 1/2; center=1), Stencil(0.,1.; center=2))
