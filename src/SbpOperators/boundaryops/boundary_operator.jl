@@ -13,6 +13,7 @@ struct BoundaryOperator{T,R<:Region,N} <: LazyTensor{T,0,1}
 end
 
 BoundaryOperator{R}(stencil::Stencil{T,N}, size::Int) where {T,R,N} = BoundaryOperator{T,R,N}(stencil, size)
+# TBD: Will the above convenience constructor ever be used?
 
 """
     BoundaryOperator(grid::EquidistantGrid{1}, closure_stencil, region)
