@@ -16,18 +16,16 @@ import Sbplib.SbpOperators.even
 @testset "VolumeOperator" begin
     inner_stencil = CenteredStencil(1/4, 2/4, 1/4)
     closure_stencils = (Stencil(1/2, 1/2; center=1), Stencil(0.,1.; center=2))
-    g_1D = EquidistantGrid(11,0.,1.)
+    g = EquidistantGrid(11,0.,1.)
     @testset "Constructors" begin
         op = VolumeOperator(inner_stencil,closure_stencils,(11,),even)
-        @test op == VolumeOperator(g_1D,inner_stencil,closure_stencils,even)
+        @test op == VolumeOperator(g,inner_stencil,closure_stencils,even)
         @test op isa LazyTensor{T,1,1} where T
     end
 
     @testset "Sizes" begin
-        @testset "1D" begin
-            op = VolumeOperator(g_1D,inner_stencil,closure_stencils,even)
-            @test range_size(op) == domain_size(op) == size(g_1D)
-        end
+        op = VolumeOperator(g,inner_stencil,closure_stencils,even)
+        @test range_size(op) == domain_size(op) == size(g)
     end
 
     # op_x = volume_operator(g_2D,inner_stencil,closure_stencils,even,1)
