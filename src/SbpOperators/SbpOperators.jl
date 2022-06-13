@@ -20,9 +20,12 @@ export normal_derivative
 export first_derivative
 export second_derivative
 
+export sat
+
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using Sbplib.Grids
+using Sbplib.BoundaryConditions
 
 @enum Parity begin
     odd = -1

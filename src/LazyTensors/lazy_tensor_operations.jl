@@ -121,6 +121,7 @@ end
 
 Base.:*(a::T, tm::LazyTensor{T}) where T = TensorComposition(ScalingTensor{T,range_dim(tm)}(a,range_size(tm)), tm)
 Base.:*(tm::LazyTensor{T}, a::T) where T = a*tm
+Base.:-(tm::LazyTensor{T}) where T = (-one(T))*tm
 
 """
     InflatedTensor{T,R,D} <: LazyTensor{T,R,D}

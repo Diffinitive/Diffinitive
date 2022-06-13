@@ -53,3 +53,31 @@ function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
     end
     return Δ
 end
+
+sat(Δ::Laplace, g::EquidistantGrid, bc::BoundaryCondition{Neumann}) = neumann_sat(Δ, g, bc.id)
+
+function neumann_sat(Δ::Laplace, g::EquidistantGrid{1}, id::BoundaryIdentifier)
+    set  = Δ.stencil_set
+    H⁻¹ = inverse_inner_product(g,set)
+    e = boundary_restriction(g, set, id)
+    d = normal_derivative(g, set, id)
+    return f(u,data) = H⁻¹∘e'∘(d*u .- data)
+    #closure = H⁻¹∘e'∘d
+    #penalty = -H⁻¹∘e'
+    #return closure, penalty
+end
+
+
+
+function neumann_sat(Δ::Laplace, g::EquidistantGrid, id::BoundaryIdentifier)
+    set  = Δ.stencil_set
+    H⁻¹ = inverse_inner_product(g, set)
+    orth_dims = Tuple(filter(i -> i != dimension(g), 1:dimension(g)))
+    Hᵧ = inner_product(restrict(g, orth_dims...), set)
+    e = boundary_restriction(g, set, id)
+    d = normal_derivative(g, set, id)
+    return f(u,data) = H⁻¹∘e'∘Hᵧ∘(d*u .- data)
+    #closure = H⁻¹∘e'∘Hᵧ∘d
+    #penalty = -H⁻¹∘e'∘Hᵧ
+    #return closure, penalty
+end
