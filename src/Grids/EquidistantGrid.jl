@@ -2,8 +2,10 @@ export EquidistantGrid
 export spacing
 export inverse_spacing
 export restrict
+export orthogonal_dims
 export boundary_identifiers
 export boundary_grid
+export boundary_size
 export refine
 export coarsen
 
@@ -116,6 +118,20 @@ function restrict(grid::EquidistantGrid, dim)
     return EquidistantGrid(size, limit_lower, limit_upper)
 end
 
+"""
+    orthogonal_dims(grid::EquidistantGrid,dim)
+
+Returns the dimensions of grid orthogonal to that of dim.
+"""
+function orthogonal_dims(grid::EquidistantGrid, dim)
+    dims = 1:dimension(grid)
+    orth_dims = filter(i -> i != dim, dims)
+	if orth_dims == dims
+		throw(DomainError(string("dimension ",string(dim)," not matching grid")))
+	end
+    return orth_dims
+end
+
 
 """
     boundary_identifiers(::EquidistantGrid)
@@ -137,15 +153,21 @@ orthogonal to the boundary specified by `id`. The boundary grid of a 1-dimension
 grid is a zero-dimensional grid.
 """
 function boundary_grid(grid::EquidistantGrid, id::CartesianBoundary)
-	dims = 1:dimension(grid)
-    # Extract dimensions orthogonal to dim(id)
-    orth_dims = filter(i -> i != dim(id), dims)
-	if orth_dims == dims
-		throw(DomainError("boundary identifier not matching grid"))
-	end
-    return restrict(grid,orth_dims)
+    orth_dims = orthogonal_dims(grid, dim(id))
+    return restrict(grid, orth_dims)
 end
 boundary_grid(::EquidistantGrid{1,T},::CartesianBoundary{1}) where T = EquidistantGrid{T}()
+
+"""
+    boundary_size(grid::EquidistantGrid, id::CartesianBoundary)
+
+Returns the size of the boundary of `grid` specified by `id`.
+"""
+function boundary_size(grid::EquidistantGrid, id::CartesianBoundary)
+	orth_dims = orthogonal_dims(grid, dim(id))
+    return  grid.size[orth_dims]
+end
+boundary_size(::EquidistantGrid{1,T},::CartesianBoundary{1}) where T = ()
 
 
 """
