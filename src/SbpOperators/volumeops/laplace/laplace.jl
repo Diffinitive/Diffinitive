@@ -48,7 +48,7 @@ See also: [`second_derivative`](@ref).
 """
 function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
     Δ = second_derivative(grid, inner_stencil, closure_stencils, 1)
-    for d = 2:dimension(grid)
+    for d = 2:dim(grid)
         Δ += second_derivative(grid, inner_stencil, closure_stencils, d)
     end
     return Δ

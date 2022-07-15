@@ -18,7 +18,7 @@ function boundary_operator(grid::EquidistantGrid, closure_stencil, boundary::Car
     op = BoundaryOperator(restrict(grid, d), closure_stencil, r)
 
     # Create 1D IdentityTensors for each coordinate direction
-    one_d_grids = restrict.(Ref(grid), Tuple(1:dimension(grid)))
+    one_d_grids = restrict.(Ref(grid), Tuple(dims(grid)))
     Is = IdentityTensor{eltype(grid)}.(size.(one_d_grids))
 
     # Formulate the correct outer product sequence of the identity mappings and

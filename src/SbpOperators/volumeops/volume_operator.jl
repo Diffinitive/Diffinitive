@@ -15,7 +15,7 @@ function volume_operator(grid::EquidistantGrid, inner_stencil, closure_stencils,
     # Create 1D volume operator in along coordinate direction
     op = VolumeOperator(restrict(grid, direction), inner_stencil, closure_stencils, parity)
     # Create 1D IdentityTensors for each coordinate direction
-    one_d_grids = restrict.(Ref(grid), Tuple(1:dimension(grid)))
+    one_d_grids = restrict.(Ref(grid), Tuple(dims(grid)))
     Is = IdentityTensor{eltype(grid)}.(size.(one_d_grids))
     # Formulate the correct outer product sequence of the identity mappings and
     # the volume operator
