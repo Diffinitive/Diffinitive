@@ -11,18 +11,18 @@ function dim end # TODO: Rename to Base.ndims instead? That's the name used for 
 function points end
 
 """
-    dims(g::Grid)
+    dims(grid::Grid)
 
-A range containing the dimensions of the grid
+A range containing the dimensions of `grid`
 """
 dims(grid::Grid) = 1:dim(grid)
 
 """
-    evalOn(g::Grid, f::Function)
+    evalOn(grid::Grid, f::Function)
 
-Evaluate function f on the grid g
+Evaluate function `f` on `grid`
 """
-function evalOn(g::Grid, f::Function)
+function evalOn(grid::Grid, f::Function)
     F(x) = f(x...)
-    return F.(points(g))
+    return F.(points(grid))
 end
