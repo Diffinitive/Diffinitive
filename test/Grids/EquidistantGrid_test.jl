@@ -19,9 +19,9 @@ using Sbplib.RegionIndices
         @test size(EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))) == (5,3)
     end
 
-    # dimension
-    @test dimension(EquidistantGrid(4,0.0,1.0)) == 1
-    @test dimension(EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))) == 2
+    # dim
+    @test dim(EquidistantGrid(4,0.0,1.0)) == 1
+    @test dim(EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))) == 2
 
     # spacing
     @test [spacing(EquidistantGrid(4,0.0,1.0))...] ≈ [(1. /3,)...] atol=5e-13

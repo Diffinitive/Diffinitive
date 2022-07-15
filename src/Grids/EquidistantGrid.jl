@@ -70,11 +70,11 @@ Base.eachindex(grid::EquidistantGrid) = CartesianIndices(grid.size)
 Base.size(g::EquidistantGrid) = g.size
 
 """
-    dimension(grid::EquidistantGrid)
+    dim(grid::EquidistantGrid)
 
 The dimension of the grid.
 """
-dimension(grid::EquidistantGrid{Dim}) where Dim = Dim
+dim(::EquidistantGrid{Dim}) where Dim = Dim
 
 """
     spacing(grid::EquidistantGrid)
@@ -141,7 +141,7 @@ Returns a tuple containing the boundary identifiers for the grid, stored as
 	 CartesianBoundary(2,Lower),
 	 ...)
 """
-boundary_identifiers(g::EquidistantGrid) = (((ntuple(i->(CartesianBoundary{i,Lower}(),CartesianBoundary{i,Upper}()),dimension(g)))...)...,)
+boundary_identifiers(g::EquidistantGrid) = (((ntuple(i->(CartesianBoundary{i,Lower}(),CartesianBoundary{i,Upper}()),dim(g)))...)...,)
 
 
 """
@@ -180,7 +180,7 @@ See also: [`coarsen`](@ref)
 function refine(grid::EquidistantGrid, r::Int)
     sz = size(grid)
     new_sz = (sz .- 1).*r .+ 1
-    return EquidistantGrid{dimension(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
+    return EquidistantGrid{dim(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
 end
 
 """
@@ -201,5 +201,5 @@ function coarsen(grid::EquidistantGrid, r::Int)
 
     new_sz = (sz .- 1).÷r .+ 1
 
-    return EquidistantGrid{dimension(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
+    return EquidistantGrid{dim(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
 end

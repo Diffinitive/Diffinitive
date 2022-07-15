@@ -2,15 +2,15 @@
      AbstractGrid
 
 Should implement
-    dimension(grid::AbstractGrid)
+    dim(grid::AbstractGrid)
     points(grid::AbstractGrid)
 
 """
 abstract type AbstractGrid end
 export AbstractGrid
-function dimension end
+function dim end # TODO: Rename to Base.ndims instead? That's the name used for arrays.
 function points end
-export dimension, points
+export dim, points
 
 """
     evalOn(g::AbstractGrid, f::Function)
@@ -29,5 +29,5 @@ export evalOn
 
 A range containing the dimensions of the grid
 """
-dims(grid::AbstractGrid) = 1:dimension(grid)
+dims(grid::AbstractGrid) = 1:dim(grid)
 export dims
