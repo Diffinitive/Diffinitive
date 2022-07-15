@@ -22,3 +22,12 @@ function evalOn(g::AbstractGrid, f::Function)
     return F.(points(g))
 end
 export evalOn
+
+
+"""
+    dims(g::AbstractGrid)
+
+A range containing the dimensions of the grid
+"""
+dims(grid::AbstractGrid) = 1:dimension(grid)
+export dims

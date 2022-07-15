@@ -18,7 +18,7 @@ See also: [`ConstantInteriorScalingOperator`](@ref).
 function inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
     Hs = ()
 
-    for i ∈ 1:dimension(grid)
+    for i ∈ dims(grid)
         Hs = (Hs..., inner_product(restrict(grid, i), interior_weight, closure_weights))
     end
 

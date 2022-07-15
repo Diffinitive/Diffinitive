@@ -124,9 +124,8 @@ end
 Returns the dimensions of grid orthogonal to that of dim.
 """
 function orthogonal_dims(grid::EquidistantGrid, dim)
-    dims = 1:dimension(grid)
-    orth_dims = filter(i -> i != dim, dims)
-	if orth_dims == dims
+    orth_dims = filter(i -> i != dim, dims(grid))
+	if orth_dims == dims(grid)
 		throw(DomainError(string("dimension ",string(dim)," not matching grid")))
 	end
     return orth_dims
