@@ -116,6 +116,7 @@ function restrict(grid::EquidistantGrid, dim)
     return EquidistantGrid(size, limit_lower, limit_upper)
 end
 
+
 """
     boundary_identifiers(::EquidistantGrid)
 
@@ -129,16 +130,16 @@ boundary_identifiers(g::EquidistantGrid) = (((ntuple(i->(CartesianBoundary{i,Low
 
 
 """
-    boundary_grid(grid::EquidistantGrid,id::CartesianBoundary)
-	boundary_grid(::EquidistantGrid{1},::CartesianBoundary{1})
+    boundary_grid(grid::EquidistantGrid, id::CartesianBoundary)
 
 Creates the lower-dimensional restriciton of `grid` spanned by the dimensions
 orthogonal to the boundary specified by `id`. The boundary grid of a 1-dimensional
 grid is a zero-dimensional grid.
 """
-function boundary_grid(grid::EquidistantGrid,id::CartesianBoundary)
-	dims = collect(1:dimension(grid))
-	orth_dims = dims[dims .!= dim(id)]
+function boundary_grid(grid::EquidistantGrid, id::CartesianBoundary)
+	dims = 1:dimension(grid)
+    # Extract dimensions orthogonal to dim(id)
+    orth_dims = filter(i -> i != dim(id), dims)
 	if orth_dims == dims
 		throw(DomainError("boundary identifier not matching grid"))
 	end
