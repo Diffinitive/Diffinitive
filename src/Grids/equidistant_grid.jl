@@ -158,18 +158,6 @@ boundary_grid(::EquidistantGrid{1,T},::CartesianBoundary{1}) where T = Equidista
 
 
 """
-    boundary_size(grid::EquidistantGrid, id::CartesianBoundary)
-
-Returns the size of the boundary of `grid` specified by `id`.
-"""
-function boundary_size(grid::EquidistantGrid, id::CartesianBoundary)
-	orth_dims = orthogonal_dims(grid, dim(id))
-    return  grid.size[orth_dims]
-end
-boundary_size(::EquidistantGrid{1,T},::CartesianBoundary{1}) where T = ()
-
-
-"""
     refine(grid::EquidistantGrid, r::Int)
 
 Refines `grid` by a factor `r`. The factor is applied to the number of
