@@ -2,12 +2,11 @@
      Grid
 
 Should implement
-    dim(grid::Grid)
+    Base.ndims(grid::Grid)
     points(grid::Grid)
 
 """
 abstract type Grid end
-function dim end # TODO: Rename to Base.ndims instead? That's the name used for arrays.
 function points end
 
 """
@@ -15,7 +14,7 @@ function points end
 
 A range containing the dimensions of `grid`
 """
-dims(grid::Grid) = 1:dim(grid)
+dims(grid::Grid) = 1:ndims(grid)
 
 """
     evalOn(grid::Grid, f::Function)
