@@ -96,7 +96,6 @@ Base.@propagate_inbounds /̃(a::T, b::AbstractArray{T,D}) where {T,D} = LazyElem
 # Overload +,-,*,/ for LazyArrays 
 # Element wise operation for `*` and `/` are not overloaded for due to conflicts with the behavior
 # of regular `*` and `/` for AbstractArrays. Use tilde versions instead.
-# TODO: Try to make it work for `*` and `/` for e.g. *(::LazyArray{T},::T)?
 Base.@propagate_inbounds Base.:+(a::LazyArray{T,D}, b::LazyArray{T,D}) where {T,D} = a +̃ b
 Base.@propagate_inbounds Base.:-(a::LazyArray{T,D}, b::LazyArray{T,D}) where {T,D} = a -̃ b
 
