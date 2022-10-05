@@ -20,10 +20,8 @@ export EquidistantGrid
 export spacing
 export inverse_spacing
 export restrict
-export orthogonal_dims
 export boundary_identifiers
 export boundary_grid
-export boundary_size
 export refine
 export coarsen
 
