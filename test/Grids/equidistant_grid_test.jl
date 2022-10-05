@@ -17,11 +17,9 @@ using Sbplib.RegionIndices
         @test eltype(EquidistantGrid((4,3),(0,0),(1,3))) == Int
         @test size(EquidistantGrid(4,0.0,1.0)) == (4,)
         @test size(EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))) == (5,3)
+        @test ndims(EquidistantGrid(4,0.0,1.0)) == 1
+        @test ndims(EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))) == 2
     end
-
-    # dim
-    @test dim(EquidistantGrid(4,0.0,1.0)) == 1
-    @test dim(EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))) == 2
 
     @testset "spacing" begin
         @test [spacing(EquidistantGrid(4,0.0,1.0))...] ≈ [(1. /3,)...] atol=5e-13

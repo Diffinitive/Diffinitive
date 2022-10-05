@@ -4,7 +4,6 @@ using Sbplib.RegionIndices
 
 # Grid
 export Grid
-export dim
 export dims
 export points
 export evalOn
