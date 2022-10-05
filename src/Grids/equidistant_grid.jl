@@ -1,18 +1,10 @@
-export EquidistantGrid
-export spacing
-export inverse_spacing
-export restrict
-export boundary_identifiers
-export boundary_grid
-export refine
-export coarsen
 
 """
-    EquidistantGrid{Dim,T<:Real} <: AbstractGrid
+    EquidistantGrid{Dim,T<:Real} <: Grid
 
 `Dim`-dimensional equidistant grid with coordinates of type `T`.
 """
-struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
+struct EquidistantGrid{Dim,T<:Real} <: Grid
     size::NTuple{Dim, Int}
     limit_lower::NTuple{Dim, T}
     limit_upper::NTuple{Dim, T}
@@ -27,6 +19,7 @@ struct EquidistantGrid{Dim,T<:Real} <: AbstractGrid
         return new{Dim,T}(size, limit_lower, limit_upper)
     end
 end
+
 
 """
     EquidistantGrid(size, limit_lower, limit_upper)
@@ -45,12 +38,14 @@ function EquidistantGrid(size, limit_lower, limit_upper)
     return EquidistantGrid{length(size), eltype(limit_lower)}(size, limit_lower, limit_upper)
 end
 
+
 """
     EquidistantGrid{T}()
 
 Constructs a 0-dimensional grid.
 """
 EquidistantGrid{T}() where T = EquidistantGrid{0,T}((),(),()) # Convenience constructor for 0-dim grid
+
 
 """
     EquidistantGrid(size::Int, limit_lower::T, limit_upper::T)
@@ -67,12 +62,11 @@ Base.eachindex(grid::EquidistantGrid) = CartesianIndices(grid.size)
 
 Base.size(g::EquidistantGrid) = g.size
 
-"""
-    dimension(grid::EquidistantGrid)
+Base.ndims(::EquidistantGrid{Dim}) where Dim = Dim
 
-The dimension of the grid.
-"""
-dimension(grid::EquidistantGrid{Dim}) where Dim = Dim
+
+
+
 
 """
     spacing(grid::EquidistantGrid)
@@ -81,12 +75,14 @@ The spacing between grid points.
 """
 spacing(grid::EquidistantGrid) = (grid.limit_upper.-grid.limit_lower)./(grid.size.-1)
 
+
 """
     inverse_spacing(grid::EquidistantGrid)
 
 The reciprocal of the spacing between grid points.
 """
 inverse_spacing(grid::EquidistantGrid) = 1 ./ spacing(grid)
+
 
 """
     points(grid::EquidistantGrid)
@@ -103,6 +99,7 @@ function points(grid::EquidistantGrid)
     return broadcast(I -> grid.limit_lower .+ (I.-1).*h, indices)
 end
 
+
 """
     restrict(::EquidistantGrid, dim)
 
@@ -118,6 +115,20 @@ end
 
 
 """
+    orthogonal_dims(grid::EquidistantGrid,dim)
+
+Returns the dimensions of grid orthogonal to that of dim.
+"""
+function orthogonal_dims(grid::EquidistantGrid, dim)
+    orth_dims = filter(i -> i != dim, dims(grid))
+	if orth_dims == dims(grid)
+		throw(DomainError(string("dimension ",string(dim)," not matching grid")))
+	end
+    return orth_dims
+end
+
+
+"""
     boundary_identifiers(::EquidistantGrid)
 
 Returns a tuple containing the boundary identifiers for the grid, stored as
@@ -126,7 +137,7 @@ Returns a tuple containing the boundary identifiers for the grid, stored as
 	 CartesianBoundary(2,Lower),
 	 ...)
 """
-boundary_identifiers(g::EquidistantGrid) = (((ntuple(i->(CartesianBoundary{i,Lower}(),CartesianBoundary{i,Upper}()),dimension(g)))...)...,)
+boundary_identifiers(g::EquidistantGrid) = (((ntuple(i->(CartesianBoundary{i,Lower}(),CartesianBoundary{i,Upper}()),ndims(g)))...)...,)
 
 
 """
@@ -137,13 +148,8 @@ orthogonal to the boundary specified by `id`. The boundary grid of a 1-dimension
 grid is a zero-dimensional grid.
 """
 function boundary_grid(grid::EquidistantGrid, id::CartesianBoundary)
-	dims = 1:dimension(grid)
-    # Extract dimensions orthogonal to dim(id)
-    orth_dims = filter(i -> i != dim(id), dims)
-	if orth_dims == dims
-		throw(DomainError("boundary identifier not matching grid"))
-	end
-    return restrict(grid,orth_dims)
+    orth_dims = orthogonal_dims(grid, dim(id))
+    return restrict(grid, orth_dims)
 end
 boundary_grid(::EquidistantGrid{1,T},::CartesianBoundary{1}) where T = EquidistantGrid{T}()
 
@@ -159,8 +165,9 @@ See also: [`coarsen`](@ref)
 function refine(grid::EquidistantGrid, r::Int)
     sz = size(grid)
     new_sz = (sz .- 1).*r .+ 1
-    return EquidistantGrid{dimension(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
+    return EquidistantGrid{ndims(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
 end
+
 
 """
     coarsen(grid::EquidistantGrid, r::Int)
@@ -180,5 +187,5 @@ function coarsen(grid::EquidistantGrid, r::Int)
 
     new_sz = (sz .- 1).÷r .+ 1
 
-    return EquidistantGrid{dimension(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
+    return EquidistantGrid{ndims(grid), eltype(grid)}(new_sz, grid.limit_lower, grid.limit_upper)
 end
