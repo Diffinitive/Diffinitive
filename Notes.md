@@ -1,5 +1,23 @@
 # Notes
 
+## Boundary Conditions and SATs
+
+Types for boundary conditions:
+
+ * abstract type `BoundaryDataType`
+ * abstract type `BoundaryCondition{T<:BoundaryDataType}`
+ * concrete types `ConstantBoundaryData <: BoundaryDataType` and similar
+ * concrete types `NeumannCondition{BDT<:BoundaryDataType} <: BoundaryCondition{BDT}` and similar
+The concrete `BoundaryDataType` subtypes are "thin types" wrapping the boundary data, and are used to indicate how the boundary data should be used in e.g. sat routines. The concrete `BoundaryCondition{BDT}` subtypes are used for assembling the tensors used to construct e.g. a SAT.
+
+SAT methods:
+There are multiple options for what the SAT methods could return.
+* (Current) a function which returns a `LazyTensorApplication`, e.g. `f = sat(grid,op,bc)`. The the resulting `LazyTensorApplication` can then be added to scheme i.e. `scheme = op*u + f(u)`. This is how one typically would write the SAT in the litterature. Depdending on the type of data in the BC, e.g. time-depdendent etc one can return f(u,t).
+* `LazyTensor`s `closure, penalty = sat(grid,op,bc)` like in the matlab version. Probably the most general one. Up to the user to make use of the returned `LazyTensor`s. One can for example then easily include the closures to the operator and have eg. `D = (op + closure)*u`.
+* A `LazyTensor` for closure, and a `LazyArray` for `penalty*data`. Mix of the above.
+
+It is not clear if any of these are preferable as it currently stands.
+
 ## Reading operators
 
 Jonatan's suggestion is to add methods to `Laplace`, `SecondDerivative` and
