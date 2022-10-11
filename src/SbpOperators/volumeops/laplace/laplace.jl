@@ -54,30 +54,23 @@ function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
     return Δ
 end
 
-sat(Δ::Laplace, g::EquidistantGrid, bc::BoundaryCondition{Neumann}) = neumann_sat(Δ, g, bc.id)
+"""
+    sat_tensors(Δ::Laplace, g::EquidistantGrid, bc::NeumannCondition)
 
-function neumann_sat(Δ::Laplace, g::EquidistantGrid{1}, id::BoundaryIdentifier)
+Returns anonymous functions for construction the `LazyTensorApplication`s
+recuired in order to impose a Neumann boundary condition.
+
+See also: [`sat`,`NeumannCondition`](@ref).
+"""
+function BoundaryConditions.sat_tensors(Δ::Laplace, g::EquidistantGrid, bc::NeumannCondition)
+    id = bc.id
     set  = Δ.stencil_set
     H⁻¹ = inverse_inner_product(g,set)
+    Hᵧ = inner_product(boundary_grid(g, id), set)
     e = boundary_restriction(g, set, id)
     d = normal_derivative(g, set, id)
-    return f(u,data) = H⁻¹∘e'∘(d*u .- data)
-    #closure = H⁻¹∘e'∘d
-    #penalty = -H⁻¹∘e'
-    #return closure, penalty
-end
-
-
-
-function neumann_sat(Δ::Laplace, g::EquidistantGrid, id::BoundaryIdentifier)
-    set  = Δ.stencil_set
-    H⁻¹ = inverse_inner_product(g, set)
-    orth_dims = Tuple(filter(i -> i != dimension(g), 1:dimension(g)))
-    Hᵧ = inner_product(restrict(g, orth_dims...), set)
-    e = boundary_restriction(g, set, id)
-    d = normal_derivative(g, set, id)
-    return f(u,data) = H⁻¹∘e'∘Hᵧ∘(d*u .- data)
-    #closure = H⁻¹∘e'∘Hᵧ∘d
-    #penalty = -H⁻¹∘e'∘Hᵧ
-    #return closure, penalty
+    
+    closure(u) = H⁻¹*e'*Hᵧ*d*u
+    penalty(g) = -H⁻¹*e'*Hᵧ*g
+    return closure, penalty
 end
