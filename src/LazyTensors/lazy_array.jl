@@ -93,17 +93,22 @@ Base.@propagate_inbounds /̃(a::T, b::AbstractArray{T,D}) where {T,D} = LazyElem
 
 
 
-# NOTE: Är det knas att vi har till exempel * istället för .* ??
-# Oklart om det ens går att lösa..
+# Overload +,-,*,/ for LazyArrays 
+# Element wise operation for `*` and `/` are not overloaded for due to conflicts with the behavior
+# of regular `*` and `/` for AbstractArrays. Use tilde versions instead.
 Base.@propagate_inbounds Base.:+(a::LazyArray{T,D}, b::LazyArray{T,D}) where {T,D} = a +̃ b
-Base.@propagate_inbounds Base.:+(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a +̃ b
-Base.@propagate_inbounds Base.:+(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = a +̃ b
-
 Base.@propagate_inbounds Base.:-(a::LazyArray{T,D}, b::LazyArray{T,D}) where {T,D} = a -̃ b
+
+Base.@propagate_inbounds Base.:+(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a +̃ b
 Base.@propagate_inbounds Base.:-(a::LazyArray{T,D}, b::AbstractArray{T,D}) where {T,D} = a -̃ b
+
+Base.@propagate_inbounds Base.:+(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = a +̃ b
 Base.@propagate_inbounds Base.:-(a::AbstractArray{T,D}, b::LazyArray{T,D}) where {T,D} = a -̃ b
 
-# Element wise operation for `*` and `\` are not overloaded due to conflicts with the behavior
-# of regular `*` and `/` for AbstractArrays. Use tilde versions instead.
+Base.@propagate_inbounds Base.:+(a::LazyArray{T,D}, b::T) where {T,D} = a +̃ b
+Base.@propagate_inbounds Base.:-(a::LazyArray{T,D}, b::T) where {T,D} = a -̃ b
+
+Base.@propagate_inbounds Base.:+(a::T, b::LazyArray{T,D}) where {T,D} = a +̃ b
+Base.@propagate_inbounds Base.:-(a::T, b::LazyArray{T,D}) where {T,D} = a -̃  b
 
 export +̃, -̃, *̃, /̃
