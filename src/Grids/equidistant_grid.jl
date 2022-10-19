@@ -1,4 +1,3 @@
-
 """
     EquidistantGrid{Dim,T<:Real} <: Grid
 
@@ -72,7 +71,11 @@ Base.getindex(g::EquidistantGrid, I::CartesianIndex) = g[Tuple(I)...]
 # TBD: Can this method be removed if `EquidistantGrid` is an AbstractArray?
 
 
+function evalOn(grid::EquidistantGrid, f::Function)
+    F(I...) = f(grid[I...]...)
 
+    return LazyFunctionArray(F, size(grid))
+end
 
 """
     spacing(grid::EquidistantGrid)

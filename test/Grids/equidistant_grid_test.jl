@@ -1,6 +1,7 @@
 using Sbplib.Grids
 using Test
 using Sbplib.RegionIndices
+using Sbplib.LazyTensors
 
 
 @testset "EquidistantGrid" begin
@@ -54,6 +55,16 @@ using Sbplib.RegionIndices
         @test g[4,2] == (-0.25,7.11/2)
 
         @test g[CartesianIndex(1,3)] == (-1.0,7.11)
+    end
+
+    @testset "evalOn" begin
+        g = EquidistantGrid((5,3), (0.0,0.0), (2.0,1.0))
+
+        @test evalOn(g, (x,y) -> 0.) isa LazyArray
+        @test evalOn(g, (x,y) -> 0.) == fill(0., (5,3))
+
+        f(x,y) = sin(x)*cos(y)
+        @test evalOn(g, f) == map(p->f(p...), points(g))
     end
 
     @testset "restrict" begin
