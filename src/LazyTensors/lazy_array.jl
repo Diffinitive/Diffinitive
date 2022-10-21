@@ -28,7 +28,7 @@ end
 export LazyFunctionArray
 
 function LazyFunctionArray(f::F, size::NTuple{D,Int}) where {F<:Function,D}
-    T = typeof(f(ones(D)...))
+    T = typeof(f(ones(Int, D)...))
     return LazyFunctionArray{F,T,D}(f,size)
 end
 
