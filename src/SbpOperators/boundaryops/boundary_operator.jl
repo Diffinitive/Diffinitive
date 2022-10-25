@@ -14,6 +14,10 @@ end
 
 BoundaryOperator{R}(stencil::Stencil{T,N}, size::Int) where {T,R,N} = BoundaryOperator{T,R,N}(stencil, size)
 # TBD: Will the above convenience constructor ever be used?
+# Review: 
+# It should probably be removed. It's kind of weird to have a convenice constructor
+# for a general type if it isnt used by any of the current specializations. And in most cases the 1D constructor
+# can be inflated.
 
 """
     BoundaryOperator(grid::EquidistantGrid{1}, closure_stencil, region)

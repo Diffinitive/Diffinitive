@@ -19,7 +19,9 @@ function monomial(x,k)
     end
     x^k/factorial(k)
 end
-
+# Review:
+# If we test LazyTensor.inflation for e.g 1D-3D general tensors then we should only need to test
+# the 1D first derivative.
 @testset "first_derivative" begin
     @testset "Constructors" begin
         stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)

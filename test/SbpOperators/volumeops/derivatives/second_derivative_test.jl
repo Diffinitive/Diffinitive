@@ -6,6 +6,9 @@ using Sbplib.LazyTensors
 
 import Sbplib.SbpOperators.VolumeOperator
 
+# Review:
+# If we test LazyTensor.inflation for e.g 1D-3D general tensors then we should only need to test
+# the 1D second derivative.
 @testset "SecondDerivative" begin
     operator_path = sbp_operators_path()*"standard_diagonal.toml"
     stencil_set = read_stencil_set(operator_path; order=4)

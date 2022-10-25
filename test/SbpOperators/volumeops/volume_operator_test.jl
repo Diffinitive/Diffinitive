@@ -40,6 +40,8 @@ import Sbplib.SbpOperators.even
     r_even[1] = (v[1] + v[2])/2
     r_odd[1]  = (v[1] + v[2])/2
 
+    # Review:
+    # Use multiplication symbol, e.g. 2*v[1]
     r_even[2] = 2v[1] + v[2]
     r_odd[2]  = 2v[1] + v[2]
 

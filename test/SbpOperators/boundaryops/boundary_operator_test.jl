@@ -14,10 +14,11 @@ import Sbplib.SbpOperators.BoundaryOperator
     g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
 
     @testset "Constructors" begin
+        # Review: Remove the first line below in case we remove convenience constructor in BoundaryOperator
         op_l = BoundaryOperator{Lower}(closure_stencil,size(g_1D)[1])
         @test op_l == BoundaryOperator(g_1D,closure_stencil,Lower())
         @test op_l isa LazyTensor{T,0,1} where T
-
+         # Review: Remove the first line below in case we remove convenience constructor in BoundaryOperator
         op_r = BoundaryOperator{Upper}(closure_stencil,size(g_1D)[1])
         @test op_r == BoundaryOperator(g_1D,closure_stencil,Upper())
         @test op_r isa LazyTensor{T,0,1} where T

@@ -367,6 +367,8 @@ end
     end
 end
 
+# Review: If we are thorough in testing multi-D tensors here we can drop tests from many of the volume operators,
+# e.g. first derivative and second derivative.
 @testset "inflate" begin
     I = LazyTensors.inflate(IdentityTensor(),(3,4,5,6), 2)
     @test I isa LazyTensor{Float64, 3,3}
