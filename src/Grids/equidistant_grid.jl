@@ -35,9 +35,6 @@ by the tuple `size`.
 function EquidistantGrid(size, limit_lower, limit_upper)
     return EquidistantGrid{length(size), eltype(limit_lower)}(size, limit_lower, limit_upper)
 end
-# TBD: Should it be an AbstractArray?
-# Review: Do we need it to be? It could be nice to have an iterator for a grid, but are there any other
-# functionalities we need? Adding two grids etc? If not, I suggest against subtyping AbstractArray.
 
 """
     EquidistantGrid{T}()
@@ -70,8 +67,6 @@ function Base.getindex(g::EquidistantGrid, I::Vararg{Int})
 end
 
 Base.getindex(g::EquidistantGrid, I::CartesianIndex) = g[Tuple(I)...]
-# TBD: Can this method be removed if `EquidistantGrid` is an AbstractArray?
-# Review: See comment above.
 
 # Review: 
 # Is it not strange that evalOn(::Grid) is non-lazy while evalOn(::EquidistantGrid) is?
