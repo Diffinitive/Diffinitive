@@ -24,6 +24,7 @@ end
 
 """
     closure_size(::BoundaryOperator)
+
 The size of the closure stencil.
 """
 closure_size(::BoundaryOperator{T,R,N}) where {T,R,N} = N

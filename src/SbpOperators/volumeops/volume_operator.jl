@@ -1,5 +1,6 @@
 """
     VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
+
 Implements a one-dimensional constant coefficients volume operator
 """
 struct VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
