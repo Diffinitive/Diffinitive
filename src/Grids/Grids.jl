@@ -2,18 +2,30 @@ module Grids
 
 using Sbplib.RegionIndices
 
-export BoundaryIdentifier, CartesianBoundary
+# Grid
+export Grid
+export dims
+export points
+export evalOn
 
-abstract type BoundaryIdentifier end
-struct CartesianBoundary{Dim, R<:Region} <: BoundaryIdentifier end
-dim(::CartesianBoundary{Dim, R}) where {Dim, R} = Dim
-region(::CartesianBoundary{Dim, R}) where {Dim, R} = R()
+# BoundaryIdentifier
+export BoundaryIdentifier
+export CartesianBoundary
+export dim
+export region
 
-export dim, region
+# EquidistantGrid
+export EquidistantGrid
+export spacing
+export inverse_spacing
+export restrict
+export boundary_identifiers
+export boundary_grid
+export refine
+export coarsen
 
-include("AbstractGrid.jl")
-include("EquidistantGrid.jl")
-
-# TODO: Rename AbstractGrid to Grid and move definition here.
+include("grid.jl")
+include("boundary_identifier.jl")
+include("equidistant_grid.jl")
 
 end # module

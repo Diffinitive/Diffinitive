@@ -6,6 +6,8 @@ using Sbplib.LazyTensors
 
 import Sbplib.SbpOperators.VolumeOperator
 
+# TODO: Refactor these test to look more like the tests in first_derivative_test.jl.
+
 @testset "SecondDerivative" begin
     operator_path = sbp_operators_path()*"standard_diagonal.toml"
     stencil_set = read_stencil_set(operator_path; order=4)

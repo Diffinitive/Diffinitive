@@ -67,11 +67,18 @@ using Sbplib.RegionIndices
     @test isa(v1 + v2, LazyArray)
     @test isa(v2 + v1, LazyArray)
     @test isa(v1 - v2, LazyArray)
-    @test isa(v2 - v1, LazyArray)
+    @test isa(v2 - v1, LazyArray)    
+    @test isa(v1 + s, LazyArray)
+    @test isa(s + v1, LazyArray)
+    @test isa(v1 - s, LazyArray)
+    @test isa(s - v1, LazyArray)
     for i ∈ eachindex(v2)
         @test (v1 + v2)[i] == (v2 + v1)[i] == r_add_v[i]
         @test (v1 - v2)[i] == -(v2 - v1)[i] == r_sub_v[i]
+        @test (v1 + s)[i] == (s + v1)[i] == r_add_s[i]
+        @test (v1 - s)[i] == -(s - v1)[i] == r_sub_s[i]
     end
+    
     @test_throws BoundsError (v1 + v2)[4]
     v2 = [1., 2, 3, 4]
     @test_throws DimensionMismatch v1 + v2
@@ -95,4 +102,7 @@ end
     @test_throws BoundsError LazyFunctionArray((i,j)->i*j, (3,2))[4,2]
     @test_throws BoundsError LazyFunctionArray((i,j)->i*j, (3,2))[2,3]
 
+    # Test that the constructor works with a restrictive function
+    f(x::Vararg{Int}) = sum(x)
+    @test LazyFunctionArray(f,(3,4)) isa LazyFunctionArray
 end
