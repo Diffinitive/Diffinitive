@@ -1,33 +1,4 @@
 """
-    boundary_operator(grid,closure_stencil,boundary)
-
-Creates a boundary operator on a `Dim`-dimensional grid for the
-specified `boundary`. The action of the operator is determined by `closure_stencil`.
-
-When `Dim=1`, the corresponding `BoundaryOperator` tensor mapping is returned.
-When `Dim>1`, the `BoundaryOperator` `op` is inflated by the outer product
-of `IdentityTensors` in orthogonal coordinate directions, e.g for `Dim=3`,
-the boundary restriction operator in the y-direction direction is `Ix⊗op⊗Iz`.
-"""
-function boundary_operator(grid::EquidistantGrid, closure_stencil, boundary::CartesianBoundary)
-    #TODO:Check that dim(boundary) <= Dim?
-
-    # Create 1D boundary operator
-    r = region(boundary)
-    d = dim(boundary)
-    op = BoundaryOperator(restrict(grid, d), closure_stencil, r)
-
-    # Create 1D IdentityTensors for each coordinate direction
-    one_d_grids = restrict.(Ref(grid), Tuple(dims(grid)))
-    Is = IdentityTensor{eltype(grid)}.(size.(one_d_grids))
-
-    # Formulate the correct outer product sequence of the identity mappings and
-    # the boundary operator
-    parts = Base.setindex(Is, op, d)
-    return foldl(⊗, parts)
-end
-
-"""
     BoundaryOperator{T,R,N} <: LazyTensor{T,0,1}
 
 Implements the boundary operator `op` for 1D as a `LazyTensor`
@@ -41,8 +12,6 @@ struct BoundaryOperator{T,R<:Region,N} <: LazyTensor{T,0,1}
     size::Int
 end
 
-BoundaryOperator{R}(stencil::Stencil{T,N}, size::Int) where {T,R,N} = BoundaryOperator{T,R,N}(stencil, size)
-
 """
     BoundaryOperator(grid::EquidistantGrid{1}, closure_stencil, region)
 
@@ -55,6 +24,7 @@ end
 
 """
     closure_size(::BoundaryOperator)
+
 The size of the closure stencil.
 """
 closure_size(::BoundaryOperator{T,R,N}) where {T,R,N} = N
