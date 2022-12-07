@@ -1,26 +1,97 @@
+# TODO:  Should BoundaryData just be used for traits
+# of the BoundaryConditions? Seems like one then  could move the
+# the  boundary data value val directly to BoundaryCondition
+# Not sure how one would do this tho.
 """
-    BoundaryDataType
+    BoundaryData
 
 A type for storing boundary data, e.g. constant, space-dependent, time-dependent etc.
-Subtypes of `BoundaryDataType` should store the boundary data in a field `val`, i.e.
-`struct MyBoundaryDataType{T} <: BoundaryDataType val::T end`.
+Subtypes of `BoundaryData` should store the boundary data in a field `val`. The exception
+to this is ZeroBoundaryData.
 """
-abstract type BoundaryDataType end
+abstract type BoundaryData end
 
-struct ConstantBoundaryData{T} <: BoundaryDataType
+"""
+    ConstantBoundaryData
+
+`val` is a scalar value of type T
+"""
+struct ConstantBoundaryData{T<:Number} <: BoundaryData
     val::T
 end
 
-struct SpaceDependentBoundaryData{T} <: BoundaryDataType
+"""
+    SpaceDependentBoundaryData
+
+`val` is a function of dimensionality equal to the boundary
+"""
+struct SpaceDependentBoundaryData{T<:Function} <: BoundaryData
     val::T
 end
 
-struct TimeDependentBoundaryData{T} <: BoundaryDataType
+"""
+    TimeDependentBoundaryData
+
+`val` is a scalar function val(t)
+"""
+struct TimeDependentBoundaryData{T<:Function} <: BoundaryData
     val::T
 end
 
-struct SpaceTimeDependentBoundaryData{T} <: BoundaryDataType
+"""
+    SpaceTimeDependentBoundaryData
+
+`val` is a timedependent function returning the spacedependent
+    boundary data at a specific time. For instance, if f(t,x)
+    is the function describing the spacetimedependent  boundary data then
+    val(t*) returns the function g(x) = f(t*,x...)
+"""
+struct SpaceTimeDependentBoundaryData{T<:Function} <: BoundaryData
     val::T
+
+    function SpaceTimeDependentBoundaryData(f::Function)
+        val(t) = (args...) -> f(t,args...)
+        return new{typeof(val)}(val)
+    end
+end
+
+"""
+    ZeroBoundaryData
+"""
+struct ZeroBoundaryData <: BoundaryData end
+
+
+"""
+    discretize(::BoundaryData, boundary_grid)
+
+Returns an anonymous time-dependent function f, such that f(t) is
+a `LazyArray` holding the `BoundaryData` discretized on `boundary_grid`.
+"""
+# TODO: Is the return type of discretize really a good interface
+# for the boundary data?
+# Moreover, instead of explicitly converting to a LazyArray here
+# should we defer this to evalOn (and extend evalOn for scalars as well)?
+# I.e. if evalOn returns a LazyArray, the boundary data is lazy. Otherwise
+# it is preallocated.
+
+function discretize(bd::ConstantBoundaryData, boundary_grid)
+    return t -> LazyTensors.LazyConstantArray(bd.val, size(boundary_grid))
+end
+
+function discretize(bd::TimeDependentBoundaryData, boundary_grid)
+    return t -> LazyTensors.LazyConstantArray(bd.val(t), size(boundary_grid))
+end
+
+function discretize(bd::SpaceDependentBoundaryData, boundary_grid)
+    return t -> evalOn(boundary_grid, bd.val)
+end
+
+function discretize(bd::SpaceTimeDependentBoundaryData, boundary_grid)
+    return t -> evalOn(boundary_grid, bd.val(t))
+end
+
+function discretize(::ZeroBoundaryData, boundary_grid)
+    return t -> LazyTensors.LazyConstantArray(zero(eltype(boundary_grid)), size(boundary_grid))
 end
 
 """
@@ -29,24 +100,22 @@ end
 A type for implementing data needed in order to impose a boundary condition.
 Subtypes refer to perticular types of boundary conditions, e.g. Neumann conditions.
 """
-# TODO: Parametrize the boundary id as well?
-abstract type BoundaryCondition{T<:BoundaryDataType} end
+abstract type BoundaryCondition{T<:BoundaryData} end
 
-data(bc::BoundaryCondition) = bc.data.val
+"""
+    data(::BoundaryCondition)
 
-struct NeumannCondition{BDT<:BoundaryDataType} <: BoundaryCondition{BDT}
-    id::BoundaryIdentifier
-    data::BDT
+Returns the data stored by the `BoundaryCondition`.
+"""
+data(bc::BoundaryCondition) = bc.data
+ 
+
+struct NeumannCondition{BD<:BoundaryData} <: BoundaryCondition{BD}
+    data::BD
+    id::BoundaryIdentifier 
 end
 
-struct DirichletCondition{BDT<:BoundaryDataType} <: BoundaryCondition{BDT}
+struct DirichletCondition{BD<:BoundaryData} <: BoundaryCondition{BD}
+    data::BD
     id::BoundaryIdentifier
-    data::BDT
-end
-
-struct RobinCondition{BDT<:BoundaryDataType,T<:Real} <: BoundaryCondition{BDT}
-    id::BoundaryIdentifier
-    data::BDT
-    α::T
-    β::T
 end

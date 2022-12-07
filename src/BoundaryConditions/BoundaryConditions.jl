@@ -1,10 +1,12 @@
 module BoundaryConditions
 
-export BoundaryDataType
+export BoundaryData
 export ConstantBoundaryData
 export SpaceDependentBoundaryData
 export TimeDependentBoundaryData
-export SpaceDependentBoundaryData
+export SpaceTimeDependentBoundaryData
+export ZeroBoundaryData
+export discretize
 
 export BoundaryCondition
 export NeumannCondition
@@ -12,6 +14,7 @@ export DirichletCondition
 export RobinCondition
 
 export data
+
 export sat
 export sat_tensors
 
