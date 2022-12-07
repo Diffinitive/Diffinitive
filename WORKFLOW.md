@@ -38,3 +38,9 @@ hg commit -m "Merge development/branch"
 * Review docstrings
 * Render Documenter and check docstrings in browser
 * Run full tests
+
+# Special comments
+The following special comments are used:
+* `# TODO: `: Something that should be done at some point.
+* `# TBD: `:  "To be determined", i.e a decision that has to be made.
+* `# REVIEW: `: A review comment. Should only exist on development branches.
