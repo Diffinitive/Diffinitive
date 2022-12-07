@@ -8,6 +8,10 @@ Branches are named using slash separated keywords. The first keyword describes t
  * refactor
 Further keywords may describe where, e.g. what sub package, the change happens. The last keyword should describe the change.
 
+Some examples:
+ * refactor/grids: Branch to refactor the grids module
+ * bugfix/lazy_tensors/lazyfunctionarray: Branch to fix a bug in LazyFunctionArray
+
 ## Merging a branch into `default`
 The changes in a branch has been reviewed and deemed ready to merge the branch is closed and then merged.
 
