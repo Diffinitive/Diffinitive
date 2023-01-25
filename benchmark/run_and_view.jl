@@ -31,7 +31,7 @@ function run_benchmark()
     )
 end
 
-function write_result_html(io, r; title)
+function write_result_html(io, r)
     iobuffer = IOBuffer()
     PkgBenchmark.export_markdown(iobuffer, r)
 
@@ -39,15 +39,17 @@ function write_result_html(io, r; title)
     content = Markdown.html(parsed_md)
 
     template = Mustache.load(template_path)
-    Mustache.render(io, template, Dict("title"=>title, "content"=>content))
+
+    dt = Dates.format(PkgBenchmark.date(r), "yyyy-mm-dd HH:MM:SS")
+    Mustache.render(io, template, Dict("title"=>dt, "content"=>content))
 end
 
 function write_result_html(r)
-    dt = Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS")
+    dt = Dates.format(PkgBenchmark.date(r), "yyyy-mm-dd HH:MM:SS")
     file_path = joinpath(results_dir, dt*".html")
 
     open(file_path, "w") do io
-        write_result_html(io, r; title=dt)
+        write_result_html(io, r)
     end
 
     return file_path
