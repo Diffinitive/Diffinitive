@@ -30,3 +30,5 @@ SUITE
 # TODO: Make it easy to compare different commits. (A simple script?)
 
 # Should set HGPLAIN before script use. Example: `HGPLAIN= hg st`
+# `hg id` for getting the revision
+# `hg update --check` for updating, requires a clean working directory.

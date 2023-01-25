@@ -1,8 +1,46 @@
-using PkgBenchmark
-using Markdown
-using Mustache
+import PkgBenchmark
+import Markdown
+import Mustache
+import Dates
 
 import Sbplib
+
+const sbplib_root = splitpath(pathof(Sbplib))[1:end-2] |> joinpath
+const results_dir = mkpath(joinpath(sbplib_root, "benchmark/results"))
+const template_path = joinpath(sbplib_root, "benchmark/result.tmpl")
+
+function main()
+    r = run_benchmark()
+    file_path = write_result_html(r)
+    open_in_default_browser(file_path)
+end
+
+function run_benchmark()
+    return PkgBenchmark.benchmarkpkg(Sbplib)
+end
+
+function write_result_html(io, r; title)
+    iobuffer = IOBuffer()
+    PkgBenchmark.export_markdown(iobuffer, r)
+
+    parsed_md = Markdown.parse(String(take!(iobuffer)))
+    content = Markdown.html(parsed_md)
+
+    template = Mustache.load(template_path)
+    Mustache.render(io, template, Dict("title"=>title, "content"=>content))
+end
+
+function write_result_html(r)
+    dt = Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS")
+    file_path = joinpath(results_dir, dt*".html")
+
+    open(file_path, "w") do io
+        write_result_html(io, r; title=dt)
+    end
+
+    return file_path
+end
+
 
 # From Pluto.jl/src/webserver/WebServer.jl  (2023-01-24)
 function open_in_default_browser(url::AbstractString)::Bool
@@ -24,33 +62,7 @@ function open_in_default_browser(url::AbstractString)::Bool
     end
 end
 
-r = benchmarkpkg(Sbplib)
+main
 
-iobuffer = IOBuffer()
-export_markdown(iobuffer, r)
-
-parsed_md = Markdown.parse(String(take!(iobuffer)))
-
-sbplib_root = splitpath(pathof(Sbplib))[1:end-2] |> joinpath
-
-results_dir = mkpath(joinpath(sbplib_root, "benchmark/results"))
-
-dt = Dates.format(now(), "yyyy-mm-dd HH:MM:SS")
-
-file_path = joinpath(results_dir, dt*".html")
-
-
-template = Mustache.load(joinpath(sbplib_root, "benchmark/result.tmpl"))
-
-open(file_path, "w") do io
-    content = html(parsed_md)
-    Mustache.render(io, template, Dict("title"=>dt, "content"=>content))
-    # html(io, parsed_md)
-end
-
-open_in_default_browser(file_path)
-
-
-# TODO: Cleanup code
 # TODO: Change color of codeblocks
 # TODO: Change width of tables and code blocks
