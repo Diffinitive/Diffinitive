@@ -16,7 +16,19 @@ function main()
 end
 
 function run_benchmark()
-    return PkgBenchmark.benchmarkpkg(Sbplib)
+    r = PkgBenchmark.benchmarkpkg(Sbplib)
+
+    commit = hg_id()
+
+    return PkgBenchmark.BenchmarkResults(
+        "Sbplib.jl",
+        commit,
+        r.benchmarkgroup,
+        r.date,
+        r.julia_commit,
+        r.vinfo,
+        r.benchmarkconfig,
+    )
 end
 
 function write_result_html(io, r; title)
