@@ -41,6 +41,15 @@ function write_result_html(r)
     return file_path
 end
 
+function hg_id()
+    cmd = Cmd(`hg id`, dir=sbplib_root)
+    return readchomp(addenv(cmd, "HGPLAIN"=>""))
+end
+
+function hg_update(rev)
+    cmd = Cmd(`hg update --check $rev`, dir=sbplib_root)
+    run(addenv(cmd, "HGPLAIN"=>""))
+end
 
 # From Pluto.jl/src/webserver/WebServer.jl  (2023-01-24)
 function open_in_default_browser(url::AbstractString)::Bool
