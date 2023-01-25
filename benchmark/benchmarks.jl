@@ -26,12 +26,7 @@ end
 
 SUITE
 
-
-# TODO: Make it easy to run and display results (useful to look at them in a webbrowser? Could serve them using julia)
+# TODO: Add mercurial version of benchmarkpkg
 # TODO: Make it easy to compare different commits. (A simple script?)
-# TODO: Do we need machanisms to save the results from runs?
-# TBD: How well does BenchmarkTools work for comparisons, do we need make special considerations?
-# TBD: When and how do we want to look at % of peak performance? Is this going to be done using the benchmark suite?
-
 
 # Should set HGPLAIN before script use. Example: `HGPLAIN= hg st`
