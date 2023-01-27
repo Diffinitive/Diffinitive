@@ -21,7 +21,6 @@ function main(args...; kwargs...)
     open_in_default_browser(file_path)
 end
 
-# TBD: What parts are PkgBenchmark contributing? Can it be stripped out? Can we replace the html output part?
 
 """
     run_benchmark()
@@ -41,7 +40,6 @@ end
 
 Updates the repository to the given revison and runs the benchmark suite. When done, updates the repository to the origianl state.
 `rev` can be any identifier compatible with `hg update`.
-
 
 Returns a `PkgBenchmark.BenchmarkResult`
 """
@@ -75,8 +73,6 @@ function run_benchmark(target, baseline, f=minimum; judgekwargs=Dict())
     return PkgBenchmark.judge(t,b,f; judgekwargs...)
 end
 
-# TBD: How to compare against current working directory? Possible to create a temporary commit?
-
 
 function add_rev_info(benchmarkresult, rev)
     return PkgBenchmark.BenchmarkResults(
@@ -90,6 +86,7 @@ function add_rev_info(benchmarkresult, rev)
     )
 end
 
+
 function write_result_html(io, r)
     iobuffer = IOBuffer()
     PkgBenchmark.export_markdown(iobuffer, r)
@@ -102,7 +99,6 @@ function write_result_html(io, r)
     dt = Dates.format(PkgBenchmark.date(r), "yyyy-mm-dd HH:MM:SS")
     Mustache.render(io, template, Dict("title"=>dt, "content"=>content))
 end
-## Fix the writing of the commit, it chops off all the important info
 
 function write_result_html(r)
     dt = Dates.format(PkgBenchmark.date(r), "yyyy-mm-dd HHMMSS")
@@ -115,7 +111,9 @@ function write_result_html(r)
     return file_path
 end
 
+
 PkgBenchmark.date(j::PkgBenchmark.BenchmarkJudgement) = PkgBenchmark.date(PkgBenchmark.target_result(j))
+
 
 function hg_id()
     cmd = Cmd(`hg id`, dir=sbplib_root)
@@ -131,6 +129,7 @@ function hg_update(rev)
     cmd = Cmd(`hg update --check -r $rev`, dir=sbplib_root)
     run(addenv(cmd, "HGPLAIN"=>""))
 end
+
 
 # From Pluto.jl/src/webserver/WebServer.jl  (2023-01-24)
 function open_in_default_browser(url::AbstractString)::Bool
@@ -152,7 +151,18 @@ function open_in_default_browser(url::AbstractString)::Bool
     end
 end
 
+
 main
 
-# TODO: Change color of codeblocks
-# TODO: Change width of tables and code blocks
+# TODO: Better logging of what is happening
+
+# TODO: Clean up the HTML output?
+    # TODO: Make the codeblocks in the table look nicer
+    # TODO: Change width of tables and code blocks so everything is visible
+    # TODO: Fix the commit id, it chops off all the important info
+    # TODO: Make title less verbose
+    # TBD: Do we have to replace export_markdown? Could use a template instead.
+
+
+# TBD: How to compare against current working directory? Possible to create a temporary commit?
+# TBD: What parts are PkgBenchmark contributing? Can it be stripped out?
