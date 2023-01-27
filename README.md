@@ -29,12 +29,12 @@ Pkg.test(test_args=["*/lazy_tensor_operations_test.jl", "Grids/*"])
 will run any file named `lazy_tensor_operations_test.jl` and all the files in the `Grids` folder.
 
 ## Running benchmarks
-Benchmarks are defined in `benchmark/` use the tools for benchmark suites in BenchmarkTools.jl
+Benchmarks are defined in `benchmark/` and use the tools for benchmark suites in BenchmarkTools.jl
 The format is compatible with PkgBenchmark.jl which helps with running the suite, comparing results and presenting the results in a readable way.
 
 `benchmark/` contains a julia environment with the necessary packages for working with the benchmarks.
 
-`activate benchmark`
+There are custom functions included for running the benchmarks in this Mercurial repository. To use this first activate the environment in `benchmark/` then include the file `benchmark_utils.jl`.
 
 ```julia
 using PkgBenchmark
