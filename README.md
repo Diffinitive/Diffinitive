@@ -36,6 +36,14 @@ The format is compatible with PkgBenchmark.jl which helps with running the suite
 
 There are custom functions included for running the benchmarks in this Mercurial repository. To use this first activate the environment in `benchmark/` then include the file `benchmark_utils.jl`.
 
+The suite can the be run from the REPL by using the function `main` in one of the following ways
+
+```julia
+main()
+main(rev)
+main(target, baseline)
+```
+
 ```julia
 using PkgBenchmark
 import Sbplib
