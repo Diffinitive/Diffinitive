@@ -36,13 +36,13 @@ end
 
 function add_rev_info(benchmarkresult, rev)
     return PkgBenchmark.BenchmarkResults(
-        r.name,
+        benchmarkresult.name,
         rev,
-        r.benchmarkgroup,
-        r.date,
-        r.julia_commit,
-        r.vinfo,
-        r.benchmarkconfig,
+        benchmarkresult.benchmarkgroup,
+        benchmarkresult.date,
+        benchmarkresult.julia_commit,
+        benchmarkresult.vinfo,
+        benchmarkresult.benchmarkconfig,
     )
 end
 
