@@ -39,10 +39,12 @@ There are custom functions included for running the benchmarks in this Mercurial
 The suite can the be run from the REPL by using the function `main` in one of the following ways
 
 ```julia
-main()
-main(rev)
-main(target, baseline)
+main()                  # Runs the suite for the current working directory
+main(rev)               # Runs the suite at the specified revision
+main(target, baseline)  # Compares two revisions
 ```
+
+Here `rev`, `target` and `baseline` can be any valid Mercurial revision specifier.
 
 ```julia
 using PkgBenchmark
