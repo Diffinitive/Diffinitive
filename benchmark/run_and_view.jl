@@ -51,7 +51,7 @@ function run_benchmark(rev)
     r = run_benchmark()
     hg_update(rev_before)
 
-    return run_benchmark()
+    return r
 end
 
 """
