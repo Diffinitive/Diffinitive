@@ -45,7 +45,7 @@ function write_result_html(io, r)
 end
 
 function write_result_html(r)
-    dt = Dates.format(PkgBenchmark.date(r), "yyyy-mm-dd HH:MM:SS")
+    dt = Dates.format(PkgBenchmark.date(r), "yyyy-mm-dd HHMMSS")
     file_path = joinpath(results_dir, dt*".html")
 
     open(file_path, "w") do io
