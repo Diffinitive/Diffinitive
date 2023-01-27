@@ -46,6 +46,8 @@ main(target, baseline)  # Compares two revisions
 
 Here `rev`, `target` and `baseline` can be any valid Mercurial revision specifier.
 
+PkgBenchmark can also be used directly.
+
 ```julia
 using PkgBenchmark
 import Sbplib
@@ -53,9 +55,6 @@ r = benchmarkpkg(Sbplib)
 
 export_markdown(stdout, r)
 ```
-
-#TODO: Finish this and clean it up
-
 
 ## Generating and using the documentation
 Generating the documentation can be done using either `make` or through activating the `docs` environment and including the script `docs/make.jl` at the REPL.
