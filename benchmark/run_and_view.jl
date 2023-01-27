@@ -20,11 +20,24 @@ end
 function run_benchmark()
     r = PkgBenchmark.benchmarkpkg(Sbplib)
 
-    commit = hg_id()
+    rev = hg_id()
 
+    return add_rev_info(r, rev)
+end
+
+function run_benchmark(rev)
+    rev_before = hg_rev()
+    hg_update(rev)
+    r = run_benchmark()
+    hg_update(rev_before)
+
+    return run_benchmark()
+end
+
+function add_rev_info(benchmarkresult, rev)
     return PkgBenchmark.BenchmarkResults(
-        "Sbplib.jl",
-        commit,
+        r.name,
+        rev,
         r.benchmarkgroup,
         r.date,
         r.julia_commit,
