@@ -124,7 +124,7 @@ function hg_rev()
 end
 
 function hg_update(rev)
-    cmd = Cmd(`hg update --check $rev`, dir=sbplib_root)
+    cmd = Cmd(`hg update --check -r $rev`, dir=sbplib_root)
     run(addenv(cmd, "HGPLAIN"=>""))
 end
 
