@@ -60,6 +60,11 @@ function hg_id()
     return readchomp(addenv(cmd, "HGPLAIN"=>""))
 end
 
+function hg_rev()
+    cmd = Cmd(`hg id -i`, dir=sbplib_root)
+    return readchomp(addenv(cmd, "HGPLAIN"=>""))
+end
+
 function hg_update(rev)
     cmd = Cmd(`hg update --check $rev`, dir=sbplib_root)
     run(addenv(cmd, "HGPLAIN"=>""))
