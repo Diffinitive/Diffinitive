@@ -65,12 +65,14 @@ Runs the benchmark at revisions `target` and `baseline` and compares them using 
 Returns a `PkgBenchmark.BenchmarkJudgement`
 """
 function run_benchmark(target, baseline, f=minimum; judgekwargs=Dict())
-    t = run_benchmark(target)
-    b = run_benchmark(baseline)
+    rev_before = hg_rev()
+    hg_update(target)
+    t = run_benchmark()
+    hg_update(baseline)
+    b = run_benchmark()
+    hg_update(rev_before)
 
-    judged = PkgBenchmark.judge(t,b,f; judgekwargs...)
-
-    return BenchmarkJudgement(t,b,judged)
+    return PkgBenchmark.judge(t,b,f; judgekwargs...)
 end
 
 # TBD: How to compare against current working directory? Possible to create a temporary commit?
