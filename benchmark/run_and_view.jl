@@ -15,6 +15,8 @@ function main()
     open_in_default_browser(file_path)
 end
 
+# TBD: What parts are PkgBenchmark contributing? Can it be stripped out? Can we replace the html output part?
+
 function run_benchmark()
     r = PkgBenchmark.benchmarkpkg(Sbplib)
 
@@ -43,6 +45,7 @@ function write_result_html(io, r)
     dt = Dates.format(PkgBenchmark.date(r), "yyyy-mm-dd HH:MM:SS")
     Mustache.render(io, template, Dict("title"=>dt, "content"=>content))
 end
+## Fix the writing of the commit, it chops off all the important info
 
 function write_result_html(r)
     dt = Dates.format(PkgBenchmark.date(r), "yyyy-mm-dd HHMMSS")
