@@ -9,14 +9,25 @@ const sbplib_root = splitpath(pathof(Sbplib))[1:end-2] |> joinpath
 const results_dir = mkpath(joinpath(sbplib_root, "benchmark/results"))
 const template_path = joinpath(sbplib_root, "benchmark/result.tmpl")
 
-function main()
-    r = run_benchmark()
+"""
+ main(args...; kwargs...)
+
+Calls `run_benchmark(args...; kwargs...)` and writes the results as an HTML file in `benchmark/results`.
+See [`run_benchmark`](@ref) for possible arguments.
+"""
+function main(args...; kwargs...)
+    r = run_benchmark(args...; kwargs...)
     file_path = write_result_html(r)
     open_in_default_browser(file_path)
 end
 
 # TBD: What parts are PkgBenchmark contributing? Can it be stripped out? Can we replace the html output part?
 
+"""
+    run_benchmark()
+
+Runs the benchmark suite for the current working directory and returns a `PkgBenchmark.BenchmarkResult`
+"""
 function run_benchmark()
     r = PkgBenchmark.benchmarkpkg(Sbplib)
 
@@ -25,6 +36,13 @@ function run_benchmark()
     return add_rev_info(r, rev)
 end
 
+"""
+    run_benchmark(rev)
+
+Updates the repository to the given revison and runs the benchmark suite. When done, updates the repository to the origianl state.
+
+Returns a `PkgBenchmark.BenchmarkResult`
+"""
 function run_benchmark(rev)
     rev_before = hg_rev()
     hg_update(rev)
@@ -33,6 +51,26 @@ function run_benchmark(rev)
 
     return run_benchmark()
 end
+
+"""
+    run_benchmark(target, baseline, f=minimum; judgekwargs=Dict())
+
+Runs the benchmark at revisions `target` and `baseline` and compares them using `PkgBenchmark.judge`.
+`f` is the function used to compare. `judgekwargs` are keyword arguments passed to `judge`.
+
+Returns a `PkgBenchmark.BenchmarkJudgement`
+"""
+function run_benchmark(target, baseline, f=minimum; judgekwargs=Dict())
+    t = run_benchmark(target)
+    b = run_benchmark(baseline)
+
+    judged = PkgBenchmark.judge(t,b,f; judgekwargs...)
+
+    return BenchmarkJudgement(t,b,judged)
+end
+
+# TBD: How to compare against current working directory? Possible to create a temporary commit?
+
 
 function add_rev_info(benchmarkresult, rev)
     return PkgBenchmark.BenchmarkResults(
