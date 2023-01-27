@@ -115,6 +115,8 @@ function write_result_html(r)
     return file_path
 end
 
+PkgBenchmark.date(j::PkgBenchmark.BenchmarkJudgement) = PkgBenchmark.date(PkgBenchmark.target_result(j))
+
 function hg_id()
     cmd = Cmd(`hg id`, dir=sbplib_root)
     return readchomp(addenv(cmd, "HGPLAIN"=>""))
