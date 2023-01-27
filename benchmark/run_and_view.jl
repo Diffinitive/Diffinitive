@@ -155,6 +155,7 @@ end
 main
 
 # TODO: Better logging of what is happening
+# TODO: Improve the workflow? How?
 
 # TODO: Clean up the HTML output?
     # TODO: Make the codeblocks in the table look nicer

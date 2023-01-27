@@ -44,7 +44,7 @@ r = benchmarkpkg(Sbplib)
 export_markdown(stdout, r)
 ```
 
-#TODO: Clean this up
+#TODO: Finish this and clean it up
 
 
 ## Generating and using the documentation
