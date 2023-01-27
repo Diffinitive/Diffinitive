@@ -40,6 +40,8 @@ end
     run_benchmark(rev)
 
 Updates the repository to the given revison and runs the benchmark suite. When done, updates the repository to the origianl state.
+`rev` can be any identifier compatible with `hg update`.
+
 
 Returns a `PkgBenchmark.BenchmarkResult`
 """
@@ -57,6 +59,8 @@ end
 
 Runs the benchmark at revisions `target` and `baseline` and compares them using `PkgBenchmark.judge`.
 `f` is the function used to compare. `judgekwargs` are keyword arguments passed to `judge`.
+
+`target` and `baseline` can be any identifier compatible with `hg update`.
 
 Returns a `PkgBenchmark.BenchmarkJudgement`
 """
