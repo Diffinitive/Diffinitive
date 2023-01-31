@@ -27,8 +27,8 @@ end
 
 Runs the benchmark suite for the current working directory and returns a `PkgBenchmark.BenchmarkResult`
 """
-function run_benchmark()
-    r = PkgBenchmark.benchmarkpkg(Sbplib)
+function run_benchmark(;kwargs...)
+    r = PkgBenchmark.benchmarkpkg(Sbplib; kwargs...)
 
     rev = hg_id()
 
@@ -43,10 +43,10 @@ Updates the repository to the given revison and runs the benchmark suite. When d
 
 Returns a `PkgBenchmark.BenchmarkResult`
 """
-function run_benchmark(rev)
+function run_benchmark(rev; kwargs...)
     rev_before = hg_rev()
     hg_update(rev)
-    r = run_benchmark()
+    r = run_benchmark(;kwargs...)
     hg_update(rev_before)
 
     return r
@@ -62,12 +62,12 @@ Runs the benchmark at revisions `target` and `baseline` and compares them using 
 
 Returns a `PkgBenchmark.BenchmarkJudgement`
 """
-function run_benchmark(target, baseline, f=minimum; judgekwargs=Dict())
+function run_benchmark(target, baseline, f=minimum; judgekwargs=Dict(), kwargs...)
     rev_before = hg_rev()
     hg_update(target)
-    t = run_benchmark()
+    t = run_benchmark(;kwargs...)
     hg_update(baseline)
-    b = run_benchmark()
+    b = run_benchmark(;kwargs...)
     hg_update(rev_before)
 
     return PkgBenchmark.judge(t,b,f; judgekwargs...)
