@@ -49,8 +49,8 @@ SUITE["derivatives"]["first_derivative"]["3D"]["z"] = @benchmarkable $u3 .= $Dz*
 
 SUITE["derivatives"]["second_derivative"] = BenchmarkGroup()
 
-D₁ = second_derivative(g1,stencil_set)
-SUITE["derivatives"]["second_derivative"]["1D"] = @benchmarkable $u1 .= $D₁*$v1
+D₂ = second_derivative(g1,stencil_set)
+SUITE["derivatives"]["second_derivative"]["1D"] = @benchmarkable $u1 .= $D₂*$v1
 
 Dx = second_derivative(g2,stencil_set,1)
 Dy = second_derivative(g2,stencil_set,2)
@@ -66,5 +66,71 @@ SUITE["derivatives"]["second_derivative"]["3D"]["x"] = @benchmarkable $u3 .= $Dx
 SUITE["derivatives"]["second_derivative"]["3D"]["y"] = @benchmarkable $u3 .= $Dy*$v3
 SUITE["derivatives"]["second_derivative"]["3D"]["z"] = @benchmarkable $u3 .= $Dz*$v3
 
+
+
+SUITE["derivatives"]["addition"] = BenchmarkGroup()
+
+D₁ = first_derivative(g1,stencil_set)
+D₂ = second_derivative(g1,stencil_set)
+SUITE["derivatives"]["addition"]["1D"] = BenchmarkGroup()
+SUITE["derivatives"]["addition"]["1D"]["apply,add"] = @benchmarkable $u1 .= $D₁*$v1 + $D₂*$v1
+SUITE["derivatives"]["addition"]["1D"]["add,apply"] = @benchmarkable $u1 .= ($D₁ + $D₂)*$v1
+
+Dxx = second_derivative(g2,stencil_set,1)
+Dyy = second_derivative(g2,stencil_set,2)
+SUITE["derivatives"]["addition"]["2D"] = BenchmarkGroup()
+SUITE["derivatives"]["addition"]["2D"]["apply,add"] = @benchmarkable $u2 .= $Dxx*$v2 + $Dyy*$v2
+SUITE["derivatives"]["addition"]["2D"]["add,apply"] = @benchmarkable $u2 .= ($Dxx + $Dyy)*$v2
+
+Dxx = second_derivative(g3,stencil_set,1)
+Dyy = second_derivative(g3,stencil_set,2)
+Dzz = second_derivative(g3,stencil_set,3)
+SUITE["derivatives"]["addition"]["3D"] = BenchmarkGroup()
+SUITE["derivatives"]["addition"]["3D"]["apply,add"] = @benchmarkable $u3 .= $Dxx*$v3 + $Dyy*$v3 + $Dzz*$v3
+SUITE["derivatives"]["addition"]["3D"]["add,apply"] = @benchmarkable $u3 .= ($Dxx + $Dyy + $Dzz)*$v3
+
+
+SUITE["derivatives"]["composition"] = BenchmarkGroup()
+
+Dx = first_derivative(g1,stencil_set)
+SUITE["derivatives"]["composition"]["1D"] = BenchmarkGroup()
+SUITE["derivatives"]["composition"]["1D"]["apply,apply"] = @benchmarkable $u1 .= $Dx*($Dx*$v1)
+SUITE["derivatives"]["composition"]["1D"]["compose,apply"] = @benchmarkable $u1 .= ($Dx∘$Dx)*$v1
+
+Dx = first_derivative(g2,stencil_set,1)
+Dy = first_derivative(g2,stencil_set,2)
+SUITE["derivatives"]["composition"]["2D"] = BenchmarkGroup()
+SUITE["derivatives"]["composition"]["2D"]["apply,apply"] = @benchmarkable $u2 .= $Dy*($Dx*$v2)
+SUITE["derivatives"]["composition"]["2D"]["compose,apply"] = @benchmarkable $u2 .= ($Dy∘$Dx)*$v2
+
+Dx = first_derivative(g3,stencil_set,1)
+Dy = first_derivative(g3,stencil_set,2)
+Dz = first_derivative(g3,stencil_set,3)
+SUITE["derivatives"]["composition"]["3D"] = BenchmarkGroup()
+SUITE["derivatives"]["composition"]["3D"]["xy"] = BenchmarkGroup()
+SUITE["derivatives"]["composition"]["3D"]["xy"]["apply,apply"] = @benchmarkable $u3 .= $Dx*($Dy*$v3)
+SUITE["derivatives"]["composition"]["3D"]["xy"]["compose,apply"] = @benchmarkable $u3 .= ($Dx∘$Dy)*$v3
+
+SUITE["derivatives"]["composition"]["3D"]["yz"] = BenchmarkGroup()
+SUITE["derivatives"]["composition"]["3D"]["yz"]["apply,apply"] = @benchmarkable $u3 .= $Dy*($Dz*$v3)
+SUITE["derivatives"]["composition"]["3D"]["yz"]["compose,apply"] = @benchmarkable $u3 .= ($Dy∘$Dz)*$v3
+
+SUITE["derivatives"]["composition"]["3D"]["xz"] = BenchmarkGroup()
+SUITE["derivatives"]["composition"]["3D"]["xz"]["apply,apply"] = @benchmarkable $u3 .= $Dx*($Dz*$v3)
+SUITE["derivatives"]["composition"]["3D"]["xz"]["compose,apply"] = @benchmarkable $u3 .= ($Dx∘$Dz)*$v3
+
+SUITE["derivatives"]["composition"]["3D"]["xx"] = BenchmarkGroup()
+SUITE["derivatives"]["composition"]["3D"]["xx"]["apply,apply"] = @benchmarkable $u3 .= $Dx*($Dx*$v3)
+SUITE["derivatives"]["composition"]["3D"]["xx"]["compose,apply"] = @benchmarkable $u3 .= ($Dx∘$Dx)*$v3
+
+SUITE["derivatives"]["composition"]["3D"]["yy"] = BenchmarkGroup()
+SUITE["derivatives"]["composition"]["3D"]["yy"]["apply,apply"] = @benchmarkable $u3 .= $Dy*($Dy*$v3)
+SUITE["derivatives"]["composition"]["3D"]["yy"]["compose,apply"] = @benchmarkable $u3 .= ($Dy∘$Dy)*$v3
+
+SUITE["derivatives"]["composition"]["3D"]["zz"] = BenchmarkGroup()
+SUITE["derivatives"]["composition"]["3D"]["zz"]["apply,apply"] = @benchmarkable $u3 .= $Dz*($Dz*$v3)
+SUITE["derivatives"]["composition"]["3D"]["zz"]["compose,apply"] = @benchmarkable $u3 .= ($Dz∘$Dz)*$v3
+
+#TODO: Reorg with dimension as first level? To reduce operator creation?
 
 SUITE
