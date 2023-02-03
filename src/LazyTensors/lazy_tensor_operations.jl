@@ -316,7 +316,7 @@ function Base.showerror(io::IO, err::RangeSizeMismatch)
     print(io, "range size $(range_size(err.tm)) of LazyTensor not matching size $(err.sz)")
 end
 
-
+# TODO: These should probably be removed. From new testing in performance/get_region_type_inference it seems that the problems are solved without these
 function apply_with_region(op, v, boundary_width::Integer, dim_size::Integer, i)
     if 0 < i <= boundary_width
         return LazyTensors.apply(op,v,Index(i,Lower))
