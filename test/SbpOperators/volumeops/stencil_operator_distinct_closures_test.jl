@@ -2,7 +2,6 @@ using Test
 
 using Sbplib.SbpOperators
 using Sbplib.Grids
-# using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 
 import Sbplib.SbpOperators.Stencil

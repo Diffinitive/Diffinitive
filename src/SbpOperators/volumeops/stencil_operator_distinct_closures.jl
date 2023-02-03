@@ -1,7 +1,14 @@
 """
-    stencil_operator_distinct_closures(grid::EquidistantGrid, inner_stencil, lower_closure, upper_closure, direction)
+    stencil_operator_distinct_closures(
+        grid::EquidistantGrid,
+        inner_stencil,
+        lower_closure,
+        upper_closure,
+        direction
+    )
 
-Creates a multi-dimensional `StencilOperatorDistinctClosures` acting on grid functions of `grid`.
+Creates a multi-dimensional `StencilOperatorDistinctClosures` acting on grid
+functions of `grid`.
 
 See also: [`StencilOperatorDistinctClosures`](@ref)
 """
