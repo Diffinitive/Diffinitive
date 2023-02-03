@@ -1,11 +1,14 @@
 """
     undivided_skewed04(g::EquidistantGrid, p, direction)
 
-Create undivided difference operators approximating the `p`th derivative. The operator do not satisfy any SBP-property and are meant to be used for
+Create undivided difference operators approximating the `p`th derivative. The
+operators do not satisfy any SBP-property and are meant to be used for
 building artificial dissipation terms.
 
-The operators and how they are used to create accurate artifical dissipation is described in
-"K. Mattsson, M. Svärd, and J. Nordström, “Stable and Accurate Artificial Dissipation,” Journal of Scientific Computing, vol. 21, no. 1, pp. 57–79, Aug. 2004"
+The operators and how they are used to create accurate artifical dissipation
+is described in "K. Mattsson, M. Svärd, and J. Nordström, “Stable and Accurate
+Artificial Dissipation,” Journal of Scientific Computing, vol. 21, no. 1, pp.
+57–79, Aug. 2004"
 """
 function undivided_skewed04(g::EquidistantGrid, p, direction)
     T = eltype(g)
