@@ -1,17 +1,13 @@
-# REVIEW: Would it be more correct to
-# call these undivided_differences instead of dissipation?
-# If I understand it correctly, this method simply provides
-# the operators required in order to compose a dissipation operator
-# and the dissipation operator are formed by a linear combination
-# of the products of Dᵀ and D for different orders.
 """
-    undivided_dissipation(g::EquidistantGrid, p, direction)
+    undivided_skewed04(g::EquidistantGrid, p, direction)
 
-Create undivided difference operators approximating the `p`th derivative for
-building artificial dissipation. The operators and how they are used to create accurate artifical dissipation is described in
+Create undivided difference operators approximating the `p`th derivative. The operator do not satisfy any SBP-property and are meant to be used for
+building artificial dissipation terms.
+
+The operators and how they are used to create accurate artifical dissipation is described in
 "K. Mattsson, M. Svärd, and J. Nordström, “Stable and Accurate Artificial Dissipation,” Journal of Scientific Computing, vol. 21, no. 1, pp. 57–79, Aug. 2004"
 """
-function undivided_dissipation(g::EquidistantGrid, p, direction)
+function undivided_skewed04(g::EquidistantGrid, p, direction)
     T = eltype(g)
     interior_weights = T.(dissipation_interior_weights(p))
 
@@ -33,7 +29,7 @@ function undivided_dissipation(g::EquidistantGrid, p, direction)
     return D, Dᵀ
 end
 
-undivided_dissipation(g::EquidistantGrid{1}, p) = undivided_dissipation(g, p, 1)
+undivided_skewed04(g::EquidistantGrid{1}, p) = undivided_skewed04(g, p, 1)
 
 function dissipation_interior_weights(p)
    if p == 0
