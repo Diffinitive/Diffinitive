@@ -78,7 +78,7 @@ flatten_tuple(ts::Vararg) = flatten_tuple(ts)
 """
     left_pad_tuple(t, val, N)
 
-Left pad the `t` to length `N` using the value `val`.
+Left pad the tuple `t` to length `N` using the value `val`.
 """
 function left_pad_tuple(t, val, N)
     if N < length(t)
@@ -92,7 +92,7 @@ end
 """
     right_pad_tuple(t, val, N)
 
-Right pad the `t` to length `N` using the value `val`.
+Right pad the tuple `t` to length `N` using the value `val`.
 """
 function right_pad_tuple(t, val, N)
     if N < length(t)
