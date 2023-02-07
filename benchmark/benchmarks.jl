@@ -2,6 +2,7 @@ using BenchmarkTools
 using Sbplib
 using Sbplib.Grids
 using Sbplib.SbpOperators
+using Sbplib.RegionIndices
 
 const SUITE = BenchmarkGroup()
 
@@ -130,6 +131,34 @@ SUITE["derivatives"]["composition"]["3D"]["yy"]["compose,apply"] = @benchmarkabl
 SUITE["derivatives"]["composition"]["3D"]["zz"] = BenchmarkGroup()
 SUITE["derivatives"]["composition"]["3D"]["zz"]["apply,apply"] = @benchmarkable $u3 .= $Dz*($Dz*$v3)
 SUITE["derivatives"]["composition"]["3D"]["zz"]["compose,apply"] = @benchmarkable $u3 .= ($Dz∘$Dz)*$v3
+
+
+SUITE["boundary_terms"] = BenchmarkGroup()
+
+H = inner_product(g2, stencil_set)
+H⁻¹ = inverse_inner_product(g2, stencil_set)
+Dxx = second_derivative(g2, stencil_set, 1)
+Dyy = second_derivative(g2, stencil_set, 2)
+
+e₁ₗ = boundary_restriction(g2, stencil_set, CartesianBoundary{1,Lower}())
+e₁ᵤ = boundary_restriction(g2, stencil_set, CartesianBoundary{1,Upper}())
+e₂ₗ = boundary_restriction(g2, stencil_set, CartesianBoundary{2,Lower}())
+e₂ᵤ = boundary_restriction(g2, stencil_set, CartesianBoundary{2,Upper}())
+
+d₁ₗ = normal_derivative(g2, stencil_set, CartesianBoundary{1,Lower}())
+d₁ᵤ = normal_derivative(g2, stencil_set, CartesianBoundary{1,Upper}())
+d₂ₗ = normal_derivative(g2, stencil_set, CartesianBoundary{2,Lower}())
+d₂ᵤ = normal_derivative(g2, stencil_set, CartesianBoundary{2,Upper}())
+
+H₁ₗ = inner_product(boundary_grid(g2, CartesianBoundary{1,Lower}()), stencil_set)
+H₁ᵤ = inner_product(boundary_grid(g2, CartesianBoundary{1,Upper}()), stencil_set)
+H₂ₗ = inner_product(boundary_grid(g2, CartesianBoundary{2,Lower}()), stencil_set)
+H₂ᵤ = inner_product(boundary_grid(g2, CartesianBoundary{2,Upper}()), stencil_set)
+
+SUITE["boundary_terms"]["pre_composition"] = @benchmarkable $u2 .= $(H⁻¹∘e₁ₗ'∘H₁ₗ∘d₁ₗ)*$v2
+SUITE["boundary_terms"]["composition"]     = @benchmarkable $u2 .= ($H⁻¹∘$e₁ₗ'∘$H₁ₗ∘$d₁ₗ)*$v2
+SUITE["boundary_terms"]["application"]     = @benchmarkable $u2 .= $H⁻¹*$e₁ₗ'*$H₁ₗ* $d₁ₗ*$v2
+# An investigation of these allocations can be found in the branch `allocation_test`
 
 #TODO: Reorg with dimension as first level? To reduce operator creation?
 
