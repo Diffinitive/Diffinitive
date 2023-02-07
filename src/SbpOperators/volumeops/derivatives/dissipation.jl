@@ -59,8 +59,16 @@ end
 dissipation_lower_closure_size(weights) = midpoint(weights) - 1
 dissipation_upper_closure_size(weights) = length(weights) - midpoint(weights)
 
-dissipation_lower_closure_stencils(interior_weights) = ntuple(i->Stencil(interior_weights..., center=i                       ), dissipation_lower_closure_size(interior_weights))
-dissipation_upper_closure_stencils(interior_weights) = ntuple(i->Stencil(interior_weights..., center=length(interior_weights)-dissipation_upper_closure_size(interior_weights)+i), dissipation_upper_closure_size(interior_weights))
+function dissipation_lower_closure_stencils(interior_weights)
+    stencil(i) = Stencil(interior_weights..., center=i)
+    return ntuple(i->stencil(i), dissipation_lower_closure_size(interior_weights))
+end
+
+function dissipation_upper_closure_stencils(interior_weights)
+    center(i) = length(interior_weights) - dissipation_upper_closure_size(interior_weights) + i
+    stencil(i) = Stencil(interior_weights..., center=center(i))
+    return ntuple(i->stencil(i), dissipation_upper_closure_size(interior_weights))
+end
 
 function dissipation_transpose_lower_closure_stencils(interior_weights)
     closure = ntuple(i->dissipation_transpose_lower_closure_stencil(interior_weights, i), length(interior_weights))
