@@ -30,8 +30,8 @@ end
     g = EquidistantGrid(20, 0., 11.)
     D,Dᵀ = undivided_skewed04(g, 1)
 
-    @test D isa LazyTensor{Float64,1,1} where T
-    @test Dᵀ isa LazyTensor{Float64,1,1} where T
+    @test D isa LazyTensor{Float64,1,1}
+    @test Dᵀ isa LazyTensor{Float64,1,1}
 
      @testset "Accuracy conditions" begin
         N = 20
