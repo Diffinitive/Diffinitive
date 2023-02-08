@@ -54,5 +54,6 @@ function LazyTensors.apply_transpose(op::BoundaryOperator, v::AbstractArray{<:An
 end
 
 function LazyTensors.apply_transpose(op::BoundaryOperator, v::AbstractArray{<:Any,0}, i)
-    return LazyTensors.apply_transpose_with_region(op, v, closure_size(op), op.size[1], i)
+    r = getregion(i, closure_size(op), op.size)
+    apply_transpose(op, v, Index(i,r))
 end

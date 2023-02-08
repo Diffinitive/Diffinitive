@@ -65,7 +65,6 @@ function getregion(i::Integer, boundary_width::Integer, dim_size::Integer)
         error("Bounds error") # TODO: Make this more standard
     end
 end
-# 2022-02-21: Using the return values of getregion cause type inference to give up in certain cases, for example H*H*v
 
 export getregion
 

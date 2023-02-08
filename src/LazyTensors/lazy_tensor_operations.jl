@@ -1,5 +1,3 @@
-using Sbplib.RegionIndices
-
 """
     TensorApplication{T,R,D} <: LazyArray{T,R}
 
@@ -324,30 +322,4 @@ end
 function Base.showerror(io::IO, err::RangeSizeMismatch)
     print(io, "RangeSizeMismatch: ")
     print(io, "range size $(range_size(err.tm)) of LazyTensor not matching size $(err.sz)")
-end
-
-# TODO: These should probably be removed. From new testing in performance/get_region_type_inference it seems that the problems are solved without these
-function apply_with_region(op, v, boundary_width::Integer, dim_size::Integer, i)
-    if 0 < i <= boundary_width
-        return LazyTensors.apply(op,v,Index(i,Lower))
-    elseif boundary_width < i <= dim_size-boundary_width
-        return LazyTensors.apply(op,v,Index(i,Interior))
-    elseif dim_size-boundary_width < i <= dim_size
-        return LazyTensors.apply(op,v,Index(i,Upper))
-    else
-        error("Bounds error") # TODO: Make this more standard
-    end
-end
-# TBD: Can these methods be merge by having a function as an arguement instead?
-# TODO: Add inference test that show where things break and how this rewrite fixes it.
-function apply_transpose_with_region(op, v, boundary_width::Integer, dim_size::Integer, i)
-    if 0 < i <= boundary_width
-        return LazyTensors.apply_transpose(op,v,Index(i,Lower))
-    elseif boundary_width < i <= dim_size-boundary_width
-        return LazyTensors.apply_transpose(op,v,Index(i,Interior))
-    elseif dim_size-boundary_width < i <= dim_size
-        return LazyTensors.apply_transpose(op,v,Index(i,Upper))
-    else
-        error("Bounds error") # TODO: Make this more standard
-    end
 end

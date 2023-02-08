@@ -32,6 +32,7 @@ function LazyTensors.apply(op::VolumeOperator, v::AbstractVector, i::Index{Upper
 end
 
 function LazyTensors.apply(op::VolumeOperator, v::AbstractVector, i)
-    return LazyTensors.apply_with_region(op, v, closure_size(op), op.size[1], i)
+    r = getregion(i, closure_size(op), op.size[1])
+    return LazyTensors.apply(op, v, Index(i, r))
 end
 # TODO: Move this to LazyTensors when we have the region communication down.
