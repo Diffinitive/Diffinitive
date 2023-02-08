@@ -1,24 +1,6 @@
 """
-    volume_operator(grid, inner_stencil, closure_stencils, parity, direction)
-
-Creates a volume operator on a `Dim`-dimensional grid acting along the
-specified coordinate `direction`. The action of the operator is determined by
-the stencils `inner_stencil` and `closure_stencils`. When `Dim=1`, the
-corresponding `VolumeOperator` tensor mapping is returned. When `Dim>1`, the
-returned operator is the appropriate outer product of a one-dimensional
-operators and `IdentityTensor`s, e.g for `Dim=3` the volume operator in the
-y-direction is `I⊗op⊗I`.
-"""
-function volume_operator(grid::EquidistantGrid, inner_stencil, closure_stencils, parity, direction)
-    #TODO: Check that direction <= Dim?
-
-    op = VolumeOperator(restrict(grid, direction), inner_stencil, closure_stencils, parity)
-    return LazyTensors.inflate(op, size(grid), direction)
-end
-# TBD: Should the inflation happen here or should we remove this method and do it at the caller instead?
-
-"""
     VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
+
 Implements a one-dimensional constant coefficients volume operator
 """
 struct VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}

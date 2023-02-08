@@ -8,12 +8,14 @@ Creates the normal derivative boundary operator `d` as a `LazyTensor`
 On a one-dimensional `grid`, `d` is a `BoundaryOperator`. On a multi-dimensional `grid`, `d` is the inflation of
 a `BoundaryOperator`.
 
-See also: [`boundary_operator`](@ref).
+See also: [`BoundaryOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
 function normal_derivative(grid, closure_stencil, boundary)
     direction = dim(boundary)
     h_inv = inverse_spacing(grid)[direction]
-    return SbpOperators.boundary_operator(grid, scale(closure_stencil,h_inv), boundary)
+
+    op = BoundaryOperator(restrict(grid, dim(boundary)), scale(closure_stencil,h_inv), region(boundary))
+    return LazyTensors.inflate(op, size(grid), dim(boundary))
 end
 
 """

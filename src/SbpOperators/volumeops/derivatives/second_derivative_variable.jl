@@ -26,7 +26,7 @@ function SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, i
     Δxᵢ = spacing(grid)[dir]
     scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
     scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
-    return SecondDerivativeVariable{dir, dimension(grid)}(scaled_inner_stencil, scaled_closure_stencils, size(grid), coeff)
+    return SecondDerivativeVariable{dir, ndims(grid)}(scaled_inner_stencil, scaled_closure_stencils, size(grid), coeff)
 end
 
 function SecondDerivativeVariable(grid::EquidistantGrid{1}, coeff::AbstractVector, inner_stencil::NestedStencil, closure_stencils)
@@ -61,8 +61,8 @@ function SecondDerivativeVariable(grid::EquidistantGrid, coeff::AbstractArray, s
 end
 
 function check_coefficient(grid, coeff)
-    if dimension(grid) != ndims(coeff)
-        throw(ArgumentError("The coefficient has dimension $(ndims(coeff)) while the grid is dimension $(dimension(grid))"))
+    if ndims(grid) != ndims(coeff)
+        throw(ArgumentError("The coefficient has dimension $(ndims(coeff)) while the grid is dimension $(ndims(grid))"))
     end
 
     if size(grid) != size(coeff)

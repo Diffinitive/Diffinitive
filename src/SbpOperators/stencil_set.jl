@@ -14,7 +14,7 @@ Base.getindex(set::StencilSet,I...) = set.table[I...]
 
 
 """
-read_stencil_set(filename; filters)
+    read_stencil_set(filename; filters)
 
 Creates a `StencilSet` from a TOML file based on some key-value
 filters. If more than one set matches the filters an error is raised. The

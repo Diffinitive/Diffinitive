@@ -26,19 +26,19 @@ function monomial(x,k)
     x^k/factorial(k)
 end
 
-@testset "undivided_dissipation" begin
+@testset "undivided_skewed04" begin
     g = EquidistantGrid(20, 0., 11.)
-    D,Dᵀ = undivided_dissipation(g, 1)
+    D,Dᵀ = undivided_skewed04(g, 1)
 
-    @test D isa LazyTensor{Float64,1,1} where T
-    @test Dᵀ isa LazyTensor{Float64,1,1} where T
+    @test D isa LazyTensor{Float64,1,1}
+    @test Dᵀ isa LazyTensor{Float64,1,1}
 
      @testset "Accuracy conditions" begin
         N = 20
         g = EquidistantGrid(N, 0//1,2//1)
         h = only(spacing(g))
         @testset "D_$p" for p ∈ [1,2,3,4]
-            D,Dᵀ = undivided_dissipation(g, p)
+            D,Dᵀ = undivided_skewed04(g, p)
 
             @testset "x^$k" for k ∈ 0:p
                 v  = evalOn(g, x->monomial(x,k))
@@ -49,7 +49,7 @@ end
         end
     end
 
-    @testset "tanspose equality" begin
+    @testset "transpose equality" begin
         function get_matrix(D)
             N = only(range_size(D))
             M = only(domain_size(D))
@@ -69,7 +69,7 @@ end
 
         g = EquidistantGrid(11, 0., 1.)
         @testset "D_$p" for p ∈ [1,2,3,4]
-            D,Dᵀ = undivided_dissipation(g, p)
+            D,Dᵀ = undivided_skewed04(g, p)
 
             D̄  = get_matrix(D)
             D̄ᵀ = get_matrix(Dᵀ)

@@ -20,7 +20,7 @@ export laplace
 export normal_derivative
 export first_derivative
 export second_derivative
-export undivided_dissipation
+export undivided_skewed04
 
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
