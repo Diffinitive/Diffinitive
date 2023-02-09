@@ -314,6 +314,7 @@ function Base.showerror(io::IO, err::DomainSizeMismatch)
     print(io, "domain size $(domain_size(err.tm)) of LazyTensor not matching size $(err.sz)")
 end
 
+
 struct RangeSizeMismatch <: Exception
     tm::LazyTensor
     sz
