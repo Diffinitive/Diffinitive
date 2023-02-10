@@ -85,6 +85,21 @@ Base.@propagate_inbounds @inline function apply_stencil_backwards(s::Stencil, v:
     return w
 end
 
+function left_pad(s::Stencil, N)
+    weights = LazyTensors.left_pad_tuple(s.weights, zero(eltype(s)), N)
+    range = (first(s.range) - (N - length(s.weights))):last(s.range)
+
+    return Stencil(range, weights)
+end
+
+function right_pad(s::Stencil, N)
+    weights = LazyTensors.right_pad_tuple(s.weights, zero(eltype(s)), N)
+    range = first(s.range):(last(s.range) + (N - length(s.weights)))
+
+    return Stencil(range, weights)
+end
+
+
 
 struct NestedStencil{T,N,M}
     s::Stencil{Stencil{T,N},M}

@@ -7,14 +7,16 @@ Creates the second-derivative operator `D2` as a `LazyTensor`
 `direction`, using the stencil `inner_stencil` in the interior and a set of stencils `closure_stencils`
 for the points in the closure regions.
 
-On a one-dimensional `grid`, `D2` is a `VolumeOperator`. On a multi-dimensional `grid`, `D2` is the outer product of the
-one-dimensional operator with the `IdentityTensor`s in orthogonal coordinate dirrections.
+On a one-dimensional `grid`, `D2` is a `VolumeOperator`. On a multi-dimensional `grid`, `D2` is the inflation of
+a `VolumeOperator`.
 
-See also: [`volume_operator`](@ref).
+See also: [`VolumeOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
 function second_derivative(grid::EquidistantGrid, inner_stencil, closure_stencils, direction)
     h_inv = inverse_spacing(grid)[direction]
-    return SbpOperators.volume_operator(grid, scale(inner_stencil,h_inv^2), scale.(closure_stencils,h_inv^2), even, direction)
+
+    D₂ = VolumeOperator(restrict(grid, direction), scale(inner_stencil,h_inv^2), scale.(closure_stencils,h_inv^2), even)
+    return LazyTensors.inflate(D₂, size(grid), direction)
 end
 
 

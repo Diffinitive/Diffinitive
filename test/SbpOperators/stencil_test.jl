@@ -62,6 +62,23 @@ import Sbplib.SbpOperators.scale
     end
 end
 
+@testset "left_pad" begin
+    @test SbpOperators.left_pad(Stencil(1,1, center = 1), 2) == Stencil(1,1, center=1)
+    @test SbpOperators.left_pad(Stencil(1,1, center = 1), 3) == Stencil(0,1,1, center=2)
+    @test SbpOperators.left_pad(Stencil(2,3, center = 2), 4) == Stencil(0,0,2,3, center=4)
+
+    @test SbpOperators.left_pad(Stencil(2.,3., center = 2), 4) == Stencil(0.,0.,2.,3., center=4)
+end
+
+@testset "right_pad" begin
+    @test SbpOperators.right_pad(Stencil(1,1, center = 1), 2) == Stencil(1,1, center=1)
+    @test SbpOperators.right_pad(Stencil(1,1, center = 1), 3) == Stencil(1,1,0, center=1)
+    @test SbpOperators.right_pad(Stencil(2,3, center = 2), 4) == Stencil(2,3,0,0, center=2)
+
+    @test SbpOperators.right_pad(Stencil(2.,3., center = 2), 4) == Stencil(2.,3.,0.,0., center=2)
+end
+
+
 @testset "NestedStencil" begin
 
     @testset "Constructors" begin
@@ -170,5 +187,4 @@ end
         @inferred SbpOperators.apply_stencil_backwards(s_int,   c_float, v_float, 2)
         @inferred SbpOperators.apply_stencil_backwards(s_float, c_float, v_int,   2)
     end
-
 end
