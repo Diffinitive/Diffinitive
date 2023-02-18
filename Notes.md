@@ -148,6 +148,7 @@ When do we need to know the size of the range and domain?
 
 ## Identifiers for regions
 The identifiers (`Upper`, `Lower`, `Interior`) used for region indecies should probabily be included in the grid module. This allows new grid types to come with their own regions.
+We implement this by refactoring RegionIndices to be agnostic to the region types and then moving the actual types to Grids.
 
 ## Regions and tensormappings
 - [ ] Use a trait to indicate if a LazyTensor uses indices with regions.
