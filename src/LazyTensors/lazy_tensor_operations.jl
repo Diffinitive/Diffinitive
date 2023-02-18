@@ -176,7 +176,7 @@ InflatedTensor(I1::IdentityTensor{T}, I2::IdentityTensor{T}) where T = InflatedT
 # TODO: Implement some pretty printing in terms of ⊗. E.g InflatedTensor(I(3),B,I(2)) -> I(3)⊗B⊗I(2)
 
 function range_size(itm::InflatedTensor)
-    return flatten_tuple(
+    return concatenate_tuples(
         range_size(itm.before),
         range_size(itm.tm),
         range_size(itm.after),
@@ -184,7 +184,7 @@ function range_size(itm::InflatedTensor)
 end
 
 function domain_size(itm::InflatedTensor)
-    return flatten_tuple(
+    return concatenate_tuples(
         domain_size(itm.before),
         domain_size(itm.tm),
         domain_size(itm.after),

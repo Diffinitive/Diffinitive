@@ -95,14 +95,6 @@ end
     @test LazyTensors.concatenate_tuples((1,2,3),(4,5),(6,7)) == (1,2,3,4,5,6,7)
 end
 
-@testset "flatten_tuple" begin
-    @test LazyTensors.flatten_tuple((1,)) == (1,)
-    @test LazyTensors.flatten_tuple((1,2,3,4,5,6)) == (1,2,3,4,5,6)
-    @test LazyTensors.flatten_tuple((1,2,(3,4),5,6)) == (1,2,3,4,5,6)
-    @test LazyTensors.flatten_tuple((1,2,(3,(4,5)),6)) == (1,2,3,4,5,6)
-    @test LazyTensors.flatten_tuple(((1,2),(3,4),(5,),6)) == (1,2,3,4,5,6)
-end
-
 @testset "left_pad_tuple" begin
     @test LazyTensors.left_pad_tuple((1,2), 0, 2) == (1,2)
     @test LazyTensors.left_pad_tuple((1,2), 0, 3) == (0,1,2)

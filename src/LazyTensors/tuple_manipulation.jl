@@ -88,19 +88,9 @@ function sizes_to_ranges(szs)
     return ntuple(i->cum_szs[i]+1:cum_szs[i+1], length(szs))
 end
 
-
 concatenate_tuples(t::Tuple,ts::Vararg{Tuple}) = (t..., concatenate_tuples(ts...)...)
 concatenate_tuples(t::Tuple) = t
 
-"""
-    flatten_tuple(t)
-
-Takes a nested tuple and flattens the whole structure
-"""
-flatten_tuple(t::NTuple{N, Number} where N) = t
-flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
-flatten_tuple(ts::Vararg) = flatten_tuple(ts)
-# TBD: Can concatenate_tuples be used instead?
 
 """
     left_pad_tuple(t, val, N)
