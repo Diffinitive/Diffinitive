@@ -51,6 +51,48 @@ end
         @inferred LazyTensors.split_tuple((1,2,3,4,5,6),Val(3),Val(2))
         @inferred LazyTensors.split_tuple((1,true,3),Val(1), Val(1))
     end
+
+    @testset "general" begin
+        @test LazyTensors.split_tuple((),()) == ()
+        @test LazyTensors.split_tuple((),(0,)) == ((),)
+        @test LazyTensors.split_tuple((1,), (1,)) == tuple((1,))
+        @test LazyTensors.split_tuple((1,2), (1,1)) == tuple((1,),(2,))
+        @test LazyTensors.split_tuple((1,2), (0,1,1)) == tuple((),(1,),(2,))
+        @test LazyTensors.split_tuple((1,2), (1,0,1)) == tuple((1,),(),(2,))
+        @test LazyTensors.split_tuple((1,2), (1,1,0)) == tuple((1,),(2,),())
+        @test LazyTensors.split_tuple((1,2,3,4), (2,0,1,1)) == tuple((1,2),(),(3,),(4,))
+
+        err_msg = "length(t) must equal sum(szs)"
+        @test_throws ArgumentError(err_msg) LazyTensors.split_tuple((), (2,))
+        @test_throws ArgumentError(err_msg) LazyTensors.split_tuple((2,), ())
+        @test_throws ArgumentError(err_msg) LazyTensors.split_tuple((1,), (2,))
+        @test_throws ArgumentError(err_msg) LazyTensors.split_tuple((1,2), (1,2))
+        @test_throws ArgumentError(err_msg) LazyTensors.split_tuple((1,2), (1))
+
+
+        split_tuple_static(t, ::Val{SZS}) where {SZS} = @inline LazyTensors.split_tuple(t,SZS)
+
+        @inferred split_tuple_static((1,2,3,4,5,6), Val((3,1,2)))
+    end
+end
+
+@testset "sizes_to_ranges" begin
+    @test LazyTensors.sizes_to_ranges((1,)) == (1:1,)
+    @test LazyTensors.sizes_to_ranges((2,)) == (1:2,)
+    @test LazyTensors.sizes_to_ranges((2,3)) == (1:2,3:5)
+    @test LazyTensors.sizes_to_ranges((3,2,4)) == (1:3,4:5,6:9)
+    @test LazyTensors.sizes_to_ranges((0,2)) == (1:0,1:2)
+    @test LazyTensors.sizes_to_ranges((2,0)) == (1:2,2:1)
+    @test LazyTensors.sizes_to_ranges((2,0,3)) == (1:2,2:1,3:5)
+end
+
+@testset "concatenate_tuples" begin
+    @test LazyTensors.concatenate_tuples(()) == ()
+    @test LazyTensors.concatenate_tuples((1,)) == (1,)
+    @test LazyTensors.concatenate_tuples((1,), ()) == (1,)
+    @test LazyTensors.concatenate_tuples((),(1,)) == (1,)
+    @test LazyTensors.concatenate_tuples((1,2,3),(4,5)) == (1,2,3,4,5)
+    @test LazyTensors.concatenate_tuples((1,2,3),(4,5),(6,7)) == (1,2,3,4,5,6,7)
 end
 
 @testset "flatten_tuple" begin

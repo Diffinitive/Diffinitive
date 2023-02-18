@@ -25,6 +25,7 @@ function split_index(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val
 
     return view_index, I_middle
 end
+# TBD: If the nice split_tuple works, can this be cleaned up as well?
 
 # TODO: Can this be replaced by something more elegant while still being type stable? 2020-10-21
 # See:
@@ -65,6 +66,31 @@ function split_tuple(t::NTuple{N,Any},::Val{M},::Val{K}) where {N,M,K}
     return p1,p2,p3
 end
 
+# TBD Are the above defs even needed? Can the below one be used without problems?
+
+"""
+    split_tuple(t, szs)
+
+Split the tuple `t` into a set of tuples of the sizes given in `szs`.
+`sum(szs)` should equal `lenght(t)`.
+"""
+function split_tuple(t, szs)
+    if length(t) != sum(szs; init=0)
+        throw(ArgumentError("length(t) must equal sum(szs)"))
+    end
+
+    rs = sizes_to_ranges(szs)
+    return map(r->t[r], rs)
+end
+
+function sizes_to_ranges(szs)
+    cum_szs = cumsum((0, szs...))
+    return ntuple(i->cum_szs[i]+1:cum_szs[i+1], length(szs))
+end
+
+
+concatenate_tuples(t::Tuple,ts::Vararg{Tuple}) = (t..., concatenate_tuples(ts...)...)
+concatenate_tuples(t::Tuple) = t
 
 """
     flatten_tuple(t)
@@ -74,6 +100,7 @@ Takes a nested tuple and flattens the whole structure
 flatten_tuple(t::NTuple{N, Number} where N) = t
 flatten_tuple(t::Tuple) = ((flatten_tuple.(t)...)...,) # simplify?
 flatten_tuple(ts::Vararg) = flatten_tuple(ts)
+# TBD: Can concatenate_tuples be used instead?
 
 """
     left_pad_tuple(t, val, N)
