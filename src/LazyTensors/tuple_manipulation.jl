@@ -73,6 +73,11 @@ end
 
 Split the tuple `t` into a set of tuples of the sizes given in `szs`.
 `sum(szs)` should equal `lenght(t)`.
+
+E.g
+```julia
+split_tuple((1,2,3,4,5,6), (3,1,2)) -> (1,2,3),(4,),(5,6)
+```
 """
 function split_tuple(t, szs)
     if length(t) != sum(szs; init=0)
