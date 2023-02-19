@@ -2,17 +2,18 @@ using Test
 using Sbplib.LazyTensors
 
 @testset "split_index" begin
-    @test LazyTensors.split_index(Val(2),Val(1),Val(2),Val(2),1,2,3,4,5,6) == ((1,2,:,5,6),(3,4))
-    @test LazyTensors.split_index(Val(2),Val(3),Val(2),Val(2),1,2,3,4,5,6) == ((1,2,:,:,:,5,6),(3,4))
-    @test LazyTensors.split_index(Val(3),Val(1),Val(1),Val(2),1,2,3,4,5,6) == ((1,2,3,:,5,6),(4,))
-    @test LazyTensors.split_index(Val(3),Val(2),Val(1),Val(2),1,2,3,4,5,6) == ((1,2,3,:,:,5,6),(4,))
-    @test LazyTensors.split_index(Val(1),Val(1),Val(2),Val(3),1,2,3,4,5,6) == ((1,:,4,5,6),(2,3))
-    @test LazyTensors.split_index(Val(1),Val(2),Val(2),Val(3),1,2,3,4,5,6) == ((1,:,:,4,5,6),(2,3))
+    @test LazyTensors.split_index(2,1,2,2, 1,2,3,4,5,6) == ((1,2,:,5,6),(3,4))
+    @test LazyTensors.split_index(2,3,2,2, 1,2,3,4,5,6) == ((1,2,:,:,:,5,6),(3,4))
+    @test LazyTensors.split_index(3,1,1,2, 1,2,3,4,5,6) == ((1,2,3,:,5,6),(4,))
+    @test LazyTensors.split_index(3,2,1,2, 1,2,3,4,5,6) == ((1,2,3,:,:,5,6),(4,))
+    @test LazyTensors.split_index(1,1,2,3, 1,2,3,4,5,6) == ((1,:,4,5,6),(2,3))
+    @test LazyTensors.split_index(1,2,2,3, 1,2,3,4,5,6) == ((1,:,:,4,5,6),(2,3))
 
-    @test LazyTensors.split_index(Val(0),Val(1),Val(3),Val(3),1,2,3,4,5,6) == ((:,4,5,6),(1,2,3))
-    @test LazyTensors.split_index(Val(3),Val(1),Val(3),Val(0),1,2,3,4,5,6) == ((1,2,3,:),(4,5,6))
+    @test LazyTensors.split_index(0,1,3,3, 1,2,3,4,5,6) == ((:,4,5,6),(1,2,3))
+    @test LazyTensors.split_index(3,1,3,0, 1,2,3,4,5,6) == ((1,2,3,:),(4,5,6))
 
-    @inferred LazyTensors.split_index(Val(2),Val(3),Val(2),Val(2),1,2,3,2,2,4)
+    split_index_static(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val{dim_after}, I...) where {dim_before,dim_view,dim_index,dim_after} = LazyTensors.split_index(dim_before, dim_view, dim_index, dim_after, I...)
+    @inferred split_index_static(Val(2),Val(3),Val(2),Val(2),1,2,3,2,2,4)
 end
 
 @testset "split_tuple" begin

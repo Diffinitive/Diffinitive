@@ -1,11 +1,11 @@
 """
-    split_index(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val{dim_after}, I...)
+    split_index(dim_before, dim_view, dim_index, dim_after, I...)
 
 Splits the multi-index `I` into two parts. One part which is expected to be
 used as a view, and one which is expected to be used as an index.
 Eg.
 ```
-split_index(Val(1),Val(3),Val(2),Val(1),(1,2,3,4)) -> (1,:,:,:,4), (2,3)
+split_index(1, 3, 2, 1, (1,2,3,4)) -> (1,:,:,:,4), (2,3)
 ```
 
 `dim_view` controls how many colons are in the view, and `dim_index` controls
@@ -18,8 +18,9 @@ The returned values satisfy
  * `length(view_index) == dim_before + dim_view + dim_after`
  * `length(I_middle) == dim_index`
 """
-function split_index(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val{dim_after}, I...) where {dim_before,dim_view, dim_index,dim_after}
-    I_before, I_middle, I_after = @inline split_tuple(I, (dim_before, dim_index, dim_after))
+function split_index(dim_before, dim_view, dim_index, dim_after, I...)
+    @inline
+    I_before, I_middle, I_after = split_tuple(I, (dim_before, dim_index, dim_after))
 
     view_index = (I_before..., ntuple((i)->:, dim_view)..., I_after...)
 
