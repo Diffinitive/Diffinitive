@@ -388,3 +388,9 @@ A different approach would be to include it as a trait for operators so that you
 
 ## Name of the `VolumeOperator` type for constant stencils
 It seems that the name is too general. The name of the method `volume_operator` makes sense. It should return different types of `LazyTensor` specialized for the grid. A suggetion for a better name is `ConstantStencilVolumeOperator`
+
+
+## Implementation of LazyOuterProduct
+Could the implementation of LazyOuterProduct be simplified by making it a
+struct containing two or more LazyTensors? (using split_tuple in a similar way
+as TensorGrid)
