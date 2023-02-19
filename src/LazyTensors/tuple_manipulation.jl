@@ -56,6 +56,12 @@ function sizes_to_ranges(szs)
     return ntuple(i->cum_szs[i]+1:cum_szs[i+1], length(szs))
 end
 
+
+"""
+    concatenate_tuples(t...)
+
+Concatenate tuples.
+"""
 concatenate_tuples(t::Tuple,ts::Vararg{Tuple}) = (t..., concatenate_tuples(ts...)...)
 concatenate_tuples(t::Tuple) = t
 

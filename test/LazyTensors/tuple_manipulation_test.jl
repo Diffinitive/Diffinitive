@@ -34,9 +34,7 @@ end
         @test_throws ArgumentError(err_msg) LazyTensors.split_tuple((1,2), (1,2))
         @test_throws ArgumentError(err_msg) LazyTensors.split_tuple((1,2), (1))
 
-
         split_tuple_static(t, ::Val{SZS}) where {SZS} = LazyTensors.split_tuple(t,SZS)
-
         @inferred split_tuple_static((1,2,3,4,5,6), Val((3,1,2)))
         @inferred split_tuple_static((1,2,3,4),Val((3,1)))
         @inferred split_tuple_static((1,2,true,4),Val((3,1)))
