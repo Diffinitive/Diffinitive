@@ -4,8 +4,9 @@
 Splits the multi-index `I` into two parts. One part which is expected to be
 used as a view, and one which is expected to be used as an index.
 Eg.
-```
-split_index(1, 3, 2, 1, (1,2,3,4)) -> (1,:,:,:,4), (2,3)
+```julia-repl
+julia> LazyTensors.split_index(1, 3, 2, 1, (1,2,3,4)...)
+((1, Colon(), Colon(), Colon(), 4), (2, 3))
 ```
 
 `dim_view` controls how many colons are in the view, and `dim_index` controls
@@ -35,8 +36,9 @@ Split the tuple `t` into a set of tuples of the sizes given in `szs`.
 `sum(szs)` should equal `lenght(t)`.
 
 E.g
-```julia
-split_tuple((1,2,3,4,5,6), (3,1,2)) -> (1,2,3),(4,),(5,6)
+```julia-repl
+julia> LazyTensors.split_tuple((1,2,3,4,5,6), (3,1,2))
+((1, 2, 3), (4,), (5, 6))
 ```
 """
 function split_tuple(t, szs)
