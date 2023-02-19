@@ -31,57 +31,32 @@ function Base.eachindex(g::TensorGrid)
 end
 
 
+struct TensorBoundary{N, BID<:BoundaryIdentifier} <: BoundaryIdentifier end
+grid_id(::TensorBoundary{N, BID}) where {N, BID} = N
+boundary_id(::TensorBoundary{N, BID}) where {N, BID} = BID()
 
-## Pre refactor code:
-"""
-    orthogonal_dims(grid::EquidistantGrid,dim)
 
-Returns the dimensions of grid orthogonal to that of dim.
 """
-function orthogonal_dims(grid::EquidistantGrid, dim)
-    orth_dims = filter(i -> i != dim, dims(grid))
-    if orth_dims == dims(grid)
-        throw(DomainError(string("dimension ",string(dim)," not matching grid")))
+    boundary_identifiers(::TensorGrid)
+
+Returns a tuple containing the boundary identifiers for the grid.
+"""
+function boundary_identifiers(g::TensorGrid)
+    n = length(g.grids)
+    per_grid = map(eachindex(g.grids)) do i
+        return map(bid -> TensorBoundary{i, bid}(), boundary_identifiers(g.grids[i]))
     end
-    return orth_dims
-end
-
-"""
-    restrict(::EquidistantGrid, dim)
-
-Pick out given dimensions from the grid and return a grid for them.
-"""
-function restrict(grid::EquidistantGrid, dim)
-    size = grid.size[dim]
-    limit_lower = grid.limit_lower[dim]
-    limit_upper = grid.limit_upper[dim]
-
-    return EquidistantGrid(size, limit_lower, limit_upper)
+    return concatenate_tuples(per_grid...)
 end
 
 
-
 """
-    boundary_identifiers(::EquidistantGrid)
+    boundary_grid(grid::TensorGrid, id::TensorBoundary)
 
-Returns a tuple containing the boundary identifiers for the grid, stored as
-    (CartesianBoundary(1,Lower),
-     CartesianBoundary(1,Upper),
-     CartesianBoundary(2,Lower),
-     ...)
+The grid for the boundary specified by `id`.
 """
-boundary_identifiers(g::EquidistantGrid) = (((ntuple(i->(CartesianBoundary{i,Lower}(),CartesianBoundary{i,Upper}()),ndims(g)))...)...,)
-
-
-"""
-    boundary_grid(grid::EquidistantGrid, id::CartesianBoundary)
-
-Creates the lower-dimensional restriciton of `grid` spanned by the dimensions
-orthogonal to the boundary specified by `id`. The boundary grid of a 1-dimensional
-grid is a zero-dimensional grid.
-"""
-function boundary_grid(grid::EquidistantGrid, id::CartesianBoundary)
-    orth_dims = orthogonal_dims(grid, dim(id))
-    return restrict(grid, orth_dims)
+function boundary_grid(g::TensorGrid, bid::TensorBoundary)
+    local_boundary_grid = boundary_grid(g.grids[grid_id(bid)], boundary_id(bid))
+    new_grids = Base.setindex(g.grids, local_boundary_grid, grid_id(bid))
+    return TensorGrid(new_grids...)
 end
-boundary_grid(::EquidistantGrid{1,T},::CartesianBoundary{1}) where T = EquidistantGrid{T}()
