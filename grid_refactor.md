@@ -56,6 +56,9 @@ Man skulle kunna utesluta MultiblockGrid i tensorgrids
 CG-nät och DG-nät blir olika.
 På CG-nät kanske man både vill indexera noder och trianglar beroende på vad man håller på med?
 
+
+Om griddarna inte ska vara AbstractArray finns det många andra ställen som blir konstiga om de är AbstractArray. TensorApplication?! LazyArrays?! Är alla saker vi jobbar med egentligen mer generella object? Finns det något sätt att uttrycka koden så att man kan välja?
+
 #### Försök till slutsater
  * Multiblock-nät indexeras i två nivåer tex `g[3][3,4]`
      * Vi struntar i att implementera multiblock-nät som en del av ett tensorgrid till att börja med.
