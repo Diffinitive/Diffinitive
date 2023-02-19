@@ -39,6 +39,7 @@ split_tuple((1,2,3,4,5,6), (3,1,2)) -> (1,2,3),(4,),(5,6)
 ```
 """
 function split_tuple(t, szs)
+    @inline
     if length(t) != sum(szs; init=0)
         throw(ArgumentError("length(t) must equal sum(szs)"))
     end
