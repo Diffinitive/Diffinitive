@@ -24,16 +24,14 @@ function eval_on(::Grid) end # TODO: Should return a LazyArray and index the gri
 function refine(::Grid) end
 function coarsen(::Grid) end # Should this be here? What if it is not possible?
 
-abstract type BoundaryId end
-
 """
 # TODO
 """
-function boundary_identifiers(::Grid) end
+function boundary_identifiers end
 """
 # TODO
 """
-function boundary_grid(::Grid, ::BoundaryId) end
+function boundary_grid end
 
 
 # TODO: Make sure that all grids implement all of the above.
