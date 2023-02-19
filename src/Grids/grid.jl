@@ -55,20 +55,3 @@ Return one of the components of gfun as a grid function.
 # Should it be lazy? Could it be a view?
 function getcomponent(gfun, I::Vararg{Int}) end
 # function getcomponent(gfun, s::Symbol) end ?
-
-# TBD: New file zero_dim_grid.jl?
-struct ZeroDimGrid{T,S,RD} <: Grid{T,0,RD}
-    p::S
-
-    function ZeroDimGrid(p)
-        T = eltype(p)
-        S = typeof(p)
-        RD = length(p)
-        return new{T,S,RD}(p)
-    end
-end
-
-Base.size(g::ZeroDimGrid) = ()
-Base.getindex(g::ZeroDimGrid) = g.p
-Base.eachindex(g::ZeroDimGrid) = CartesianIndices(())
-

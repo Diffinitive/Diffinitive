@@ -28,5 +28,6 @@ export coarsen
 include("grid.jl")
 include("boundary_identifier.jl")
 include("equidistant_grid.jl")
+include("zero_dim_grid.jl")
 
 end # module
