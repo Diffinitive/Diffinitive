@@ -12,7 +12,11 @@ using Sbplib.LazyTensors
     @test LazyTensors.split_index(0,1,3,3, 1,2,3,4,5,6) == ((:,4,5,6),(1,2,3))
     @test LazyTensors.split_index(3,1,3,0, 1,2,3,4,5,6) == ((1,2,3,:),(4,5,6))
 
-    split_index_static(::Val{dim_before}, ::Val{dim_view}, ::Val{dim_index}, ::Val{dim_after}, I...) where {dim_before,dim_view,dim_index,dim_after} = LazyTensors.split_index(dim_before, dim_view, dim_index, dim_after, I...)
+    split_index_static(::Val{dim_before}, 
+                       ::Val{dim_view}, 
+                       ::Val{dim_index}, 
+                       ::Val{dim_after}, I...) where {dim_before,dim_view,dim_index,dim_after} = 
+        LazyTensors.split_index(dim_before, dim_view, dim_index, dim_after, I...)
     @inferred split_index_static(Val(2),Val(3),Val(2),Val(2),1,2,3,2,2,4)
 end
 
@@ -66,14 +70,14 @@ end
     @test LazyTensors.left_pad_tuple((1,2), 0, 2) == (1,2)
     @test LazyTensors.left_pad_tuple((1,2), 0, 3) == (0,1,2)
     @test LazyTensors.left_pad_tuple((3,2), 1, 6) == (1,1,1,1,3,2)
-
-    @test_throws DomainError(0, "Can't pad tuple of length 2 to 0 elements") LazyTensors.left_pad_tuple((1,2), 0, 0) == (1,2)
+    err_msg = "Can't pad tuple of length 2 to 0 elements"
+    @test_throws DomainError(0, err_msg) LazyTensors.left_pad_tuple((1,2), 0, 0) == (1,2)
 end
 
 @testset "right_pad_tuple" begin
     @test LazyTensors.right_pad_tuple((1,2), 0, 2) == (1,2)
     @test LazyTensors.right_pad_tuple((1,2), 0, 3) == (1,2,0)
     @test LazyTensors.right_pad_tuple((3,2), 1, 6) == (3,2,1,1,1,1)
-
-    @test_throws DomainError(0, "Can't pad tuple of length 2 to 0 elements") LazyTensors.right_pad_tuple((1,2), 0, 0) == (1,2)
+    err_msg = "Can't pad tuple of length 2 to 0 elements"
+    @test_throws DomainError(0,err_msg) LazyTensors.right_pad_tuple((1,2), 0, 0) == (1,2)
 end
