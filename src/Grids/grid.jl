@@ -14,7 +14,6 @@ Base.ndims(::Grid{T,D,RD}) where {T,D,RD} = D # nidms borde nog vara antalet ind
 nrangedims(::Grid{T,D,RD}) where {T,D,RD} = RD
 Base.eltype(::Grid{T,D,RD}) where {T,D,RD} = T # vad ska eltype vara? Inte T väl... en vektor? SVector{T,D}?
 
-function eval_on(::Grid) end # TODO: Should return a LazyArray and index the grid
 function refine(::Grid) end
 function coarsen(::Grid) end # Should this be here? What if it is not possible?
 
@@ -38,8 +37,9 @@ Enumerate the dimensions of the grid.
 dims(grid::Grid) = 1:ndims(grid)
 
 
-
 # TBD: New file grid_functions.jl?
+
+function eval_on(::Grid) end # TODO: Should return a LazyArray and index the grid
 
 """
     getcomponent(gfun, I::Vararg{Int})
