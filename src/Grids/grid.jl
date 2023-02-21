@@ -6,14 +6,8 @@ The top level type for grids.
 Should implement
 # TBD:
 """
-#TBD: Does all the kinds of grids we want fit with this interface?
-# Multigrid?
-# Unstructured?
-# Triangular structured grids?
-# Non-simply connected?
-#
-# Maybe it shouldn't be an abstract array after all?
-abstract type Grid{T,D,RD} <: AbstractArray{T,D} end
+#TBD: Should it be an AbstractArray? See notes in grid_refactor.md
+abstract type Grid{T,D,RD} end
 
 
 Base.ndims(::Grid{T,D,RD}) where {T,D,RD} = D # nidms borde nog vara antalet index som används för att indexera nätet. Snarare än vilken dimension nätet har (tänk ostrukturerat)
