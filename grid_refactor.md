@@ -59,12 +59,15 @@ På CG-nät kanske man både vill indexera noder och trianglar beroende på vad 
 
 Om griddarna inte ska vara AbstractArray finns det många andra ställen som blir konstiga om de är AbstractArray. TensorApplication?! LazyArrays?! Är alla saker vi jobbar med egentligen mer generella object? Finns det något sätt att uttrycka koden så att man kan välja?
 
+
+Det vi är ute efter är kanske att griddarna uppfyller Iteration och Indexing interfacen.
+
 #### Försök till slutsater
  * Multiblock-nät indexeras i två nivåer tex `g[3][3,4]`
      * Vi struntar i att implementera multiblock-nät som en del av ett tensorgrid till att börja med.
  * En grid kan inte alltid vara en AbstractArray eftersom till exempel ett NCS eller strukturerad triangel inte har rätt form.
  * Om vi har nod-indexerade ostrukturerade nät borde de fungera med TensorGrid.
- *
+ * Griddar ska uppfylla Indexing och Iteration interfacen
 
 ### Kan vi introducera 1d griddar och tensorgriddar?
   * Vanligt intervallgrid
