@@ -94,6 +94,14 @@ grid. This simlifies the implementation and avoids certain surprise
 behaviours.
 """
 function equidistant_grid(size::Dims, limit_lower, limit_upper)
+    if any(size .<= 0)
+        throw(DomainError("all components of size must be postive"))
+    end
+
+    if any(limit_upper.-limit_lower .<= 0)
+        throw(DomainError("all side lengths must be postive"))
+    end
+
     gs = map(size, limit_lower, limit_upper) do s,l,u
         EquidistantGrid(range(l, u, length=s)) # TBD: Should it use LinRange instead?
     end
