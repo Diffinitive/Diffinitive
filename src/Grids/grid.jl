@@ -7,6 +7,7 @@ Should implement
 # TBD:
 """
 #TBD: Should it be an AbstractArray? See notes in grid_refactor.md
+# TODO: Document that grids should implement the interfaces for iteration and indexing.
 abstract type Grid{T,D,RD} end
 
 

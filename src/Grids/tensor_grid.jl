@@ -10,6 +10,12 @@ struct TensorGrid{T,D,RD,GT<:NTuple{N,Grid} where N} <: Grid{T,D,RD}
     end
 end
 
+# Indexing interface
+# TODO
+# Iteration interface
+# TODO
+
+
 function Base.size(g::TensorGrid)
     return LazyTensors.concatenate_tuples(size.(g.grids)...)
 end

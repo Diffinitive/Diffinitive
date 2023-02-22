@@ -12,3 +12,8 @@ end
 Base.size(g::ZeroDimGrid) = ()
 Base.getindex(g::ZeroDimGrid) = g.p
 Base.eachindex(g::ZeroDimGrid) = CartesianIndices(())
+
+# Indexing interface
+# TODO
+# Iteration interface
+# TODO
