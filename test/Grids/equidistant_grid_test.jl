@@ -39,8 +39,8 @@ using Sbplib.LazyTensors
         @test g[5] == 0.4
         @test g[101] == 10.0
 
-        @test_broken g[begin] == 0.0
-        @test_broken g[end] == 10.0
+        @test g[begin] == 0.0
+        @test g[end] == 10.0
     end
 
     @testset "boundary_identifiers" begin

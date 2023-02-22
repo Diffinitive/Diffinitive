@@ -12,6 +12,9 @@ Base.size(g::EquidistantGrid) = size(g.points)
 Base.length(g::EquidistantGrid) = length(g.points)
 Base.eachindex(g::EquidistantGrid) = eachindex(g.points)
 
+Base.firstindex(g::EquidistantGrid) = firstindex(g.points)
+Base.lastindex(g::EquidistantGrid) = lastindex(g.points)
+
 # TODO: Make sure collect works!
 
 
