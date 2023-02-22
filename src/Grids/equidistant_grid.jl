@@ -1,3 +1,7 @@
+"""
+# TODO:
+"""
+#TODO: Document recomendations for type of range. (LinRange is faster?)
 struct EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1,1}
     points::R
 end
@@ -77,11 +81,17 @@ Construct an equidistant grid with corners at the coordinates `limit_lower` and
 `limit_upper`.
 
 The length of the domain sides are given by the components of
-`limit_upper-limit_lower`. E.g for a 2D grid with `limit_lower=(-1,0)` and `limit_upper=(1,2)` the domain is defined
-as `(-1,1)x(0,2)`. The side lengths of the grid are not allowed to be negative.
+`limit_upper-limit_lower`. E.g for a 2D grid with `limit_lower=(-1,0)` and
+`limit_upper=(1,2)` the domain is defined as `(-1,1)x(0,2)`. The side lengths
+of the grid are not allowed to be negative.
 
 The number of equidistantly spaced points in each coordinate direction are given
 by the tuple `size`.
+
+Note: If `limit_lower` and `limit_upper` are integers and `size` would allow a
+completely integer grid, `equidistant_grid` will still return a floating point
+grid. This simlifies the implementation and avoids certain surprise
+behaviours.
 """
 function equidistant_grid(size::Dims, limit_lower, limit_upper)
     gs = map(size, limit_lower, limit_upper) do s,l,u
