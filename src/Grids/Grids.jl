@@ -7,7 +7,12 @@ using Sbplib.LazyTensors
 export Grid
 export dims
 export points
-export evalOn
+
+export TensorGrid
+export ZeroDimGrid
+
+export eval_on
+export getcomponent
 
 # BoundaryIdentifier
 export BoundaryIdentifier
@@ -24,6 +29,7 @@ export boundary_identifiers
 export boundary_grid
 export refine
 export coarsen
+export equidistant_grid
 
 abstract type BoundaryIdentifier end
 
