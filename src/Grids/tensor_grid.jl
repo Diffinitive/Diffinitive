@@ -11,13 +11,13 @@ struct TensorGrid{T,D,RD,GT<:NTuple{N,Grid} where N} <: Grid{T,D,RD}
 end
 
 function Base.size(g::TensorGrid)
-    return concatenate_tuples(size.(g.grids)...)
+    return LazyTensors.concatenate_tuples(size.(g.grids)...)
 end
 
 function Base.getindex(g::TensorGrid, I...)
     szs = ndims.(g.grids)
 
-    Is = split_tuple(I, szs)
+    Is = LazyTensors.split_tuple(I, szs)
     ps = map((g,I)->SVector(g[I...]), g.grids, Is)
 
     return vcat(ps...)
@@ -26,7 +26,7 @@ end
 IndexStyle(::TensorGrid) = IndexCartesian()
 
 function Base.eachindex(g::TensorGrid)
-    szs = concatenate_tuples(size.(g.grids)...)
+    szs = LazyTensors.concatenate_tuples(size.(g.grids)...)
     return CartesianIndices(szs)
 end
 
@@ -46,7 +46,7 @@ function boundary_identifiers(g::TensorGrid)
     per_grid = map(eachindex(g.grids)) do i
         return map(bid -> TensorBoundary{i, bid}(), boundary_identifiers(g.grids[i]))
     end
-    return concatenate_tuples(per_grid...)
+    return LazyTensors.concatenate_tuples(per_grid...)
 end
 
 
