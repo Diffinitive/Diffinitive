@@ -30,7 +30,7 @@ using Sbplib.LazyTensors
 
     @testset "collect" begin
         g = EquidistantGrid(0:0.1:0.5)
-        @test_broken collect(g) == [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+        @test collect(g) == [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
     end
 
     @testset "getindex" begin

@@ -6,16 +6,21 @@ struct EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1,1}
     points::R
 end
 
-Base.eltype(g::EquidistantGrid{T}) where T = T
-Base.getindex(g::EquidistantGrid, i) = g.points[i]
-Base.size(g::EquidistantGrid) = size(g.points)
-Base.length(g::EquidistantGrid) = length(g.points)
 Base.eachindex(g::EquidistantGrid) = eachindex(g.points)
 
+# Indexing interface
+Base.getindex(g::EquidistantGrid, i) = g.points[i]
 Base.firstindex(g::EquidistantGrid) = firstindex(g.points)
 Base.lastindex(g::EquidistantGrid) = lastindex(g.points)
 
-# TODO: Make sure collect works!
+# Iteration interface
+Base.iterate(g::EquidistantGrid) = iterate(g.points)
+Base.iterate(g::EquidistantGrid, state) = iterate(g.points, state)
+
+Base.IteratorSize(::Type{EquidistantGrid}) = Base.HasShape{1}()
+Base.eltype(::Type{EquidistantGrid{T}}) where T = T
+Base.length(g::EquidistantGrid) = length(g.points)
+Base.size(g::EquidistantGrid) = size(g.points)
 
 
 """
