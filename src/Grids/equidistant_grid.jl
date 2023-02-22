@@ -65,7 +65,7 @@ function coarsen(g::EquidistantGrid, r::Int)
 
     new_sz = (length(g) - 1)÷r + 1
 
-    return EquidistantGrid(change_length(g.points), new_sz)
+    return EquidistantGrid(change_length(g.points, new_sz))
 end
 
 
