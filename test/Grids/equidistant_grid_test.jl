@@ -9,12 +9,31 @@ using Sbplib.LazyTensors
     @test EquidistantGrid(range(0,1,length=10)) isa EquidistantGrid
     @test EquidistantGrid(LinRange(0,1,11)) isa EquidistantGrid
 
-    @testset "Base" begin
+    @testset "Indexing Interface" begin
+        g = EquidistantGrid(0:0.1:10)
+        @test g[1] == 0.0
+        @test g[5] == 0.4
+        @test g[101] == 10.0
+
+        @test g[begin] == 0.0
+        @test g[end] == 10.0
+
+        @test all(eachindex(g) .== 1:101)
+    end
+
+    @testset "Iterator interface" begin
         @test eltype(EquidistantGrid(0:10)) == Int
         @test eltype(EquidistantGrid(0:2:10)) == Int
         @test eltype(EquidistantGrid(0:0.1:10)) == Float64
         @test size(EquidistantGrid(0:10)) == (11,)
         @test size(EquidistantGrid(0:0.1:10)) == (101,)
+
+        @test collect(EquidistantGrid(0:0.1:0.5)) == [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+
+        @test Base.IteratorSize(EquidistantGrid{Float64, StepRange{Float64}}) == Base.HasShape{1}()
+    end
+
+    @testset "Base" begin
         @test ndims(EquidistantGrid(0:10)) == 1
     end
 
@@ -26,21 +45,6 @@ using Sbplib.LazyTensors
     @testset "inverse_spacing" begin
         @test inverse_spacing(EquidistantGrid(0:10)) == 1
         @test inverse_spacing(EquidistantGrid(0:0.1:10)) == 10
-    end
-
-    @testset "collect" begin
-        g = EquidistantGrid(0:0.1:0.5)
-        @test collect(g) == [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
-    end
-
-    @testset "getindex" begin
-        g = EquidistantGrid(0:0.1:10)
-        @test g[1] == 0.0
-        @test g[5] == 0.4
-        @test g[101] == 10.0
-
-        @test g[begin] == 0.0
-        @test g[end] == 10.0
     end
 
     @testset "boundary_identifiers" begin
