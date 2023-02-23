@@ -17,8 +17,7 @@ Base.lastindex(g::EquidistantGrid) = lastindex(g.points)
 Base.iterate(g::EquidistantGrid) = iterate(g.points)
 Base.iterate(g::EquidistantGrid, state) = iterate(g.points, state)
 
-Base.IteratorSize(::Type{EquidistantGrid{T,R}}) where {T,R} = Base.HasShape{1}()
-Base.eltype(::Type{EquidistantGrid{T}}) where T = T
+Base.IteratorSize(::Type{<:EquidistantGrid}) = Base.HasShape{1}()
 Base.length(g::EquidistantGrid) = length(g.points)
 Base.size(g::EquidistantGrid) = size(g.points)
 

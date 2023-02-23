@@ -11,8 +11,8 @@ Should implement
 abstract type Grid{T,D} end
 
 
-Base.ndims(::Grid{T,D}) where {T,D} = D # nidms borde nog vara antalet index som används för att indexera nätet. Snarare än vilken dimension nätet har (tänk ostrukturerat)
-Base.eltype(::Grid{T,D}) where {T,D} = T # vad ska eltype vara? Inte T väl... en vektor? SVector{T,D}?
+Base.ndims(::Grid{T,D}) where {T,D} = D
+Base.eltype(::Type{<:Grid{T}}) where T = T
 
 function refine(::Grid) end
 function coarsen(::Grid) end # Should this be here? What if it is not possible?
