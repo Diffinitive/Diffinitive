@@ -1,12 +1,11 @@
-struct TensorGrid{T,D,RD,GT<:NTuple{N,Grid} where N} <: Grid{T,D,RD}
+struct TensorGrid{T,D,GT<:NTuple{N,Grid} where N} <: Grid{T,D}
     grids::GT
 
     function TensorGrid(gs...)
         T = eltype(gs[1]) # All gs should have the same T
         D = sum(ndims,gs)
-        RD = sum(nrangedims, gs)
 
-        return new{T,D,RD,typeof(gs)}(gs)
+        return new{T,D,typeof(gs)}(gs)
     end
 end
 

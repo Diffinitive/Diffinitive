@@ -2,7 +2,7 @@
 # TODO:
 """
 #TODO: Document recomendations for type of range. (LinRange is faster?)
-struct EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1,1}
+struct EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1}
     points::R
 end
 

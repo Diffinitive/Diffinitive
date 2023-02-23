@@ -1,11 +1,10 @@
-struct ZeroDimGrid{T,S,RD} <: Grid{T,0,RD}
+struct ZeroDimGrid{T,S} <: Grid{T,0}
     p::S
 
     function ZeroDimGrid(p)
         T = eltype(p)
         S = typeof(p)
-        RD = length(p)
-        return new{T,S,RD}(p)
+        return new{T,S}(p)
     end
 end
 

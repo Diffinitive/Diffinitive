@@ -1,5 +1,5 @@
 """
-     Grid{T,D,RD} <: AbstractArray{T,D}
+     Grid{T,D}
 
 The top level type for grids.
 
@@ -8,12 +8,11 @@ Should implement
 """
 #TBD: Should it be an AbstractArray? See notes in grid_refactor.md
 # TODO: Document that grids should implement the interfaces for iteration and indexing.
-abstract type Grid{T,D,RD} end
+abstract type Grid{T,D} end
 
 
-Base.ndims(::Grid{T,D,RD}) where {T,D,RD} = D # nidms borde nog vara antalet index som används för att indexera nätet. Snarare än vilken dimension nätet har (tänk ostrukturerat)
-nrangedims(::Grid{T,D,RD}) where {T,D,RD} = RD
-Base.eltype(::Grid{T,D,RD}) where {T,D,RD} = T # vad ska eltype vara? Inte T väl... en vektor? SVector{T,D}?
+Base.ndims(::Grid{T,D}) where {T,D} = D # nidms borde nog vara antalet index som används för att indexera nätet. Snarare än vilken dimension nätet har (tänk ostrukturerat)
+Base.eltype(::Grid{T,D}) where {T,D} = T # vad ska eltype vara? Inte T väl... en vektor? SVector{T,D}?
 
 function refine(::Grid) end
 function coarsen(::Grid) end # Should this be here? What if it is not possible?
