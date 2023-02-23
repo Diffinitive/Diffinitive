@@ -55,8 +55,8 @@ using Sbplib.LazyTensors
 
     @testset "boundary_grid" begin
         g = EquidistantGrid(0:0.1:1)
-        @test_broken boundary_grid(g, Lower()) == ZeroDimGrid(fill(0.0)) # TBD: Is fill necessary here? Why?
-        @test_broken boundary_grid(g, Upper()) == ZeroDimGrid(fill(1.0))
+        @test boundary_grid(g, Lower()) == ZeroDimGrid(0.0) # TBD: Is fill necessary here? Why?
+        @test boundary_grid(g, Upper()) == ZeroDimGrid(1.0)
     end
 
     @testset "refine" begin
