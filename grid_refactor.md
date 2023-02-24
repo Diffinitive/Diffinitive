@@ -97,6 +97,14 @@ Vi skulle också kunna använda ArraysOfArrays. Skillnaden blir att den elementt
 
 Läs i notes.md om: Vector valued grid functions
 
+## Should Grid have function for the target manifold dimension?
+Where would it be used?
+    In the constructor for TensorGrid
+    Elsewhere?
+
+An alternative is to analyze T in Grid{T,D} to find the answer. (See combined_coordinate_vector_type in tensor_grid.jl)
+
+
 ## Notes from pluto notebook
 - Är det dåligt att använda ndims om antalet index inte matchar?
    - Tex ostrukturerat grid
