@@ -2,6 +2,7 @@ module Grids
 
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
+using StaticArrays
 
 # Grid
 export Grid
@@ -11,14 +12,14 @@ export points
 export TensorGrid
 export ZeroDimGrid
 
+export TensorGridBoundary
+
 export eval_on
 export getcomponent
 
 # BoundaryIdentifier
 export BoundaryIdentifier
-export CartesianBoundary
-export dim
-export region
+
 
 # EquidistantGrid
 export EquidistantGrid
