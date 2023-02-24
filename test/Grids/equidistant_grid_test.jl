@@ -95,7 +95,7 @@ end
 
     @testset "Base" begin
         @test eltype(equidistant_grid(4,0.0,1.0)) == Float64
-        @test_broken eltype(equidistant_grid((4,3),(0,0),(1,3))) == AbstractVector{Float64}
+        @test eltype(equidistant_grid((4,3),(0,0),(1,3))) <: AbstractVector{Float64}
         @test size(equidistant_grid(4,0.0,1.0)) == (4,)
         @test size(equidistant_grid((5,3), (0.0,0.0), (2.0,1.0))) == (5,3)
         @test ndims(equidistant_grid(4,0.0,1.0)) == 1
@@ -104,15 +104,14 @@ end
 
     @testset "getindex" begin
         g = equidistant_grid((5,3), (-1.0,0.0), (0.0,7.11))
-        # gp = collect(g);
-        gp = rand(size(g)...)
+        gp = collect(g);
         p = [(-1.,0.)      (-1.,7.11/2)   (-1.,7.11);
             (-0.75,0.)    (-0.75,7.11/2) (-0.75,7.11);
             (-0.5,0.)     (-0.5,7.11/2)  (-0.5,7.11);
             (-0.25,0.)    (-0.25,7.11/2) (-0.25,7.11);
             (0.,0.)       (0.,7.11/2)    (0.,7.11)]
         for i ∈ eachindex(gp)
-            @test_broken [gp[i]...] ≈ [p[i]...] atol=5e-13
+            @test [gp[i]...] ≈ [p[i]...] atol=5e-13
         end
     end
 end
