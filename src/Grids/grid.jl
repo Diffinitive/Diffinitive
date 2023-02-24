@@ -14,13 +14,21 @@ abstract type Grid{T,D} end
 Base.ndims(::Grid{T,D}) where {T,D} = D
 Base.eltype(::Type{<:Grid{T}}) where T = T
 
-function refine(::Grid) end
-function coarsen(::Grid) end # Should this be here? What if it is not possible?
+"""
+# TODO
+"""
+function refine end
+
+"""
+# TODO
+"""
+function coarsen end
 
 """
 # TODO
 """
 function boundary_identifiers end
+
 """
 # TODO
 """
