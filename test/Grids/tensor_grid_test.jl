@@ -80,8 +80,8 @@ using Sbplib.RegionIndices
         @test refine(TensorGrid(g1(11), g2(6)),1) == TensorGrid(g1(11), g2(6))
         @test refine(TensorGrid(g1(11), g2(6)),2) == TensorGrid(g1(21), g2(11))
         @test refine(TensorGrid(g1(11), g2(6)),3) == TensorGrid(g1(31), g2(16))
-        @test_broken refine(TensorGrid(g1(11), g₄), 1) == TensorGrid(g1(11), g₄)
-        @test_broken refine(TensorGrid(g1(11), g₄), 2) == TensorGrid(g1(21), g₄)
+        @test refine(TensorGrid(g1(11), g₄), 1) == TensorGrid(g1(11), g₄)
+        @test refine(TensorGrid(g1(11), g₄), 2) == TensorGrid(g1(21), g₄)
     end
 
     @testset "coarsen" begin
@@ -91,13 +91,13 @@ using Sbplib.RegionIndices
         @test coarsen(TensorGrid(g1(11), g2(6)),1) == TensorGrid(g1(11), g2(6))
         @test coarsen(TensorGrid(g1(21), g2(11)),2) == TensorGrid(g1(11), g2(6))
         @test coarsen(TensorGrid(g1(31), g2(16)),3) == TensorGrid(g1(11), g2(6))
-        @test_broken coarsen(TensorGrid(g1(11), g₄), 1) == TensorGrid(g1(11), g₄)
-        @test_broken coarsen(TensorGrid(g1(21), g₄), 2) == TensorGrid(g1(11), g₄)
+        @test coarsen(TensorGrid(g1(11), g₄), 1) == TensorGrid(g1(11), g₄)
+        @test coarsen(TensorGrid(g1(21), g₄), 2) == TensorGrid(g1(11), g₄)
     end
 
     @testset "boundary_identifiers" begin
         @test boundary_identifiers(TensorGrid(g₁, g₂)) == map((n,id)->TensorGridBoundary{n,id}(), (1,1,2,2), (Lower,Upper,Lower,Upper))
-        @test_broken boundary_identifiers(TensorGrid(g₁, g₄)) == (TensorGridBoundary{1,Lower}(),TensorGridBoundary{1,Upper}())
+        @test boundary_identifiers(TensorGrid(g₁, g₄)) == (TensorGridBoundary{1,Lower}(),TensorGridBoundary{1,Upper}())
     end
 
     @testset "boundary_grid" begin

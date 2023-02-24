@@ -25,19 +25,20 @@ using StaticArrays
     end
 
     @testset "refine" begin
-        @test_broken false
+        @test refine(ZeroDimGrid(@SVector[1.0,2.0]),1) == ZeroDimGrid(@SVector[1.0,2.0])
+        @test refine(ZeroDimGrid(@SVector[1.0,2.0]),2) == ZeroDimGrid(@SVector[1.0,2.0])
     end
 
     @testset "coarsen" begin
-        @test_broken false
+        @test coarsen(ZeroDimGrid(@SVector[1.0,2.0]),1) == ZeroDimGrid(@SVector[1.0,2.0])
+        @test coarsen(ZeroDimGrid(@SVector[1.0,2.0]),2) == ZeroDimGrid(@SVector[1.0,2.0])
     end
 
     @testset "boundary_identifiers" begin
-        @test_broken false
+        @test boundary_identifiers(ZeroDimGrid(@SVector[1.0,2.0])) == ()
     end
 
     @testset "boundary_grid" begin
-        @test_broken false
-        # Test that it throws an error
+        @test_throws ArgumentError("ZeroDimGrid has no boundaries") boundary_grid(ZeroDimGrid(@SVector[1.0,2.0]), :bid)
     end
 end

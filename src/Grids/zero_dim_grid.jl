@@ -17,3 +17,10 @@ Base.iterate(g::ZeroDimGrid, ::Any) = nothing
 Base.IteratorSize(::Type{<:ZeroDimGrid}) = Base.HasShape{0}()
 Base.length(g::ZeroDimGrid) = 1
 Base.size(g::ZeroDimGrid) = ()
+
+
+refine(g::ZeroDimGrid, ::Int) = g
+coarsen(g::ZeroDimGrid, ::Int) = g
+
+boundary_identifiers(g::ZeroDimGrid) = ()
+boundary_grid(g::ZeroDimGrid, ::Any) = throw(ArgumentError("ZeroDimGrid has no boundaries"))
