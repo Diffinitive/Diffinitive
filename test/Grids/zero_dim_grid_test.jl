@@ -23,4 +23,21 @@ using StaticArrays
         @test size(g) == ()
         @test collect(g) == fill(@SVector[1,2])
     end
+
+    @testset "refine" begin
+        @test_broken false
+    end
+
+    @testset "coarsen" begin
+        @test_broken false
+    end
+
+    @testset "boundary_identifiers" begin
+        @test_broken false
+    end
+
+    @testset "boundary_grid" begin
+        @test_broken false
+        # Test that it throws an error
+    end
 end
