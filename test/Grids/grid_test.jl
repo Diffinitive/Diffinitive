@@ -11,6 +11,9 @@ using StaticArrays
 
     @test ndims(DummyGrid{Int, 2}()) == 2
     @test dims(DummyGrid{Int, 2}()) == 1:2
+
+    @test target_manifold_dim(DummyGrid{Int, 1}()) == 1
+    @test target_manifold_dim(DummyGrid{SVector{3,Float64}, 2}()) == 3
 end
 
 @testset "eval_on" begin

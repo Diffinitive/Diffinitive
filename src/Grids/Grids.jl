@@ -6,6 +6,7 @@ using StaticArrays
 
 # Grid
 export Grid
+export target_manifold_dim
 export dims
 
 export TensorGrid
