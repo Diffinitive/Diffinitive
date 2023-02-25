@@ -78,15 +78,8 @@ end
 
 
 function combined_coordinate_vector_type(coordinate_types...)
-    coord_length(::Type{<:Number}) = 1
-    coord_length(T::Type{<:SVector}) = length(T)
-
-    coord_type(T::Type{<:Number}) = T
-    coord_type(T::Type{<:SVector}) = eltype(T)
-
-
-    combined_coord_length = mapreduce(coord_length, +, coordinate_types)
-    combined_coord_type = mapreduce(coord_type, promote_type, coordinate_types)
+    combined_coord_length = mapreduce(_ncomponents, +, coordinate_types)
+    combined_coord_type = mapreduce(_component_type, promote_type, coordinate_types)
 
     if combined_coord_length == 1
         return combined_coord_type

@@ -64,3 +64,11 @@ Return one of the components of gfun as a grid function.
 # Should it be lazy? Could it be a view?
 function getcomponent(gfun, I::Vararg{Int}) end
 # function getcomponent(gfun, s::Symbol) end ?
+
+
+# TODO: Explain how these are intended to be used
+_ncomponents(::Type{<:Number}) = 1
+_ncomponents(T::Type{<:SVector}) = length(T)
+
+_component_type(T::Type{<:Number}) = T
+_component_type(T::Type{<:SVector}) = eltype(T)

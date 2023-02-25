@@ -45,3 +45,23 @@ end
 @testset "getcomponent" begin
     @test_broken false
 end
+
+@testset "_ncomponents" begin
+    @test Grids._ncomponents(Int) == 1
+    @test Grids._ncomponents(Float64) == 1
+    @test Grids._ncomponents(Rational) == 1
+
+    @test Grids._ncomponents(SVector{3,Int}) == 3
+    @test Grids._ncomponents(SVector{2,Float64}) == 2
+    @test Grids._ncomponents(SVector{4,Rational}) == 4
+end
+
+@testset "_component_type" begin
+    @test Grids._component_type(Int) == Int
+    @test Grids._component_type(Float64) == Float64
+    @test Grids._component_type(Rational) == Rational
+
+    @test Grids._component_type(SVector{3,Int}) == Int
+    @test Grids._component_type(SVector{2,Float64}) == Float64
+    @test Grids._component_type(SVector{4,Rational}) == Rational
+end
