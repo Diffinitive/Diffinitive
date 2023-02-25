@@ -100,10 +100,24 @@ Läs i notes.md om: Vector valued grid functions
 ## Should Grid have function for the target manifold dimension?
 Where would it be used?
     In the constructor for TensorGrid
+    In eval on if we want to allow multiargument functions
     Elsewhere?
 
 An alternative is to analyze T in Grid{T,D} to find the answer. (See combined_coordinate_vector_type in tensor_grid.jl)
 
+## Lazy version of map for our needs?
+Could be used to
+ * evaulate functions on grids
+ * pick out components of grid functions
+ * More?
+
+Maybe this:
+```julia
+struct LazyMappedArray <: LazyArray
+    f::F
+    v::AT
+end
+```
 
 ## Notes from pluto notebook
 - Är det dåligt att använda ndims om antalet index inte matchar?

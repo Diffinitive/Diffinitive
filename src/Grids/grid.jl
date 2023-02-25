@@ -44,11 +44,17 @@ function boundary_grid end
 Enumerate the dimensions of the grid.
 """
 dims(grid::Grid) = 1:ndims(grid)
-
+# TBD: Is this function needed? Where is it used?
 
 # TBD: New file grid_functions.jl?
+"""
+TODO:
 
-function eval_on(::Grid) end # TODO: Should return a LazyArray and index the grid
+* Mention map(f,g) if you want a concrete array
+"""
+eval_on(g::Grid, f) = eval_on(g, f, Base.IteratorSize(g)) # TBD: Borde f vara först som i alla map, sum, och dylikt
+eval_on(g::Grid, f, ::Base.HasShape) = LazyTensors.LazyFunctionArray((I...)->f(g[I...]), size(g))
+
 
 """
     getcomponent(gfun, I::Vararg{Int})
