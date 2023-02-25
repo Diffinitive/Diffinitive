@@ -7,7 +7,6 @@ using StaticArrays
 # Grid
 export Grid
 export dims
-export points
 
 export TensorGrid
 export ZeroDimGrid
@@ -25,7 +24,6 @@ export BoundaryIdentifier
 export EquidistantGrid
 export spacing
 export inverse_spacing
-export restrict
 export boundary_identifiers
 export boundary_grid
 export refine
