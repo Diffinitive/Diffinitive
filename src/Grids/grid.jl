@@ -54,8 +54,13 @@ TODO:
 * Mention map(f,g) if you want a concrete array
 """
 eval_on(g::Grid, f) = eval_on(g, f, Base.IteratorSize(g)) # TBD: Borde f vara först som i alla map, sum, och dylikt
-eval_on(g::Grid, f, ::Base.HasShape) = LazyTensors.LazyFunctionArray((I...)->f(g[I...]), size(g))
-
+function eval_on(g::Grid, f, ::Base.HasShape)
+    if hasmethod(f, (Any,))
+        return LazyTensors.LazyFunctionArray((I...)->f(g[I...]), size(g))
+    else
+        return LazyTensors.LazyFunctionArray((I...)->f(g[I...]...), size(g))
+    end
+end
 
 """
     getcomponent(gfun, I::Vararg{Int})

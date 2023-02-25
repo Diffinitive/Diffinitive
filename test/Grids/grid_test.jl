@@ -39,10 +39,9 @@ end
     @test eval_on(g, x̄ -> @SVector[x̄[2], x̄[1]]) isa LazyArray{SVector{2,Float64}}
     @test eval_on(g, x̄ -> @SVector[x̄[2], x̄[1]]) == map(x̄ -> @SVector[x̄[2], x̄[1]], g)
 
-
-
+    # Multi-argument functions
     f(x,y) = sin(x)*cos(y)
-    @test_broken eval_on(g, f) == map(p->f(p...), points(g))
+    @test eval_on(g, f) == map(x̄->f(x̄...), g)
 end
 
 @testset "getcomponent" begin
