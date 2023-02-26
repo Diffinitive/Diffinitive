@@ -44,10 +44,6 @@ end
     @test eval_on(g, f) == map(x̄->f(x̄...), g)
 end
 
-@testset "getcomponent" begin
-    @test_broken false
-end
-
 @testset "_ncomponents" begin
     @test Grids._ncomponents(Int) == 1
     @test Grids._ncomponents(Float64) == 1

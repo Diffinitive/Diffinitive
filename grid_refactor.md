@@ -119,6 +119,14 @@ struct LazyMappedArray <: LazyArray
 end
 ```
 
+Could allow us to remove eval_on.
+
+## Do we need functions like `getcomponent`?
+Perhaps this can be more cleanly solved using map or a lazy version of map?
+That approach would be more flexible and more general requiring few specialized functions.
+
+(see "Lazy version of map for our needs?" above)
+
 ## Notes from pluto notebook
 - Är det dåligt att använda ndims om antalet index inte matchar?
    - Tex ostrukturerat grid
