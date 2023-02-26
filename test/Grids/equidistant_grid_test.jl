@@ -118,5 +118,14 @@ end
 
 
 @testset "change_length" begin
-    @test_broken false
+    @test Grids.change_length(0:20, 21) == 0:20
+    @test Grids.change_length(0:20, 11) == 0:2:20
+    @test Grids.change_length(0:2:20, 21) == 0:20
+
+    @test Grids.change_length(range(0,1,length=10), 10) == range(0,1,length=10)
+    @test Grids.change_length(range(0,1,length=10), 5) == range(0,1,length=5)
+    @test Grids.change_length(range(0,1,length=10), 20) == range(0,1,length=20)
+
+    @test Grids.change_length(LinRange(1,2,10),10) == LinRange(1,2,10)
+    @test Grids.change_length(LinRange(1,2,10),15) == LinRange(1,2,15)
 end
