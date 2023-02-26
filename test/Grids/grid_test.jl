@@ -27,9 +27,6 @@ end
 
     g = equidistant_grid((5,3), (0.0,0.0), (2.0,1.0))
 
-
-    # Splat for only one dim, controllef by type specification in function.
-
     @test eval_on(g, x̄ -> 0.) isa LazyArray
     @test eval_on(g, x̄ -> 0.) == fill(0., (5,3))
 

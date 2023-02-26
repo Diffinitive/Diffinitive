@@ -76,11 +76,6 @@ function coarsen(g::EquidistantGrid, r::Int)
 end
 
 
-
-
-
-
-
 """
     equidistant_grid(size::Dims, limit_lower, limit_upper)
 

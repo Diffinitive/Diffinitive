@@ -115,3 +115,8 @@ end
         end
     end
 end
+
+
+@testset "change_length" begin
+    @test_broken false
+end
