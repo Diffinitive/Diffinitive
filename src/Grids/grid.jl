@@ -3,13 +3,11 @@
 
 The top level type for grids.
 
+TODO:
 Should implement
-# TBD:
+ * interfaces for iteration and indexing
 """
-#TBD: Should it be an AbstractArray? See notes in grid_refactor.md
-# TODO: Document that grids should implement the interfaces for iteration and indexing.
 abstract type Grid{T,D} end
-
 
 Base.ndims(::Grid{T,D}) where {T,D} = D
 Base.eltype(::Type{<:Grid{T}}) where T = T
@@ -45,9 +43,7 @@ function boundary_grid end
 Enumerate the dimensions of the grid.
 """
 dims(grid::Grid) = 1:ndims(grid)
-# TBD: Is this function needed? Where is it used?
-
-# TBD: New file grid_functions.jl?
+# TBD: Is this function needed? Where is it used
 """
 TODO:
 
@@ -63,7 +59,7 @@ function eval_on(g::Grid, f, ::Base.HasShape)
 end
 
 
-# TODO: Explain how these are intended to be used
+# TODO: Explain how and where these are intended to be used
 _ncomponents(::Type{<:Number}) = 1
 _ncomponents(T::Type{<:SVector}) = length(T)
 

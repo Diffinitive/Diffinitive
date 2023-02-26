@@ -134,4 +134,3 @@ change_length(r::UnitRange, n) = StepRange{Int,Int}(range(r[begin], r[end], n))
 change_length(r::StepRange, n) = StepRange{Int,Int}(range(r[begin], r[end], n))
 change_length(r::StepRangeLen, n) = range(r[begin], r[end], n)
 change_length(r::LinRange, n) = LinRange(r[begin], r[end], n)
-# TODO: Test the above

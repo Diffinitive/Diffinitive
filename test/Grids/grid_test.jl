@@ -21,6 +21,9 @@ end
     @test eval_on(ZeroDimGrid(@SVector[1.,2.]), x̄->x̄[1]+x̄[2]) == fill(3.)
     @test eval_on(ZeroDimGrid(@SVector[3.,2.]), x̄->x̄[1]+x̄[2]) == fill(5.)
 
+    @test eval_on(ZeroDimGrid(1.), x̄->2x̄) isa LazyArray
+    @test eval_on(ZeroDimGrid(1.), x̄->2x̄) == fill(2.)
+
     @test eval_on(EquidistantGrid(range(0,1,length=4)), x->2x) isa LazyArray
     @test eval_on(EquidistantGrid(range(0,1,length=4)), x->2x) == 2 .* range(0,1,length=4)
 
