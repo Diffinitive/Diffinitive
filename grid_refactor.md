@@ -1,15 +1,34 @@
 # Grids refactor
 
-## Mål
-  * Embedded grids
-  * Vektorvärda grid funktioner, speciellt koordinat-funktionen
-  * Olika griddar i olika riktningar?
-      * Tex periodiskt i en riktning och intervall i en.
-      * Tex ostrukturerat i ett par och strukturerat i en.
-  * Enkelt att evaluera på 0d-grid
+## Goals before merging
+* A somewhat clear path towards multi-block grids and their grid functions.
+* A somewhat clear path towards implementations of div() and rot() or the elastic operator (See Notes.md)
+
+## Change summary
+* `EquidistantGrid` is now only a 1D thing.
+* Higher dimensions are supported through `TensorGrid`.
+* The old behavior of `EquidistantGrid` has been moved to the function `equidistant_grid`.
+* Grids embedded in higher dimensions are now supported through tensor products with `ZeroDimGrid`s.
+* Vector valued grid functions are now supported and the default element type is `SVector`.
+* Grids are now expected to support Julia's indexing and iteration interface.
+
+
+## TODO
+* Document the expected behavior of grid functions
+* Write down the thinking around Grid being an AbstractArray. Why it doesn't work
+
+* Clean out Notes.md of any solved issues
+* Delete this document, move remaining notes to Notes.md
+
+## Remaining work for feature branches
+* Multi-block grids
+* Periodic grids
+* Grids with modified boundary nodes
+* Unstructured grids?
 
 ## Frågor
 
+### Should we move utility functions to their own file?
 
 ### Ska `Grid` vara en AbstractArray?
 Efter som alla nät ska agera som en gridfunktion för koordinaterna måste man
@@ -21,7 +40,6 @@ Några saker att förhålla sig till:
   - Triangular structured grids?
   - Non-simply connected?
   - CG/DG-nät
-
 
 Om alla nät är någon slags AbstractArray så kan tillexempel ett multiblock nät vara en AbstractArray{<:Grid, 1} och motsvarande gridfunktioner AbstractArray{<:AbstractArray,1}.
 Där man alltså först indexerar för vilket när man vill åt och sedan indexerar nätet. Tex `mg[2][32,12]`.
@@ -69,35 +87,7 @@ Det vi är ute efter är kanske att griddarna uppfyller Iteration och Indexing i
  * Om vi har nod-indexerade ostrukturerade nät borde de fungera med TensorGrid.
  * Griddar ska uppfylla Indexing och Iteration interfacen
 
-### Kan vi introducera 1d griddar och tensorgriddar?
-  * Vanligt intervallgrid
-  * Periodiskt grid
-  * 0-dimensionellt grid
-
-Det skulle kunna lösa frågan med embedded-griddar
-och frågan om mixade grids.
-
-En svårighet kan vara att implemetera indexeringen för tensorgridden. Är det
-lätt att göra den transparent för kompilatorn?
-
-Läs i notes.md om: Grids embedded in higher dimensions
-
-Periodiska gridfunktioner? Eller ska vi bara skita i det och låta användaren
-hantera det själv? Blir det krångligt i högre dimensioner?
-
-
-### Hur ska vi hantera gridfunktioner med flera komponenter?
-Tex koordinat-funktionen på nätet?
-
-Funkar det att ha StaticArray som element type?
-    Kan man köra rakt på med en operator då?
-
-Vi skulle också kunna använda ArraysOfArrays. Skillnaden blir att den elementtypen är Array{T,N}. Vilket betyder att den är by reference?
-    Frågan är om kompilatorn kommer att bry sig... Jag skulle luta mot StaticArrays for safety
-
-Läs i notes.md om: Vector valued grid functions
-
-## Should Grid have function for the target manifold dimension?
+### Should Grid have function for the target manifold dimension?
 Where would it be used?
     In the constructor for TensorGrid
     In eval on if we want to allow multiargument functions
@@ -105,7 +95,7 @@ Where would it be used?
 
 An alternative is to analyze T in Grid{T,D} to find the answer. (See combined_coordinate_vector_type in tensor_grid.jl)
 
-## Lazy version of map for our needs?
+### Lazy version of map for our needs?
 Could be used to
  * evaulate functions on grids
  * pick out components of grid functions
@@ -121,20 +111,14 @@ end
 
 Could allow us to remove eval_on.
 
-## Do we need functions like `getcomponent`?
+### Do we need functions like `getcomponent`?
 Perhaps this can be more cleanly solved using map or a lazy version of map?
 That approach would be more flexible and more general requiring few specialized functions.
 
 (see "Lazy version of map for our needs?" above)
 
-## Notes from pluto notebook
-- Är det dåligt att använda ndims om antalet index inte matchar?
-   - Tex ostrukturerat grid
-   - Baserat på hur Array fungerar och ndims docs borde den nog returnera
-     antalet index och inte griddens dimension
-   - Å andra sidan kanske man inte behöver veta viken dimension det är? Fast det känns konstigt...
-- Should we keep the `points` function?
-   - Maybe it's better to support `collect` on the grid?
-- How to handle boundary identifiers and boundary grids on `TensorGrid`?
+### Would it help to introduce a type for grid functions?
+Seems easier to avoid this but it might be worth investigating.
 
+Can it be done with some kind of trait? We can give AbstractArray the appropriate trait and keep them for the simplest grid functions.
 
