@@ -13,12 +13,12 @@ struct BoundaryOperator{T,R<:Region,N} <: LazyTensor{T,0,1}
 end
 
 """
-    BoundaryOperator(grid::EquidistantGrid{1}, closure_stencil, region)
+    BoundaryOperator(grid::EquidistantGrid, closure_stencil, region)
 
-Constructs the BoundaryOperator with stencil `closure_stencil` for a one-dimensional `grid`, restricting to
+Constructs the BoundaryOperator with stencil `closure_stencil` for a `EquidistantGrid` `grid`, restricting to
 to the boundary specified by `region`.
 """
-function BoundaryOperator(grid::EquidistantGrid{1}, closure_stencil::Stencil{T,N}, region::Region) where {T,N}
+function BoundaryOperator(grid::EquidistantGrid, closure_stencil::Stencil{T,N}, region::Region) where {T,N}
     return BoundaryOperator{T,typeof(region),N}(closure_stencil,size(grid)[1])
 end
 
