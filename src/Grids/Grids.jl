@@ -14,6 +14,9 @@ export ZeroDimGrid
 
 export TensorGridBoundary
 
+export grid_id
+export boundary_id
+
 export eval_on
 export getcomponent
 
@@ -30,6 +33,7 @@ export boundary_grid
 export refine
 export coarsen
 export equidistant_grid
+export CartesianBoundary
 
 abstract type BoundaryIdentifier end
 

@@ -118,9 +118,11 @@ end
 Constructs a 1D equidistant grid.
 """
 function equidistant_grid(size::Int, limit_lower::T, limit_upper::T) where T
+    # TBD: Should this really return a TensorGrid?
 	return equidistant_grid((size,),(limit_lower,),(limit_upper,))
 end
 
+CartesianBoundary{D,BID} = TensorGridBoundary{D,BID} # TBD: What should we do about the naming of this boundary?
 
 
 """
