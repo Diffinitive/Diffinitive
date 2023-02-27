@@ -96,21 +96,9 @@ grid. This simlifies the implementation and avoids certain surprise
 behaviours.
 """
 function equidistant_grid(size::Dims, limit_lower, limit_upper)
-    if any(size .<= 0)
-        throw(DomainError("all components of size must be postive"))
-    end
-
-    if any(limit_upper.-limit_lower .<= 0)
-        throw(DomainError("all side lengths must be postive"))
-    end
-
-    gs = map(size, limit_lower, limit_upper) do s,l,u
-        EquidistantGrid(range(l, u, length=s)) # TBD: Should it use LinRange instead?
-    end
-
+    gs = map(equidistant_grid, size, limit_lower, limit_upper)
     return TensorGrid(gs...)
 end
-
 
 """
     equidistant_grid(size::Int, limit_lower::T, limit_upper::T)
@@ -118,8 +106,14 @@ end
 Constructs a 1D equidistant grid.
 """
 function equidistant_grid(size::Int, limit_lower::T, limit_upper::T) where T
-    # TBD: Should this really return a TensorGrid?
-	return equidistant_grid((size,),(limit_lower,),(limit_upper,))
+    if any(size .<= 0)
+        throw(DomainError("size must be postive"))
+    end
+
+    if any(limit_upper.-limit_lower .<= 0)
+        throw(DomainError("side length must be postive"))
+    end
+	return EquidistantGrid(range(limit_lower, limit_upper, length=size)) # TBD: Should it use LinRange instead?
 end
 
 CartesianBoundary{D,BID} = TensorGridBoundary{D,BID} # TBD: What should we do about the naming of this boundary?

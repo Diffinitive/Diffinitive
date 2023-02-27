@@ -14,13 +14,13 @@ using Sbplib.SbpOperators: BoundaryOperator, Stencil
 
     @testset "boundary_restriction" begin
         @testset "1D" begin
-            e_l = boundary_restriction(g_1D,stencil_set,CartesianBoundary{1,Lower}())
-            @test e_l == BoundaryOperator(g_1D.grids[1],Stencil{Float64}(e_closure),Lower())
+            e_l = boundary_restriction(g_1D,stencil_set,Lower())
+            @test e_l == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),Lower())
             @test e_l isa BoundaryOperator{T,Lower} where T
             @test e_l isa LazyTensor{T,0,1} where T
 
-            e_r = boundary_restriction(g_1D,stencil_set,CartesianBoundary{1,Upper}())
-            @test e_r == BoundaryOperator(g_1D.grids[1],Stencil{Float64}(e_closure),Upper())
+            e_r = boundary_restriction(g_1D,stencil_set,Upper())
+            @test e_r == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),Upper())
             @test e_r isa BoundaryOperator{T,Upper} where T
             @test e_r isa LazyTensor{T,0,1} where T
         end
@@ -35,7 +35,7 @@ using Sbplib.SbpOperators: BoundaryOperator, Stencil
     @testset "Application" begin
         @testset "1D" begin
             e_l, e_r = boundary_restriction.(Ref(g_1D), Ref(stencil_set), boundary_identifiers(g_1D))
-            v = eval_on(g_1D,x->1+x[1]^2) # TBD: We don't want an SVector here right? (For 1D)
+            v = eval_on(g_1D,x->1+x^2)
             u = fill(3.124)
 
             @test (e_l*v)[] == v[1]

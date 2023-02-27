@@ -85,13 +85,17 @@ end
 
 
 @testset "equidistant_grid" begin
-    @test equidistant_grid(4,0.0,1.0) isa TensorGrid
-    @test equidistant_grid(4,0.0,8.0) isa TensorGrid
+    @test equidistant_grid(4,0.0,1.0) isa EquidistantGrid
+    @test equidistant_grid((4,3),(0.0,0.0),(8.0,5.0)) isa TensorGrid
+
     # constuctor
     @test_throws DomainError equidistant_grid(0,0.0,1.0)
     @test_throws DomainError equidistant_grid(1,1.0,1.0)
     @test_throws DomainError equidistant_grid(1,1.0,-1.0)
-    @test equidistant_grid(4,0.0,1.0) == equidistant_grid((4,),(0.0,),(1.0,))
+
+    @test_throws DomainError equidistant_grid((0,0),(0.0,0.0),(1.0,1.0))
+    @test_throws DomainError equidistant_grid((1,1),(1.0,1.0),(1.0,1.0))
+    @test_throws DomainError equidistant_grid((1,1),(1.0,1.0),(-1.0,-1.0))
 
     @testset "Base" begin
         @test eltype(equidistant_grid(4,0.0,1.0)) == Float64
