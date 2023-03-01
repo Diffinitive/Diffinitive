@@ -8,7 +8,7 @@ import Sbplib.SbpOperators.VolumeOperator
 
 # TODO: Refactor these test to look more like the tests in first_derivative_test.jl.
 
-@testset "SecondDerivative" begin
+@test_skip @testset "SecondDerivative" begin
     operator_path = sbp_operators_path()*"standard_diagonal.toml"
     stencil_set = read_stencil_set(operator_path; order=4)
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])

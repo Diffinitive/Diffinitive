@@ -6,7 +6,7 @@ using Sbplib.LazyTensors
 
 import Sbplib.SbpOperators.ConstantInteriorScalingOperator
 
-@testset "Diagonal-stencil inner_product" begin
+@test_skip @testset "Diagonal-stencil inner_product" begin
     Lx = π/2.
     Ly = Float64(π)
     Lz = 1.

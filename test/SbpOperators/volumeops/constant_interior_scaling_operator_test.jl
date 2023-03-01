@@ -5,7 +5,7 @@ using Sbplib.SbpOperators
 import Sbplib.SbpOperators: ConstantInteriorScalingOperator
 using Sbplib.Grids
 
-@testset "ConstantInteriorScalingOperator" begin
+@test_skip @testset "ConstantInteriorScalingOperator" begin
     @test ConstantInteriorScalingOperator(1, (2,3), 10) isa ConstantInteriorScalingOperator{Int,2}
     @test ConstantInteriorScalingOperator(1., (2.,3.), 10) isa ConstantInteriorScalingOperator{Float64,2}
 

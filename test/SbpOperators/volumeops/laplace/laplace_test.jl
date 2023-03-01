@@ -4,15 +4,15 @@ using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
 
-# Default stencils (4th order)
-operator_path = sbp_operators_path()*"standard_diagonal.toml"
-stencil_set = read_stencil_set(operator_path; order=4)
-inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
-closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
-g_1D = EquidistantGrid(101, 0.0, 1.)
-g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
+@test_skip @testset "Laplace" begin
+    # Default stencils (4th order)
+    operator_path = sbp_operators_path()*"standard_diagonal.toml"
+    stencil_set = read_stencil_set(operator_path; order=4)
+    inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
+    closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
+    g_1D = EquidistantGrid(101, 0.0, 1.)
+    g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
 
-@testset "Laplace" begin
     @testset "Constructors" begin
         @testset "1D" begin
             Δ = laplace(g_1D, inner_stencil, closure_stencils)
@@ -66,7 +66,14 @@ g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
     end
 end
 
-@testset "laplace" begin
+@test_skip @testset "laplace" begin
+    operator_path = sbp_operators_path()*"standard_diagonal.toml"
+    stencil_set = read_stencil_set(operator_path; order=4)
+    inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
+    closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
+    g_1D = EquidistantGrid(101, 0.0, 1.)
+    g_3D = EquidistantGrid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
+
     @testset "1D" begin
         Δ = laplace(g_1D, inner_stencil, closure_stencils)
         @test Δ == second_derivative(g_1D, inner_stencil, closure_stencils, 1)

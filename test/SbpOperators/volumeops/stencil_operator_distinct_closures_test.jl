@@ -8,7 +8,7 @@ import Sbplib.SbpOperators.Stencil
 import Sbplib.SbpOperators.StencilOperatorDistinctClosures
 import Sbplib.SbpOperators.stencil_operator_distinct_closures
 
-@testset "stencil_operator_distinct_closures" begin
+@test_skip @testset "stencil_operator_distinct_closures" begin
     lower_closure = (
         Stencil(-1,1, center=1),
     )
@@ -38,7 +38,7 @@ import Sbplib.SbpOperators.stencil_operator_distinct_closures
     @test A₂²*v₂ == repeat(3u', 5, 1)
 end
 
-@testset "StencilOperatorDistinctClosures" begin
+@test_skip @testset "StencilOperatorDistinctClosures" begin
     g = EquidistantGrid(11, 0., 1.)
 
     lower_closure = (

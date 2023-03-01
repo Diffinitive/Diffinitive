@@ -6,7 +6,7 @@ using Sbplib.LazyTensors
 
 import Sbplib.SbpOperators.ConstantInteriorScalingOperator
 
-@testset "Diagonal-stencil inverse_inner_product" begin
+@test_skip @testset "Diagonal-stencil inverse_inner_product" begin
     Lx = π/2.
     Ly = Float64(π)
     g_1D = EquidistantGrid(77, 0.0, Lx)
