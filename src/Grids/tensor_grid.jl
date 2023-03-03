@@ -79,7 +79,7 @@ end
 
 function combined_coordinate_vector_type(coordinate_types...)
     combined_coord_length = mapreduce(_ncomponents, +, coordinate_types)
-    combined_coord_type = mapreduce(_component_type, promote_type, coordinate_types)
+    combined_coord_type = mapreduce(eltype, promote_type, coordinate_types)
 
     if combined_coord_length == 1
         return combined_coord_type

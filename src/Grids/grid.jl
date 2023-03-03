@@ -63,6 +63,3 @@ end
 # TODO: Explain how and where these are intended to be used
 _ncomponents(::Type{<:Number}) = 1
 _ncomponents(T::Type{<:SVector}) = length(T)
-
-_component_type(T::Type{<:Number}) = T
-_component_type(T::Type{<:SVector}) = eltype(T)
