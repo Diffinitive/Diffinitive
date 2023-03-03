@@ -18,6 +18,7 @@
 * Document the expected behavior of grid functions
 * Write down the thinking around Grid being an AbstractArray. Why it doesn't work
 
+* Check all the docstring of all types that have been changed
 * Clean out Notes.md of any solved issues
 * Delete this document, move remaining notes to Notes.md
 
@@ -123,3 +124,4 @@ Seems easier to avoid this but it might be worth investigating.
 
 Can it be done with some kind of trait? We can give AbstractArray the appropriate trait and keep them for the simplest grid functions.
 
+## Implement the tensor product operator for grids?
