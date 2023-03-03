@@ -261,6 +261,17 @@ component(gf,:,2) # Andra kolumnen av en matris
 @ourview gf[:,:][2]
 ```
 
+### Prestanda-aspekter
+[Vidar, Discord, 2023-03-03]
+Typiskt sett finns det två sätt att representera vektorvärda gridfunktioner AbstractArray{T,Dim} där T är en vektor över komponenterna. Man skulle alltså i 1D ha
+u = [ [u1[x1], u2[x1]] , [u1[x2], u2[x2]], ... [u1[xN], u2[xN]]]. Detta brukar kallas array of structs (AoS). Alternativet är struct of arrays (SoA), där man har alla gridpunkter för en given komponent u = [[u1[x1], u1[x2]],... u1[xN]], [u2[x1], u2[x2], ... u2[xN]]].
+
+Personligen tycker jag att AoS känns som den mer naturliga representationen? Det skulle göra det enklarare att parallelisera en vektorvärd gridfunktion över gridpunkterna, och om man opererar på olika komponenter i samma funktion så är det också bra ur en minnesaccess-synpunkt då dessa kommer ligga nära vandra i minnet. Problemet är att AoS sabbar vektorisering på CPU då två gridpunkter i en komponent ligger långt bort från varandra. Efter lite eftersökningar (och efter att snackat lite med Ossian) så verkar det ändå som att AoS är dåligt på GPU, där man vill att trådar typiskt sett utföra samma operation på närliggande minne.
+
+Vad tänker du kring detta ur ett interface-perspektiv? Jag hittade paketet  https://github.com/JuliaArrays/StructArrays.jl som verkar erbjuda AoS-interface men SoA-minneslayout så det kanske kan vara något vi kan använda? Inte native-stödd på samma sätt som SVector, men verkar iaf utvecklas aktivt.
+
+[Efter telefonsamtal] För optimal prestanda behöver vi antagligen se till att man kan räkna ut varje komponent i en punkt individuellt. Detta så att man har frihet att till exempel låta den innersta loopen hålla komponentindexet konstant för att underlätta intruktionsvektorisering.
+
 ## Performance measuring
 We should be measuring performance early. How does our effective cpu and memory bandwidth utilization compare to peak performance?
 
