@@ -36,7 +36,7 @@ Base.size(lfa::LazyFunctionArray) = lfa.size
 
 function Base.getindex(lfa::LazyFunctionArray{F,T,D}, I::Vararg{Int,D}) where {F,T,D}
     @boundscheck checkbounds(lfa, I...)
-    return @inbounds lfa.f(I...)
+    return @inbounds @inline lfa.f(I...)
 end
 
 
