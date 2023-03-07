@@ -272,6 +272,15 @@ Vad tänker du kring detta ur ett interface-perspektiv? Jag hittade paketet  htt
 
 [Efter telefonsamtal] För optimal prestanda behöver vi antagligen se till att man kan räkna ut varje komponent i en punkt individuellt. Detta så att man har frihet att till exempel låta den innersta loopen hålla komponentindexet konstant för att underlätta intruktionsvektorisering.
 
+
+[Vidare tankar]
+ * Det borde bara vara output-gridfunktionen som behöver special-indexeras? Det viktiga på inputsidan är att den är lagrad på rätt sätt i minnet.
+ * Det borde inte vara några problem att behålla det "optimala" interfacet (gf[1,1,1][2]) till gridfunktionerna. Om man verkligen behöver kan skapa parallella indexeringsmetoder som gör det man behöver, i.e, "deep indexing".
+ * Det är inte säkert att vi behöver göra något speciellt på outputsidan överhuvudtaget. Det känns inte orimligt att kompilatorn skulle kunna optimera bort den koden som räknar ut onödiga komponenter.
+ * Om vi behöver special-indexering kommer till exempel LazyTensorApplication att behöva implementera det.
+ * För att komma vidare med något mer avancerat behöver vi antagligen implementera några operatorer som ger och agerar på vektorvärda funktioner. Tex grad, elastiska operatorn, andra?
+
+
 ## Performance measuring
 We should be measuring performance early. How does our effective cpu and memory bandwidth utilization compare to peak performance?
 
