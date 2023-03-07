@@ -15,8 +15,10 @@
 
 
 ## TODO
+* Add benchmarks or allocation tests for eval_on and indexing grids.
 * Document the expected behavior of grid functions
 * Write down the thinking around Grid being an AbstractArray. Why it doesn't work
+* Merge and run benchmarks
 
 * Check all the docstring of all types that have been changed
 * Clean out Notes.md of any solved issues
