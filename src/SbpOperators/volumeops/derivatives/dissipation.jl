@@ -10,29 +10,30 @@ is described in "K. Mattsson, M. Svärd, and J. Nordström, “Stable and Accura
 Artificial Dissipation,” Journal of Scientific Computing, vol. 21, no. 1, pp.
 57–79, Aug. 2004"
 """
-function undivided_skewed04(g::EquidistantGrid, p, direction)
+function undivided_skewed04(g::TensorGrid, p, direction)
+    op = undivided_skewed04(g.grids[direction], p)
+    return LazyTensors.inflate(op, size(g), direction)
+end
+
+function undivided_skewed04(g::EquidistantGrid, p)
     T = eltype(g)
     interior_weights = T.(dissipation_interior_weights(p))
 
-    D  = stencil_operator_distinct_closures(
+    D  = StencilOperatorDistinctClosures(
         g,
         dissipation_interior_stencil(interior_weights),
         dissipation_lower_closure_stencils(interior_weights),
         dissipation_upper_closure_stencils(interior_weights),
-        direction,
     )
-    Dᵀ = stencil_operator_distinct_closures(
+    Dᵀ = StencilOperatorDistinctClosures(
         g,
         dissipation_transpose_interior_stencil(interior_weights),
         dissipation_transpose_lower_closure_stencils(interior_weights),
         dissipation_transpose_upper_closure_stencils(interior_weights),
-        direction,
     )
 
     return D, Dᵀ
 end
-
-undivided_skewed04(g::EquidistantGrid{1}, p) = undivided_skewed04(g, p, 1)
 
 function dissipation_interior_weights(p)
    if p == 0

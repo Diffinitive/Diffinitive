@@ -18,7 +18,7 @@ struct ConstantInteriorScalingOperator{T,N} <: LazyTensor{T,1,1}
     end
 end
 
-function ConstantInteriorScalingOperator(grid::EquidistantGrid{1}, interior_weight, closure_weights)
+function ConstantInteriorScalingOperator(grid::EquidistantGrid, interior_weight, closure_weights)
     return ConstantInteriorScalingOperator(interior_weight, Tuple(closure_weights), size(grid)[1])
 end
 

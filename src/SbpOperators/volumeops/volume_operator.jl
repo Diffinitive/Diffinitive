@@ -10,7 +10,7 @@ struct VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
     parity::Parity
 end
 
-function VolumeOperator(grid::EquidistantGrid{1}, inner_stencil, closure_stencils, parity)
+function VolumeOperator(grid::EquidistantGrid, inner_stencil, closure_stencils, parity)
     return VolumeOperator(inner_stencil, Tuple(closure_stencils), size(grid), parity)
 end
 

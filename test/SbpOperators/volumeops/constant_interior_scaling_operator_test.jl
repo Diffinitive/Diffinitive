@@ -5,7 +5,7 @@ using Sbplib.SbpOperators
 import Sbplib.SbpOperators: ConstantInteriorScalingOperator
 using Sbplib.Grids
 
-@test_skip @testset "ConstantInteriorScalingOperator" begin
+@testset "ConstantInteriorScalingOperator" begin
     @test ConstantInteriorScalingOperator(1, (2,3), 10) isa ConstantInteriorScalingOperator{Int,2}
     @test ConstantInteriorScalingOperator(1., (2.,3.), 10) isa ConstantInteriorScalingOperator{Float64,2}
 
@@ -33,7 +33,7 @@ using Sbplib.Grids
     @test_throws DomainError ConstantInteriorScalingOperator(4,(2,3), 3)
 
     @testset "Grid constructor" begin
-        g = EquidistantGrid(11, 0., 2.)
+        g = equidistant_grid(11, 0., 2.)
         @test ConstantInteriorScalingOperator(g, 3., (.1,.2)) isa ConstantInteriorScalingOperator{Float64}
     end
 end
