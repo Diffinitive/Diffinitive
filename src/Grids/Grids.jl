@@ -8,7 +8,6 @@ using StaticArrays
 export Grid
 export target_manifold_dim
 export component_type
-export dims
 
 export TensorGrid
 export ZeroDimGrid

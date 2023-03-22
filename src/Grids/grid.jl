@@ -38,13 +38,7 @@ function boundary_grid end
 
 # TODO: Make sure that all grids implement all of the above.
 
-"""
-    dims(grid::Grid)
 
-Enumerate the dimensions of the grid.
-"""
-dims(grid::Grid) = 1:ndims(grid)
-# TBD: Is this function needed? Where is it used
 """
 TODO:
 
