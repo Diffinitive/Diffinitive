@@ -72,7 +72,7 @@ Using `make` there are four targets for documentation
 ```shell
 make docs          # generates files suitable for webserver deployment, i.e with `prettyurls=true`
 make localdocs     # generates files suitable for local viewing in a web browser, i.e `prettyurls=false`
-make opendocs      # view documentation locally
+make opendocs      # build and view documentation locally
 make cleandocs     # cleans up generated files
 ```
 

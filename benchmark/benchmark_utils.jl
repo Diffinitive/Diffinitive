@@ -166,4 +166,8 @@ main
 
 
 # TBD: How to compare against current working directory? Possible to create a temporary commit?
+    # Make a secret temporary commit
+    # run benchmarkresult
+    # uncommit the temporary commit
+    # verbose flag on commit will print the revision id of the new commit.
 # TBD: What parts are PkgBenchmark contributing? Can it be stripped out?
