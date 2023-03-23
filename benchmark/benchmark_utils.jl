@@ -130,6 +130,21 @@ function hg_update(rev)
     run(addenv(cmd, "HGPLAIN"=>""))
 end
 
+function hg_commit(msg)
+    cmd = Cmd(`hg commit --verbose --message $msg`, dir=sbplib_root)
+    out = readchomp(addenv(cmd, "HGPLAIN"=>""))
+
+    return only(match(r"committed changeset \d+:([0-9a-z]+)", out))
+end
+
+function hg_is_dirty()
+    cmd = Cmd(`hg identify --id`, dir=sbplib_root)
+    out = readchomp(addenv(cmd, "HGPLAIN"=>""))
+
+    return endswith(out, "+")
+end
+
+
 
 # From Pluto.jl/src/webserver/WebServer.jl  (2023-01-24)
 function open_in_default_browser(url::AbstractString)::Bool
