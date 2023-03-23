@@ -44,11 +44,14 @@ cleandocs:
 	rm -rf docs/build
 	rm -rf docs/build-local	
 
-benchmark: benchmark/run-benchmark
+benchmark:
+	$(JULIA) --project=benchmark benchmark/make.jl
 
-benchmarkrev: benchmark/run-benchmark-rev
+benchmarkrev:
+	$(JULIA) --project=benchmark benchmark/make.jl --rev $(REV)
 
-benchmarkcmp: benchmark/run-benchmark-cmp
+benchmarkcmp:
+	$(JULIA) --project=benchmark benchmark/make.jl --cmp $(TARGET) $(BASELINE)
 
 cleanbenchmark:
 	rm -rf benchmark/results
@@ -67,17 +70,3 @@ docs/build: $(DOCS_DEPENDENCIES)
 
 docs/build-local: $(DOCS_DEPENDENCIES)
 	$(JULIA) --project=docs docs/make.jl --build-dir build-local
-
-benchmark/run-benchmark:
-	$(JULIA) --project=benchmark benchmark/make.jl
-
-benchmark/run-benchmark-rev:
-	$(JULIA) --project=benchmark benchmark/make.jl --rev $(REV)
-
-benchmark/run-benchmark-cmp:
-	$(JULIA) --project=benchmark benchmark/make.jl --cmp $(TARGET) $(BASELINE)
-
-
-.PHONY: temp
-temp:
-	@echo $(SRC_FILES_AND_DIRS)
