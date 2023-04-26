@@ -162,4 +162,18 @@ SUITE["boundary_terms"]["application"]     = @benchmarkable $u2 .= $H⁻¹*$e₁
 
 #TODO: Reorg with dimension as first level? To reduce operator creation?
 
+
+
+SUITE["lazy_tensors"] = BenchmarkGroup()
+
+SUITE["lazy_tensors"]["compositions"] = BenchmarkGroup()
+s = ScalingTensor(1.,(10,))
+u = rand(10)
+v = similar(u)
+s3 = s∘s∘s
+s4 = s∘s∘s∘s
+SUITE["lazy_tensors"]["compositions"]["s∘s∘s"]   = @benchmarkable $v .= $s3*$u
+SUITE["lazy_tensors"]["compositions"]["s∘s∘s∘s"] = @benchmarkable $v .= $s4*$u
+
+
 SUITE
