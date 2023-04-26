@@ -131,8 +131,20 @@ function hg_update(rev)
     run(addenv(cmd, "HGPLAIN"=>""))
 end
 
-function hg_commit(msg)
-    cmd = Cmd(`hg commit --verbose --message $msg`, dir=sbplib_root)
+"""
+    hg_commit(msg; secret=false)
+
+Make a hg commit with the provided message. If `secret` is true the commit is
+in the secret phase stopping it from being pushed.
+"""
+function hg_commit(msg; secret=false)
+    if secret
+        secretflag = "--secret"
+    else
+        secretflag = ""
+    end
+
+    cmd = Cmd(`hg commit --verbose $secretflag --message $msg`, dir=sbplib_root)
     out = readchomp(addenv(cmd, "HGPLAIN"=>""))
 
     return only(match(r"committed changeset \d+:([0-9a-z]+)", out))
