@@ -38,8 +38,9 @@ end
 """
     run_benchmark(rev)
 
-Updates the repository to the given revison and runs the benchmark suite. When done, updates the repository to the origianl state.
-`rev` can be any identifier compatible with `hg update`.
+Updates the repository to the given revison and runs the benchmark suite. When
+done, reverts the repository to the original state. `rev` can be any
+identifier compatible with `hg update`.
 
 Returns a `PkgBenchmark.BenchmarkResult`
 """
