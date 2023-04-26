@@ -168,6 +168,12 @@ function hg_strip(rev; keep=false)
 
     return nothing
 end
+
+"""
+    hg_is_dirty()
+
+Return true if the repositopry has uncommited changes.
+"""
 function hg_is_dirty()
     cmd = Cmd(`hg identify --id`, dir=sbplib_root)
     out = readchomp(addenv(cmd, "HGPLAIN"=>""))
