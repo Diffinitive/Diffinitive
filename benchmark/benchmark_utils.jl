@@ -187,3 +187,12 @@ main
     # uncommit the temporary commit
     # verbose flag on commit will print the revision id of the new commit.
 # TBD: What parts are PkgBenchmark contributing? Can it be stripped out?
+
+
+## Catching the exit code and errors from a command can be done with code similar to
+    # proc = open(cmd)
+    # if success(proc)
+
+    # else
+
+    # end
