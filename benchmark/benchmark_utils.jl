@@ -181,6 +181,55 @@ function hg_is_dirty()
     return endswith(out, "+")
 end
 
+"""
+    hg_at_revision(f, rev)
+
+Update the repository to the given revision and run the function `f`. After
+`f` is run the working directory is restored. If there are uncommited changes
+a temporary commit will be used to save the state of the working directory.
+"""
+function hg_at_revision(f, rev)
+    if hg_is_dirty()
+        hg_with_temporary_commit() do
+            _hg_at_revision(f, rev)
+        end
+    else
+        _hg_at_revision(f, rev)
+    end
+end
+
+function _hg_at_revision(f, rev)
+    @assert !hg_is_dirty()
+
+    origin_rev = hg_rev()
+
+    hg_update(rev)
+    try
+        f()
+    finally
+        hg_update(origin_rev)
+    end
+end
+
+"""
+    hg_with_temporary_commit(f)
+
+Run the function `f` after making a temporary commit with the current working
+directory. After `f` has finished the working directory is restored to its
+original state and the temporary commit stripped.
+"""
+function hg_with_temporary_commit(f)
+    @assert hg_is_dirty()
+
+    origin_rev = hg_commit("[Automatic commit by julia]",secret=true)
+
+    try
+        f()
+    finally
+        hg_update(origin_rev)
+        hg_strip(origin_rev; keep=true)
+    end
+end
 
 
 # From Pluto.jl/src/webserver/WebServer.jl  (2023-01-24)
