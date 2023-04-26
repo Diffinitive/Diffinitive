@@ -151,6 +151,23 @@ function hg_commit(msg; secret=false)
     return only(match(r"committed changeset \d+:([0-9a-z]+)", out))
 end
 
+"""
+    hg_strip(rev; keep=false)
+
+Strips the given commit from the repo. If `keep` is true, the changes of the
+commit are kept in the working directory.
+"""
+function hg_strip(rev; keep=false)
+    if keep
+        cmd = Cmd(`hg --config extensions.strip= strip --keep -r $rev`, dir=sbplib_root)
+    else
+        cmd = Cmd(`hg --config extensions.strip= strip        -r $rev`, dir=sbplib_root)
+    end
+
+    run(addenv(cmd, "HGPLAIN"=>""))
+
+    return nothing
+end
 function hg_is_dirty()
     cmd = Cmd(`hg identify --id`, dir=sbplib_root)
     out = readchomp(addenv(cmd, "HGPLAIN"=>""))
