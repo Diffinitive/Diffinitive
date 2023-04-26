@@ -141,12 +141,11 @@ in the secret phase stopping it from being pushed.
 """
 function hg_commit(msg; secret=false)
     if secret
-        secretflag = "--secret"
+        cmd = Cmd(`hg commit --verbose --secret --message $msg`, dir=sbplib_root)
     else
-        secretflag = ""
+        cmd = Cmd(`hg commit --verbose          --message $msg`, dir=sbplib_root)
     end
 
-    cmd = Cmd(`hg commit --verbose $secretflag --message $msg`, dir=sbplib_root)
     out = readchomp(addenv(cmd, "HGPLAIN"=>""))
 
     return only(match(r"committed changeset \d+:([0-9a-z]+)", out))
