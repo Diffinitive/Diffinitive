@@ -3,6 +3,7 @@ using Sbplib
 using Sbplib.Grids
 using Sbplib.SbpOperators
 using Sbplib.RegionIndices
+using Sbplib.LazyTensors
 
 const SUITE = BenchmarkGroup()
 
