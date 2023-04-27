@@ -191,10 +191,10 @@ a temporary commit will be used to save the state of the working directory.
 function hg_at_revision(f, rev)
     if hg_is_dirty()
         hg_with_temporary_commit() do
-            _hg_at_revision(f, rev)
+            return _hg_at_revision(f, rev)
         end
     else
-        _hg_at_revision(f, rev)
+        return _hg_at_revision(f, rev)
     end
 end
 
@@ -205,7 +205,7 @@ function _hg_at_revision(f, rev)
 
     hg_update(rev)
     try
-        f()
+        return f()
     finally
         hg_update(origin_rev)
     end
@@ -224,7 +224,7 @@ function hg_with_temporary_commit(f)
     origin_rev = hg_commit("[Automatic commit by julia]",secret=true)
 
     try
-        f()
+        return f()
     finally
         hg_update(origin_rev)
         hg_strip(origin_rev; keep=true)
