@@ -30,7 +30,7 @@ Runs the benchmark suite for the current working directory and returns a `PkgBen
 function run_benchmark(;kwargs...)
     r = PkgBenchmark.benchmarkpkg(Sbplib; kwargs...)
 
-    rev = hg_id()
+    rev = hg_rev() # Should be changed to hg_id() when the html can handle it.
 
     return add_rev_info(r, rev)
 end
@@ -76,9 +76,15 @@ end
 
 
 function add_rev_info(benchmarkresult, rev)
+    if endswith(rev,"+")
+        revstr = "+$rev" # Workaround for the bad presentation of BenchmarkResults.
+    else
+        revstr = rev
+    end
+
     return PkgBenchmark.BenchmarkResults(
         benchmarkresult.name,
-        rev,
+        revstr,
         benchmarkresult.benchmarkgroup,
         benchmarkresult.date,
         benchmarkresult.julia_commit,
