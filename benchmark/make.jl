@@ -1,13 +1,21 @@
+rev = nothing
+baseline = nothing
+target = nothing
+
 if "--rev" ∈ ARGS
     i = findlast(==("--rev"), ARGS)
-    args = parse(Int,ARGS[i+1])
-elseif ("--target","--baseline") ∈ ARGS
+    rev = ARGS[i+1]
+end
+
+if "--target" ∈ ARGS
     i = findlast(==("--target"), ARGS)
-    j = findlast(==("--baseline"), ARGS)
-    args = (ARGS[i+1],ARGS[j+1])
-else
-    args = ()
+    target = ARGS[i+1]
+end
+
+if "--baseline" ∈ ARGS
+    i = findlast(==("--baseline"), ARGS)
+    baseline = ARGS[i+1]
 end
 
 include("benchmark_utils.jl")
-main(args...)
+main(;rev, target, baseline)

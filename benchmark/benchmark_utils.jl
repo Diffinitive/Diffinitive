@@ -10,13 +10,33 @@ const results_dir = mkpath(joinpath(sbplib_root, "benchmark/results"))
 const template_path = joinpath(sbplib_root, "benchmark/result.tmpl")
 
 """
- main(args...; kwargs...)
+    mainmain(;rev=nothing, target=nothing, baseline=nothing , kwargs...)
 
-Calls `run_benchmark(args...; kwargs...)` and writes the results as an HTML file in `benchmark/results`.
-See [`run_benchmark`](@ref) for possible arguments.
+Calls `run_benchmark(args...; kwargs...)` and writes the results as an HTML
+file in `benchmark/results`.
+
+ * If `rev` is set, the benchmarks are run for the given mercurial revision.
+ * If only `baseline` is set, the current working directory is compared with
+   the revision given in `baseline`.
+ * If  both `target` and `baseline` is set those revision are compared.
+
+For control over what happens to the benchmark result datastructure see the
+different methods of [`run_benchmark`](@ref)
 """
-function main(args...; kwargs...)
-    r = run_benchmark(args...; kwargs...)
+function main(;rev=nothing, target=nothing, baseline=nothing , kwargs...)
+    if !isnothing(rev)
+        r = run_benchmark(rev; kwargs...)
+    elseif !isnothing(baseline)
+        if isnothing(target)
+            r = compare_benchmarks(baseline; kwargs...)
+        else
+            r = compare_benchmarks(target, baseline; kwargs...)
+        end
+    else
+        # Neither rev, or baseline were set => Run on current working directory.
+        r = run_benchmark(;kwargs...)
+    end
+
     file_path = write_result_html(r)
     open_in_default_browser(file_path)
 end
@@ -25,7 +45,8 @@ end
 """
     run_benchmark()
 
-Runs the benchmark suite for the current working directory and returns a `PkgBenchmark.BenchmarkResult`
+Run the benchmark suite for the current working directory and return a
+`PkgBenchmark.BenchmarkResult`
 """
 function run_benchmark(;kwargs...)
     r = PkgBenchmark.benchmarkpkg(Sbplib; kwargs...)
@@ -46,12 +67,12 @@ Returns a `PkgBenchmark.BenchmarkResult`
 """
 function run_benchmark(rev; kwargs...)
     return hg_at_revision(rev) do
-        run_benchmark(;kwargs...)
+        run_benchmark(; kwargs...)
     end
 end
 
 """
-    run_benchmark(target, baseline, f=minimum; judgekwargs=Dict())
+    compare_benchmarks(target, baseline, f=minimum; judgekwargs=Dict())
 
 Runs the benchmark at revisions `target` and `baseline` and compares them
 using `PkgBenchmark.judge`. `f` is the function used to compare. `judgekwargs`
@@ -61,13 +82,24 @@ are keyword arguments passed to `judge`.
 
 Returns a `PkgBenchmark.BenchmarkJudgement`
 """
-function run_benchmark(target, baseline, f=minimum; judgekwargs=Dict(), kwargs...)
-    rev_before = hg_rev()
-    hg_update(target)
+function compare_benchmarks(target, baseline, f=minimum; judgekwargs=Dict(), kwargs...)
+    t = run_benchmark(target; kwargs...)
+    b = run_benchmark(baseline; kwargs...)
+
+    return PkgBenchmark.judge(t,b,f; judgekwargs...)
+end
+
+"""
+    compare_benchmarks(baseline, ...)
+
+Compare the results at the current working directory with the revision
+specified in `baseline`.
+
+Accepts the same arguments as the two revision version.
+"""
+function compare_benchmark(baseline, f=minimum; judgekwargs=Dict(), kwargs...)
     t = run_benchmark(;kwargs...)
-    hg_update(baseline)
-    b = run_benchmark(;kwargs...)
-    hg_update(rev_before)
+    b = run_benchmark(baseline; kwargs...)
 
     return PkgBenchmark.judge(t,b,f; judgekwargs...)
 end
