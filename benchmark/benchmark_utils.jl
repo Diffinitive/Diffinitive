@@ -45,12 +45,9 @@ identifier compatible with `hg update`.
 Returns a `PkgBenchmark.BenchmarkResult`
 """
 function run_benchmark(rev; kwargs...)
-    rev_before = hg_rev()
-    hg_update(rev)
-    r = run_benchmark(;kwargs...)
-    hg_update(rev_before)
-
-    return r
+    return hg_at_revision(rev) do
+        run_benchmark(;kwargs...)
+    end
 end
 
 """
