@@ -302,6 +302,7 @@ main
     # TBD: Do we have to replace export_markdown? Could use a template instead.
 
 # Should be able to run the current benchmark script at a different revision.
+# Should have a way to filter the benchmark suite
 
 # TBD: What parts are PkgBenchmark contributing? Can it be stripped out?
 
