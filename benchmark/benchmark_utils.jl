@@ -53,8 +53,9 @@ end
 """
     run_benchmark(target, baseline, f=minimum; judgekwargs=Dict())
 
-Runs the benchmark at revisions `target` and `baseline` and compares them using `PkgBenchmark.judge`.
-`f` is the function used to compare. `judgekwargs` are keyword arguments passed to `judge`.
+Runs the benchmark at revisions `target` and `baseline` and compares them
+using `PkgBenchmark.judge`. `f` is the function used to compare. `judgekwargs`
+are keyword arguments passed to `judge`.
 
 `target` and `baseline` can be any identifier compatible with `hg update`.
 
