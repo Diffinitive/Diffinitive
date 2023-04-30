@@ -202,9 +202,9 @@ Preferably dimensions and sizes should be checked when lazy objects are created,
 ## Vector valued grid functions
 
 ### Test-applikationer
-div och grad operationer
+div- och grad-operationer
 
-Enligt Wikipedia verkar det som att `∇⋅` agerar på första dimensionen av ett tensor fält och `div()` på sista.
+Enligt Wikipedia verkar det som att `∇⋅` agerar på första dimensionen av ett tensorfält och `div()` på sista.
 Om man generaliserar kanske `∇` i så fall bara lägger till en dimension i början.
 
 Kan vi implementera `⋅`(\cdot) så att de fungerar som man vill för både tensor-fält och tensor-operatorer?
@@ -212,8 +212,8 @@ Kan vi implementera `⋅`(\cdot) så att de fungerar som man vill för både ten
 Är `∇` ett tensor-fält av tensor-operatorer? Vad är ett tensor-fält i vår kod? Är det en special-fall av en tensor-mapping?
 
 ### Grid-funktionen
-Grid-funktionon har typen `AbstractArray{T,2} where T`.
-`T` kan vara lite vad som helst, tillexemel en SVector eller Array, eller tuple. TensorOperatorerna bryr sig inte om exakt vad det är, mer än att typen måste stödja de operationer som operatorn använder.
+Grid-funktioner har typen `AbstractArray{T,2} where T`.
+`T` kan vara lite vad som helst, tillexemel en SVector eller Array, eller Tuple. Tensoroperatorerna bryr sig inte om exakt vad det är, mer än att typen måste stödja de operationer som operatorn använder.
 
 En nackdel kan vara hur man ska få ut gridfunktionen för tex andra komponenten.
 
@@ -225,7 +225,7 @@ gf[2,3] # x̄ för en viss gridpunkt
 gf[2,3][2] # x̄[2] för en viss gridpunkt
 ```
 
-Note: Behöver bestämma om eval on skickar in `x̄` eller `x̄...` till `f`. Eller om man kan stödja båda.
+Note: Behöver bestämma om `eval_on` skickar in `x̄` eller `x̄...` till `f`. Eller om man kan stödja båda.
 
 ### Tensor operatorer
 Vi kan ha tensor-operatorer som agerar på ett skalärt fält och ger ett vektorfält eller tensorfält.
@@ -243,7 +243,7 @@ Skulle kunna ha en funktion `range_type(::LazyTensor, ::Type{domain_type})`
 Kanske kan man implementera `⋅(tm::LazyTensor{R,D}, v::AbstractArray{T,D})` där T är en AbstractArray, tm på något sätt har komponenter, lika många som T har element.
 
 ### Komponenter som gridfunktioner
-En viktig operation för vektor fält är att kunna få ut komponenter som grid-funktioner. Detta behöver antagligen kunna ske lazy.
+En viktig operation för vektorfält är att kunna få ut komponenter som grid-funktioner. Detta behöver antagligen kunna ske lazy.
 Det finns ett par olika lösningar:
 * Implementera en egen typ av view som tar hand om detta. Eller Accessors.jl?
 * Använda en LazyTensor
