@@ -3,9 +3,10 @@
 
 Implements the boundary operator `op` for 1D as a `LazyTensor`
 
-`op` is the restriction of a grid function to the boundary using some closure `Stencil{T,N}`.
-The boundary to restrict to is determined by `R`.
-`op'` is the prolongation of a zero dimensional array to the whole grid using the same closure stencil.
+`op` is the restriction of a grid function to the boundary using some closure
+`Stencil{T,N}`. The boundary to restrict to is determined by `R`. `op'` is the
+prolongation of a zero dimensional array to the whole grid using the same
+closure stencil.
 """
 struct BoundaryOperator{T,R<:Region,N} <: LazyTensor{T,0,1}
     stencil::Stencil{T,N}
@@ -15,8 +16,9 @@ end
 """
     BoundaryOperator(grid::EquidistantGrid, closure_stencil, region)
 
-Constructs the BoundaryOperator with stencil `closure_stencil` for a `EquidistantGrid` `grid`, restricting to
-to the boundary specified by `region`.
+Constructs the BoundaryOperator with stencil `closure_stencil` for a
+`EquidistantGrid` `grid`, restricting to to the boundary specified by
+`region`.
 """
 function BoundaryOperator(grid::EquidistantGrid, closure_stencil::Stencil{T,N}, region::Region) where {T,N}
     return BoundaryOperator{T,typeof(region),N}(closure_stencil,size(grid)[1])

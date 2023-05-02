@@ -1,27 +1,51 @@
 """
-    inverse_inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
+    inverse_inner_product(grid, ...)
 
-Constructs the inverse inner product operator `H⁻¹` as a `LazyTensor` using
-the weights of `H`, `interior_weight`, `closure_weights`. `H⁻¹` is inverse of
-the inner product operator `H`.
+The inverse inner product on a given grid with weights from a stencils set or given
+explicitly.
+"""
+function inverse_inner_product end
 
-On a 1-dimensional grid, `H⁻¹` is a `ConstantInteriorScalingOperator`. On an
-N-dimensional grid, `H⁻¹` is the outer product of the 1-dimensional inverse
-inner product operators for each coordinate direction. On a 0-dimensional
-`grid`, `H⁻¹` is a 0-dimensional `IdentityTensor`.
+"""
+    inverse_inner_product(tg::TensorGrid, stencil_set::StencilSet)
 
-See also: [`ConstantInteriorScalingOperator`](@ref).
+The inverse inner product on the given tensor grid which is the tensor product of the
+individual grids' inner products.
 """
 function inverse_inner_product(tg::TensorGrid, stencil_set::StencilSet)
     return mapreduce(g->inverse_inner_product(g,stencil_set), ⊗, tg.grids)
 end
 
+"""
+    inverse_inner_product(g::EquidistantGrid, stencil_set::StencilSet)
+
+The inverse inner product using weights `H` from `stencil_set`.
+
+See also: [`ConstantInteriorScalingOperator`](@ref).
+"""
 function inverse_inner_product(g::EquidistantGrid, stencil_set::StencilSet)
     interior_weight = parse_scalar(stencil_set["H"]["inner"])
     closure_weights = parse_tuple(stencil_set["H"]["closure"])
+    return inverse_inner_product(g, interior_weight, closure_weights)
+end
 
+"""
+    inverse_inner_product(g::EquidistantGrid, interior_weight, closure_weights)
+
+The inverse inner product on `g` with explicit weights.
+
+See also: [`ConstantInteriorScalingOperator`](@ref).
+"""
+function inverse_inner_product(g::EquidistantGrid, interior_weight, closure_weights)
     h⁻¹ = inverse_spacing(g)
     return SbpOperators.ConstantInteriorScalingOperator(g, h⁻¹*1/interior_weight, h⁻¹./closure_weights)
 end
 
+"""
+    inverse_inner_product(g::ZeroDimGrid, stencil_set::StencilSet)
+
+The identity tensor with the correct type parameters.
+
+Implemented to simplify 1D code for sbp-operators.
+"""
 inverse_inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor{component_type(g)}()

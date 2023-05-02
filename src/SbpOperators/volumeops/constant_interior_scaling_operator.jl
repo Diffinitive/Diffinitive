@@ -2,7 +2,8 @@
     ConstantInteriorScalingOperator{T,N} <: LazyTensor{T,1,1}
 
 A one-dimensional operator scaling a vector. The first and last `N` points are
-scaled with individual weights while all interior points are scaled the same.
+scaled with individual weights while all interior points are scaled using the
+same factor.
 """
 struct ConstantInteriorScalingOperator{T,N} <: LazyTensor{T,1,1}
     interior_weight::T

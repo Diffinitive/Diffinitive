@@ -1,7 +1,8 @@
 """
-    undivided_skewed04(g::EquidistantGrid, p, direction)
+    undivided_skewed04(g::TensorGrid, p, direction)
+    undivided_skewed04(g::EquidistantGrid, p)
 
-Create undivided difference operators approximating the `p`th derivative. The
+Undivided difference operators approximating the `p`th derivative. The
 operators do not satisfy any SBP-property and are meant to be used for
 building artificial dissipation terms.
 
@@ -10,6 +11,8 @@ is described in "K. Mattsson, M. Svärd, and J. Nordström, “Stable and Accura
 Artificial Dissipation,” Journal of Scientific Computing, vol. 21, no. 1, pp.
 57–79, Aug. 2004"
 """
+function undivided_skewed04 end
+
 function undivided_skewed04(g::TensorGrid, p, direction)
     op = undivided_skewed04(g.grids[direction], p)
     return LazyTensors.inflate(op, size(g), direction)

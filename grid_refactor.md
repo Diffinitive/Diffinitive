@@ -21,7 +21,6 @@
 * Write about the design choices in the docs.
 * Merge and run benchmarks
 
-* Check all the docstring of all types that have been changed
 * Clean out Notes.md of any solved issues
 * Delete this document, move remaining notes to Notes.md
 

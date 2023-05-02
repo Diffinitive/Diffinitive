@@ -1,9 +1,8 @@
 """
     Laplace{T, Dim, TM} <: LazyTensor{T, Dim, Dim}
 
-Implements the Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
-`LazyTensor`. Additionally `Laplace` stores the `StencilSet`
-used to construct the `LazyTensor`.
+The Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
+`LazyTensor`.
 """
 struct Laplace{T, Dim, TM<:LazyTensor{T, Dim, Dim}} <: LazyTensor{T, Dim, Dim}
     D::TM       # Difference operator
@@ -32,7 +31,7 @@ LazyTensors.apply(L::Laplace, v::AbstractArray, I...) = LazyTensors.apply(L.D,v,
 """
     laplace(g::Grid, stencil_set)
 
-Creates the Laplace operator operator `Δ` as a `LazyTensor` on the given grid
+Creates the Laplace operator operator `Δ` as a `LazyTensor` on the given grid.
 
 `Δ` approximates the Laplace operator ∑d²/xᵢ² , i = 1,...,`Dim` on `g`. The
 approximation depends on the type of grid and the stencil set.

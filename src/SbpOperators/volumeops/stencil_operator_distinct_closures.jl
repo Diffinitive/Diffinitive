@@ -1,7 +1,8 @@
 """
     StencilOperatorDistinctClosures{T,K,N,M,L} <: LazyTensor{T,1}
 
-A one dimensional stencil operator with separate closures for the two boundaries.
+A one dimensional stencil operator with separate closures for the two
+boundaries.
 
 `StencilOperatorDistinctClosures` can be contrasted to `VolumeOperator` in
 that it has different closure stencils for the upper and lower boundary.
