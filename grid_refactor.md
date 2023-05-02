@@ -122,9 +122,4 @@ That approach would be more flexible and more general requiring few specialized 
 
 (see "Lazy version of map for our needs?" above)
 
-### Would it help to introduce a type for grid functions?
-Seems easier to avoid this but it might be worth investigating.
-
-Can it be done with some kind of trait? We can give AbstractArray the appropriate trait and keep them for the simplest grid functions.
-
 ## Implement the tensor product operator for grids?
