@@ -46,6 +46,7 @@ refine(g::TensorGrid, r::Int) = mapreduce(g->refine(g,r), TensorGrid, g.grids)
 coarsen(g::TensorGrid, r::Int) = mapreduce(g->coarsen(g,r), TensorGrid, g.grids)
 
 """
+    TensorGridBoundary{N, BID} <: BoundaryIdentifier
 # TODO:
 """
 struct TensorGridBoundary{N, BID} <: BoundaryIdentifier end

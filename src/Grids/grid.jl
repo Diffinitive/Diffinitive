@@ -15,34 +15,50 @@ target_manifold_dim(::Grid{T}) where T = _ncomponents(T) # TBD: Name of this fun
 component_type(::Grid{T}) where T = eltype(T)
 
 """
-# TODO
+    refine(g::Grid, r)
+
+`g` refined by the factor `r`.
+
+See also: [`coarsen`](@ref).
 """
 function refine end
 
 """
-# TODO
+    coarsen(g::Grid, r)
+
+`g` coarsened by the factor `r`.
+
+See also: [`refine`](@ref).
 """
 function coarsen end
 
 """
-# TODO
+    boundary_identifiers(g::Grid)
+
+Identifiers for all the boundaries of `g`.
 """
 function boundary_identifiers end
 
 """
-# TODO
+    boundary_grid(g::Grid, bid::BoundaryIdentifier)
+
+The grid for the specified boundary.
 """
 function boundary_grid end
-# TBD Can we implement a version here that accepts multiple ids and grouped boundaries? Maybe we need multiblock stuff?
+# TBD: Can we implement a version here that accepts multiple ids and grouped boundaries? Maybe we need multiblock stuff?
 
 
 # TODO: Make sure that all grids implement all of the above.
 
 
 """
-TODO:
+    eval_on(g::Grid, f)
 
-* Mention map(f,g) if you want a concrete array
+Lazy evaluation `f` on the grid. `f` can either be on the form `f(x,y,...)`
+with each coordinate as an argument, or on the form `f(x̄)` taking a
+coordinate vector.
+
+TODO: Mention map(f,g) if you want a concrete array
 """
 eval_on(g::Grid, f) = eval_on(g, f, Base.IteratorSize(g)) # TBD: Borde f vara först som i alla map, sum, och dylikt
 function eval_on(g::Grid, f, ::Base.HasShape)
@@ -52,6 +68,7 @@ function eval_on(g::Grid, f, ::Base.HasShape)
         return LazyTensors.LazyFunctionArray((I...)->f(g[I...]...), size(g))
     end
 end
+# TBD: How does `eval_on` relate to `map`. Should the be closer in name?
 
 
 # TODO: Explain how and where these are intended to be used
