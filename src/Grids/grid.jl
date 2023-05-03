@@ -3,8 +3,10 @@
 
 A grid with coordinates of type `T`, e.g. `SVector{3,Float64}`, and dimension
 `D`. The grid can be embedded in a higher dimension in which case the number
-of indices and the number of components of the coordinatevectors will be
+of indices and the number of components of the coordinate vectors will be
 different.
+
+All grids are expected to behave as a grid function for the coordinates.
 
 `Grids` is top level abstract type for grids. A grid should implement Julia's interfaces for
 indexing and iteration.
