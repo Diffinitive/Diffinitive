@@ -19,8 +19,12 @@ abstract type Grid{T,D} end
 
 Base.ndims(::Grid{T,D}) where {T,D} = D
 Base.eltype(::Type{<:Grid{T}}) where T = T
-coordinate_size(::Grid{T}) where T = _ncomponents(T) # TBD: Name of this function?!
-component_type(::Grid{T}) where T = eltype(T)
+
+coordinate_size(::Type{<:Grid{T}}) where T = _ncomponents(T)
+coordinate_size(g::Grid) = coordinate_size(typeof(g)) # TBD: Name of this function?!
+
+component_type(::Type{<:Grid{T}}) where T = eltype(T)
+component_type(g::Grid) = component_type(typeof(g))
 
 """
     refine(g::Grid, r)

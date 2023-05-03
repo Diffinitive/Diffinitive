@@ -14,6 +14,8 @@ using StaticArrays
     @test coordinate_size(DummyGrid{Int, 1}()) == 1
     @test coordinate_size(DummyGrid{SVector{3,Float64}, 2}()) == 3
 
+    @test coordinate_size(DummyGrid{SVector{3,Float64}, 2}) == 3
+
     @testset "component_type" begin
         @test component_type(DummyGrid{Int,1}()) == Int
         @test component_type(DummyGrid{Float64,1}()) == Float64
@@ -22,6 +24,9 @@ using StaticArrays
         @test component_type(DummyGrid{SVector{3,Int},2}()) == Int
         @test component_type(DummyGrid{SVector{2,Float64},3}()) == Float64
         @test component_type(DummyGrid{SVector{4,Rational},4}()) == Rational
+
+        @test component_type(DummyGrid{Float64,1}) == Float64
+        @test component_type(DummyGrid{SVector{2,Float64},3}) == Float64
     end
 end
 
