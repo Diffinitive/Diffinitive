@@ -1,11 +1,19 @@
 """
      Grid{T,D}
 
-The top level type for grids.
+A grid with coordinates of type `T`, e.g. `SVector{3,Float64}`, and dimension
+`D`. The grid can be embedded in a higher dimension in which case the number
+of indices and the number of components of the coordinatevectors will be
+different.
 
-TODO:
-Should implement
- * interfaces for iteration and indexing
+`Grids` is top level abstract type for grids. A grid should implement Julia's interfaces for
+indexing and iteration.
+
+## Note
+
+Importantly a grid does not have to be an `AbstractArray`. The reason is to
+allow flexible handling of special types of grids like multiblock-grids, or
+grids with special indexing.
 """
 abstract type Grid{T,D} end
 

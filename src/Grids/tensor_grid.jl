@@ -2,6 +2,7 @@
     TensorGrid{T,D} <: Grid{T,D}
 
 * Only supports HasShape grids at the moment
+# TODO:
 """
 struct TensorGrid{T,D,GT<:NTuple{N,Grid} where N} <: Grid{T,D}
     grids::GT

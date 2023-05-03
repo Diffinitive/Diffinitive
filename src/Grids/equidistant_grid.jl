@@ -1,5 +1,7 @@
 """
-# TODO:
+    EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1}
+
+TODO
 """
 #TODO: Document recomendations for type of range. (LinRange is faster?)
 struct EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1}
