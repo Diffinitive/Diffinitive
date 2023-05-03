@@ -11,8 +11,8 @@ using StaticArrays
 
     @test ndims(DummyGrid{Int, 2}()) == 2
 
-    @test target_manifold_dim(DummyGrid{Int, 1}()) == 1
-    @test target_manifold_dim(DummyGrid{SVector{3,Float64}, 2}()) == 3
+    @test coordinate_size(DummyGrid{Int, 1}()) == 1
+    @test coordinate_size(DummyGrid{SVector{3,Float64}, 2}()) == 3
 
     @testset "component_type" begin
         @test component_type(DummyGrid{Int,1}()) == Int

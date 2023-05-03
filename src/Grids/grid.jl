@@ -19,7 +19,7 @@ abstract type Grid{T,D} end
 
 Base.ndims(::Grid{T,D}) where {T,D} = D
 Base.eltype(::Type{<:Grid{T}}) where T = T
-target_manifold_dim(::Grid{T}) where T = _ncomponents(T) # TBD: Name of this function?!
+coordinate_size(::Grid{T}) where T = _ncomponents(T) # TBD: Name of this function?!
 component_type(::Grid{T}) where T = eltype(T)
 
 """

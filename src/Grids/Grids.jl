@@ -6,7 +6,7 @@ using StaticArrays
 
 # Grid
 export Grid
-export target_manifold_dim
+export coordinate_size
 export component_type
 
 export TensorGrid
