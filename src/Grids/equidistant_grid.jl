@@ -1,9 +1,15 @@
 """
     EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1}
 
-TODO
+A one-dimensional equidistant grid. Most users are expected to use
+[`equidistant_grid`](@ref) for constructing equidistant grids.
+
+See also: [`equidistant_grid`](@ref)
+
+
+## Note
+The type of range used for the points can likely impact performance.
 """
-#TODO: Document recomendations for type of range. (LinRange is faster?)
 struct EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1}
     points::R
 end
