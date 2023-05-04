@@ -8,7 +8,6 @@ struct TensorGrid{T,D,GT<:NTuple{N,Grid} where N} <: Grid{T,D}
     grids::GT
 
     function TensorGrid(gs...)
-        # T = combined_coordinate_vector_type(eltype.(gs)...)
         T = mapreduce(eltype, combined_coordinate_vector_type, gs)
         D = sum(ndims, gs)
 
@@ -92,5 +91,4 @@ end
 
 function combine_coordinates(coords...)
     return mapreduce(SVector, vcat, coords)
-    # return SVector(coords...)
 end

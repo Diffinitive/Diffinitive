@@ -94,7 +94,5 @@ function eval_on(g::Grid, f, ::Base.HasShape)
 end
 # TBD: How does `eval_on` relate to `map`. Should the be closer in name?
 
-
-# TODO: Explain how and where these are intended to be used
 _ncomponents(::Type{<:Number}) = 1
 _ncomponents(T::Type{<:SVector}) = length(T)
