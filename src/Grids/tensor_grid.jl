@@ -1,8 +1,9 @@
 """
     TensorGrid{T,D} <: Grid{T,D}
 
-* Only supports HasShape grids at the moment
-# TODO:
+A grid constructed as the tensor product of other grids.
+
+Currently only supports grids with the `HasShape`-trait.
 """
 struct TensorGrid{T,D,GT<:NTuple{N,Grid} where N} <: Grid{T,D}
     grids::GT
@@ -47,7 +48,9 @@ coarsen(g::TensorGrid, r::Int) = mapreduce(g->coarsen(g,r), TensorGrid, g.grids)
 
 """
     TensorGridBoundary{N, BID} <: BoundaryIdentifier
-# TODO:
+
+A boundary identifier for a tensor grid. `N` Specifies which grid in the
+tensor product and `BID` which boundary on that grid.
 """
 struct TensorGridBoundary{N, BID} <: BoundaryIdentifier end
 grid_id(::TensorGridBoundary{N, BID}) where {N, BID} = N
