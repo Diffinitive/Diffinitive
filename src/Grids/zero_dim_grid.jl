@@ -1,6 +1,7 @@
 """
     ZeroDimGrid{T} <: Grid{T,0}
-# TODO
+
+A zero dimensional grid consisting of a single point.
 """
 struct ZeroDimGrid{T} <: Grid{T,0}
     point::T
