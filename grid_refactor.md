@@ -17,8 +17,6 @@
 ## TODO
 * Add benchmarks or allocation tests for eval_on and indexing grids.
 * Add benchmarks for range type in EquidistantGrid. (LinRange vs StepRange)
-* Document the expected behavior of grid functions
-* Write down the thinking around Grid being an AbstractArray. Why it doesn't work.
 * Write about the design choices in the docs.
 * Merge and run benchmarks
 
