@@ -10,7 +10,7 @@ that it has different closure stencils for the upper and lower boundary.
 closures is useful for representing operators with skewed stencils like upwind
 operators.
 
-See also: [`VolumeOperator`](@ref), [`stencil_operator_distinct_closures`](@ref)
+See also: [`VolumeOperator`](@ref)
 """
 struct StencilOperatorDistinctClosures{T,K,N,M,LC<:NTuple{N,Stencil{T,L}} where L, UC<:NTuple{M,Stencil{T,L}} where L} <: LazyTensor{T,1,1}
     inner_stencil::Stencil{T,K}
