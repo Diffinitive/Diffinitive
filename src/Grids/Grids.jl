@@ -42,5 +42,4 @@ include("tensor_grid.jl")
 include("equidistant_grid.jl")
 include("zero_dim_grid.jl")
 
-
 end # module

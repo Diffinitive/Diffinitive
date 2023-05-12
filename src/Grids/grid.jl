@@ -92,7 +92,6 @@ function eval_on(g::Grid, f, ::Base.HasShape)
         return LazyTensors.LazyFunctionArray((I...)->f(g[I...]...), size(g))
     end
 end
-# TBD: How does `eval_on` relate to `map`. Should the be closer in name?
 
 _ncomponents(::Type{<:Number}) = 1
 _ncomponents(T::Type{<:SVector}) = length(T)

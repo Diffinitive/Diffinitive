@@ -199,6 +199,77 @@ This would mean no bounds checking in applys, however any indexing that they do 
 
 Preferably dimensions and sizes should be checked when lazy objects are created, for example TensorApplication, TensorComposition and so on. If dimension checks decreases performance we can make them skippable later.
 
+## Changes to `eval_on`
+There are reasons to replace `eval_on` with regular `map` from Base, and implement a kind of lazy map perhaps `lmap` that work on indexable collections.
+
+The benefit of doing this is that we can treat grids as gridfunctions for the coordinate function, and get a more flexible tool. For example `map`/`lmap` can then be used both to evaluate a function on the grid but also get a component of a vector valued grid function or similar.
+
+A question is how and if we should implement `map`/`lmap` for functions like `(x,y)->x*y` or stick to just using vector inputs. There are a few options.
+
+* use `Base.splat((x,y)->x*y)` with the single argument `map`/`lmap`.
+* implement a kind of `unzip` function to get iterators for each component, which can then be used with the multiple-iterators-version of `map`/`lmap`.
+* Inspect the function in the `map`/`lmap` function to determine which mathches.
+
+Below is a partial implementation of `lmap` with some ideas
+```julia
+struct LazyMapping{T,IT,F}
+    f::F
+    indexable_iterator::IT # ___
+end
+
+function LazyMapping(f,I)
+    IT = eltype(I)
+    T = f(zero(T))
+    F = typeof(f)
+
+    return LazyMapping{T,IT,F}(f,I)
+end
+
+getindex(lm::LazyMapping, I...) = lm.f(lm.I[I...])
+# indexabl interface
+# iterable has shape
+
+iterate(lm::LazyMapping) = _lazy_mapping_iterate(lm, iterate(lm.I))
+iterate(lm::LazyMapping, state) = _lazy_mapping_iterate(lm, iterate(lm.I, state))
+
+_lazy_mapping_iterate(lm, ::Nothing) = nothing
+_lazy_mapping_iterate(lm, (next, state)) = lm.f(next), state
+
+lmap(f,  I) = LazyIndexableMap(f,I)
+```
+
+The interaction of the map methods with the probable design of multiblock functions involving nested indecies complicate the picture slightly. It's clear at the time of writing how this would work with `Base.map`. Perhaps we want to implement our own versions of both eager and lazy map.
+
+## Multiblock implementation
+We want multiblock things to work very similarly to regular one block things.
+
+### Grid functions
+Should probably support a nested indexing so that we first have an index for subgrid and then an index for nodes on that grid. E.g `g[1,2][2,3]` or `g[3][43,21]`.
+
+We could also possibly provide a combined indexing style `g[1,2,3,4]` where the first group of indices are for the subgrid and the remaining are for the nodes.
+
+We should make sure the underlying buffer for gridfunctions are continuously stored and are easy to convert to, so that interaction with for example DifferentialEquations is simple and without much boilerplate.
+
+#### `map` and `collect` and nested indexing
+We need to make sure `collect`, `map` and a potential lazy map work correctly through the nested indexing.
+
+### Tensor applications
+Should behave as grid functions
+
+### LazyTensors
+Could be built as a tuple or array of LazyTensors for each grid with a simple apply function.
+
+Nested indexing for these is problably not needed unless it simplifies their own implementation.
+
+Possibly useful to provide a simple type that doesn't know about connections between the grids. Antother type can include knowledge of the.
+
+We have at least two option for how to implement them:
+* Matrix of LazyTensors
+* Looking at the grid and determining what the apply should do.
+
+### Overall design implications of nested indices
+If some grids accept nested indexing there might be a clash with how LazyArrays work. It would be nice if the grid functions and lazy arrays that actually are arrays can be AbstractArray and things can be relaxed for nested index types.
+
 ## Vector valued grid functions
 
 ### Test-applikationer
@@ -224,8 +295,6 @@ gf = evalOn(g, f)
 gf[2,3] # x̄ för en viss gridpunkt
 gf[2,3][2] # x̄[2] för en viss gridpunkt
 ```
-
-Note: Behöver bestämma om `eval_on` skickar in `x̄` eller `x̄...` till `f`. Eller om man kan stödja båda.
 
 ### Tensor operatorer
 Vi kan ha tensor-operatorer som agerar på ett skalärt fält och ger ett vektorfält eller tensorfält.
