@@ -10,5 +10,4 @@
 * `eval_on` can be called with both `f(x,y,...)` and `f(x̄)`.
 
 ## TODO
-* Clean out Notes.md of any solved issues
 * Delete this document, move remaining notes to Notes.md

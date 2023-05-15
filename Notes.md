@@ -141,13 +141,12 @@ When do we need to know the size of the range and domain?
  - [ ] Create a macro @lazy which replaces a binary op (+,-) by its lazy equivalent? Would be a neat way to indicate which evaluations are lazy without cluttering/confusing with special characters.
  - [ ] Dispatch on Lower() instead of the type Lower so `::Lower` instead of `::Type{Lower}` ???
  	Seems better unless there is some specific reason to use the type instead of the value.
- - [ ] How do we handle mixes of periodic and non-periodic grids? Seems it should be supported on the grid level and on the 1d operator level. Between there it should be transparent.
  - [ ] Can we have a trait to tell if a LazyTensor is transposable?
  - [ ] Is it ok to have "Constructors" for abstract types which create subtypes? For example a Grids() functions that gives different kind of grids based on input?
  - [ ] Figure out how to treat the borrowing parameters of operators. Include in into the struct? Expose via function dispatched on the operator type and grid?
 
 ## Identifiers for regions
-The identifiers (`Upper`, `Lower`, `Interior`) used for region indecies should probabily be included in the grid module. This allows new grid types to come with their own regions.
+The identifiers (`Upper`, `Lower`, `Interior`) used for region indecies should probably be included in the grid module. This allows new grid types to come with their own regions.
 We implement this by refactoring RegionIndices to be agnostic to the region types and then moving the actual types to Grids.
 
 ## Regions and tensormappings
@@ -314,21 +313,12 @@ Kanske kan man implementera `⋅(tm::LazyTensor{R,D}, v::AbstractArray{T,D})` d�
 ### Komponenter som gridfunktioner
 En viktig operation för vektorfält är att kunna få ut komponenter som grid-funktioner. Detta behöver antagligen kunna ske lazy.
 Det finns ett par olika lösningar:
+* Använda map eller en lazy map (se diskussion om eval_on)
 * Implementera en egen typ av view som tar hand om detta. Eller Accessors.jl?
 * Använda en LazyTensor
 * Någon typ av lazy-broadcast
 * En lazy array som applicerar en funktion för varje element.
 
-Skulle vara en fördel om det är hyffsat generiskt så att en eventuell användare kan utöka det enkelt om de har någon egen exotisk typ. Eller ska man vila helt på
-
-Syntax:
-```
-gf = eval(...)
-component(gf,2) # Andra komponenten av en vektor
-component(gf,2,3) # (2,3) elementet av en matris
-component(gf,:,2) # Andra kolumnen av en matris
-@ourview gf[:,:][2]
-```
 
 ### Prestanda-aspekter
 [Vidar, Discord, 2023-03-03]
