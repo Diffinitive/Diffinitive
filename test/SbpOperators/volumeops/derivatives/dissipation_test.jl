@@ -47,8 +47,6 @@ end
                 @test D*v == h^p * vₚₓ
             end
         end
-
-        # TODO: Add 2D tests
     end
 
     @testset "transpose equality" begin
@@ -78,6 +76,19 @@ end
 
             @test D̄ == D̄ᵀ'
         end
+    end
+
+    @testset "2D" begin
+        N = 20
+        g = equidistant_grid((N,2N), (0,0), (2,1))
+        h = spacing.(g.grids)
+
+        D,Dᵀ = undivided_skewed04(g, 3, 2)
+
+        v = eval_on(g, x->monomial(x[1],4)*monomial(x[2],3))
+        d³vdy³ = eval_on(g, x->monomial(x[1],4)*monomial(x[2],0))
+
+        @test D*v ≈ h[2]^3*d³vdy³
     end
 end
 

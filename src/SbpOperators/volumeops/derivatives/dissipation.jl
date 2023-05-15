@@ -14,8 +14,11 @@ Artificial Dissipation,” Journal of Scientific Computing, vol. 21, no. 1, pp.
 function undivided_skewed04 end
 
 function undivided_skewed04(g::TensorGrid, p, direction)
-    op = undivided_skewed04(g.grids[direction], p)
-    return LazyTensors.inflate(op, size(g), direction)
+    D,Dᵀ = undivided_skewed04(g.grids[direction], p)
+    return (
+        LazyTensors.inflate(D, size(g), direction),
+        LazyTensors.inflate(Dᵀ, size(g), direction),
+    )
 end
 
 function undivided_skewed04(g::EquidistantGrid, p)

@@ -71,10 +71,6 @@ The grid for the specified boundary.
 function boundary_grid end
 # TBD: Can we implement a version here that accepts multiple ids and grouped boundaries? Maybe we need multiblock stuff?
 
-
-# TODO: Make sure that all grids implement all of the above.
-
-
 """
     eval_on(g::Grid, f)
 

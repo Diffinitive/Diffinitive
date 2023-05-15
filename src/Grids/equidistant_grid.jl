@@ -14,10 +14,9 @@ struct EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1}
     points::R
 end
 
-Base.eachindex(g::EquidistantGrid) = eachindex(g.points)
-
 # Indexing interface
 Base.getindex(g::EquidistantGrid, i) = g.points[i]
+Base.eachindex(g::EquidistantGrid) = eachindex(g.points)
 Base.firstindex(g::EquidistantGrid) = firstindex(g.points)
 Base.lastindex(g::EquidistantGrid) = lastindex(g.points)
 
