@@ -35,3 +35,9 @@
  - [ ] Multiblock grids
  - [ ] Periodic grids
  - [ ] Grids with modified boundary closures
+
+
+### Benchmarks
+ - [ ] Benchmarks for all grid indexing (focused on allocation)
+ - [ ] Benchmarks for indexing of lazy grid functions
+ - [ ] Add benchmarks for range type in EquidistantGrid. (LinRange vs StepRange)

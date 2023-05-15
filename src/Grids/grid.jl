@@ -82,9 +82,9 @@ Lazy evaluation `f` on the grid. `f` can either be on the form `f(x,y,...)`
 with each coordinate as an argument, or on the form `f(x̄)` taking a
 coordinate vector.
 
-TODO: Mention map(f,g) if you want a concrete array
+If the goal is a concrete array `map(f,g)` can be used instead.
 """
-eval_on(g::Grid, f) = eval_on(g, f, Base.IteratorSize(g)) # TBD: Borde f vara först som i alla map, sum, och dylikt
+eval_on(g::Grid, f) = eval_on(g, f, Base.IteratorSize(g))
 function eval_on(g::Grid, f, ::Base.HasShape)
     if hasmethod(f, (Any,))
         return LazyTensors.LazyFunctionArray((I...)->f(g[I...]), size(g))

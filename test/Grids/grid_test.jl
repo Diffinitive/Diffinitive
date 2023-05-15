@@ -56,8 +56,6 @@ end
     # Multi-argument functions
     f(x,y) = sin(x)*cos(y)
     @test eval_on(g, f) == map(x̄->f(x̄...), g)
-
-    #TODO: inference test!
 end
 
 @testset "_ncomponents" begin
