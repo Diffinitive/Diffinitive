@@ -9,8 +9,8 @@ function inner_product end
 """
     inner_product(tg::TensorGrid, stencil_set::StencilSet)
 
-The inner product on the given tensor grid which is the tensor product of the
-individual grids' inner products.
+The inner product on `tg`, i.e., the tensor product of the
+individual grids' inner products, using weights `H` from `stencil_set`.
 """
 function inner_product(tg::TensorGrid, stencil_set::StencilSet)
     return mapreduce(g->inner_product(g,stencil_set), ⊗, tg.grids)
@@ -19,7 +19,7 @@ end
 """
     inner_product(g::EquidistantGrid, stencil_set::StencilSet)
 
-The inner product using weights `H` from `stencil_set`.
+The inner product on `g` using weights `H` from `stencil_set`.
 
 See also: [`ConstantInteriorScalingOperator`](@ref).
 """
@@ -46,7 +46,7 @@ end
 
 The identity tensor with the correct type parameters.
 
-Implemented to simplify 1D code for sbp-operators.
+Implemented to simplify 1D code for SBP operators.
 """
 inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor{component_type(g)}()
 

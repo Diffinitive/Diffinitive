@@ -53,8 +53,8 @@ boundary_grid(g::EquidistantGrid, id::Upper) = ZeroDimGrid(g[end])
 """
     refine(g::EquidistantGrid, r::Int)
 
-Refines `grid` by a factor `r`. The factor is applied to the number of
-intervals which is 1 less than the size of the grid.
+The grid where `g` is refined by the factor `r`. The factor is applied to the number of
+intervals, i.e., 1 less than the size of  `g`.
 
 See also: [`coarsen`](@ref)
 """
@@ -64,10 +64,10 @@ function refine(g::EquidistantGrid, r::Int)
 end
 
 """
-    coarsen(grid::EquidistantGrid, r::Int)
+    coarsen(g::EquidistantGrid, r::Int)
 
-Coarsens `grid` by a factor `r`. The factor is applied to the number of
-intervals which is 1 less than the size of the grid. If the number of
+The grid where `g` is coarsened by the factor `r`. The factor is applied to the number of
+intervals, i.e., 1 less than the size of `g`. If the number of
 intervals are not divisible by `r` an error is raised.
 
 See also: [`refine`](@ref)
@@ -94,7 +94,7 @@ The length of the domain sides are given by the components of
 `limit_upper=(1,2)` the domain is defined as `(-1,1)x(0,2)`. The side lengths
 of the grid are not allowed to be negative.
 
-The number of equidistantly spaced points in each coordinate direction are given
+The number of equispaced points in each coordinate direction are given
 by the tuple `size`.
 
 Note: If `limit_lower` and `limit_upper` are integers and `size` would allow a
@@ -127,9 +127,9 @@ CartesianBoundary{D,BID} = TensorGridBoundary{D,BID} # TBD: What should we do ab
 
 
 """
-    change_length(::AbstractRange, n)
+    change_length(r::AbstractRange, n)
 
-Change the length of a range to `n`, keeping the same start and stop.
+Change the length of `r` to `n`, keeping the same start and stop.
 """
 function change_length end
 

@@ -57,9 +57,9 @@ grid_id(::TensorGridBoundary{N, BID}) where {N, BID} = N
 boundary_id(::TensorGridBoundary{N, BID}) where {N, BID} = BID()
 
 """
-    boundary_identifiers(::TensorGrid)
+    boundary_identifiers(g::TensorGrid)
 
-Returns a tuple containing the boundary identifiers for the grid.
+Returns a tuple containing the boundary identifiers of `g`.
 """
 function boundary_identifiers(g::TensorGrid)
     per_grid = map(eachindex(g.grids)) do i
@@ -70,13 +70,13 @@ end
 
 
 """
-    boundary_grid(grid::TensorGrid, id::TensorGridBoundary)
+    boundary_grid(g::TensorGrid, id::TensorGridBoundary)
 
-The grid for the boundary specified by `id`.
+The grid for the boundary of `g` specified by `id`.
 """
-function boundary_grid(g::TensorGrid, bid::TensorGridBoundary)
-    local_boundary_grid = boundary_grid(g.grids[grid_id(bid)], boundary_id(bid))
-    new_grids = Base.setindex(g.grids, local_boundary_grid, grid_id(bid))
+function boundary_grid(g::TensorGrid, id::TensorGridBoundary)
+    local_boundary_grid = boundary_grid(g.grids[grid_id(id)], boundary_id(id))
+    new_grids = Base.setindex(g.grids, local_boundary_grid, grid_id(id))
     return TensorGrid(new_grids...)
 end
 

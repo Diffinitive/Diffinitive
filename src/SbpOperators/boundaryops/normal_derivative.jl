@@ -5,11 +5,11 @@
 
 Creates the normal derivative boundary operator `d` as a `LazyTensor`
 
-`d` computes the normal derivative of a grid function  on `boundary` using the
-'d1' stencil in the given stencil_set. `d'` is the prolongation of the normal
-derivative of a grid function to the whole grid using the same stencil. On a
-one-dimensional `grid`, `d` is a `BoundaryOperator`. On a multi-dimensional
-`grid`, `d` is the inflation of a `BoundaryOperator`.
+`d` computes the normal derivative at `boundary` of a grid function on `g` using the
+'d1' stencil in `stencil_set`. `d'` is the prolongation of the normal
+derivative of a grid function to the whole of `g` using the same stencil. On a
+one-dimensional grid, `d` is a `BoundaryOperator`. On a multi-dimensional
+grid, `d` is the inflation of a `BoundaryOperator`.
 
 See also: [`BoundaryOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """

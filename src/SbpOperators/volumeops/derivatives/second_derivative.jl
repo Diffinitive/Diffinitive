@@ -1,7 +1,7 @@
 """
     second_derivative(g::EquidistantGrid, stencil_set, direction)
 
-Creates the second-derivative operator `D2` as a `LazyTensor`
+Creates the second derivative operator `D2` as a `LazyTensor`
 
 `D2` approximates the second-derivative d²/dξ² on `g` along the coordinate
 dimension specified by `direction`.
@@ -14,10 +14,10 @@ function second_derivative(g::TensorGrid, stencil_set, direction)
 end
 
 """
-    second_derivative(g, stencil_set)
+    second_derivative(g::EquidistantGrid, stencil_set::::StencilSet)
 
-Creates a `second_derivative` operator on a 1D `g` given a `stencil_set`. Uses
-the `D2` stencil in the stencil set.
+The second derivative operator on an `EquidistantGrid`. 
+Uses the `D2` stencil in `stencil_set`.
 """
 function second_derivative(g::EquidistantGrid, stencil_set::StencilSet)
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
@@ -26,9 +26,9 @@ function second_derivative(g::EquidistantGrid, stencil_set::StencilSet)
 end
 
 """
-    second_derivative(g, inner_stencil, closure_stencils)
+    second_derivative(g::EquidistantGrid, inner_stencil::Stencil, closure_stencils)
 
-Creates a `second_derivative` operator on a 1D `g` given `inner_stencil` and
+The second derivative operator on an `EquidistantGrid`, given `inner_stencil` and
 `closure_stencils`.
 """
 function second_derivative(g::EquidistantGrid, inner_stencil::Stencil, closure_stencils)

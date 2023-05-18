@@ -207,7 +207,7 @@ A question is how and if we should implement `map`/`lmap` for functions like `(x
 
 * use `Base.splat((x,y)->x*y)` with the single argument `map`/`lmap`.
 * implement a kind of `unzip` function to get iterators for each component, which can then be used with the multiple-iterators-version of `map`/`lmap`.
-* Inspect the function in the `map`/`lmap` function to determine which mathches.
+* Inspect the function in the `map`/`lmap` function to determine which matches.
 
 Below is a partial implementation of `lmap` with some ideas
 ```julia

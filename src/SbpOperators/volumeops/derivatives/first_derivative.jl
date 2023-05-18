@@ -1,7 +1,7 @@
 """
     first_derivative(g, ..., [direction])
 
-The first-derivative operator `D1` as a `LazyTensor` on the given grid.
+The first derivative operator `D1` as a `LazyTensor` on the given grid.
 
 `D1` approximates the first-derivative d/dξ on `g` along the coordinate
 dimension specified by `direction`.
@@ -19,10 +19,10 @@ function first_derivative(g::TensorGrid, stencil_set, direction)
 end
 
 """
-    first_derivative(g::EquidistantGrid, stencil_set)
+    first_derivative(g::EquidistantGrid, stencil_set::StencilSet)
 
-The first derivative operator on a `EquidistantGrid` given a
-`StencilSet`. Uses the `D1` stencil in the stencil set.
+The first derivative operator on an `EquidistantGrid`. 
+Uses the `D1` stencil in `stencil_set`.
 """
 function first_derivative(g::EquidistantGrid, stencil_set::StencilSet)
     inner_stencil = parse_stencil(stencil_set["D1"]["inner_stencil"])
@@ -31,10 +31,10 @@ function first_derivative(g::EquidistantGrid, stencil_set::StencilSet)
 end
 
 """
-    first_derivative(g::EquidistantGrid, inner_stencil, closure_stencils)
+    first_derivative(g::EquidistantGrid, inner_stencil::Stencil, closure_stencils)
 
-The first derivative operator on a `EquidistantGrid` given an
-`inner_stencil` and a`closure_stencils`.
+The first derivative operator on an `EquidistantGrid` given an
+`inner_stencil` and `closure_stencils`.
 """
 function first_derivative(g::EquidistantGrid, inner_stencil::Stencil, closure_stencils)
     h⁻¹ = inverse_spacing(g)

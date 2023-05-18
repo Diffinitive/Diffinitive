@@ -10,9 +10,9 @@ struct Laplace{T, Dim, TM<:LazyTensor{T, Dim, Dim}} <: LazyTensor{T, Dim, Dim}
 end
 
 """
-    Laplace(grid::Equidistant, stencil_set)
+    Laplace(g::Grid, stencil_set::StencilSet)
 
-Creates the `Laplace` operator `Δ` on `grid` given a `stencil_set`. 
+Creates the `Laplace` operator `Δ` on `g` given `stencil_set`. 
 
 See also [`laplace`](@ref).
 """
@@ -31,7 +31,7 @@ LazyTensors.apply(L::Laplace, v::AbstractArray, I...) = LazyTensors.apply(L.D,v,
 """
     laplace(g::Grid, stencil_set)
 
-Creates the Laplace operator operator `Δ` as a `LazyTensor` on the given grid.
+Creates the Laplace operator operator `Δ` as a `LazyTensor` on `g`.
 
 `Δ` approximates the Laplace operator ∑d²/xᵢ² , i = 1,...,`Dim` on `g`. The
 approximation depends on the type of grid and the stencil set.

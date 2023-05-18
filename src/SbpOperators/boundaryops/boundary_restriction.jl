@@ -5,8 +5,8 @@
 
 Creates boundary restriction operators `e` as `LazyTensor`s on `boundary`
 
-`e` is the restriction of a grid function to `boundary` using the 'e' stencil
-in the guven stencil set. `e'` is the prolongation of a grid function on
+`e` restricts a grid function on `g` to `boundary` using the 'e' stencil
+in `stencil_set`. `e'` prolongates a grid function on
 `boundary` to the whole grid using the same stencil. On a one-dimensional
 grid, `e` is a `BoundaryOperator`. On a multi-dimensional grid, `e` is the
 inflation of a `BoundaryOperator`.

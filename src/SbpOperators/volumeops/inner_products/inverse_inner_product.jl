@@ -9,8 +9,8 @@ function inverse_inner_product end
 """
     inverse_inner_product(tg::TensorGrid, stencil_set::StencilSet)
 
-The inverse inner product on the given tensor grid which is the tensor product of the
-individual grids' inner products.
+The inverse of inner product on `tg`, i.e., the tensor product of the
+individual grids' inverse inner products, using weights `H` from `stencil_set`.
 """
 function inverse_inner_product(tg::TensorGrid, stencil_set::StencilSet)
     return mapreduce(g->inverse_inner_product(g,stencil_set), ⊗, tg.grids)
@@ -19,7 +19,7 @@ end
 """
     inverse_inner_product(g::EquidistantGrid, stencil_set::StencilSet)
 
-The inverse inner product using weights `H` from `stencil_set`.
+The inverse of the inner product on `g` using weights `H` from `stencil_set`.
 
 See also: [`ConstantInteriorScalingOperator`](@ref).
 """
@@ -46,6 +46,6 @@ end
 
 The identity tensor with the correct type parameters.
 
-Implemented to simplify 1D code for sbp-operators.
+Implemented to simplify 1D code for SBP operators.
 """
 inverse_inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor{component_type(g)}()
