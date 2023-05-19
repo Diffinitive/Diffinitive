@@ -17,28 +17,32 @@ using Sbplib.RegionIndices
     @test TensorGrid(g₁, g₄, g₂) isa Grid{SVector{4,Float64}, 2}
 
     @testset "Indexing Interface" begin
-        @test TensorGrid(g₁, g₂)[1,1] isa SVector{2,Float64}
-        @test TensorGrid(g₁, g₂)[1,1] == [0.0,2.0]
-        @test TensorGrid(g₁, g₂)[3,5] == [0.2,2.8]
-        @test TensorGrid(g₁, g₂)[10,6] == [0.9,3.0]
+        @testset "regular indexing" begin
+            @test TensorGrid(g₁, g₂)[1,1] isa SVector{2,Float64}
+            @test TensorGrid(g₁, g₂)[1,1] == [0.0,2.0]
+            @test TensorGrid(g₁, g₂)[3,5] == [0.2,2.8]
+            @test TensorGrid(g₁, g₂)[10,6] == [0.9,3.0]
 
-        @test TensorGrid(g₁, g₃)[1,1] isa SVector{2,Float64}
-        @test TensorGrid(g₁, g₃)[1,1] == [0.0,1.0]
+            @test TensorGrid(g₁, g₃)[1,1] isa SVector{2,Float64}
+            @test TensorGrid(g₁, g₃)[1,1] == [0.0,1.0]
 
-        @test TensorGrid(g₁, g₂, g₃)[3,4,5] isa SVector{3,Float64}
-        @test TensorGrid(g₁, g₂, g₃)[3,4,5] == [0.2, 2.6, 5.0]
+            @test TensorGrid(g₁, g₂, g₃)[3,4,5] isa SVector{3,Float64}
+            @test TensorGrid(g₁, g₂, g₃)[3,4,5] == [0.2, 2.6, 5.0]
 
-        @test TensorGrid(g₁, g₄)[3] isa SVector{3,Float64}
-        @test TensorGrid(g₁, g₄)[3] == [0.2, 1., 2.]
+            @test TensorGrid(g₁, g₄)[3] isa SVector{3,Float64}
+            @test TensorGrid(g₁, g₄)[3] == [0.2, 1., 2.]
 
-        @test TensorGrid(g₁, g₄, g₂)[3,2] isa SVector{4,Float64}
-        @test TensorGrid(g₁, g₄, g₂)[3,2] == [0.2, 1., 2., 2.2]
+            @test TensorGrid(g₁, g₄, g₂)[3,2] isa SVector{4,Float64}
+            @test TensorGrid(g₁, g₄, g₂)[3,2] == [0.2, 1., 2., 2.2]
+        end
 
-        @test eachindex(TensorGrid(g₁, g₂)) == CartesianIndices((11,6))
-        @test eachindex(TensorGrid(g₁, g₃)) == CartesianIndices((11,10))
-        @test eachindex(TensorGrid(g₁, g₂, g₃)) == CartesianIndices((11,6,10))
-        @test eachindex(TensorGrid(g₁, g₄)) == CartesianIndices((11,))
-        @test eachindex(TensorGrid(g₁, g₄, g₂)) == CartesianIndices((11,6))
+        @testset "eachindex" begin
+            @test eachindex(TensorGrid(g₁, g₂)) == CartesianIndices((11,6))
+            @test eachindex(TensorGrid(g₁, g₃)) == CartesianIndices((11,10))
+            @test eachindex(TensorGrid(g₁, g₂, g₃)) == CartesianIndices((11,6,10))
+            @test eachindex(TensorGrid(g₁, g₄)) == CartesianIndices((11,))
+            @test eachindex(TensorGrid(g₁, g₄, g₂)) == CartesianIndices((11,6))
+        end
     end
 
     @testset "Iterator interface" begin
