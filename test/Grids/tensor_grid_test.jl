@@ -36,6 +36,22 @@ using Sbplib.RegionIndices
             @test TensorGrid(g₁, g₄, g₂)[3,2] == [0.2, 1., 2., 2.2]
         end
 
+        @testset "cartesian indexing" begin
+            cases = [
+                (TensorGrid(g₁, g₂),     (1,1)  ),
+                (TensorGrid(g₁, g₂),     (3,5)  ),
+                (TensorGrid(g₁, g₂),     (10,6) ),
+                (TensorGrid(g₁, g₃),     (1,1)  ),
+                (TensorGrid(g₁, g₂, g₃), (3,4,5)),
+                (TensorGrid(g₁, g₄),     (3)    ),
+                (TensorGrid(g₁, g₄, g₂), (3,2)  ),
+            ]
+
+            @testset "i = $is" for (g, is) ∈ cases
+                @test g[CartesianIndex(is...)] == g[is...]
+            end
+        end
+
         @testset "eachindex" begin
             @test eachindex(TensorGrid(g₁, g₂)) == CartesianIndices((11,6))
             @test eachindex(TensorGrid(g₁, g₃)) == CartesianIndices((11,10))

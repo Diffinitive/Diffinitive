@@ -26,6 +26,8 @@ function Base.getindex(g::TensorGrid, I...)
     return vcat(ps...)
 end
 
+Base.getindex(g::TensorGrid, I::CartesianIndex) = g[Tuple(I)...]
+
 function Base.eachindex(g::TensorGrid)
     szs = LazyTensors.concatenate_tuples(size.(g.grids)...)
     return CartesianIndices(szs)
