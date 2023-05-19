@@ -1,26 +1,8 @@
 """
-    stencil_operator_distinct_closures(
-        grid::EquidistantGrid,
-        inner_stencil,
-        lower_closure,
-        upper_closure,
-        direction
-    )
-
-Creates a multi-dimensional `StencilOperatorDistinctClosures` acting on grid
-functions of `grid`.
-
-See also: [`StencilOperatorDistinctClosures`](@ref)
-"""
-function stencil_operator_distinct_closures(grid::EquidistantGrid, inner_stencil, lower_closure, upper_closure, direction)
-    op = StencilOperatorDistinctClosures(restrict(grid, direction), inner_stencil, lower_closure, upper_closure)
-    return LazyTensors.inflate(op, size(grid), direction)
-end
-
-"""
     StencilOperatorDistinctClosures{T,K,N,M,L} <: LazyTensor{T,1}
 
-A one dimensional stencil operator with separate closures for the two boundaries.
+A one dimensional stencil operator with separate closures for the two
+boundaries.
 
 `StencilOperatorDistinctClosures` can be contrasted to `VolumeOperator` in
 that it has different closure stencils for the upper and lower boundary.
@@ -28,7 +10,7 @@ that it has different closure stencils for the upper and lower boundary.
 closures is useful for representing operators with skewed stencils like upwind
 operators.
 
-See also: [`VolumeOperator`](@ref), [`stencil_operator_distinct_closures`](@ref)
+See also: [`VolumeOperator`](@ref)
 """
 struct StencilOperatorDistinctClosures{T,K,N,M,LC<:NTuple{N,Stencil{T,L}} where L, UC<:NTuple{M,Stencil{T,L}} where L} <: LazyTensor{T,1,1}
     inner_stencil::Stencil{T,K}
@@ -37,7 +19,7 @@ struct StencilOperatorDistinctClosures{T,K,N,M,LC<:NTuple{N,Stencil{T,L}} where 
     size::Tuple{Int}
 end
 
-function StencilOperatorDistinctClosures(grid::EquidistantGrid{1}, inner_stencil, lower_closure, upper_closure)
+function StencilOperatorDistinctClosures(grid::EquidistantGrid, inner_stencil, lower_closure, upper_closure)
     return StencilOperatorDistinctClosures(inner_stencil, Tuple(lower_closure), Tuple(upper_closure), size(grid))
 end
 

@@ -1,26 +1,30 @@
 """
-    normal_derivative(grid, closure_stencil::Stencil, boundary)
+    normal_derivative(g, stencil_set::StencilSet, boundary)
+    normal_derivative(g::TensorGrid, stencil_set::StencilSet, boundary::TensorGridBoundary)
+    normal_derivative(g::EquidistantGrid, stencil_set::StencilSet, boundary)
 
 Creates the normal derivative boundary operator `d` as a `LazyTensor`
 
-`d` computes the normal derivative of a grid function  on `boundary` a `Stencil` `closure_stencil`.
-`d'` is the prolongation of the normal derivative of a grid function to the whole grid using the same `closure_stencil`.
-On a one-dimensional `grid`, `d` is a `BoundaryOperator`. On a multi-dimensional `grid`, `d` is the inflation of
-a `BoundaryOperator`.
+`d` computes the normal derivative at `boundary` of a grid function on `g` using the
+'d1' stencil in `stencil_set`. `d'` is the prolongation of the normal
+derivative of a grid function to the whole of `g` using the same stencil. On a
+one-dimensional grid, `d` is a `BoundaryOperator`. On a multi-dimensional
+grid, `d` is the inflation of a `BoundaryOperator`.
 
 See also: [`BoundaryOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
-function normal_derivative(grid, closure_stencil, boundary)
-    direction = dim(boundary)
-    h_inv = inverse_spacing(grid)[direction]
+function normal_derivative end
 
-    op = BoundaryOperator(restrict(grid, dim(boundary)), scale(closure_stencil,h_inv), region(boundary))
-    return LazyTensors.inflate(op, size(grid), dim(boundary))
+
+function normal_derivative(g::TensorGrid, stencil_set::StencilSet, boundary::TensorGridBoundary)
+    op = normal_derivative(g.grids[grid_id(boundary)], stencil_set, boundary_id(boundary))
+    return LazyTensors.inflate(op, size(g), grid_id(boundary))
 end
 
-"""
-    normal_derivative(grid, stencil_set, boundary)
+function normal_derivative(g::EquidistantGrid, stencil_set::StencilSet, boundary)
+    closure_stencil = parse_stencil(stencil_set["d1"]["closure"])
+    h_inv = inverse_spacing(g)
 
-Creates a `normal_derivative` operator on `grid` given a `stencil_set`.
-"""
-normal_derivative(grid, stencil_set::StencilSet, boundary) = normal_derivative(grid, parse_stencil(stencil_set["d1"]["closure"]), boundary)
+    scaled_stencil = scale(closure_stencil,h_inv)
+    return BoundaryOperator(g, scaled_stencil, boundary)
+end
