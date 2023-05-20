@@ -14,7 +14,7 @@ import Sbplib.SbpOperators.even
 @testset "VolumeOperator" begin
     inner_stencil = CenteredStencil(1/4, 2/4, 1/4)
     closure_stencils = (Stencil(1/2, 1/2; center=1), Stencil(2.,1.; center=2))
-    g = EquidistantGrid(11,0.,1.)
+    g = equidistant_grid(11,0.,1.)
 
     @testset "Constructors" begin
         op = VolumeOperator(inner_stencil,closure_stencils,(11,),even)

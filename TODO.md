@@ -1,5 +1,7 @@
 # TODO
 
+## Organization
+ - [ ] Split up Notes.md in several files
 
 ## Coding
  - [ ] Ändra namn på variabler och funktioner så att det följer style-guide
@@ -26,3 +28,16 @@
  - [ ] Kolla att vi gör boundschecks överallt och att de är markerade med @boundscheck
  - [ ] Kolla att vi har @inline på rätt ställen
  - [ ] Profilera
+
+
+### Grids
+
+ - [ ] Multiblock grids
+ - [ ] Periodic grids
+ - [ ] Grids with modified boundary closures
+
+
+### Benchmarks
+ - [ ] Benchmarks for all grid indexing (focused on allocation)
+ - [ ] Benchmarks for indexing of lazy grid functions
+ - [ ] Add benchmarks for range type in EquidistantGrid. (LinRange vs StepRange)

@@ -1,38 +1,45 @@
 """
-    undivided_skewed04(g::EquidistantGrid, p, direction)
+    undivided_skewed04(g::TensorGrid, p, direction)
+    undivided_skewed04(g::EquidistantGrid, p)
 
-Create undivided difference operators approximating the `p`th derivative. The
-operators do not satisfy any SBP-property and are meant to be used for
+Undivided difference operators approximating the `p`th derivative. The
+operators do not satisfy any SBP property and are meant to be used for
 building artificial dissipation terms.
 
-The operators and how they are used to create accurate artifical dissipation
+The operators and how they are used to create accurate artificial dissipation
 is described in "K. Mattsson, M. Svärd, and J. Nordström, “Stable and Accurate
 Artificial Dissipation,” Journal of Scientific Computing, vol. 21, no. 1, pp.
 57–79, Aug. 2004"
 """
-function undivided_skewed04(g::EquidistantGrid, p, direction)
+function undivided_skewed04 end
+
+function undivided_skewed04(g::TensorGrid, p, direction)
+    D,Dᵀ = undivided_skewed04(g.grids[direction], p)
+    return (
+        LazyTensors.inflate(D, size(g), direction),
+        LazyTensors.inflate(Dᵀ, size(g), direction),
+    )
+end
+
+function undivided_skewed04(g::EquidistantGrid, p)
     T = eltype(g)
     interior_weights = T.(dissipation_interior_weights(p))
 
-    D  = stencil_operator_distinct_closures(
+    D  = StencilOperatorDistinctClosures(
         g,
         dissipation_interior_stencil(interior_weights),
         dissipation_lower_closure_stencils(interior_weights),
         dissipation_upper_closure_stencils(interior_weights),
-        direction,
     )
-    Dᵀ = stencil_operator_distinct_closures(
+    Dᵀ = StencilOperatorDistinctClosures(
         g,
         dissipation_transpose_interior_stencil(interior_weights),
         dissipation_transpose_lower_closure_stencils(interior_weights),
         dissipation_transpose_upper_closure_stencils(interior_weights),
-        direction,
     )
 
     return D, Dᵀ
 end
-
-undivided_skewed04(g::EquidistantGrid{1}, p) = undivided_skewed04(g, p, 1)
 
 function dissipation_interior_weights(p)
    if p == 0

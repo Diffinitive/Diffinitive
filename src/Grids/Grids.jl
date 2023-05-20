@@ -1,31 +1,45 @@
 module Grids
 
 using Sbplib.RegionIndices
+using Sbplib.LazyTensors
+using StaticArrays
 
 # Grid
 export Grid
-export dims
-export points
-export evalOn
+export coordinate_size
+export component_type
+
+export TensorGrid
+export ZeroDimGrid
+
+export TensorGridBoundary
+
+export grid_id
+export boundary_id
+
+export eval_on
+export getcomponent
 
 # BoundaryIdentifier
 export BoundaryIdentifier
-export CartesianBoundary
-export dim
-export region
+
 
 # EquidistantGrid
 export EquidistantGrid
 export spacing
 export inverse_spacing
-export restrict
 export boundary_identifiers
 export boundary_grid
 export refine
 export coarsen
+export equidistant_grid
+export CartesianBoundary
+
+abstract type BoundaryIdentifier end
 
 include("grid.jl")
-include("boundary_identifier.jl")
+include("tensor_grid.jl")
 include("equidistant_grid.jl")
+include("zero_dim_grid.jl")
 
 end # module
