@@ -1,6 +1,6 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.2"
+julia_version = "1.8.5"
 manifest_format = "2.0"
 project_hash = "25bba7b4a00465d5a2b00b589eb10e3301c31f2a"
 
@@ -52,7 +52,7 @@ version = "4.5.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "0.5.2+0"
+version = "1.0.1+0"
 
 [[deps.DataAPI]]
 git-tree-sha1 = "e8119c1a33d267e16108be441a287a6981ba1630"
@@ -223,7 +223,7 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
 
 [[deps.Sbplib]]
-deps = ["TOML", "TiledIteration"]
+deps = ["StaticArrays", "TOML", "TiledIteration"]
 path = ".."
 uuid = "5a373a26-915f-4769-bcab-bf03835de17b"
 version = "0.1.0"
@@ -249,6 +249,17 @@ deps = ["IfElse"]
 git-tree-sha1 = "c35b107b61e7f34fa3f124026f2a9be97dea9e1c"
 uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
 version = "0.8.3"
+
+[[deps.StaticArrays]]
+deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
+git-tree-sha1 = "c262c8e978048c2b095be1672c9bee55b4619521"
+uuid = "90137ffa-7385-5640-81b9-e52037218182"
+version = "1.5.24"
+
+[[deps.StaticArraysCore]]
+git-tree-sha1 = "6b7ba252635a5eff6a0b0664a41ee140a1c9e72a"
+uuid = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
+version = "1.4.0"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]

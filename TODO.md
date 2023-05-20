@@ -1,11 +1,12 @@
 # TODO
 
+## Organization
+ - [ ] Split up Notes.md in several files
 
 ## Coding
  - [ ] Ändra namn på variabler och funktioner så att det följer style-guide
  - [ ] Add new Laplace operator to DiffOps, probably named WaveEqOp(?!!?)
  - [ ] Create a struct that bundles the necessary Tensor operators for solving the wave equation.
- - [ ] Replace getindex hack for flattening tuples with flatten_tuple. (eg. `getindex.(range_size.(L.D2),1)`)
  - [ ] Use `@inferred` in a lot of tests.
  - [ ] Replace `@inferred` tests with a benchmark suite that automatically tests for regressions.
  - [ ] Make sure we are setting tolerances in tests in a consistent way
@@ -27,3 +28,16 @@
  - [ ] Kolla att vi gör boundschecks överallt och att de är markerade med @boundscheck
  - [ ] Kolla att vi har @inline på rätt ställen
  - [ ] Profilera
+
+
+### Grids
+
+ - [ ] Multiblock grids
+ - [ ] Periodic grids
+ - [ ] Grids with modified boundary closures
+
+
+### Benchmarks
+ - [ ] Benchmarks for all grid indexing (focused on allocation)
+ - [ ] Benchmarks for indexing of lazy grid functions
+ - [ ] Add benchmarks for range type in EquidistantGrid. (LinRange vs StepRange)

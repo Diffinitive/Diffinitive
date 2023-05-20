@@ -10,8 +10,7 @@ import Sbplib.SbpOperators.BoundaryOperator
 
 @testset "BoundaryOperator" begin
     closure_stencil = Stencil(2.,1.,3.; center = 1)
-    g_1D = EquidistantGrid(11, 0.0, 1.0)
-    g_2D = EquidistantGrid((11,15), (0.0, 0.0), (1.0,1.0))
+    g_1D = EquidistantGrid(range(0,1,length=11))
 
     @testset "Constructors" begin
         @test BoundaryOperator(g_1D, closure_stencil, Lower()) isa LazyTensor{T,0,1} where T
@@ -30,7 +29,7 @@ import Sbplib.SbpOperators.BoundaryOperator
     end
 
     @testset "Application" begin
-        v = evalOn(g_1D,x->1+x^2)
+        v = eval_on(g_1D,x->1+x^2)
         u = fill(3.124)
         @test (op_l*v)[] == 2*v[1] + v[2] + 3*v[3]
         @test (op_r*v)[] == 2*v[end] + v[end-1] + 3*v[end-2]
@@ -38,7 +37,7 @@ import Sbplib.SbpOperators.BoundaryOperator
         @test op_l'*u == [2*u[]; u[]; 3*u[]; zeros(8)]
         @test op_r'*u == [zeros(8); 3*u[]; u[]; 2*u[]]
 
-        v = evalOn(g_1D, x->1. +x*im)
+        v = eval_on(g_1D, x->1. +x*im)
         @test (op_l*v)[] isa ComplexF64
 
         u = fill(1. +im)

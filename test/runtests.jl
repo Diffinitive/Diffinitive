@@ -49,4 +49,5 @@ testsetname = isempty(ARGS) ? "Sbplib.jl" : "["*join(ARGS, ", ")*"]"
 
 @testset "$testsetname" begin
     run_testfiles(ARGS)
+    println()
 end

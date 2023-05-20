@@ -12,9 +12,9 @@ sz(d) = ntuple(i->100, d)
 ll(d) = ntuple(i->0., d)
 lu(d) = ntuple(i->1., d)
 
-g1 = EquidistantGrid(sz(1),ll(1),lu(1))
-g2 = EquidistantGrid(sz(2),ll(2),lu(2))
-g3 = EquidistantGrid(sz(3),ll(3),lu(3))
+g1 = equidistant_grid(sz(1)[1],ll(1)[1],lu(1)[1])
+g2 = equidistant_grid(sz(2),ll(2),lu(2))
+g3 = equidistant_grid(sz(3),ll(3),lu(3))
 
 v1 = rand(sz(1)...)
 v2 = rand(sz(2)...)
