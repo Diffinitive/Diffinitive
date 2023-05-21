@@ -52,7 +52,7 @@ range_size(tmt::TensorTranspose) = domain_size(tmt.tm)
 domain_size(tmt::TensorTranspose) = range_size(tmt.tm)
 
 
-struct ElementwiseTensorOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
+struct ElementwiseTensorOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}} <: LazyTensor{T,R,D}
     tm1::T1
     tm2::T2
 
