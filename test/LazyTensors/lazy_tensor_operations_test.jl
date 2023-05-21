@@ -188,7 +188,7 @@ end
     @test a*Ã == Ã*a
     @test range_size(a*Ã) == range_size(Ã)
     @test domain_size(a*Ã) == domain_size(Ã)
-    @test a*Ã*v == a.*A*v
+    @test a*Ã*v ≈ a.*A*v rtol=1e-14
 end
 
 

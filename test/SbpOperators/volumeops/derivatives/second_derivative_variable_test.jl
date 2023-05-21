@@ -15,7 +15,7 @@ using LinearAlgebra
     ]
 
     @testset "1D" begin
-        g = EquidistantGrid(11, 0., 1.)
+        g = equidistant_grid(11, 0., 1.)
         c = [  1.,  3.,  6., 10., 15., 21., 28., 36., 45., 55., 66.]
         @testset "Constructors" begin
             @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils) isa LazyTensor
@@ -26,7 +26,8 @@ using LinearAlgebra
 
 
             stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 2)
-            @test SecondDerivativeVariable(g, c, stencil_set, 1) isa SecondDerivativeVariable
+            @test SecondDerivativeVariable(g, c, stencil_set) isa SecondDerivativeVariable
+            @test SecondDerivativeVariable(TensorGrid(g), c, stencil_set, 1) isa SecondDerivativeVariable
 
             @testset "checking c" begin
                 c_short = rand(5)
@@ -35,7 +36,7 @@ using LinearAlgebra
 
                 @test_throws DimensionMismatch("the size (5,) of the coefficient does not match the size (11,) of the grid") SecondDerivativeVariable(g, c_short, interior_stencil, closure_stencils)
                 @test_throws DimensionMismatch("the size (16,) of the coefficient does not match the size (11,) of the grid") SecondDerivativeVariable(g, c_long, interior_stencil, closure_stencils)
-                @test_throws ArgumentError("The coefficient has dimension 2 while the grid is dimension 1") SecondDerivativeVariable(g, c_higher_dimension, interior_stencil, closure_stencils,1)
+                @test_throws ArgumentError("The coefficient has dimension 2 while the grid is dimension 1") SecondDerivativeVariable(TensorGrid(g), c_higher_dimension, interior_stencil, closure_stencils, 1)
             end
         end
 
@@ -49,9 +50,9 @@ using LinearAlgebra
         @testset "application" begin
 
             function apply_to_functions(; v, c)
-                g = EquidistantGrid(11, 0., 10.) # h = 1
-                c̄ = evalOn(g,c)
-                v̄ = evalOn(g,v)
+                g = equidistant_grid(11, 0., 10.) # h = 1
+                c̄ = eval_on(g,c)
+                v̄ = eval_on(g,v)
 
                 D₂ᶜ = SecondDerivativeVariable(g, c̄, interior_stencil, closure_stencils)
                 return D₂ᶜ*v̄
@@ -65,9 +66,9 @@ using LinearAlgebra
         end
 
         @testset "type stability" begin
-            g = EquidistantGrid(11, 0., 10.) # h = 1
-            c̄ = evalOn(g,x-> -1)
-            v̄ = evalOn(g,x->1.)
+            g = equidistant_grid(11, 0., 10.) # h = 1
+            c̄ = eval_on(g,x-> -1)
+            v̄ = eval_on(g,x->1.)
 
             D₂ᶜ = SecondDerivativeVariable(g, c̄, interior_stencil, closure_stencils)
 
@@ -79,8 +80,8 @@ using LinearAlgebra
     end
 
     @testset "2D" begin
-        g = EquidistantGrid((11,9), (0.,0.), (10.,8.)) # h = 1
-        c = evalOn(g, (x,y)->x+y)
+        g = equidistant_grid((11,9), (0.,0.), (10.,8.)) # h = 1
+        c = eval_on(g, (x,y)->x+y)
         @testset "Constructors" begin
             @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1) isa LazyTensor
             @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,2) isa LazyTensor
@@ -107,9 +108,9 @@ using LinearAlgebra
 
         @testset "application" begin
             function apply_to_functions(dir; v, c)
-                g = EquidistantGrid((11,9), (0.,0.), (10.,8.)) # h = 1
-                c̄ = evalOn(g,c)
-                v̄ = evalOn(g,v)
+                g = equidistant_grid((11,9), (0.,0.), (10.,8.)) # h = 1
+                c̄ = eval_on(g,c)
+                v̄ = eval_on(g,v)
 
                 D₂ᶜ = SecondDerivativeVariable(g, c̄, interior_stencil, closure_stencils,dir)
                 return D₂ᶜ*v̄
@@ -147,14 +148,14 @@ using LinearAlgebra
                 Dxv(x,y) = cos(x)*exp(x) - (exp(x) + exp(1.5 - 1.5y))*sin(x)
                 Dyv(x,y) = -1.5(1.5exp(x) + 1.5exp(1.5 - 1.5y))*cos(1.5 - 1.5y) - 2.25exp(1.5 - 1.5y)*sin(1.5 - 1.5y)
 
-                g₁ = EquidistantGrid((60,67), (0.,0.), (1.,2.))
+                g₁ = equidistant_grid((60,67), (0.,0.), (1.,2.))
                 g₂ = refine(g₁,2)
 
-                c̄₁ = evalOn(g₁, c)
-                c̄₂ = evalOn(g₂, c)
+                c̄₁ = eval_on(g₁, c)
+                c̄₂ = eval_on(g₂, c)
 
-                v̄₁ = evalOn(g₁, v)
-                v̄₂ = evalOn(g₂, v)
+                v̄₁ = eval_on(g₁, v)
+                v̄₂ = eval_on(g₂, v)
 
 
                 function convergence_rate_estimate(stencil_set, dir, Dv_true)
@@ -164,8 +165,8 @@ using LinearAlgebra
                     Dv̄₁ = D₁*v̄₁
                     Dv̄₂ = D₂*v̄₂
 
-                    Dv₁ = evalOn(g₁,Dv_true)
-                    Dv₂ = evalOn(g₂,Dv_true)
+                    Dv₁ = eval_on(g₁,Dv_true)
+                    Dv₂ = eval_on(g₂,Dv_true)
 
                     e₁ = norm(Dv̄₁ - Dv₁)/norm(Dv₁)
                     e₂ = norm(Dv̄₂ - Dv₂)/norm(Dv₂)

@@ -1,3 +1,5 @@
 syntax: glob
 docs/build/
 docs/build-local/
+benchmark/results
+benchmark/tune.json

@@ -27,7 +27,7 @@ function monomial(x,k)
 end
 
 @testset "undivided_skewed04" begin
-    g = EquidistantGrid(20, 0., 11.)
+    g = equidistant_grid(20, 0., 11.)
     D,Dᵀ = undivided_skewed04(g, 1)
 
     @test D isa LazyTensor{Float64,1,1}
@@ -35,14 +35,14 @@ end
 
      @testset "Accuracy conditions" begin
         N = 20
-        g = EquidistantGrid(N, 0//1,2//1)
+        g = equidistant_grid(N, 0//1,2//1)
         h = only(spacing(g))
         @testset "D_$p" for p ∈ [1,2,3,4]
             D,Dᵀ = undivided_skewed04(g, p)
 
             @testset "x^$k" for k ∈ 0:p
-                v  = evalOn(g, x->monomial(x,k))
-                vₚₓ = evalOn(g, x->monomial(x,k-p))
+                v  = eval_on(g, x->monomial(x,k))
+                vₚₓ = eval_on(g, x->monomial(x,k-p))
 
                 @test D*v == h^p * vₚₓ
             end
@@ -67,7 +67,7 @@ end
             return Dmat
         end
 
-        g = EquidistantGrid(11, 0., 1.)
+        g = equidistant_grid(11, 0., 1.)
         @testset "D_$p" for p ∈ [1,2,3,4]
             D,Dᵀ = undivided_skewed04(g, p)
 
@@ -76,6 +76,19 @@ end
 
             @test D̄ == D̄ᵀ'
         end
+    end
+
+    @testset "2D" begin
+        N = 20
+        g = equidistant_grid((N,2N), (0,0), (2,1))
+        h = spacing.(g.grids)
+
+        D,Dᵀ = undivided_skewed04(g, 3, 2)
+
+        v = eval_on(g, x->monomial(x[1],4)*monomial(x[2],3))
+        d³vdy³ = eval_on(g, x->monomial(x[1],4)*monomial(x[2],0))
+
+        @test D*v ≈ h[2]^3*d³vdy³
     end
 end
 
