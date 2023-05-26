@@ -12,7 +12,7 @@ end
 
 function VolumeOperator(grid::EquidistantGrid, inner_stencil, closure_stencils, parity)
     return VolumeOperator(inner_stencil, Tuple(closure_stencils), size(grid), parity)
-end
+end # TBD: Remove this function?
 
 closure_size(::VolumeOperator{T,N,M}) where {T,N,M} = M
 
