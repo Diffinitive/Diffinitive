@@ -4,7 +4,7 @@ using Sbplib.Grids
 using Sbplib.LazyTensors
 using Sbplib.SbpOperators
 using Sbplib.RegionIndices
-using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil
+using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil, SecondDerivativeVariable
 
 using LinearAlgebra
 

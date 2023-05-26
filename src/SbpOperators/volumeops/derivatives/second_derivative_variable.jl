@@ -1,5 +1,3 @@
-export SecondDerivativeVariable
-
 # REVIEW: Fixa docs
 """
     SecondDerivativeVariable{Dir,T,D,...} <: LazyTensor{T,D,D}
