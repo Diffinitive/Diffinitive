@@ -9,14 +9,13 @@ A second derivative operator in direction `Dir` with a variable coefficient.
 struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:NestedStencil{T},TArray<:AbstractArray} <: LazyTensor{T,D,D}
     inner_stencil::IStencil
     closure_stencils::NTuple{M,CStencil}
-    size::NTuple{D,Int}
     coefficient::TArray
 
-    function SecondDerivativeVariable{Dir, D}(inner_stencil::NestedStencil{T}, closure_stencils::NTuple{M,NestedStencil{T}}, size::NTuple{D,Int}, coefficient::AbstractArray) where {Dir,T,D,M}
+    function SecondDerivativeVariable{Dir, D}(inner_stencil::NestedStencil{T}, closure_stencils::NTuple{M,NestedStencil{T}}, coefficient::AbstractArray) where {Dir,T,D,M}
         IStencil = typeof(inner_stencil)
         CStencil = eltype(closure_stencils)
         TArray = typeof(coefficient)
-        return new{Dir,T,D,M,IStencil,CStencil,TArray}(inner_stencil,closure_stencils,size, coefficient)
+        return new{Dir,T,D,M,IStencil,CStencil,TArray}(inner_stencil, closure_stencils, coefficient)
     end
 end
 
@@ -26,7 +25,7 @@ function SecondDerivativeVariable(g::TensorGrid, coeff::AbstractArray, inner_ste
     Δxᵢ = spacing(g.grids[dir])
     scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
     scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
-    return SecondDerivativeVariable{dir, ndims(g)}(scaled_inner_stencil, scaled_closure_stencils, size(g), coeff)
+    return SecondDerivativeVariable{dir, ndims(g)}(scaled_inner_stencil, scaled_closure_stencils, coeff)
 end
 
 function SecondDerivativeVariable(g::EquidistantGrid, coeff::AbstractVector, inner_stencil::NestedStencil, closure_stencils)
@@ -78,8 +77,8 @@ derivative_direction(::SecondDerivativeVariable{Dir}) where {Dir} = Dir
 
 closure_size(op::SecondDerivativeVariable) = length(op.closure_stencils)
 
-LazyTensors.range_size(op::SecondDerivativeVariable) = op.size
-LazyTensors.domain_size(op::SecondDerivativeVariable) = op.size
+LazyTensors.range_size(op::SecondDerivativeVariable) = size(op.coefficient)
+LazyTensors.domain_size(op::SecondDerivativeVariable) = size(op.coefficient)
 
 
 function derivative_view(op, a, I)
@@ -110,7 +109,8 @@ function apply_upper(op::SecondDerivativeVariable, v, I...)
     c̃ = derivative_view(op, op.coefficient, I)
 
     i = I[derivative_direction(op)]
-    stencil = op.closure_stencils[op.size[derivative_direction(op)]-i+1]
+    sz = domain_size(op)[derivative_direction(op)]
+    stencil = op.closure_stencils[sz-i+1]
     return @inbounds apply_stencil_backwards(stencil, c̃, ṽ, i)
 end
 
@@ -128,6 +128,7 @@ end
 
 function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractArray, I...)
     dir = derivative_direction(op)
+    sz = domain_size(op)[dir]
 
     i = I[dir]
 
@@ -135,10 +136,10 @@ function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractArray, I...)
     if 0 < i <= closure_size(op)
         I = Base.setindex(I, Index(i, Lower), dir)
         return LazyTensors.apply(op, v, I...)
-    elseif closure_size(op) < i <= op.size[dir]-closure_size(op)
+    elseif closure_size(op) < i <= sz-closure_size(op)
         I = Base.setindex(I, Index(i, Interior), dir)
         return LazyTensors.apply(op, v, I...)
-    elseif op.size[dir]-closure_size(op) < i <= op.size[dir]
+    elseif sz-closure_size(op) < i <= sz
         I = Base.setindex(I, Index(i, Upper), dir)
         return LazyTensors.apply(op, v, I...)
     else
@@ -170,7 +171,8 @@ function apply_upper(op::SecondDerivativeVariable{1}, v, i, j)
     ṽ = @view v[:,j]
     c̃ = @view op.coefficient[:,j]
 
-    stencil = op.closure_stencils[op.size[derivative_direction(op)]-i+1]
+    sz = domain_size(op)[derivative_direction(op)]
+    stencil = op.closure_stencils[sz-i+1]
     return @inbounds apply_stencil_backwards(stencil, c̃, ṽ, i)
 end
 
@@ -194,6 +196,7 @@ function apply_upper(op::SecondDerivativeVariable{2}, v, i, j)
     ṽ = @view v[i,:]
     c̃ = @view op.coefficient[i,:]
 
-    stencil = op.closure_stencils[op.size[derivative_direction(op)]-j+1]
+    sz = domain_size(op)[derivative_direction(op)]
+    stencil = op.closure_stencils[sz-j+1]
     return @inbounds apply_stencil_backwards(stencil, c̃, ṽ, j)
 end
