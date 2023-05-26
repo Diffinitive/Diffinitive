@@ -15,9 +15,17 @@ using LinearAlgebra
         g = equidistant_grid(11, 0., 1.)
         c = [  1.,  3.,  6., 10., 15., 21., 28., 36., 45., 55., 66.]
 
+        @testset "checking c" begin
+            c_short = rand(5)
+            c_long = rand(16)
+            c_higher_dimension = rand(11,11)
+
+            @test_throws DimensionMismatch("the size (5,) of the coefficient does not match the size (11,) of the grid") second_derivative_variable(g, c_short, stencil_set)
+            @test_throws DimensionMismatch("the size (16,) of the coefficient does not match the size (11,) of the grid") second_derivative_variable(g, c_long, stencil_set)
+            @test_throws ArgumentError("The coefficient has dimension 2 while the grid is dimension 1") second_derivative_variable(g, c_higher_dimension, stencil_set)
+        end
 
         @testset "application" begin
-
             function apply_to_functions(; v, c)
                 g = equidistant_grid(11, 0., 10.) # h = 1
                 c̄ = eval_on(g,c)
@@ -122,38 +130,23 @@ end
 
 @testset "SecondDerivativeVariable" begin
     interior_stencil = CenteredNestedStencil((1/2, 1/2, 0.),(-1/2, -1., -1/2),( 0., 1/2, 1/2))
-    closure_stencils = [
+    closure_stencils = (
         NestedStencil(( 2.,  -1., 0.),(-3., 1.,  0.), (1., 0., 0.), center = 1),
-    ]
+    )
 
     @testset "1D" begin
-        g = equidistant_grid(11, 0., 1.)
         c = [  1.,  3.,  6., 10., 15., 21., 28., 36., 45., 55., 66.]
         @testset "Constructors" begin
-            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils) isa LazyTensor
+            @test SecondDerivativeVariable(c, interior_stencil, closure_stencils, 1) isa LazyTensor
 
-            D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils)
+            D₂ᶜ = SecondDerivativeVariable(c, interior_stencil, closure_stencils, 1)
             @test range_dim(D₂ᶜ) == 1
             @test domain_dim(D₂ᶜ) == 1
 
-
-            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 2)
-            @test SecondDerivativeVariable(g, c, stencil_set) isa SecondDerivativeVariable
-            @test SecondDerivativeVariable(TensorGrid(g), c, stencil_set, 1) isa SecondDerivativeVariable
-
-            @testset "checking c" begin
-                c_short = rand(5)
-                c_long = rand(16)
-                c_higher_dimension = rand(11,11)
-
-                @test_throws DimensionMismatch("the size (5,) of the coefficient does not match the size (11,) of the grid") SecondDerivativeVariable(g, c_short, interior_stencil, closure_stencils)
-                @test_throws DimensionMismatch("the size (16,) of the coefficient does not match the size (11,) of the grid") SecondDerivativeVariable(g, c_long, interior_stencil, closure_stencils)
-                @test_throws ArgumentError("The coefficient has dimension 2 while the grid is dimension 1") SecondDerivativeVariable(TensorGrid(g), c_higher_dimension, interior_stencil, closure_stencils, 1)
-            end
         end
 
         @testset "sizes" begin
-            D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils)
+            D₂ᶜ = SecondDerivativeVariable(c, interior_stencil, closure_stencils, 1)
             @test closure_size(D₂ᶜ) == 1
             @test range_size(D₂ᶜ) == (11,)
             @test domain_size(D₂ᶜ) == (11,)
@@ -166,7 +159,7 @@ end
                 c̄ = eval_on(g,c)
                 v̄ = eval_on(g,v)
 
-                D₂ᶜ = SecondDerivativeVariable(g, c̄, interior_stencil, closure_stencils)
+                D₂ᶜ = SecondDerivativeVariable(c̄, interior_stencil, closure_stencils, 1)
                 return D₂ᶜ*v̄
             end
 
@@ -182,7 +175,7 @@ end
             c̄ = eval_on(g,x-> -1)
             v̄ = eval_on(g,x->1.)
 
-            D₂ᶜ = SecondDerivativeVariable(g, c̄, interior_stencil, closure_stencils)
+            D₂ᶜ = SecondDerivativeVariable(c̄, interior_stencil, closure_stencils, 1)
 
             @inferred SbpOperators.apply_lower(D₂ᶜ, v̄, 1)
             @inferred SbpOperators.apply_interior(D₂ᶜ, v̄, 5)
@@ -195,24 +188,21 @@ end
         g = equidistant_grid((11,9), (0.,0.), (10.,8.)) # h = 1
         c = eval_on(g, (x,y)->x+y)
         @testset "Constructors" begin
-            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1) isa LazyTensor
-            @test SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,2) isa LazyTensor
+            @test SecondDerivativeVariable(c, interior_stencil, closure_stencils, 1) isa LazyTensor
+            @test SecondDerivativeVariable(c, interior_stencil, closure_stencils, 2) isa LazyTensor
 
-            D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1)
+            D₂ᶜ = SecondDerivativeVariable(c, interior_stencil, closure_stencils, 1)
             @test range_dim(D₂ᶜ) == 2
             @test domain_dim(D₂ᶜ) == 2
-
-            stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 2)
-            @test SecondDerivativeVariable(g, c, stencil_set, 1) isa SecondDerivativeVariable
         end
 
         @testset "sizes" begin
-            D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,1)
+            D₂ᶜ = SecondDerivativeVariable(c, interior_stencil, closure_stencils, 1)
             @test range_size(D₂ᶜ) == (11,9)
             @test domain_size(D₂ᶜ) == (11,9)
             @test closure_size(D₂ᶜ) == 1
 
-            D₂ᶜ = SecondDerivativeVariable(g, c, interior_stencil, closure_stencils,2)
+            D₂ᶜ = SecondDerivativeVariable(c, interior_stencil, closure_stencils, 2)
             @test range_size(D₂ᶜ) == (11,9)
             @test domain_size(D₂ᶜ) == (11,9)
             @test closure_size(D₂ᶜ) == 1
@@ -224,7 +214,7 @@ end
                 c̄ = eval_on(g,c)
                 v̄ = eval_on(g,v)
 
-                D₂ᶜ = SecondDerivativeVariable(g, c̄, interior_stencil, closure_stencils,dir)
+                D₂ᶜ = SecondDerivativeVariable(c̄, interior_stencil, closure_stencils, dir)
                 return D₂ᶜ*v̄
             end
 

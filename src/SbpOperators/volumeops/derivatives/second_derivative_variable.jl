@@ -26,7 +26,7 @@ function second_derivative_variable(g::TensorGrid, coeff, inner_stencil::NestedS
     Δxᵢ = spacing(g.grids[dir])
     scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
     scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
-    return SecondDerivativeVariable{dir, ndims(g)}(scaled_inner_stencil, scaled_closure_stencils, coeff)
+    return SecondDerivativeVariable(coeff, scaled_inner_stencil, scaled_closure_stencils, dir)
 end
 
 function check_coefficient(g, coeff)
@@ -51,11 +51,12 @@ struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:N
     closure_stencils::NTuple{M,CStencil}
     coefficient::TArray
 
-    function SecondDerivativeVariable{Dir, D}(inner_stencil::NestedStencil{T}, closure_stencils::NTuple{M,NestedStencil{T}}, coefficient::AbstractArray) where {Dir,T,D,M}
+    function SecondDerivativeVariable(coefficient::AbstractArray, inner_stencil::NestedStencil{T}, closure_stencils::NTuple{M,NestedStencil{T}}, dir) where {T,M}
+        D = ndims(coefficient)
         IStencil = typeof(inner_stencil)
         CStencil = eltype(closure_stencils)
         TArray = typeof(coefficient)
-        return new{Dir,T,D,M,IStencil,CStencil,TArray}(inner_stencil, closure_stencils, coefficient)
+        return new{dir,T,D,M,IStencil,CStencil,TArray}(inner_stencil, closure_stencils, coefficient)
     end
 end
 
