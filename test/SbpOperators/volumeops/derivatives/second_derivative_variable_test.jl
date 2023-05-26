@@ -9,10 +9,7 @@ using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil, SecondDerivativ
 using LinearAlgebra
 
 @testset "second_derivative_variable" begin
-    interior_stencil = CenteredNestedStencil((1/2, 1/2, 0.),(-1/2, -1., -1/2),( 0., 1/2, 1/2))
-    closure_stencils = [
-        NestedStencil(( 2.,  -1., 0.),(-3., 1.,  0.), (1., 0., 0.), center = 1),
-    ]
+    stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
 
     @testset "1D" begin
         g = equidistant_grid(11, 0., 1.)
@@ -26,7 +23,7 @@ using LinearAlgebra
                 c̄ = eval_on(g,c)
                 v̄ = eval_on(g,v)
 
-                D₂ᶜ = second_derivative_variable(g, c̄, interior_stencil, closure_stencils)
+                D₂ᶜ = second_derivative_variable(g, c̄, stencil_set)
                 return D₂ᶜ*v̄
             end
 
@@ -48,7 +45,7 @@ using LinearAlgebra
                 c̄ = eval_on(g,c)
                 v̄ = eval_on(g,v)
 
-                D₂ᶜ = second_derivative_variable(g, c̄, interior_stencil, closure_stencils,dir)
+                D₂ᶜ = second_derivative_variable(g, c̄, stencil_set, dir)
                 return D₂ᶜ*v̄
             end
 
