@@ -20,6 +20,7 @@ export laplace
 export normal_derivative
 export first_derivative
 export second_derivative
+export second_derivative_variable
 export undivided_skewed04
 
 using Sbplib.RegionIndices

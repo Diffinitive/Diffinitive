@@ -1,3 +1,51 @@
+"""
+    second_derivative_variable(g, coeff ..., [direction])
+
+The variable second derivative operator as a `LazyTensor` on the given grid.
+`coeff` is a grid function of the variable coefficient.
+
+Approximates the d/dξ c d/dξ on `g` along the coordinate dimension specified
+by `direction`.
+"""
+function second_derivative_variable end
+
+
+function second_derivative_variable(g::TensorGrid, coeff::AbstractArray, inner_stencil::NestedStencil, closure_stencils, dir)
+    check_coefficient(g, coeff)
+
+    Δxᵢ = spacing(g.grids[dir])
+    scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
+    scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
+    return SecondDerivativeVariable{dir, ndims(g)}(scaled_inner_stencil, scaled_closure_stencils, coeff)
+end
+
+function second_derivative_variable(g::EquidistantGrid, coeff::AbstractVector, inner_stencil::NestedStencil, closure_stencils)
+    return second_derivative_variable(TensorGrid(g), coeff, inner_stencil, closure_stencils, 1)
+end
+
+function second_derivative_variable(g::TensorGrid, coeff::AbstractArray, stencil_set, dir::Int)
+    inner_stencil    = parse_nested_stencil(eltype(coeff), stencil_set["D2variable"]["inner_stencil"])
+    closure_stencils = parse_nested_stencil.(eltype(coeff), stencil_set["D2variable"]["closure_stencils"])
+
+    return second_derivative_variable(g, coeff, inner_stencil, closure_stencils, dir)
+end
+
+function second_derivative_variable(g::EquidistantGrid, coeff::AbstractArray, stencil_set)
+    return second_derivative_variable(TensorGrid(g), coeff, stencil_set, 1)
+end
+
+
+function check_coefficient(g, coeff)
+    if ndims(g) != ndims(coeff)
+        throw(ArgumentError("The coefficient has dimension $(ndims(coeff)) while the grid is dimension $(ndims(g))"))
+    end
+
+    if size(g) != size(coeff)
+        throw(DimensionMismatch("the size $(size(coeff)) of the coefficient does not match the size $(size(g)) of the grid"))
+    end
+end
+
+
 # REVIEW: Fixa docs
 """
     SecondDerivativeVariable{Dir,T,D,...} <: LazyTensor{T,D,D}
@@ -14,60 +62,6 @@ struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:N
         CStencil = eltype(closure_stencils)
         TArray = typeof(coefficient)
         return new{Dir,T,D,M,IStencil,CStencil,TArray}(inner_stencil, closure_stencils, coefficient)
-    end
-end
-
-function SecondDerivativeVariable(g::TensorGrid, coeff::AbstractArray, inner_stencil::NestedStencil, closure_stencils, dir)
-    check_coefficient(g, coeff)
-
-    Δxᵢ = spacing(g.grids[dir])
-    scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
-    scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
-    return SecondDerivativeVariable{dir, ndims(g)}(scaled_inner_stencil, scaled_closure_stencils, coeff)
-end
-
-function SecondDerivativeVariable(g::EquidistantGrid, coeff::AbstractVector, inner_stencil::NestedStencil, closure_stencils)
-    return SecondDerivativeVariable(TensorGrid(g), coeff, inner_stencil, closure_stencils, 1)
-end
-
-@doc raw"""
-    SecondDerivativeVariable(g::EquidistantGrid, coeff::AbstractArray, stencil_set, dir)
-
-Create a `LazyTensor` for the second derivative with a variable coefficient
-`coeff` on `grid` from the stencils in `stencil_set`. The direction is
-determined by `dir`.
-
-`coeff` is a grid function on `grid`.
-
-# Example
-With
-```
-D = SecondDerivativeVariable(g, c, stencil_set, 2)
-```
-then `D*u` approximates
-```math
-\frac{\partial}{\partial y} c(x,y) \frac{\partial u}{\partial y},
-```
-on ``(0,1)⨯(0,1)`` represented by `g`.
-"""
-function SecondDerivativeVariable(g::TensorGrid, coeff::AbstractArray, stencil_set, dir::Int)
-    inner_stencil    = parse_nested_stencil(eltype(coeff), stencil_set["D2variable"]["inner_stencil"])
-    closure_stencils = parse_nested_stencil.(eltype(coeff), stencil_set["D2variable"]["closure_stencils"])
-
-    return SecondDerivativeVariable(g, coeff, inner_stencil, closure_stencils, dir)
-end
-
-function SecondDerivativeVariable(g::EquidistantGrid, coeff::AbstractArray, stencil_set) 
-    return SecondDerivativeVariable(TensorGrid(g), coeff, stencil_set, 1)
-end
-
-function check_coefficient(g, coeff)
-    if ndims(g) != ndims(coeff)
-        throw(ArgumentError("The coefficient has dimension $(ndims(coeff)) while the grid is dimension $(ndims(g))"))
-    end
-
-    if size(g) != size(coeff)
-        throw(DimensionMismatch("the size $(size(coeff)) of the coefficient does not match the size $(size(g)) of the grid"))
     end
 end
 
