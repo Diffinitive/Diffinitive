@@ -9,20 +9,6 @@ by `direction`.
 """
 function second_derivative_variable end
 
-
-function second_derivative_variable(g::TensorGrid, coeff::AbstractArray, inner_stencil::NestedStencil, closure_stencils, dir)
-    check_coefficient(g, coeff)
-
-    Δxᵢ = spacing(g.grids[dir])
-    scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
-    scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
-    return SecondDerivativeVariable{dir, ndims(g)}(scaled_inner_stencil, scaled_closure_stencils, coeff)
-end
-
-function second_derivative_variable(g::EquidistantGrid, coeff::AbstractVector, inner_stencil::NestedStencil, closure_stencils)
-    return second_derivative_variable(TensorGrid(g), coeff, inner_stencil, closure_stencils, 1)
-end
-
 function second_derivative_variable(g::TensorGrid, coeff::AbstractArray, stencil_set, dir::Int)
     inner_stencil    = parse_nested_stencil(eltype(coeff), stencil_set["D2variable"]["inner_stencil"])
     closure_stencils = parse_nested_stencil.(eltype(coeff), stencil_set["D2variable"]["closure_stencils"])
@@ -34,6 +20,14 @@ function second_derivative_variable(g::EquidistantGrid, coeff::AbstractArray, st
     return second_derivative_variable(TensorGrid(g), coeff, stencil_set, 1)
 end
 
+function second_derivative_variable(g::TensorGrid, coeff::AbstractArray, inner_stencil::NestedStencil, closure_stencils, dir)
+    check_coefficient(g, coeff)
+
+    Δxᵢ = spacing(g.grids[dir])
+    scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
+    scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
+    return SecondDerivativeVariable{dir, ndims(g)}(scaled_inner_stencil, scaled_closure_stencils, coeff)
+end
 
 function check_coefficient(g, coeff)
     if ndims(g) != ndims(coeff)
