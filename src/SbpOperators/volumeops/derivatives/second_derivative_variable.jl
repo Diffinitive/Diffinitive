@@ -9,18 +9,18 @@ by `direction`.
 """
 function second_derivative_variable end
 
-function second_derivative_variable(g::TensorGrid, coeff::AbstractArray, stencil_set, dir::Int)
+function second_derivative_variable(g::TensorGrid, coeff, stencil_set, dir::Int)
     inner_stencil    = parse_nested_stencil(eltype(coeff), stencil_set["D2variable"]["inner_stencil"])
     closure_stencils = parse_nested_stencil.(eltype(coeff), stencil_set["D2variable"]["closure_stencils"])
 
     return second_derivative_variable(g, coeff, inner_stencil, closure_stencils, dir)
 end
 
-function second_derivative_variable(g::EquidistantGrid, coeff::AbstractArray, stencil_set)
+function second_derivative_variable(g::EquidistantGrid, coeff, stencil_set)
     return second_derivative_variable(TensorGrid(g), coeff, stencil_set, 1)
 end
 
-function second_derivative_variable(g::TensorGrid, coeff::AbstractArray, inner_stencil::NestedStencil, closure_stencils, dir)
+function second_derivative_variable(g::TensorGrid, coeff, inner_stencil::NestedStencil, closure_stencils, dir)
     check_coefficient(g, coeff)
 
     Δxᵢ = spacing(g.grids[dir])
