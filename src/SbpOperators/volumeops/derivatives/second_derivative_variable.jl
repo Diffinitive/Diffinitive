@@ -40,7 +40,6 @@ function check_coefficient(g, coeff)
 end
 
 
-# REVIEW: Fixa docs
 """
     SecondDerivativeVariable{Dir,T,D,...} <: LazyTensor{T,D,D}
 
@@ -130,13 +129,13 @@ function LazyTensors.apply(op::SecondDerivativeVariable, v::AbstractArray, I...)
         I = Base.setindex(I, Index(i, Upper), dir)
         return LazyTensors.apply(op, v, I...)
     else
-        error("Bounds error") # TODO: Make this more standard
+        error("Bounds error") # This should be `throw(BoundsError())` but the type inference is so fragile that it doesn't work. Needs investigation. / Jonatan 2023-06-08
     end
 end
 
 
-## 2D Specific implementations to avoid instability
-## TODO: Should really be solved by fixing the general methods instead
+# 2D Specific implementations to avoid type instability
+# TBD: Can this be solved by fixing the general methods instead?
 
 
 ## x-direction
