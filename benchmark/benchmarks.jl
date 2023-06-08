@@ -1,9 +1,12 @@
 using BenchmarkTools
+
 using Sbplib
 using Sbplib.Grids
 using Sbplib.SbpOperators
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
+
+using LinearAlgebra
 
 const SUITE = BenchmarkGroup()
 
@@ -67,6 +70,30 @@ SUITE["derivatives"]["second_derivative"]["3D"] = BenchmarkGroup()
 SUITE["derivatives"]["second_derivative"]["3D"]["x"] = @benchmarkable $u3 .= $Dx*$v3
 SUITE["derivatives"]["second_derivative"]["3D"]["y"] = @benchmarkable $u3 .= $Dy*$v3
 SUITE["derivatives"]["second_derivative"]["3D"]["z"] = @benchmarkable $u3 .= $Dz*$v3
+
+
+SUITE["derivatives"]["second_derivative_variable"] = BenchmarkGroup()
+
+c1 = map(x->sin(x)+2, g1)
+D₂ = second_derivative_variable(g1, c1, stencil_set)
+SUITE["derivatives"]["second_derivative_variable"]["1D"] = @benchmarkable $u1 .= $D₂*$v1
+
+c2 = map(x->sin(x[1] + x[2])+2, g2)
+Dx = second_derivative_variable(g2, c2, stencil_set, 1)
+Dy = second_derivative_variable(g2, c2, stencil_set, 2)
+SUITE["derivatives"]["second_derivative_variable"]["2D"] = BenchmarkGroup()
+SUITE["derivatives"]["second_derivative_variable"]["2D"]["x"] = @benchmarkable $u2 .= $Dx*$v2
+SUITE["derivatives"]["second_derivative_variable"]["2D"]["y"] = @benchmarkable $u2 .= $Dy*$v2
+
+c3 = map(x->sin(norm(x))+2, g3)
+Dx = second_derivative_variable(g3, c3, stencil_set, 1)
+Dy = second_derivative_variable(g3, c3, stencil_set, 2)
+Dz = second_derivative_variable(g3, c3, stencil_set, 3)
+SUITE["derivatives"]["second_derivative_variable"]["3D"] = BenchmarkGroup()
+SUITE["derivatives"]["second_derivative_variable"]["3D"]["x"] = @benchmarkable $u3 .= $Dx*$v3
+SUITE["derivatives"]["second_derivative_variable"]["3D"]["y"] = @benchmarkable $u3 .= $Dy*$v3
+SUITE["derivatives"]["second_derivative_variable"]["3D"]["z"] = @benchmarkable $u3 .= $Dz*$v3
+
 
 
 
