@@ -35,11 +35,14 @@ export coarsen
 export equidistant_grid
 export CartesianBoundary
 
+export CurvilinearGrid
+
 abstract type BoundaryIdentifier end
 
 include("grid.jl")
 include("tensor_grid.jl")
 include("equidistant_grid.jl")
 include("zero_dim_grid.jl")
+include("curvilinear_grid.jl")
 
 end # module
