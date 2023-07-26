@@ -14,7 +14,7 @@ Base.getindex(set::StencilSet,I...) = set.table[I...]
 
 
 """
-read_stencil_set(filename; filters)
+    read_stencil_set(filename; filters)
 
 Creates a `StencilSet` from a TOML file based on some key-value
 filters. If more than one set matches the filters an error is raised. The
@@ -109,6 +109,33 @@ function check_stencil_toml(parsed_toml)
         throw(ArgumentError("the center of a stencil must be specified as an integer."))
     end
 end
+
+
+"""
+    parse_nested_stencil(parsed_toml)
+
+Accept parsed TOML and read it as a nested tuple.
+
+See also [`read_stencil_set`](@ref), [`parse_stencil`](@ref).
+"""
+function parse_nested_stencil(parsed_toml)
+    if parsed_toml isa Array
+        weights = parse_stencil.(parsed_toml)
+        return CenteredNestedStencil(weights...)
+    end
+
+    center = parsed_toml["c"]
+    weights = parse_tuple.(parsed_toml["s"])
+    return NestedStencil(weights...; center)
+end
+
+"""
+    parse_nested_stencil(T, parsed_toml)
+
+Parse the input as a nested stencil with element type `T`.
+"""
+parse_nested_stencil(T, parsed_toml) = NestedStencil{T}(parse_nested_stencil(parsed_toml))
+
 
 """
     parse_scalar(parsed_toml)

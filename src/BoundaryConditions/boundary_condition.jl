@@ -70,8 +70,8 @@ a `LazyArray` holding the `BoundaryData` discretized on `boundary_grid`.
 # TODO: Is the return type of discretize really a good interface
 # for the boundary data?
 # Moreover, instead of explicitly converting to a LazyArray here
-# should we defer this to evalOn (and extend evalOn for scalars as well)?
-# I.e. if evalOn returns a LazyArray, the boundary data is lazy. Otherwise
+# should we defer this to eval_on (and extend eval_on for scalars as well)?
+# I.e. if eval_on returns a LazyArray, the boundary data is lazy. Otherwise
 # it is preallocated.
 
 function discretize(bd::ConstantBoundaryData, boundary_grid)
@@ -83,11 +83,11 @@ function discretize(bd::TimeDependentBoundaryData, boundary_grid)
 end
 
 function discretize(bd::SpaceDependentBoundaryData, boundary_grid)
-    return t -> evalOn(boundary_grid, bd.val)
+    return t -> eval_on(boundary_grid, bd.val)
 end
 
 function discretize(bd::SpaceTimeDependentBoundaryData, boundary_grid)
-    return t -> evalOn(boundary_grid, bd.val(t))
+    return t -> eval_on(boundary_grid, bd.val(t))
 end
 
 function discretize(::ZeroBoundaryData, boundary_grid)

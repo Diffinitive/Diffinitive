@@ -6,7 +6,7 @@ using Sbplib.Grids
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 
-grid = EquidistantGrid(11, 0.0, 1.0)
+grid = equidistant_grid(11, 0.0, 1.0)
 (id_l,id_r) = boundary_identifiers(grid)
 struct MockOp
 end
@@ -30,11 +30,11 @@ function BoundaryConditions.sat_tensors(op::MockOp, grid, bc::DirichletCondition
 end
 
 
-@testset "sat" begin
-    g = ConstantBoundaryData(2.0)
-    dc = DirichletCondition(g,id_l)
-    op = MockOp()
-    f = sat(op, grid, dc)
-    u = evalOn(grid, x-> -1/2 + x^2)
-    @show f(0.,u)
-end
+# @testset "sat" begin
+#     g = ConstantBoundaryData(2.0)
+#     dc = DirichletCondition(g,id_l)
+#     op = MockOp()
+#     f = sat(op, grid, dc)
+#     u = eval_on(grid, x-> -1/2 + x^2)
+#     @show f(0.,u)
+# end

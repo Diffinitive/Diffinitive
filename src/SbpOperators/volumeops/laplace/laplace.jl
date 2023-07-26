@@ -1,9 +1,8 @@
 """
     Laplace{T, Dim, TM} <: LazyTensor{T, Dim, Dim}
 
-Implements the Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
-`LazyTensor`. Additionally `Laplace` stores the `StencilSet`
-used to construct the `LazyTensor `.
+The Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
+`LazyTensor`.
 """
 struct Laplace{T, Dim, TM<:LazyTensor{T, Dim, Dim}} <: LazyTensor{T, Dim, Dim}
     D::TM       # Difference operator
@@ -11,17 +10,15 @@ struct Laplace{T, Dim, TM<:LazyTensor{T, Dim, Dim}} <: LazyTensor{T, Dim, Dim}
 end
 
 """
-    Laplace(grid::Equidistant, stencil_set)
+    Laplace(g::Grid, stencil_set::StencilSet)
 
-Creates the `Laplace` operator `Δ` on `grid` given a `stencil_set`. 
+Creates the `Laplace` operator `Δ` on `g` given `stencil_set`. 
 
 See also [`laplace`](@ref).
 """
-function Laplace(grid::EquidistantGrid, stencil_set::StencilSet)
-    inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
-    closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
-    Δ = laplace(grid, inner_stencil,closure_stencils)
-    return Laplace(Δ,stencil_set)
+function Laplace(g::Grid, stencil_set::StencilSet)
+    Δ = laplace(g, stencil_set)
+    return Laplace(Δ, stencil_set)
 end
 
 LazyTensors.range_size(L::Laplace) = LazyTensors.range_size(L.D)
@@ -32,44 +29,47 @@ LazyTensors.apply(L::Laplace, v::AbstractArray, I...) = LazyTensors.apply(L.D,v,
 # Base.show(io::IO, L::Laplace) = ...
 
 """
-    laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
+    laplace(g::Grid, stencil_set)
 
-Creates the Laplace operator operator `Δ` as a `LazyTensor`
+Creates the Laplace operator operator `Δ` as a `LazyTensor` on `g`.
 
-`Δ` approximates the Laplace operator ∑d²/xᵢ² , i = 1,...,`Dim` on `grid`, using
-the stencil `inner_stencil` in the interior and a set of stencils `closure_stencils`
-for the points in the closure regions.
-
-On a one-dimensional `grid`, `Δ` is equivalent to `second_derivative`. On a
-multi-dimensional `grid`, `Δ` is the sum of multi-dimensional `second_derivative`s
-where the sum is carried out lazily.
+`Δ` approximates the Laplace operator ∑d²/xᵢ² , i = 1,...,`Dim` on `g`. The
+approximation depends on the type of grid and the stencil set.
 
 See also: [`second_derivative`](@ref).
 """
-function laplace(grid::EquidistantGrid, inner_stencil, closure_stencils)
-    Δ = second_derivative(grid, inner_stencil, closure_stencils, 1)
-    for d = 2:ndims(grid)
-        Δ += second_derivative(grid, inner_stencil, closure_stencils, d)
+function laplace end
+function laplace(g::TensorGrid, stencil_set)
+    # return mapreduce(+, enumerate(g.grids)) do (i, gᵢ)
+    #     Δᵢ = laplace(gᵢ, stencil_set)
+    #     LazyTensors.inflate(Δᵢ, size(g), i)
+    # end
+
+    Δ = LazyTensors.inflate(laplace(g.grids[1], stencil_set), size(g), 1)
+    for d = 2:ndims(g)
+        Δ += LazyTensors.inflate(laplace(g.grids[d], stencil_set), size(g), d)
     end
     return Δ
 end
+laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
+
 
 """
-    sat_tensors(Δ::Laplace, g::EquidistantGrid, bc::NeumannCondition)
+sat_tensors(Δ::Laplace, g::TensorGrid, bc::NeumannCondition)
 
 Returns anonymous functions for construction the `LazyTensorApplication`s
 recuired in order to impose a Neumann boundary condition.
 
 See also: [`sat`,`NeumannCondition`](@ref).
 """
-function BoundaryConditions.sat_tensors(Δ::Laplace, g::EquidistantGrid, bc::NeumannCondition)
+function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
     id = bc.id
     set  = Δ.stencil_set
     H⁻¹ = inverse_inner_product(g,set)
     Hᵧ = inner_product(boundary_grid(g, id), set)
     e = boundary_restriction(g, set, id)
     d = normal_derivative(g, set, id)
-    
+
     closure(u) = H⁻¹*e'*Hᵧ*d*u
     penalty(g) = -H⁻¹*e'*Hᵧ*g
     return closure, penalty

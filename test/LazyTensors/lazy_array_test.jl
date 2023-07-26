@@ -102,4 +102,7 @@ end
     @test_throws BoundsError LazyFunctionArray((i,j)->i*j, (3,2))[4,2]
     @test_throws BoundsError LazyFunctionArray((i,j)->i*j, (3,2))[2,3]
 
+    # Test that the constructor works with a restrictive function
+    f(x::Vararg{Int}) = sum(x)
+    @test LazyFunctionArray(f,(3,4)) isa LazyFunctionArray
 end

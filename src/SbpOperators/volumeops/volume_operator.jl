@@ -1,31 +1,7 @@
 """
-    volume_operator(grid, inner_stencil, closure_stencils, parity, direction)
-
-Creates a volume operator on a `Dim`-dimensional grid acting along the
-specified coordinate `direction`. The action of the operator is determined by
-the stencils `inner_stencil` and `closure_stencils`. When `Dim=1`, the
-corresponding `VolumeOperator` tensor mapping is returned. When `Dim>1`, the
-returned operator is the appropriate outer product of a one-dimensional
-operators and `IdentityTensor`s, e.g for `Dim=3` the volume operator in the
-y-direction is `I⊗op⊗I`.
-"""
-function volume_operator(grid::EquidistantGrid, inner_stencil, closure_stencils, parity, direction)
-    #TODO: Check that direction <= Dim?
-
-    # Create 1D volume operator in along coordinate direction
-    op = VolumeOperator(restrict(grid, direction), inner_stencil, closure_stencils, parity)
-    # Create 1D IdentityTensors for each coordinate direction
-    one_d_grids = restrict.(Ref(grid), Tuple(dims(grid)))
-    Is = IdentityTensor{eltype(grid)}.(size.(one_d_grids))
-    # Formulate the correct outer product sequence of the identity mappings and
-    # the volume operator
-    parts = Base.setindex(Is, op, direction)
-    return foldl(⊗, parts)
-end
-
-"""
     VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
-Implements a one-dimensional constant coefficients volume operator
+
+A one-dimensional constant coefficients stencil operator.
 """
 struct VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
     inner_stencil::Stencil{T,N}
@@ -34,9 +10,9 @@ struct VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
     parity::Parity
 end
 
-function VolumeOperator(grid::EquidistantGrid{1}, inner_stencil, closure_stencils, parity)
+function VolumeOperator(grid::EquidistantGrid, inner_stencil, closure_stencils, parity)
     return VolumeOperator(inner_stencil, Tuple(closure_stencils), size(grid), parity)
-end
+end # TBD: Remove this function?
 
 closure_size(::VolumeOperator{T,N,M}) where {T,N,M} = M
 
@@ -59,3 +35,4 @@ function LazyTensors.apply(op::VolumeOperator, v::AbstractVector, i)
     r = getregion(i, closure_size(op), op.size[1])
     return LazyTensors.apply(op, v, Index(i, r))
 end
+# TODO: Move this to LazyTensors when we have the region communication down.

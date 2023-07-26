@@ -30,6 +30,7 @@ Base.:-(s::LazyTensor, t::LazyTensor) = ElementwiseTensorOperation{:-}(s,t)
 
 # Composing lazy tensors
 Base.:∘(s::LazyTensor, t::LazyTensor) = TensorComposition(s,t)
+Base.:∘(s::TensorComposition, t::LazyTensor) = s.t1∘(s.t2∘t)
 
 # Outer products of tensors
 ⊗(a::LazyTensor, b::LazyTensor) = LazyOuterProduct(a,b)

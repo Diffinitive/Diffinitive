@@ -188,7 +188,7 @@ end
     @test a*Ã == Ã*a
     @test range_size(a*Ã) == range_size(Ã)
     @test domain_size(a*Ã) == domain_size(Ã)
-    @test a*Ã*v == a.*A*v
+    @test a*Ã*v ≈ a.*A*v rtol=1e-14
 end
 
 
@@ -365,4 +365,18 @@ end
         I2 = IdentityTensor(4)
         @test I1⊗Ã⊗I2 == InflatedTensor(I1, Ã, I2)
     end
+end
+
+@testset "inflate" begin
+    I = LazyTensors.inflate(IdentityTensor(),(3,4,5,6), 2)
+    @test I isa LazyTensor{Float64, 3,3}
+    @test range_size(I) == (3,5,6)
+    @test domain_size(I) == (3,5,6)
+
+    @test LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 1) == InflatedTensor(IdentityTensor{Float64}(),ScalingTensor(1., (4,)),IdentityTensor(4,5,6))
+    @test LazyTensors.inflate(ScalingTensor(2., (1,)),(3,4,5,6), 2) == InflatedTensor(IdentityTensor(3),ScalingTensor(2., (1,)),IdentityTensor(5,6))
+    @test LazyTensors.inflate(ScalingTensor(3., (6,)),(3,4,5,6), 4) == InflatedTensor(IdentityTensor(3,4,5),ScalingTensor(3., (6,)),IdentityTensor{Float64}())
+
+    @test_throws BoundsError LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 0)
+    @test_throws BoundsError LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 5)
 end

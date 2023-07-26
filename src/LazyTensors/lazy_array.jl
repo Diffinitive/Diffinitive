@@ -28,7 +28,7 @@ end
 export LazyFunctionArray
 
 function LazyFunctionArray(f::F, size::NTuple{D,Int}) where {F<:Function,D}
-    T = typeof(f(ones(D)...))
+    T = typeof(f(ones(Int, D)...))
     return LazyFunctionArray{F,T,D}(f,size)
 end
 
@@ -36,7 +36,7 @@ Base.size(lfa::LazyFunctionArray) = lfa.size
 
 function Base.getindex(lfa::LazyFunctionArray{F,T,D}, I::Vararg{Int,D}) where {F,T,D}
     @boundscheck checkbounds(lfa, I...)
-    return @inbounds lfa.f(I...)
+    return @inbounds @inline lfa.f(I...)
 end
 
 

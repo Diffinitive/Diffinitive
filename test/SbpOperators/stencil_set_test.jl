@@ -4,6 +4,7 @@ using TOML
 using Sbplib.SbpOperators
 
 import Sbplib.SbpOperators.Stencil
+import Sbplib.SbpOperators.NestedStencil
 
 @testset "readoperator" begin
     toml_str = """
@@ -169,4 +170,19 @@ end
 
     @test SbpOperators.parse_rational(2) isa Rational
     @test SbpOperators.parse_rational(2) == 2//1
+end
+
+@testset "parse_nested_stencil" begin
+    toml = TOML.parse("""
+        s1 = [["1/2", "1/2", "0"],[ "-1/2", "-1", "-1/2"],["0", "1/2", "1/2"]]
+        s2 = {s = [[  "2",  "-1", "0"],[   "-3",  "1",    "0"],["1",   "0",   "0"]], c = 1}
+        s3 = {s = [[  "2",  "-1", "0"],[   "-3",  "1",    "0"],["1",   "0",   "0"]], c = 2}
+    """)
+
+    @test parse_nested_stencil(toml["s1"]) == CenteredNestedStencil((1//2, 1//2, 0//1),( -1//2, -1//1, -1//2),(0//1, 1//2, 1//2))
+    @test parse_nested_stencil(toml["s2"]) == NestedStencil((2//1, -1//1, 0//1),( -3//1, 1//1, 0//1),(1//1, 0//1, 0//1), center = 1)
+    @test parse_nested_stencil(toml["s3"]) == NestedStencil((2//1, -1//1, 0//1),( -3//1, 1//1, 0//1),(1//1, 0//1, 0//1), center = 2)
+
+    @test parse_nested_stencil(Float64, toml["s1"]) == CenteredNestedStencil((1/2, 1/2, 0.),( -1/2, -1., -1/2),(0., 1/2, 1/2))
+    @test parse_nested_stencil(Int, toml["s2"]) == NestedStencil((2, -1, 0),( -3, 1, 0),(1, 0, 0), center = 1)
 end
