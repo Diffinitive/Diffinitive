@@ -57,8 +57,8 @@ laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
 """
 sat_tensors(Δ::Laplace, g::TensorGrid, bc::NeumannCondition)
 
-Returns anonymous functions for construction the `LazyTensorApplication`s
-recuired in order to impose a Neumann boundary condition.
+Returns the LazyTensors required to impose a Neumann condition
+SAT = sat_op(d*u - g)
 
 See also: [`sat`,`NeumannCondition`](@ref).
 """
@@ -70,7 +70,6 @@ function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::NeumannConditi
     e = boundary_restriction(g, set, id)
     d = normal_derivative(g, set, id)
 
-    closure(u) = H⁻¹*e'*Hᵧ*d*u
-    penalty(g) = -H⁻¹*e'*Hᵧ*g
-    return closure, penalty
+    sat_tensor = H⁻¹∘e'∘Hᵧ
+    return sat_tensor, d
 end
