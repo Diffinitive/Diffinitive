@@ -74,7 +74,7 @@ function boundary_grid end
 """
     eval_on(g::Grid, f)
 
-Lazy evaluation `f` on the grid. `f` can either be on the form `f(x,y,...)`
+Lazy evaluation of `f` on the grid. `f` can either be on the form `f(x,y,...)`
 with each coordinate as an argument, or on the form `f(x̄)` taking a
 coordinate vector.
 
@@ -88,6 +88,14 @@ function eval_on(g::Grid, f, ::Base.HasShape)
         return LazyTensors.LazyFunctionArray((I...)->f(g[I...]...), size(g))
     end
 end
+"""
+    eval_on(g::Grid, f::Number)
+
+Lazy evaluation of a scalar `f` on the grid. `
+
+For concrete array grid functions `map(f,g)` can be used instead.
+"""
+eval_on(g::Grid, f::Number) = return LazyTensors.LazyConstantArray(f, size(g))
 
 _ncomponents(::Type{<:Number}) = 1
 _ncomponents(T::Type{<:SVector}) = length(T)
