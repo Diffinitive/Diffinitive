@@ -17,7 +17,7 @@ struct TensorGrid{T,D,GT<:NTuple{N,Grid} where N} <: Grid{T,D}
 end
 
 # Indexing interface
-function Base.getindex(g::TensorGrid, I...)
+function Base.getindex(g::TensorGrid, I::Vararg{Int})
     szs = ndims.(g.grids)
 
     Is = LazyTensors.split_tuple(I, szs)
@@ -25,8 +25,6 @@ function Base.getindex(g::TensorGrid, I...)
 
     return vcat(ps...)
 end
-
-Base.getindex(g::TensorGrid, I::CartesianIndex) = g[Tuple(I)...]
 
 function Base.eachindex(g::TensorGrid)
     szs = LazyTensors.concatenate_tuples(size.(g.grids)...)

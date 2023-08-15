@@ -22,6 +22,8 @@ abstract type Grid{T,D} end
 Base.ndims(::Grid{T,D}) where {T,D} = D
 Base.eltype(::Type{<:Grid{T}}) where T = T
 
+Base.getindex(g::Grid, I::CartesianIndex) = g[Tuple(I)...]
+
 """
     coordinate_size(g)
 
