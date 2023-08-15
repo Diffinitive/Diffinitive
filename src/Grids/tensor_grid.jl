@@ -42,6 +42,7 @@ function Base.lastindex(g::TensorGrid, d)
     i, ld = grid_and_local_dim_index(ndims.(g.grids), d)
     return lastindex(g.grids[i], ld)
 end
+# TBD: Should the two above functions be supported by implementing `axes` instead?
 
 # Iteration interface
 Base.iterate(g::TensorGrid) = iterate(Iterators.product(g.grids...)) |> _iterate_combine_coords
