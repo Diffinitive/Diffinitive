@@ -156,3 +156,31 @@ end
     @test Grids.combine_coordinates(1,@SVector[2.,3]) isa SVector{3, Float64}
     @test Grids.combine_coordinates(1,@SVector[2.,3]) == [1,2,3]
 end
+
+@testset "grid_and_local_dim_index" begin
+    cases = [
+        ((1,), 1) => (1,1),
+
+        ((1,1), 1) => (1,1),
+        ((1,1), 2) => (2,1),
+
+        ((1,2), 1) => (1,1),
+        ((1,2), 2) => (2,1),
+        ((1,2), 3) => (2,2),
+
+        ((2,1), 1) => (1,1),
+        ((2,1), 2) => (1,2),
+        ((2,1), 3) => (2,1),
+
+        ((2,1,3), 1) => (1,1),
+        ((2,1,3), 2) => (1,2),
+        ((2,1,3), 3) => (2,1),
+        ((2,1,3), 4) => (3,1),
+        ((2,1,3), 5) => (3,2),
+        ((2,1,3), 6) => (3,3),
+    ]
+
+    @testset "grid_and_local_dim_index$args" for (args, expected) ∈ cases
+        @test Grids.grid_and_local_dim_index(args...) == expected
+    end
+end

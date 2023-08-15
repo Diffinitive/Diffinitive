@@ -97,3 +97,20 @@ end
 function combine_coordinates(coords...)
     return mapreduce(SVector, vcat, coords)
 end
+
+"""
+   grid_and_local_dim_index(nds, d)
+
+Given a tuple of number of dimensions `nds`, and a global dimension `d`,
+calculate which grid index and local dimension `d` corresponds to.
+"""
+function grid_and_local_dim_index(nds, d)
+    I = findfirst(>=(d), cumsum(nds))
+
+    if I == 1
+        return (1, d)
+    else
+        return (I, d-cumsum(nds)[I-1])
+    end
+    # TBD: Is there a cleaner way to compute this?
+end
