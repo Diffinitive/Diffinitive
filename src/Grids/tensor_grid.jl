@@ -33,6 +33,16 @@ function Base.eachindex(g::TensorGrid)
     return CartesianIndices(szs)
 end
 
+function Base.firstindex(g::TensorGrid, d)
+    i, ld = grid_and_local_dim_index(ndims.(g.grids), d)
+    return firstindex(g.grids[i], ld)
+end
+
+function Base.lastindex(g::TensorGrid, d)
+    i, ld = grid_and_local_dim_index(ndims.(g.grids), d)
+    return lastindex(g.grids[i], ld)
+end
+
 # Iteration interface
 Base.iterate(g::TensorGrid) = iterate(Iterators.product(g.grids...)) |> _iterate_combine_coords
 Base.iterate(g::TensorGrid, state) = iterate(Iterators.product(g.grids...), state) |> _iterate_combine_coords
