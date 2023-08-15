@@ -59,6 +59,18 @@ using Sbplib.RegionIndices
             @test eachindex(TensorGrid(g₁, g₄)) == CartesianIndices((11,))
             @test eachindex(TensorGrid(g₁, g₄, g₂)) == CartesianIndices((11,6))
         end
+
+        @testset "firstindex" begin
+            @test_broken firstindex(TensorGrid(g₁, g₂, g₃), 1) == 1
+            @test_broken firstindex(TensorGrid(g₁, g₂, g₃), 2) == 1
+            @test_broken firstindex(TensorGrid(g₁, g₂, g₃), 3) == 1
+        end
+
+        @testset "lastindex" begin
+            @test_broken lastindex(TensorGrid(g₁, g₂, g₃), 1) == 11
+            @test_broken lastindex(TensorGrid(g₁, g₂, g₃), 2) == 6
+            @test_broken lastindex(TensorGrid(g₁, g₂, g₃), 3) == 10
+        end
     end
 
     @testset "Iterator interface" begin
