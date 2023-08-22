@@ -95,8 +95,6 @@ end
     eval_on(g::Grid, f::Number)
 
 Lazy evaluation of a scalar `f` on the grid.
-
-For concrete array grid functions `map(f,g)` can be used instead. # REVIEW: The suggested code doesn't seem to work and I don't think it needs to. Probably enough to just delete the remark?
 """
 eval_on(g::Grid, f::Number) = return LazyTensors.LazyConstantArray(f, size(g))
 
