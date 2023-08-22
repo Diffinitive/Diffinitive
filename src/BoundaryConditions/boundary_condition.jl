@@ -4,7 +4,7 @@
 A type for implementing data needed in order to impose a boundary condition.
 Subtypes refer to perticular types of boundary conditions, e.g. Neumann conditions.
 """
-abstract type BoundaryCondition end
+abstract type BoundaryCondition{T} end
 
 """
     id(::BoundaryCondition)
@@ -30,17 +30,18 @@ a `LazyArray` holding the `BoundaryData` discretized on `boundary_grid`.
 function discretize_data(grid, bc::BoundaryCondition)
     return eval_on(boundary_grid(grid, id(bc)), data(bc))
 end
- 
-struct NeumannCondition{DT} <: BoundaryCondition{DT}
-    data::DT
+
+struct DirichletCondition{T} <: BoundaryCondition{T}
+    data::T
+    id::BoundaryIdentifier
+end
+id(bc::DirichletCondition) = bc.id
+data(bc::DirichletCondition) = bc.data
+
+struct NeumannCondition{T} <: BoundaryCondition{T}
+    data::T
     id::BoundaryIdentifier 
 end
 id(bc::NeumannCondition) = bc.id
 data(bc::NeumannCondition) = bc.data
 
-struct DirichletCondition{DT} <: BoundaryCondition{DT}
-    data::DT
-    id::BoundaryIdentifier
-end
-id(bc::NeumannCondition) = bc.id
-data(bc::DirichletCondition) = bc.data
