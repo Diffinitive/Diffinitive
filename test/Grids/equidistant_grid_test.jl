@@ -19,6 +19,9 @@ using Sbplib.LazyTensors
         @test g[end] == 10.0
 
         @test all(eachindex(g) .== 1:101)
+
+        @test firstindex(g) == 1
+        @test lastindex(g) == 101
     end
 
     @testset "Iterator interface" begin
