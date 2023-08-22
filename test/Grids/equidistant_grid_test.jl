@@ -22,6 +22,11 @@ using Sbplib.LazyTensors
 
         @test firstindex(g) == 1
         @test lastindex(g) == 101
+
+        @test g[:] == g[1:101]
+        
+        @test axes(g,1) == 1:101
+        @test axes(g) == (1:101,)
     end
 
     @testset "Iterator interface" begin
