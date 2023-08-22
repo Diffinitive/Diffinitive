@@ -39,6 +39,10 @@ using Sbplib.RegionIndices
             @test g[begin, begin] == g[1,1]
             @test g[begin, end] == g[1,6]
             @test g[end, end] == g[11,6]
+
+            @test axes(g, 1) == 1:11
+            @test axes(g, 2) == 1:6
+            @test axes(g) == (1:11,1:6)
         end
 
         @testset "cartesian indexing" begin
