@@ -34,6 +34,11 @@ using Sbplib.RegionIndices
 
             @test TensorGrid(g₁, g₄, g₂)[3,2] isa SVector{4,Float64}
             @test TensorGrid(g₁, g₄, g₂)[3,2] == [0.2, 1., 2., 2.2]
+
+            g = TensorGrid(g₁, g₂)
+            @test g[begin, begin] == g[1,1]
+            @test g[begin, end] == g[1,6]
+            @test g[end, end] == g[11,6]
         end
 
         @testset "cartesian indexing" begin
