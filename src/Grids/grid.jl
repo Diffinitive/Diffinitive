@@ -90,10 +90,11 @@ function eval_on(g::Grid, f, ::Base.HasShape)
         return LazyTensors.LazyFunctionArray((I...)->f(g[I...]...), size(g))
     end
 end
+
 """
     eval_on(g::Grid, f::Number)
 
-Lazy evaluation of a scalar `f` on the grid. `
+Lazy evaluation of a scalar `f` on the grid.
 
 For concrete array grid functions `map(f,g)` can be used instead.
 """
