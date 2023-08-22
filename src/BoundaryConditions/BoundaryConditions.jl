@@ -1,19 +1,13 @@
 module BoundaryConditions
 
-export BoundaryData
-export ConstantBoundaryData
-export SpaceDependentBoundaryData
-export TimeDependentBoundaryData
-export SpaceTimeDependentBoundaryData
-export ZeroBoundaryData
-export discretize
 
 export BoundaryCondition
+export discretize_data
+export data
+export id
+
 export NeumannCondition
 export DirichletCondition
-export RobinCondition
-
-export data
 
 export sat
 export sat_tensors
