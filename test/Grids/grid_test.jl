@@ -38,6 +38,9 @@ end
     @test eval_on(ZeroDimGrid(1.), x̄->2x̄) isa LazyArray
     @test eval_on(ZeroDimGrid(1.), x̄->2x̄) == fill(2.)
 
+    @test eval_on(ZeroDimGrid(@SVector[1.,2.]), π) isa LazyArray
+    @test eval_on(ZeroDimGrid(@SVector[1.,2.]), π) == fill(π)
+
     @test eval_on(EquidistantGrid(range(0,1,length=4)), x->2x) isa LazyArray
     @test eval_on(EquidistantGrid(range(0,1,length=4)), x->2x) == 2 .* range(0,1,length=4)
 
@@ -48,6 +51,8 @@ end
     @test eval_on(g, x̄ -> 0.) == fill(0., (5,3))
 
     @test eval_on(g, x̄ -> sin(x̄[1])*cos(x̄[2])) == map(x̄->sin(x̄[1])*cos(x̄[2]), g)
+
+    @test eval_on(g, π) == fill(π, (5,3))
 
     # Vector valued function
     @test eval_on(g, x̄ -> @SVector[x̄[2], x̄[1]]) isa LazyArray{SVector{2,Float64}}
