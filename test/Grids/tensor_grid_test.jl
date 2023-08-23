@@ -39,10 +39,6 @@ using Sbplib.RegionIndices
             @test g[begin, begin] == g[1,1]
             @test g[begin, end] == g[1,6]
             @test g[end, end] == g[11,6]
-
-            @test axes(g, 1) == 1:11
-            @test axes(g, 2) == 1:6
-            @test axes(g) == (1:11,1:6)
         end
 
         @testset "cartesian indexing" begin
@@ -112,6 +108,16 @@ using Sbplib.RegionIndices
         @test collect(TensorGrid(g₁, g₂, g₃)) == [@SVector[x,y,z] for x ∈ range(0,1,length=11), y ∈ range(2,3,length=6), z ∈ 1:10]
         @test collect(TensorGrid(g₁, g₄)) == [@SVector[x,1,2] for x ∈ range(0,1,length=11)]
         @test collect(TensorGrid(g₁, g₄, g₂)) == [@SVector[x,1,2,y] for x ∈ range(0,1,length=11), y ∈ range(2,3,length=6)]
+    end
+
+    @testset "Base" begin
+        g₁ = EquidistantGrid(range(0,1,length=11))
+        g₂ = EquidistantGrid(range(2,3,length=6))
+        g = TensorGrid(g₁, g₂)
+
+        @test axes(g, 1) == 1:11
+        @test axes(g, 2) == 1:6
+        @test axes(g) == (1:11,1:6)
     end
 
     @testset "refine" begin
