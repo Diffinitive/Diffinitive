@@ -14,6 +14,5 @@ using Sbplib.Grids
     @test DirichletCondition(g,id_n) isa BoundaryCondition{Float64}
     @test NeumannCondition(f,id_n) isa BoundaryCondition{<:Function}
 
-#    g_n = discretize_data(grid_2d,DirichletCondition(f,id_n))
-#    @test g_n .≈ g*ones(1,11)
+   @test g*ones(11,1) ≈ discretize_data(grid_2d,DirichletCondition(g,id_n))
 end
