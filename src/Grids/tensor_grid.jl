@@ -104,8 +104,16 @@ end
 """
    grid_and_local_dim_index(nds, d)
 
-Given a tuple of number of dimensions `nds`, and a global dimension `d`,
-calculate which grid index and local dimension `d` corresponds to.
+Given a tuple of number of dimensions `nds`, and a global dimension index `d`,
+calculate which grid index, and local dimension, `d` corresponds to.
+
+`nds` would come from broadcasting `ndims` on the grids tuple of a
+`TensorGrid`. If you are interested in a dimension `d` of a tensor grid `g`
+```julia
+gi, ldi = grid_and_local_dim_index(ndims.(g.grids), d)
+```
+tells you which grid it belongs to (`gi`) and wich index it is at within that
+grid (`ldi`).
 """
 function grid_and_local_dim_index(nds, d)
     I = findfirst(>=(d), cumsum(nds))
