@@ -43,9 +43,6 @@ using Sbplib.RegionIndices
             @test axes(g, 1) == 1:11
             @test axes(g, 2) == 1:6
             @test axes(g) == (1:11,1:6)
-
-            # REVIEW: Would be nice if this worked.
-            @test_broken g[:, end] == g[1:11,6]
         end
 
         @testset "cartesian indexing" begin
