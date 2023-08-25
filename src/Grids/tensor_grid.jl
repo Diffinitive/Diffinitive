@@ -112,7 +112,7 @@ calculate which grid index, and local dimension, `d` corresponds to.
 ```julia
 gi, ldi = grid_and_local_dim_index(ndims.(g.grids), d)
 ```
-tells you which grid it belongs to (`gi`) and wich index it is at within that
+tells you which grid it belongs to (`gi`) and which index it is at within that
 grid (`ldi`).
 """
 function grid_and_local_dim_index(nds, d)
@@ -123,5 +123,4 @@ function grid_and_local_dim_index(nds, d)
     else
         return (I, d-cumsum(nds)[I-1])
     end
-    # TBD: Is there a cleaner way to compute this?
 end
