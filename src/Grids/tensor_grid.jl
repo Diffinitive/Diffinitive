@@ -31,6 +31,11 @@ function Base.eachindex(g::TensorGrid)
     return CartesianIndices(szs)
 end
 
+function Base.axes(g::TensorGrid, d)
+    i, ld = grid_and_local_dim_index(ndims.(g.grids), d)
+    return axes(g.grids[i], ld)
+end
+
 # Iteration interface
 Base.iterate(g::TensorGrid) = iterate(Iterators.product(g.grids...)) |> _iterate_combine_coords
 Base.iterate(g::TensorGrid, state) = iterate(Iterators.product(g.grids...), state) |> _iterate_combine_coords
@@ -94,4 +99,28 @@ end
 
 function combine_coordinates(coords...)
     return mapreduce(SVector, vcat, coords)
+end
+
+"""
+   grid_and_local_dim_index(nds, d)
+
+Given a tuple of number of dimensions `nds`, and a global dimension index `d`,
+calculate which grid index, and local dimension, `d` corresponds to.
+
+`nds` would come from broadcasting `ndims` on the grids tuple of a
+`TensorGrid`. If you are interested in a dimension `d` of a tensor grid `g`
+```julia
+gi, ldi = grid_and_local_dim_index(ndims.(g.grids), d)
+```
+tells you which grid it belongs to (`gi`) and which index it is at within that
+grid (`ldi`).
+"""
+function grid_and_local_dim_index(nds, d)
+    I = findfirst(>=(d), cumsum(nds))
+
+    if I == 1
+        return (1, d)
+    else
+        return (I, d-cumsum(nds)[I-1])
+    end
 end
