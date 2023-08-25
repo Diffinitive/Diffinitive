@@ -35,7 +35,11 @@ export coarsen
 export equidistant_grid
 export CartesianBoundary
 
+
+# CurvilinearGrid
 export CurvilinearGrid
+export jacobian
+export logicalgrid
 
 abstract type BoundaryIdentifier end
 

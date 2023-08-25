@@ -1,8 +1,11 @@
 struct CurvilinearGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractArray{<:Any, 2}, D}} <: Grid{T,D}
     logicalgrid::GT
     physicalcoordinates::CT
-    Jacobian::JT
+    jacobian::JT
 end
+
+jacobian(g::CurvilinearGrid) = g.jacobian
+logicalgrid(g::CurvilinearGrid) = g.logicalgrid
 
 
 # Indexing interface

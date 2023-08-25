@@ -9,10 +9,9 @@ using StaticArrays
 
     @test CurvilinearGrid(g, x̄, J) isa Grid{SVector{2, Float64},2}
 
-
-    @test_broken jacobian(cg) isa Array{<:AbstractVector}
-    @test_broken logicalgrid(cg) isa Grid
-
+    cg = CurvilinearGrid(g, x̄, J)
+    @test jacobian(cg) isa Array{<:AbstractMatrix}
+    @test logicalgrid(cg) isa Grid
 
 
     @testset "Indexing Interface" begin
