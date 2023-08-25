@@ -20,6 +20,8 @@ Base.eachindex(g::EquidistantGrid) = eachindex(g.points)
 Base.firstindex(g::EquidistantGrid) = firstindex(g.points)
 Base.lastindex(g::EquidistantGrid) = lastindex(g.points)
 
+Base.axes(g::EquidistantGrid, d) = axes(g.points, d)
+
 # Iteration interface
 Base.iterate(g::EquidistantGrid) = iterate(g.points)
 Base.iterate(g::EquidistantGrid, state) = iterate(g.points, state)

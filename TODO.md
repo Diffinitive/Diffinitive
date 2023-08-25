@@ -35,6 +35,7 @@
  - [ ] Multiblock grids
  - [ ] Periodic grids
  - [ ] Grids with modified boundary closures
+ - [ ] Support indexing with `:`.
 
 
 ### Benchmarks
