@@ -9,7 +9,11 @@ logicalgrid(g::CurvilinearGrid) = g.logicalgrid
 
 
 # Indexing interface
-Base.getindex(g::CurvilinearGrid, I...) = g.physicalcoordinates[I...]
+Base.getindex(g::CurvilinearGrid, I::Vararg{Int}) = g.physicalcoordinates[I...]
+Base.eachindex(g::CurvilinearGrid) = eachindex(g.logicalgrid)
+
+Base.firstindex(g::CurvilinearGrid, d) = firstindex(g.logicalgrid, d)
+Base.lastindex(g::CurvilinearGrid, d) = lastindex(g.logicalgrid, d)
 
 # function Base.getindex(g::TensorGrid, I...)
 #     szs = ndims.(g.grids)
