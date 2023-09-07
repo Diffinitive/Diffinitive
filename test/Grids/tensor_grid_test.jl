@@ -91,6 +91,12 @@ using Sbplib.RegionIndices
         @test size(TensorGrid(g₁, g₄)) == (11,)
         @test size(TensorGrid(g₁, g₄, g₂)) == (11,6)
 
+        @test length(TensorGrid(g₁, g₂)) == 66
+        @test length(TensorGrid(g₁, g₃)) == 110
+        @test length(TensorGrid(g₁, g₂, g₃)) == 660
+        @test length(TensorGrid(g₁, g₄)) == 11
+        @test length(TensorGrid(g₁, g₄, g₂)) == 66
+
         @test Base.IteratorSize(TensorGrid(g₁, g₂)) == Base.HasShape{2}()
         @test Base.IteratorSize(TensorGrid(g₁, g₃)) == Base.HasShape{2}()
         @test Base.IteratorSize(TensorGrid(g₁, g₂, g₃)) == Base.HasShape{3}()
