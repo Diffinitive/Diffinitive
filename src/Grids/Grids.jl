@@ -1,3 +1,4 @@
+# TODO: Double check that the interfaces for indexing and iterating are fully implemented and tested for all grids.
 module Grids
 
 using Sbplib.RegionIndices

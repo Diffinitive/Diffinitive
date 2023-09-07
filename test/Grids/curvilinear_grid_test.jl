@@ -3,10 +3,16 @@ using Test
 using StaticArrays
 
 @testset "CurvilinearGrid" begin
-    lg = equidistant_grid((11,11), (0,0), (1,1))
+    lg = equidistant_grid((11,11), (0,0), (1,1)) # TODO: Change dims of the grid to be different
     x̄ = map(ξ̄ -> 2ξ̄, lg)
     J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
     cg = CurvilinearGrid(lg, x̄, J)
+
+    # TODO: Test constructor for different dims of range and domain for the coordinates
+    # TODO: Test constructor with different type than TensorGrid. a dummy type?
+
+    @test_broken false # @test_throws ArgumentError("Sizes must match") CurvilinearGrid(lg, map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11))
+
 
     @test cg isa Grid{SVector{2, Float64},2}
 
