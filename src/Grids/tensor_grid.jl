@@ -45,6 +45,7 @@ _iterate_combine_coords((next,state)) = combine_coordinates(next...), state
 Base.IteratorSize(::Type{<:TensorGrid{<:Any, D}}) where D = Base.HasShape{D}()
 Base.length(g::TensorGrid) = sum(length, g.grids)
 Base.size(g::TensorGrid) = LazyTensors.concatenate_tuples(size.(g.grids)...)
+Base.size(g::TensorGrid, d) = size(g)[d]
 
 
 refine(g::TensorGrid, r::Int) = mapreduce(g->refine(g,r), TensorGrid, g.grids)

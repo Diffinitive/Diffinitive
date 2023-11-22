@@ -29,6 +29,7 @@ Base.iterate(g::EquidistantGrid, state) = iterate(g.points, state)
 Base.IteratorSize(::Type{<:EquidistantGrid}) = Base.HasShape{1}()
 Base.length(g::EquidistantGrid) = length(g.points)
 Base.size(g::EquidistantGrid) = size(g.points)
+Base.size(g::EquidistantGrid, d) = size(g.points)[d]
 
 
 """
