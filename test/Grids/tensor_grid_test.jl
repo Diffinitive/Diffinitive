@@ -85,11 +85,23 @@ using Sbplib.RegionIndices
         @test eltype(TensorGrid(g₁, g₄)) == SVector{3,Float64}
         @test eltype(TensorGrid(g₁, g₄, g₂)) == SVector{4,Float64}
 
+        @test eltype(typeof(TensorGrid(g₁, g₂))) == SVector{2,Float64}
+        @test eltype(typeof(TensorGrid(g₁, g₃))) == SVector{2,Float64}
+        @test eltype(typeof(TensorGrid(g₁, g₂, g₃))) == SVector{3,Float64}
+        @test eltype(typeof(TensorGrid(g₁, g₄))) == SVector{3,Float64}
+        @test eltype(typeof(TensorGrid(g₁, g₄, g₂))) == SVector{4,Float64}
+
         @test size(TensorGrid(g₁, g₂)) == (11,6)
         @test size(TensorGrid(g₁, g₃)) == (11,10)
         @test size(TensorGrid(g₁, g₂, g₃)) == (11,6,10)
         @test size(TensorGrid(g₁, g₄)) == (11,)
         @test size(TensorGrid(g₁, g₄, g₂)) == (11,6)
+
+        @test size(TensorGrid(g₁, g₂, g₃),1) == 11
+        @test size(TensorGrid(g₁, g₂, g₃),2) == 6
+        @test size(TensorGrid(g₁, g₂, g₃),3) == 10
+        @test size(TensorGrid(g₁, g₄, g₂),1) == 11
+        @test size(TensorGrid(g₁, g₄, g₂),2) == 6
 
         @test length(TensorGrid(g₁, g₂)) == 66
         @test length(TensorGrid(g₁, g₃)) == 110
