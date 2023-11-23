@@ -16,18 +16,15 @@ Base.eachindex(g::CurvilinearGrid) = eachindex(g.logicalgrid)
 Base.firstindex(g::CurvilinearGrid, d) = firstindex(g.logicalgrid, d)
 Base.lastindex(g::CurvilinearGrid, d) = lastindex(g.logicalgrid, d)
 
+# Iteration interface
 
+Base.iterate(g::CurvilinearGrid) = iterate(g.physicalcoordinates)
+Base.iterate(g::CurvilinearGrid, state) = iterate(g.physicalcoordinates, state)
 
-# # Iteration interface
-# Base.iterate(g::TensorGrid) = iterate(Iterators.product(g.grids...)) |> _iterate_combine_coords
-# Base.iterate(g::TensorGrid, state) = iterate(Iterators.product(g.grids...), state) |> _iterate_combine_coords
-# _iterate_combine_coords(::Nothing) = nothing
-# _iterate_combine_coords((next,state)) = combine_coordinates(next...), state
-
-# Base.IteratorSize(::Type{<:TensorGrid{<:Any, D}}) where D = Base.HasShape{D}()
-# Base.eltype(::Type{<:TensorGrid{T}}) where T = T
-# Base.length(g::TensorGrid) = sum(length, g.grids)
-# Base.size(g::TensorGrid) = LazyTensors.concatenate_tuples(size.(g.grids)...)
+Base.IteratorSize(::Type{<:CurvilinearGrid{<:Any, D}}) where D = Base.HasShape{D}()
+Base.length(g::CurvilinearGrid) = length(g.logicalgrid)
+Base.size(g::CurvilinearGrid) = size(g.logicalgrid)
+Base.size(g::CurvilinearGrid, d) = size(g.logicalgrid, d)
 
 
 # refine(g::TensorGrid, r::Int) = mapreduce(g->refine(g,r), TensorGrid, g.grids)

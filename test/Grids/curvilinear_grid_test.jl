@@ -62,16 +62,43 @@ using StaticArrays
     # TODO: Test with different types of logical grids
 
     @testset "Iterator interface" begin
-        # @test eltype(EquidistantGrid(0:10)) == Int
-        # @test eltype(EquidistantGrid(0:2:10)) == Int
-        # @test eltype(EquidistantGrid(0:0.1:10)) == Float64
+        sg = CurvilinearGrid(
+            equidistant_grid((15,11), (0,0), (1,1)),
+            map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11)
+        )
 
-        # @test size(EquidistantGrid(0:10)) == (11,)
-        # @test size(EquidistantGrid(0:0.1:10)) == (101,)
+        @test eltype(cg) == SVector{2,Float64}
+        @test eltype(sg) == SVector{3,Float64}
 
-        # @test collect(EquidistantGrid(0:0.1:0.5)) == [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+        @test eltype(typeof(cg)) == SVector{2,Float64}
+        @test eltype(typeof(sg)) == SVector{3,Float64}
 
-        # @test Base.IteratorSize(EquidistantGrid{Float64, StepRange{Float64}}) == Base.HasShape{1}()
+        @test size(cg) == (11,11)
+        @test size(sg) == (15,11)
+
+        @test size(cg,2) == 11
+        @test size(sg,2) == 11
+
+        @test length(cg) == 121
+        @test length(sg) == 165
+
+        @test Base.IteratorSize(cg) == Base.HasShape{2}()
+        @test Base.IteratorSize(typeof(cg)) == Base.HasShape{2}()
+
+        @test Base.IteratorSize(sg) == Base.HasShape{2}()
+        @test Base.IteratorSize(typeof(sg)) == Base.HasShape{2}()
+
+        element, state = iterate(cg)
+        @test element == lg[1,1].*2
+        element, _ =  iterate(cg, state)
+        @test element == lg[2,1].*2
+
+        element, state = iterate(sg)
+        @test element == sg.physicalcoordinates[1,1]
+        element, _ = iterate(sg, state)
+        @test element == sg.physicalcoordinates[2,1]
+
+        @test collect(cg) == 2 .* lg
     end
 
     @testset "Base" begin
