@@ -16,19 +16,7 @@ Base.eachindex(g::CurvilinearGrid) = eachindex(g.logicalgrid)
 Base.firstindex(g::CurvilinearGrid, d) = firstindex(g.logicalgrid, d)
 Base.lastindex(g::CurvilinearGrid, d) = lastindex(g.logicalgrid, d)
 
-# function Base.getindex(g::TensorGrid, I...)
-#     szs = ndims.(g.grids)
 
-#     Is = LazyTensors.split_tuple(I, szs)
-#     ps = map((g,I)->SVector(g[I...]), g.grids, Is)
-
-#     return vcat(ps...)
-# end
-
-# function Base.eachindex(g::TensorGrid)
-#     szs = LazyTensors.concatenate_tuples(size.(g.grids)...)
-#     return CartesianIndices(szs)
-# end
 
 # # Iteration interface
 # Base.iterate(g::TensorGrid) = iterate(Iterators.product(g.grids...)) |> _iterate_combine_coords
