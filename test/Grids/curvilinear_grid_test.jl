@@ -1,4 +1,5 @@
 using Sbplib.Grids
+using Sbplib.RegionIndices
 using Test
 using StaticArrays
 
@@ -102,41 +103,37 @@ using StaticArrays
     end
 
     @testset "Base" begin
-        # @test ndims(EquidistantGrid(0:10)) == 1
+        @test ndims(cg) == 2
     end
 
     @testset "boundary_identifiers" begin
-        # g = EquidistantGrid(0:0.1:10)
-        # @test boundary_identifiers(g) == (Lower(), Upper())
-        # @inferred boundary_identifiers(g)
+        @test boundary_identifiers(cg) == boundary_identifiers(lg)
     end
 
     @testset "boundary_grid" begin
-        # g = EquidistantGrid(0:0.1:1)
-        # @test boundary_grid(g, Lower()) == ZeroDimGrid(0.0)
-        # @test boundary_grid(g, Upper()) == ZeroDimGrid(1.0)
+        @test_broken boundary_grid(cg, TensorGridBoundary{1, Lower}()) == 2. * boundary_grid(lg,TensorGridBoundary{1, Lower()})
+        @test_broken boundary_grid(cg, TensorGridBoundary{1, Upper}()) == 2. * boundary_grid(lg,TensorGridBoundary{1, Upper()})
+        @test_broken boundary_grid(cg, TensorGridBoundary{2, Lower}()) == 2. * boundary_grid(lg,TensorGridBoundary{2, Lower()})
+        @test_broken boundary_grid(cg, TensorGridBoundary{2, Upper}()) == 2. * boundary_grid(lg,TensorGridBoundary{2, Upper()})
     end
 
+    # TBD: Should curvilinear grid support refining and coarsening?
+    # This would require keeping the coordinate mapping around which seems burdensome, and might increase compilation time?
     @testset "refine" begin
-        # g = EquidistantGrid(0:0.1:1)
-        # @test refine(g, 1) == g
-        # @test refine(g, 2) == EquidistantGrid(0:0.05:1)
-        # @test refine(g, 3) == EquidistantGrid(0:(0.1/3):1)
+        @test_broken refine(cg, 1) == cg
+        @test_broken refine(cg, 2) == CurvilinearGrid(refine(lg,2), x̄, J)
+        @test_broken refine(cg, 3) == CurvilinearGrid(refine(lg,3), x̄, J)
     end
 
     @testset "coarsen" begin
-        # g = EquidistantGrid(0:1:10)
-        # @test coarsen(g, 1) == g
-        # @test coarsen(g, 2) == EquidistantGrid(0:2:10)
+        lg = equidistant_grid((11,11), (0,0), (1,1)) # TODO: Change dims of the grid to be different
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+        cg = CurvilinearGrid(lg, x̄, J)
 
-        # g = EquidistantGrid(0:0.1:1)
-        # @test coarsen(g, 1) == g
-        # @test coarsen(g, 2) == EquidistantGrid(0:0.2:1)
+        @test_broken coarsen(cg, 1) == cg
+        @test_broken coarsen(cg, 2) == CurvilinearGrid(coarsen(lg,2), x̄, J)
 
-        # g = EquidistantGrid(0:10)
-        # @test coarsen(g, 1) == EquidistantGrid(0:1:10)
-        # @test coarsen(g, 2) == EquidistantGrid(0:2:10)
-
-        # @test_throws DomainError(3, "Size minus 1 must be divisible by the ratio.") coarsen(g, 3)
+        @test_broken false # @test_throws DomainError(3, "Size minus 1 must be divisible by the ratio.") coarsen(cg, 3)
     end
 end
