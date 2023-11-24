@@ -181,6 +181,18 @@ end
 
         @test SbpOperators.apply_stencil(ns, c, v, 4) == 5*7 + 11*11 + 6*13
         @test SbpOperators.apply_stencil_backwards(ns, c, v, 4) == -3*3 - 7*5 - 4*7
+
+        # Different types in vector and stencil
+        ns = NestedStencil((-1.,1.,0.),(-1.,0.,1.),(0.,-2.,2.), center=2)
+        @test SbpOperators.apply_inner_stencils(ns, c, 4) isa Stencil{Float64, 3}
+        @test SbpOperators.apply_inner_stencils(ns, c, 4) == Stencil(4.,9.,10.; center=2)
+        @test SbpOperators.apply_inner_stencils_backwards(ns, c, 4) isa Stencil{Float64, 3}
+        @test SbpOperators.apply_inner_stencils_backwards(ns, c, 4) == Stencil(-5.,-9.,-8.; center=2)
+
+        @test SbpOperators.apply_stencil(ns, c, v, 4) isa Float64
+        @test SbpOperators.apply_stencil(ns, c, v, 4) == 193.
+        @test SbpOperators.apply_stencil_backwards(ns, c, v, 4) isa Float64
+        @test SbpOperators.apply_stencil_backwards(ns, c, v, 4) == -158.
     end
 
     @testset "type stability" begin
