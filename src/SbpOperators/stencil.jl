@@ -69,20 +69,15 @@ end
 end
 
 Base.@propagate_inbounds @inline function apply_stencil(s::Stencil, v::AbstractVector, i::Int)
-    w = zero(promote_type(eltype(s),eltype(v)))
-    @simd for k ∈ 1:length(s)
-        w += s.weights[k]*v[i + s.range[k]]
+    return sum(1:length(s)) do k
+        s.weights[k]*v[i + s.range[k]]
     end
-
-    return w
 end
 
 Base.@propagate_inbounds @inline function apply_stencil_backwards(s::Stencil, v::AbstractVector, i::Int)
-    w = zero(promote_type(eltype(s),eltype(v)))
-    @simd for k ∈ length(s):-1:1
-        w += s.weights[k]*v[i - s.range[k]]
+    return sum(length(s):-1:1) do k
+        s.weights[k]*v[i - s.range[k]]
     end
-    return w
 end
 
 function left_pad(s::Stencil, N)
