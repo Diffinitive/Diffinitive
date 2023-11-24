@@ -3,6 +3,7 @@ using Sbplib.SbpOperators
 import Sbplib.SbpOperators.Stencil
 import Sbplib.SbpOperators.NestedStencil
 import Sbplib.SbpOperators.scale
+import Sbplib.SbpOperators: apply_stencil, apply_stencil_backwards
 
 @testset "Stencil" begin
     s = Stencil(-2:2, (1.,2.,2.,3.,4.))
@@ -42,6 +43,31 @@ import Sbplib.SbpOperators.scale
 
     @testset "promotion" begin
         @test promote(Stencil(1,1;center=1), Stencil(2.,2.;center=2)) == (Stencil(1.,1.;center=1), Stencil(2.,2.;center=2))
+    end
+
+    @testset "apply_stencil" begin
+        v = [1, 2, 4, 8, 16, 32, 64, 128]
+        s = Stencil(1,2,3,4, center = 2)
+        @test apply_stencil(s,v, 2) == v[1] + 2*v[2] + 3*v[3] + 4*v[4]
+        @test apply_stencil(s,v, 4) == v[3] + 2*v[4] + 3*v[5] + 4*v[6]
+        @test apply_stencil_backwards(s,v, 3) == 4*v[1] + 3*v[2] + 2*v[3] + 1*v[4]
+        @test apply_stencil_backwards(s,v, 7) == 4*v[5] + 3*v[6] + 2*v[7] + 1*v[8]
+        @test apply_stencil(s,v, 2) isa Int
+        @test apply_stencil_backwards(s,v, 7) isa Int
+
+        v = [1, 2, 4, 8, 16, 32, 64, 128]
+        s = Stencil(1.,2.,3.,4., center = 2)
+        @test apply_stencil(s,v, 4) == v[3] + 2. *v[4] + 3. *v[5] + 4. *v[6]
+        @test apply_stencil_backwards(s,v, 7) == 4. *v[5] + 3. *v[6] + 2. *v[7] + v[8]
+        @test apply_stencil(s,v, 2) isa Float64
+        @test apply_stencil_backwards(s,v, 7) isa Float64
+
+        v = [1., 2., 4., 8., 16., 32., 64., 128.]
+        s = Stencil(1,2,3,4, center = 2)
+        @test apply_stencil(s,v, 2) == v[1] + 2*v[2] + 3*v[3] + 4*v[4]
+        @test apply_stencil_backwards(s,v, 3) == 4*v[1] + 3*v[2] + 2*v[3] + 1*v[4]
+        @test apply_stencil(s,v, 2) isa Float64
+        @test apply_stencil_backwards(s,v, 3) isa Float64
     end
 
     @testset "type stability" begin
