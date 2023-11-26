@@ -79,7 +79,7 @@ Base.@propagate_inbounds @inline function apply_stencil(s::Stencil, v::AbstractV
 end
 
 Base.@propagate_inbounds @inline function apply_stencil_backwards(s::Stencil, v::AbstractVector, i::Int)
-    T = Base.promote_op(*, eltype(s), eltype(v))
+    T = Base.promote_op((a₁,v₁,a₂,v₂)->a₁*v₁ + a₂*v₂, eltype(s), eltype(v), eltype(s), eltype(v))
     w = zero(T)
     @simd for k ∈ length(s):-1:1
         w += s.weights[k]*v[i - s.range[k]]
