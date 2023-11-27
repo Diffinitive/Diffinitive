@@ -69,13 +69,13 @@ end
 end
 
 Base.@propagate_inbounds @inline function apply_stencil(s::Stencil, v::AbstractVector, i::Int)
-    return @inline sum(enumerate(s.weights)) do (k,w)
+    return @inline sum(enumerate(s.weights)) do (k,w) #TBD: Which optimizations are needed here?
         w*v[i + @inbounds s.range[k]]
     end
 end
 
 Base.@propagate_inbounds @inline function apply_stencil_backwards(s::Stencil, v::AbstractVector, i::Int)
-    return @inline sum(enumerate(s.weights)) do (k,w)
+    return @inline sum(enumerate(s.weights)) do (k,w) #TBD: Which optimizations are needed here?
         w*v[i - @inbounds s.range[k]]
     end
 end
