@@ -16,6 +16,7 @@ export TensorGridBoundary
 
 export grid_id
 export boundary_id
+export boundary_indices
 
 export eval_on
 export getcomponent
