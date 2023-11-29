@@ -324,3 +324,4 @@ v[I]
 
 * This would impact how tensor grid works.
 * To make things homogenous maybe these index collections should be used for the more simple grids too.
+* The function `to_indices` from Base could be usefull to implement for `IndexCollection`
