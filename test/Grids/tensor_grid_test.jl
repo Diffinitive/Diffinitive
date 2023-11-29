@@ -169,6 +169,21 @@ using Sbplib.RegionIndices
         @test boundary_grid(TensorGrid(g₁, g₂), TensorGridBoundary{1, Upper}()) == TensorGrid(ZeroDimGrid(g₁[end]), g₂)
         @test boundary_grid(TensorGrid(g₁, g₄), TensorGridBoundary{1, Upper}()) == TensorGrid(ZeroDimGrid(g₁[end]), g₄)
     end
+
+    @testset "boundary_indices" begin
+        g₁ = EquidistantGrid(range(0,1,length=11))
+        g₂ = EquidistantGrid(range(2,3,length=6))
+        g₄ = ZeroDimGrid(@SVector[1,2])
+
+        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Lower}()) == (1,:)
+        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Upper}()) == (11,:)
+        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Lower}()) == (:,1)
+        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Upper}()) == (:,6)
+        @test boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Lower}()) == (1,)
+        @test boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Upper}()) == (11,)
+        @test boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Lower}()) == (1,)
+        @test boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Upper}()) == (11,)
+    end
 end
 
 @testset "combined_coordinate_vector_type" begin

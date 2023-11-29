@@ -86,6 +86,17 @@ function boundary_grid(g::TensorGrid, id::TensorGridBoundary)
 end
 
 
+function boundary_indices(g::TensorGrid, id::TensorGridBoundary)
+    per_grid_ind = map(g.grids) do g
+        ntuple(i->:, ndims(g))
+    end
+
+    local_b_ind = boundary_indices(g.grids[grid_id(id)], boundary_id(id))
+    b_ind = Base.setindex(per_grid_ind, local_b_ind, grid_id(id))
+
+    return LazyTensors.concatenate_tuples(b_ind...)
+end
+
 function combined_coordinate_vector_type(coordinate_types...)
     combined_coord_length = mapreduce(_ncomponents, +, coordinate_types)
     combined_coord_type = mapreduce(eltype, promote_type, coordinate_types)
