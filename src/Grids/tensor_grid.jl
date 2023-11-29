@@ -73,7 +73,6 @@ function boundary_identifiers(g::TensorGrid)
     return LazyTensors.concatenate_tuples(per_grid...)
 end
 
-
 """
     boundary_grid(g::TensorGrid, id::TensorGridBoundary)
 
@@ -84,7 +83,6 @@ function boundary_grid(g::TensorGrid, id::TensorGridBoundary)
     new_grids = Base.setindex(g.grids, local_boundary_grid, grid_id(id))
     return TensorGrid(new_grids...)
 end
-
 
 function boundary_indices(g::TensorGrid, id::TensorGridBoundary)
     per_grid_ind = map(g.grids) do g

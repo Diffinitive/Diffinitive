@@ -74,6 +74,15 @@ function boundary_grid end
 # TBD: Can we implement a version here that accepts multiple ids and grouped boundaries? Maybe we need multiblock stuff?
 
 """
+    boundary_indices(g::Grid, id::BoundaryIdentifier)
+
+A collection of indices corresponding to the boundary with given id. The
+collection should be usable to index grid functions on the grid to obtain grid
+functions on the boundary grid.
+"""
+function boundary_indices end
+
+"""
     eval_on(g::Grid, f)
 
 Lazy evaluation of `f` on the grid. `f` can either be on the form `f(x,y,...)`
@@ -101,11 +110,4 @@ eval_on(g::Grid, f::Number) = return LazyTensors.LazyConstantArray(f, size(g))
 _ncomponents(::Type{<:Number}) = 1
 _ncomponents(T::Type{<:SVector}) = length(T)
 
-"""
-    boundary_indices(g::Grid, id::BoundaryIdentifier)
 
-A collection of indices corresponding to the boundary with given id. The
-collection should be usable to index grid functions on the grid to obtain grid
-functions on the boundary grid.
-"""
-function boundary_indices end
