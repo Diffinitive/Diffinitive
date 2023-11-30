@@ -73,6 +73,8 @@ The grid for the boundary specified by `id`.
 function boundary_grid end
 # TBD: Can we implement a version here that accepts multiple ids and grouped boundaries? Maybe we need multiblock stuff?
 
+# REVIEW: I suggest removing the sentence "The collection should be usable ...". I think it is redudant and also somewhat confusing
+# in that wording "obtain grid functions" makes it sound like new grid functions are allocated from the indexing.
 """
     boundary_indices(g::Grid, id::BoundaryIdentifier)
 
