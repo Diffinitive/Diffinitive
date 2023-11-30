@@ -315,7 +315,7 @@ struct containing two or more LazyTensors? (using split_tuple in a similar way
 as TensorGrid)
 
 ## Implementation of boundary_indices for more complex grids
-To represent boundaries of for example tet-elements we can use a type `IndexCollection` which should be able to be used to index a grid function directly.
+To represent boundaries of for example tet-elements we can use a type `IndexCollection` to index a grid function directly.
 
 ```julia
 I = IndexCollection(...)
@@ -324,4 +324,4 @@ v[I]
 
 * This would impact how tensor grid works.
 * To make things homogenous maybe these index collections should be used for the more simple grids too.
-* The function `to_indices` from Base could be usefull to implement for `IndexCollection`
+* The function `to_indices` from Base could be useful to implement for `IndexCollection`
