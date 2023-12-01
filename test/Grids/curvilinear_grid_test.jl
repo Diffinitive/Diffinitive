@@ -117,10 +117,10 @@ using StaticArrays
     end
 
     @testset "boundary_grid" begin
-        @test_broken boundary_grid(cg, TensorGridBoundary{1, Lower}()) == 2. * boundary_grid(lg,TensorGridBoundary{1, Lower()})
-        @test_broken boundary_grid(cg, TensorGridBoundary{1, Upper}()) == 2. * boundary_grid(lg,TensorGridBoundary{1, Upper()})
-        @test_broken boundary_grid(cg, TensorGridBoundary{2, Lower}()) == 2. * boundary_grid(lg,TensorGridBoundary{2, Lower()})
-        @test_broken boundary_grid(cg, TensorGridBoundary{2, Upper}()) == 2. * boundary_grid(lg,TensorGridBoundary{2, Upper()})
+        @test boundary_grid(cg, TensorGridBoundary{1, Lower}()) == 2. * boundary_grid(lg,TensorGridBoundary{1, Lower}())
+        @test_broken boundary_grid(cg, TensorGridBoundary{1, Upper}()) == 2. * boundary_grid(lg,TensorGridBoundary{1, Upper}())
+        @test_broken boundary_grid(cg, TensorGridBoundary{2, Lower}()) == 2. * boundary_grid(lg,TensorGridBoundary{2, Lower}())
+        @test_broken boundary_grid(cg, TensorGridBoundary{2, Upper}()) == 2. * boundary_grid(lg,TensorGridBoundary{2, Upper}())
     end
 
     # TBD: Should curvilinear grid support refining and coarsening?
