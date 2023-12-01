@@ -33,12 +33,45 @@ coordinate_size(::Type{<:Grid{T}}) where T = _ncomponents(T)
 coordinate_size(g::Grid) = coordinate_size(typeof(g)) # TBD: Name of this function?!
 
 """
-    component_type(g)
+    component_type(gf)
 
-The type of the components of the coordinate vector of `Grid` `g`.
+The type of the components of `gf`.
 """
-component_type(::Type{<:Grid{T}}) where T = eltype(T)
-component_type(g::Grid) = component_type(typeof(g))
+component_type(T::Type) = eltype(eltype(T))
+component_type(t) = component_type(typeof(t))
+
+componentview(gf, component_index...) = ArrayComponentView(gf, component_index)
+
+struct ArrayComponentView{CT,T,D,AT <: AbstractArray{T,D}, IT} <: AbstractArray{CT,D}
+    v::AT
+    component_index::IT
+
+    function ArrayComponentView(v, component_index)
+        CT = typeof(first(v)[component_index...])
+        return new{CT, eltype(v), ndims(v), typeof(v), typeof(component_index)}(v,component_index)
+    end
+end
+
+Base.size(cv) = size(cv.v)
+Base.getindex(cv::ArrayComponentView, i::Int) = cv.v[i][cv.component_index...]
+Base.getindex(cv::ArrayComponentView, I::Vararg{Int}) = cv.v[I...][cv.component_index...]
+IndexStyle(::Type{<:ArrayComponentView{<:Any,<:Any,AT}}) where AT = IndexStyle(AT)
+
+# TODO: Implement the remaining optional methods from the array interface
+# setindex!(A, v, i::Int)
+# setindex!(A, v, I::Vararg{Int, N})
+# iterate
+# length(A)
+# similar(A)
+# similar(A, ::Type{S})
+# similar(A, dims::Dims)
+# similar(A, ::Type{S}, dims::Dims)
+# # Non-traditional indices
+# axes(A)
+# similar(A, ::Type{S}, inds)
+# similar(T::Union{Type,Function}, inds)
+
+# TODO: Implement a more general ComponentView that can handle non-AbstractArrays.
 
 """
     refine(g::Grid, r)
