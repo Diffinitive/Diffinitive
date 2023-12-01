@@ -73,14 +73,15 @@ The grid for the boundary specified by `id`.
 function boundary_grid end
 # TBD: Can we implement a version here that accepts multiple ids and grouped boundaries? Maybe we need multiblock stuff?
 
-# REVIEW: I suggest removing the sentence "The collection should be usable ...". I think it is redudant and also somewhat confusing
-# in that wording "obtain grid functions" makes it sound like new grid functions are allocated from the indexing.
 """
     boundary_indices(g::Grid, id::BoundaryIdentifier)
 
-A collection of indices corresponding to the boundary with given id. The
-collection should be usable to index grid functions on the grid to obtain grid
-functions on the boundary grid.
+A collection of indices corresponding to the boundary with given id. For grids
+with Cartesian indexing these collections will be tuples with elements of type
+``Union{Int,Colon}``.
+
+When implementing this method it is expected that the returned collection can
+be used to index grid functions to obtain grid functions on the boundary grid.
 """
 function boundary_indices end
 
