@@ -33,12 +33,10 @@ coordinate_size(::Type{<:Grid{T}}) where T = _ncomponents(T)
 coordinate_size(g::Grid) = coordinate_size(typeof(g)) # TBD: Name of this function?!
 
 """
-    component_type(g)
+    component_type(gf)
 
-The type of the components of the coordinate vector of `Grid` `g`.
+The type of the components of `gf`.
 """
-component_type(::Type{<:Grid{T}}) where T = eltype(T) #TBD: removable?
-component_type(g::Grid) = component_type(typeof(g))
 component_type(T::Type) = eltype(eltype(T))
 component_type(t) = component_type(typeof(t))
 
