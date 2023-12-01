@@ -17,6 +17,7 @@ export coarsen
 export refine
 export eval_on
 export componentview
+export ArrayComponentView
 
 export BoundaryIdentifier
 export TensorGridBoundary
