@@ -110,6 +110,12 @@ using StaticArrays
         @test boundary_identifiers(cg) == boundary_identifiers(lg)
     end
 
+    @testset "boundary_indices" begin
+        @test boundary_indices(cg, CartesianBoundary{1,Lower}()) == boundary_indices(lg,CartesianBoundary{1,Lower}())
+        @test boundary_indices(cg, CartesianBoundary{2,Lower}()) == boundary_indices(lg,CartesianBoundary{2,Lower}())
+        @test boundary_indices(cg, CartesianBoundary{1,Upper}()) == boundary_indices(lg,CartesianBoundary{1,Upper}())
+    end
+
     @testset "boundary_grid" begin
         @test_broken boundary_grid(cg, TensorGridBoundary{1, Lower}()) == 2. * boundary_grid(lg,TensorGridBoundary{1, Lower()})
         @test_broken boundary_grid(cg, TensorGridBoundary{1, Upper}()) == 2. * boundary_grid(lg,TensorGridBoundary{1, Upper()})

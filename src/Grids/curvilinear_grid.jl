@@ -27,6 +27,7 @@ Base.size(g::CurvilinearGrid) = size(g.logicalgrid)
 Base.size(g::CurvilinearGrid, d) = size(g.logicalgrid, d)
 
 boundary_identifiers(g::CurvilinearGrid) = boundary_identifiers(g.logicalgrid)
+boundary_indices(g::CurvilinearGrid, id::TensorGridBoundary) = boundary_indices(g.logicalgrid, id)
 
 function boundary_grid(g::CurvilinearGrid, id::TensorGridBoundary)
     b_indices = boundary_indices(g.logicalgrid, id)
