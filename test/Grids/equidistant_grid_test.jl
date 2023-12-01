@@ -68,6 +68,17 @@ using Sbplib.LazyTensors
         @test boundary_grid(g, Upper()) == ZeroDimGrid(1.0)
     end
 
+    @testset "boundary_indices" begin
+        g = EquidistantGrid(0:0.1:1)
+        @test boundary_indices(g, Lower()) == (1,)
+        @test boundary_indices(g, Upper()) == (11,)
+
+        g = EquidistantGrid(2:0.1:10)
+        @test boundary_indices(g, Lower()) == (1,)
+        @test boundary_indices(g, Upper()) == (81,)
+
+    end
+
     @testset "refine" begin
         g = EquidistantGrid(0:0.1:1)
         @test refine(g, 1) == g
