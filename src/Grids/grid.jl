@@ -37,8 +37,17 @@ coordinate_size(g::Grid) = coordinate_size(typeof(g)) # TBD: Name of this functi
 
 The type of the components of the coordinate vector of `Grid` `g`.
 """
-component_type(::Type{<:Grid{T}}) where T = eltype(T)
+component_type(::Type{<:Grid{T}}) where T = eltype(T) #TBD: removable?
 component_type(g::Grid) = component_type(typeof(g))
+component_type(T::Type) = eltype(eltype(T))
+component_type(t) = component_type(typeof(t))
+
+function componentview(gf, component_index...)
+    A = reinterpret(reshape, component_type(gf), gf)
+
+    component_linear_index = LinearIndices(first(gf))[component_index...]
+    return @view A[component_linear_index,:,:]
+end
 
 """
     refine(g::Grid, r)

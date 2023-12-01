@@ -63,6 +63,17 @@ end
     @test eval_on(g, f) == map(x̄->f(x̄...), g)
 end
 
+@testset "componentview" begin
+    v = [@SMatrix[1 3; 2 4] .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
+
+    @test componentview(v, 1, 1) == [1 .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
+    @test componentview(v, 1, 2) == [3 .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
+    @test componentview(v, 2, 1) == [2 .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
+
+    # should work with colon
+    # should return a view which can be index like the grid function
+end
+
 @testset "_ncomponents" begin
     @test Grids._ncomponents(Int) == 1
     @test Grids._ncomponents(Float64) == 1

@@ -13,10 +13,10 @@ export boundary_id
 export boundary_indices
 export boundary_identifiers
 export boundary_grid
-export eval_on
 export coarsen
-export getcomponent
 export refine
+export eval_on
+export componentview
 
 export BoundaryIdentifier
 export TensorGridBoundary
