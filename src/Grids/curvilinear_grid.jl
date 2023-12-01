@@ -33,8 +33,8 @@ function boundary_grid(g::CurvilinearGrid, id::TensorGridBoundary)
     b_indices = boundary_indices(g.logicalgrid, id)
     return CurvilinearGrid(
         boundary_grid(g.logicalgrid, id),
-        g.physicalcoordinates[b_indices],
-        g.jacobian[b_indices],
+        g.physicalcoordinates[b_indices...],
+        g.jacobian[b_indices...],
     )
 end
 
