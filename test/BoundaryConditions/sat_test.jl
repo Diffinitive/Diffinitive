@@ -3,38 +3,64 @@ using Test
 
 using Sbplib.BoundaryConditions
 using Sbplib.Grids
-using Sbplib.RegionIndices
 using Sbplib.LazyTensors
+using Sbplib.SbpOperators
 
-grid = equidistant_grid(11, 0.0, 1.0)
-(id_l,id_r) = boundary_identifiers(grid)
+stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 4)
+
 struct MockOp
 end
 
-function BoundaryConditions.sat_tensors(op::MockOp, grid, bc::DirichletCondition)
-    sz = size(grid)
-    m = sz[1]
-    ind = (region(bc.id) == Lower()) ? 1 : m
-    e = zeros(m);
-    e[ind] = 1.
-    eᵀ = ones(Float64,m,0);
-    e[ind] = 1.
-    c_tensor = LazyTensors.DiagonalTensor(e)
-    p_tensor = DenseTensor(eᵀ, (1,), (2,))
-    closure(u) = c_tensor*u
-    function penalty(g)
-        @show g
-        return p_tensor*g
-    end
-    return closure, penalty
+function BoundaryConditions.sat_tensors(op::MockOp, g::TensorGrid, bc::DirichletCondition)
+    e = boundary_restriction(g, stencil_set, id(bc))
+    L = e
+    sat_op = e'
+    return sat_op, L
 end
 
+function BoundaryConditions.sat_tensors(op::MockOp, g::TensorGrid, bc::DirichletCondition, a)
+    e = boundary_restriction(g, stencil_set, id(bc))
+    L = a*e
+    sat_op = e'
+    return sat_op, L
+end
 
-# @testset "sat" begin
-#     g = ConstantBoundaryData(2.0)
-#     dc = DirichletCondition(g,id_l)
-#     op = MockOp()
-#     f = sat(op, grid, dc)
-#     u = eval_on(grid, x-> -1/2 + x^2)
-#     @show f(0.,u)
-# end
+function BoundaryConditions.sat_tensors(op::MockOp, g::TensorGrid, bc::NeumannCondition)
+    e = boundary_restriction(g, stencil_set, id(bc))
+    d = normal_derivative(g, stencil_set, id(bc))
+    L = d
+    sat_op = e'
+    return sat_op, L
+end
+
+@testset "sat" begin
+    op = MockOp()
+    grid  = equidistant_grid((11,13), (0.,0.), (1.,1.))
+    W, E, S, N = boundary_identifiers(grid)
+    u = eval_on(grid, (x,y) -> x+y^2)
+
+    
+    dc_W = DirichletCondition(1.0, W)
+    SAT_W = sat(op, grid, dc_W)
+    g_W = discretize_data(grid, dc_W)
+    r_W = zeros(size(grid))
+    r_W[1,:] .= map(y -> (y^2-1.), range(0., 1., length=13))
+    @test SAT_W(u, g_W) ≈ r_W atol = 1e-13
+
+    dc_E = DirichletCondition(2, E)
+    SAT_E = sat(op, grid, dc_E, 2.)
+    g_E = discretize_data(grid, dc_E)
+    r_E = zeros(size(grid))
+    r_E[end,:] .= map(y -> (2*(1. + y^2)-2.), range(0., 1., length=13))
+    @test SAT_E(u, g_E) ≈ r_E atol = 1e-13
+
+    nc_S = NeumannCondition(.0, S)
+    SAT_S = sat(op, grid, nc_S)
+    g_S = discretize_data(grid, nc_S)
+    @test SAT_S(u, g_S) ≈ zeros(size(grid)) atol = 1e-13
+
+    nc_N = NeumannCondition(2.0, N)
+    SAT_S = sat(op, grid, nc_N)
+    g_N = discretize_data(grid, nc_N)
+    @test SAT_S(u, g_N) ≈ zeros(size(grid)) atol = 1e-13
+end
