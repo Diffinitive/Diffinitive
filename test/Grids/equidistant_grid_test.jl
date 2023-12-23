@@ -31,6 +31,8 @@ using Sbplib.LazyTensors
         @test size(EquidistantGrid(0:10)) == (11,)
         @test size(EquidistantGrid(0:0.1:10)) == (101,)
 
+        @test size(EquidistantGrid(0:0.1:10),1) == 101
+
         @test collect(EquidistantGrid(0:0.1:0.5)) == [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
 
         @test Base.IteratorSize(EquidistantGrid{Float64, StepRange{Float64}}) == Base.HasShape{1}()
@@ -64,6 +66,17 @@ using Sbplib.LazyTensors
         g = EquidistantGrid(0:0.1:1)
         @test boundary_grid(g, Lower()) == ZeroDimGrid(0.0)
         @test boundary_grid(g, Upper()) == ZeroDimGrid(1.0)
+    end
+
+    @testset "boundary_indices" begin
+        g = EquidistantGrid(0:0.1:1)
+        @test boundary_indices(g, Lower()) == (1,)
+        @test boundary_indices(g, Upper()) == (11,)
+
+        g = EquidistantGrid(2:0.1:10)
+        @test boundary_indices(g, Lower()) == (1,)
+        @test boundary_indices(g, Upper()) == (81,)
+
     end
 
     @testset "refine" begin
@@ -107,8 +120,13 @@ end
     @testset "Base" begin
         @test eltype(equidistant_grid(4,0.0,1.0)) == Float64
         @test eltype(equidistant_grid((4,3),(0,0),(1,3))) <: AbstractVector{Float64}
+
         @test size(equidistant_grid(4,0.0,1.0)) == (4,)
         @test size(equidistant_grid((5,3), (0.0,0.0), (2.0,1.0))) == (5,3)
+
+        @test size(equidistant_grid((5,3), (0.0,0.0), (2.0,1.0)),1) == 5
+        @test size(equidistant_grid((5,3), (0.0,0.0), (2.0,1.0)),2) == 3
+
         @test ndims(equidistant_grid(4,0.0,1.0)) == 1
         @test ndims(equidistant_grid((5,3), (0.0,0.0), (2.0,1.0))) == 2
     end

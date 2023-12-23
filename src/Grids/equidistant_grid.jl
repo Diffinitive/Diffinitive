@@ -29,6 +29,7 @@ Base.iterate(g::EquidistantGrid, state) = iterate(g.points, state)
 Base.IteratorSize(::Type{<:EquidistantGrid}) = Base.HasShape{1}()
 Base.length(g::EquidistantGrid) = length(g.points)
 Base.size(g::EquidistantGrid) = size(g.points)
+Base.size(g::EquidistantGrid, d) = size(g.points)[d]
 
 
 """
@@ -50,7 +51,8 @@ inverse_spacing(g::EquidistantGrid) = 1/step(g.points)
 boundary_identifiers(::EquidistantGrid) = (Lower(), Upper())
 boundary_grid(g::EquidistantGrid, id::Lower) = ZeroDimGrid(g[begin])
 boundary_grid(g::EquidistantGrid, id::Upper) = ZeroDimGrid(g[end])
-
+boundary_indices(g::EquidistantGrid, id::Lower) = (1,)
+boundary_indices(g::EquidistantGrid, id::Upper) = (length(g),)
 
 """
     refine(g::EquidistantGrid, r::Int)

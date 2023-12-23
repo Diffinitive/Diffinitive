@@ -8,32 +8,28 @@ using StaticArrays
 export Grid
 export coordinate_size
 export component_type
+export grid_id
+export boundary_id
+export boundary_indices
+export boundary_identifiers
+export boundary_grid
+export eval_on
+export coarsen
+export getcomponent
+export refine
+
+export BoundaryIdentifier
+export TensorGridBoundary
+export CartesianBoundary
 
 export TensorGrid
 export ZeroDimGrid
 
-export TensorGridBoundary
-
-export grid_id
-export boundary_id
-
-export eval_on
-export getcomponent
-
-# BoundaryIdentifier
-export BoundaryIdentifier
-
-
-# EquidistantGrid
 export EquidistantGrid
-export spacing
 export inverse_spacing
-export boundary_identifiers
-export boundary_grid
-export refine
-export coarsen
+export spacing
 export equidistant_grid
-export CartesianBoundary
+
 
 abstract type BoundaryIdentifier end
 

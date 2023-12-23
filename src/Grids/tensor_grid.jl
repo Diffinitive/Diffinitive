@@ -43,9 +43,9 @@ _iterate_combine_coords(::Nothing) = nothing
 _iterate_combine_coords((next,state)) = combine_coordinates(next...), state
 
 Base.IteratorSize(::Type{<:TensorGrid{<:Any, D}}) where D = Base.HasShape{D}()
-Base.eltype(::Type{<:TensorGrid{T}}) where T = T
-Base.length(g::TensorGrid) = sum(length, g.grids)
+Base.length(g::TensorGrid) = prod(length, g.grids)
 Base.size(g::TensorGrid) = LazyTensors.concatenate_tuples(size.(g.grids)...)
+Base.size(g::TensorGrid, d) = size(g)[d]
 
 
 refine(g::TensorGrid, r::Int) = mapreduce(g->refine(g,r), TensorGrid, g.grids)
@@ -73,7 +73,6 @@ function boundary_identifiers(g::TensorGrid)
     return LazyTensors.concatenate_tuples(per_grid...)
 end
 
-
 """
     boundary_grid(g::TensorGrid, id::TensorGridBoundary)
 
@@ -85,6 +84,16 @@ function boundary_grid(g::TensorGrid, id::TensorGridBoundary)
     return TensorGrid(new_grids...)
 end
 
+function boundary_indices(g::TensorGrid, id::TensorGridBoundary)
+    per_grid_ind = map(g.grids) do g
+        ntuple(i->:, ndims(g))
+    end
+
+    local_b_ind = boundary_indices(g.grids[grid_id(id)], boundary_id(id))
+    b_ind = Base.setindex(per_grid_ind, local_b_ind, grid_id(id))
+
+    return LazyTensors.concatenate_tuples(b_ind...)
+end
 
 function combined_coordinate_vector_type(coordinate_types...)
     combined_coord_length = mapreduce(_ncomponents, +, coordinate_types)
