@@ -3,6 +3,7 @@ using Test
 using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
+using Sbplib.BoundaryConditions
 
 @testset "Laplace" begin
     # Default stencils (4th order)
@@ -85,6 +86,52 @@ end
         Dzz = second_derivative(g_3D, stencil_set, 3)
         @test Δ == Dxx + Dyy + Dzz
         @test Δ isa LazyTensor{Float64,3,3}
+    end
+end
+
+@testset "sat_tensors" begin
+    operator_path = sbp_operators_path()*"standard_diagonal.toml"
+    stencil_set = read_stencil_set(operator_path; order=4)
+    g = equidistant_grid((101,102), (-1.,-1.), (1.,1.))
+    W,E,S,N = boundary_identifiers(g)
+    
+    u = eval_on(g, (x,y) -> sin(x+y))
+    uWx = eval_on(boundary_grid(g,W), (x,y) -> -cos(x+y))
+    uEx = eval_on(boundary_grid(g,E), (x,y) -> cos(x+y))
+    uSy = eval_on(boundary_grid(g,S), (x,y) -> -cos(x+y))
+    uNy = eval_on(boundary_grid(g,N), (x,y) -> cos(x+y))
+    
+    
+    v = eval_on(g, (x,y) -> cos(x+y))
+    vW = eval_on(boundary_grid(g,W), (x,y) -> cos(x+y))
+    vE = eval_on(boundary_grid(g,E), (x,y) -> cos(x+y))
+    vS = eval_on(boundary_grid(g,S), (x,y) -> cos(x+y))
+    vN = eval_on(boundary_grid(g,N), (x,y) -> cos(x+y))
+
+
+    @testset "Neumann" begin
+        Δ = Laplace(g, stencil_set)
+        H = inner_product(g, stencil_set)
+        HW = inner_product(boundary_grid(g,W), stencil_set)
+        HE = inner_product(boundary_grid(g,E), stencil_set)
+        HS = inner_product(boundary_grid(g,S), stencil_set)
+        HN = inner_product(boundary_grid(g,N), stencil_set)
+        
+        ncW = NeumannCondition(0., W)
+        ncE = NeumannCondition(0., E)
+        ncS = NeumannCondition(0., S)
+        ncN = NeumannCondition(0., N)
+        
+        SATW = foldl(∘,sat_tensors(Δ, g, ncW))
+        SATE = foldl(∘,sat_tensors(Δ, g, ncE))
+        SATS = foldl(∘,sat_tensors(Δ, g, ncS))
+        SATN = foldl(∘,sat_tensors(Δ, g, ncN))
+        
+
+        @test sum((H*SATW*u).*v) ≈ sum((HW*uWx).*vW) rtol = 1e-6
+        @test sum((H*SATE*u).*v) ≈ sum((HE*uEx).*vE) rtol = 1e-6
+        @test sum((H*SATS*u).*v) ≈ sum((HS*uSy).*vS) rtol = 1e-6
+        @test sum((H*SATN*u).*v) ≈ sum((HN*uNy).*vN) rtol = 1e-6
     end
 end
 
