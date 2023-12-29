@@ -10,6 +10,10 @@ using Sbplib.StaticDicts
 
 sitename = "Sbplib.jl"
 
+remotes = nothing
+edit_link = nothing
+repolink = nothing
+
 if "--prettyurls" ∈ ARGS
     prettyurls = true
 else
@@ -39,5 +43,6 @@ pages = [
 ]
 # This ordering is not respected by @contents. See https://github.com/JuliaDocs/Documenter.jl/issues/936
 
-format=Documenter.HTML(;prettyurls)
-makedocs(;sitename, pages, format, build)
+format=Documenter.HTML(;prettyurls, edit_link, repolink)
+
+makedocs(;sitename, pages, format, build, remotes)
