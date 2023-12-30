@@ -42,6 +42,9 @@ component_type(t) = component_type(typeof(t))
 
 componentview(gf, component_index...) = ArrayComponentView(gf, component_index)
 
+# REVIEW: Should this only be defined for vector-valued component types of the same dimension?
+# Now one can for instance do:  v = [rand(2,2),rand(2,2), rand(2,1)] and cv = componentview(v,1,2)
+# resulting in #undef in the third component of cv.
 struct ArrayComponentView{CT,T,D,AT <: AbstractArray{T,D}, IT} <: AbstractArray{CT,D}
     v::AT
     component_index::IT
@@ -54,7 +57,7 @@ end
 
 Base.size(cv) = size(cv.v)
 Base.getindex(cv::ArrayComponentView, i::Int) = cv.v[i][cv.component_index...]
-Base.getindex(cv::ArrayComponentView, I::Vararg{Int}) = cv.v[I...][cv.component_index...]
+Base.getindex(cv::ArrayComponentView, I::Vararg{Int}) = cv.v[I...][cv.component_index...] #REVIEW: Will this allocate if I... slices v? if so, we should probably use a view on v?
 IndexStyle(::Type{<:ArrayComponentView{<:Any,<:Any,AT}}) where AT = IndexStyle(AT)
 
 # TODO: Implement the remaining optional methods from the array interface
