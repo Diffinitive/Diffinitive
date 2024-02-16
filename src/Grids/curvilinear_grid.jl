@@ -32,7 +32,7 @@ boundary_indices(g::CurvilinearGrid, id::TensorGridBoundary) = boundary_indices(
 function boundary_grid(g::CurvilinearGrid, id::TensorGridBoundary)
     b_indices = boundary_indices(g.logicalgrid, id)
 
-    # Calculate indices of needed jacobian combonents
+    # Calculate indices of needed jacobian components
     D = ndims(g)
     all_indices = SVector{D}(1:D)
     free_variable_indices = deleteat(all_indices, grid_id(id))
