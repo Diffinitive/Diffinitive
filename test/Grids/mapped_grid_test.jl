@@ -3,34 +3,34 @@ using Sbplib.RegionIndices
 using Test
 using StaticArrays
 
-@testset "CurvilinearGrid" begin
+@testset "MappedGrid" begin
     lg = equidistant_grid((11,11), (0,0), (1,1)) # TODO: Change dims of the grid to be different
     x̄ = map(ξ̄ -> 2ξ̄, lg)
     J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
-    cg = CurvilinearGrid(lg, x̄, J)
+    mg = MappedGrid(lg, x̄, J)
 
     # TODO: Test constructor for different dims of range and domain for the coordinates
     # TODO: Test constructor with different type than TensorGrid. a dummy type?
 
-    @test_broken false # @test_throws ArgumentError("Sizes must match") CurvilinearGrid(lg, map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11))
+    @test_broken false # @test_throws ArgumentError("Sizes must match") MappedGrid(lg, map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11))
 
 
-    @test cg isa Grid{SVector{2, Float64},2}
+    @test mg isa Grid{SVector{2, Float64},2}
 
-    @test jacobian(cg) isa Array{<:AbstractMatrix}
-    @test logicalgrid(cg) isa Grid
+    @test jacobian(mg) isa Array{<:AbstractMatrix}
+    @test logicalgrid(mg) isa Grid
 
     @testset "Indexing Interface" begin
-        cg = CurvilinearGrid(lg, x̄, J)
-        @test cg[1,1] == [0.0, 0.0]
-        @test cg[4,2] == [0.6, 0.2]
-        @test cg[6,10] == [1., 1.8]
+        mg = MappedGrid(lg, x̄, J)
+        @test mg[1,1] == [0.0, 0.0]
+        @test mg[4,2] == [0.6, 0.2]
+        @test mg[6,10] == [1., 1.8]
 
-        @test cg[begin, begin] == [0.0, 0.0]
-        @test cg[end,end] == [2.0, 2.0]
-        @test cg[begin,end] == [0., 2.]
+        @test mg[begin, begin] == [0.0, 0.0]
+        @test mg[end,end] == [2.0, 2.0]
+        @test mg[begin,end] == [0., 2.]
 
-        @test eachindex(cg) == CartesianIndices((11,11))
+        @test eachindex(mg) == CartesianIndices((11,11))
 
         @testset "cartesian indexing" begin
             cases = [
@@ -42,56 +42,56 @@ using StaticArrays
             ]
 
             @testset "i = $is" for (lg, is) ∈ cases
-                @test cg[CartesianIndex(is...)] == cg[is...]
+                @test mg[CartesianIndex(is...)] == mg[is...]
             end
         end
 
         @testset "eachindex" begin
-            @test eachindex(cg) == CartesianIndices((11,11))
+            @test eachindex(mg) == CartesianIndices((11,11))
         end
 
         @testset "firstindex" begin
-            @test firstindex(cg, 1) == 1
-            @test firstindex(cg, 2) == 1
+            @test firstindex(mg, 1) == 1
+            @test firstindex(mg, 2) == 1
         end
 
         @testset "lastindex" begin
-            @test lastindex(cg, 1) == 11
-            @test lastindex(cg, 2) == 11
+            @test lastindex(mg, 1) == 11
+            @test lastindex(mg, 2) == 11
         end
     end
     # TODO: Test with different types of logical grids
 
     @testset "Iterator interface" begin
-        sg = CurvilinearGrid(
+        sg = MappedGrid(
             equidistant_grid((15,11), (0,0), (1,1)),
             map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11)
         )
 
-        @test eltype(cg) == SVector{2,Float64}
+        @test eltype(mg) == SVector{2,Float64}
         @test eltype(sg) == SVector{3,Float64}
 
-        @test eltype(typeof(cg)) == SVector{2,Float64}
+        @test eltype(typeof(mg)) == SVector{2,Float64}
         @test eltype(typeof(sg)) == SVector{3,Float64}
 
-        @test size(cg) == (11,11)
+        @test size(mg) == (11,11)
         @test size(sg) == (15,11)
 
-        @test size(cg,2) == 11
+        @test size(mg,2) == 11
         @test size(sg,2) == 11
 
-        @test length(cg) == 121
+        @test length(mg) == 121
         @test length(sg) == 165
 
-        @test Base.IteratorSize(cg) == Base.HasShape{2}()
-        @test Base.IteratorSize(typeof(cg)) == Base.HasShape{2}()
+        @test Base.IteratorSize(mg) == Base.HasShape{2}()
+        @test Base.IteratorSize(typeof(mg)) == Base.HasShape{2}()
 
         @test Base.IteratorSize(sg) == Base.HasShape{2}()
         @test Base.IteratorSize(typeof(sg)) == Base.HasShape{2}()
 
-        element, state = iterate(cg)
+        element, state = iterate(mg)
         @test element == lg[1,1].*2
-        element, _ =  iterate(cg, state)
+        element, _ =  iterate(mg, state)
         @test element == lg[2,1].*2
 
         element, state = iterate(sg)
@@ -99,21 +99,21 @@ using StaticArrays
         element, _ = iterate(sg, state)
         @test element == sg.physicalcoordinates[2,1]
 
-        @test collect(cg) == 2 .* lg
+        @test collect(mg) == 2 .* lg
     end
 
     @testset "Base" begin
-        @test ndims(cg) == 2
+        @test ndims(mg) == 2
     end
 
     @testset "boundary_identifiers" begin
-        @test boundary_identifiers(cg) == boundary_identifiers(lg)
+        @test boundary_identifiers(mg) == boundary_identifiers(lg)
     end
 
     @testset "boundary_indices" begin
-        @test boundary_indices(cg, CartesianBoundary{1,Lower}()) == boundary_indices(lg,CartesianBoundary{1,Lower}())
-        @test boundary_indices(cg, CartesianBoundary{2,Lower}()) == boundary_indices(lg,CartesianBoundary{2,Lower}())
-        @test boundary_indices(cg, CartesianBoundary{1,Upper}()) == boundary_indices(lg,CartesianBoundary{1,Upper}())
+        @test boundary_indices(mg, CartesianBoundary{1,Lower}()) == boundary_indices(lg,CartesianBoundary{1,Lower}())
+        @test boundary_indices(mg, CartesianBoundary{2,Lower}()) == boundary_indices(lg,CartesianBoundary{2,Lower}())
+        @test boundary_indices(mg, CartesianBoundary{1,Upper}()) == boundary_indices(lg,CartesianBoundary{1,Upper}())
     end
 
     @testset "boundary_grid" begin
@@ -123,7 +123,7 @@ using StaticArrays
             η*(2ξ-1)  1+ξ*(ξ-1);
         ]
 
-        cg = curvilinear_grid(x̄, J, 10, 11)
+        mg = mapped_grid(x̄, J, 10, 11)
         J1((ξ, η)) = @SMatrix[
             1       ;
             η*(2ξ-1);
@@ -133,11 +133,11 @@ using StaticArrays
             1+ξ*(ξ-1);
         ]
 
-        function test_boundary_grid(cg, bId, Jb)
-            bg = boundary_grid(cg, bId)
+        function test_boundary_grid(mg, bId, Jb)
+            bg = boundary_grid(mg, bId)
 
-            lg = logicalgrid(cg)
-            expected_bg = CurvilinearGrid(
+            lg = logicalgrid(mg)
+            expected_bg = MappedGrid(
                 boundary_grid(lg, bId),
                 map(x̄, boundary_grid(lg, bId)),
                 map(Jb, boundary_grid(lg, bId)),
@@ -151,43 +151,43 @@ using StaticArrays
             end
         end
 
-        @testset test_boundary_grid(cg, TensorGridBoundary{1, Lower}(), J2)
-        @testset test_boundary_grid(cg, TensorGridBoundary{1, Upper}(), J2)
-        @testset test_boundary_grid(cg, TensorGridBoundary{2, Lower}(), J1)
-        @testset test_boundary_grid(cg, TensorGridBoundary{2, Upper}(), J1)
+        @testset test_boundary_grid(mg, TensorGridBoundary{1, Lower}(), J2)
+        @testset test_boundary_grid(mg, TensorGridBoundary{1, Upper}(), J2)
+        @testset test_boundary_grid(mg, TensorGridBoundary{2, Lower}(), J1)
+        @testset test_boundary_grid(mg, TensorGridBoundary{2, Upper}(), J1)
     end
 
     # TBD: Should curvilinear grid support refining and coarsening?
     # This would require keeping the coordinate mapping around which seems burdensome, and might increase compilation time?
     @testset "refine" begin
-        @test_broken refine(cg, 1) == cg
-        @test_broken refine(cg, 2) == CurvilinearGrid(refine(lg,2), x̄, J)
-        @test_broken refine(cg, 3) == CurvilinearGrid(refine(lg,3), x̄, J)
+        @test_broken refine(mg, 1) == mg
+        @test_broken refine(mg, 2) == MappedGrid(refine(lg,2), x̄, J)
+        @test_broken refine(mg, 3) == MappedGrid(refine(lg,3), x̄, J)
     end
 
     @testset "coarsen" begin
         lg = equidistant_grid((11,11), (0,0), (1,1)) # TODO: Change dims of the grid to be different
         x̄ = map(ξ̄ -> 2ξ̄, lg)
         J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
-        cg = CurvilinearGrid(lg, x̄, J)
+        mg = MappedGrid(lg, x̄, J)
 
-        @test_broken coarsen(cg, 1) == cg
-        @test_broken coarsen(cg, 2) == CurvilinearGrid(coarsen(lg,2), x̄, J)
+        @test_broken coarsen(mg, 1) == mg
+        @test_broken coarsen(mg, 2) == MappedGrid(coarsen(lg,2), x̄, J)
 
-        @test_broken false # @test_throws DomainError(3, "Size minus 1 must be divisible by the ratio.") coarsen(cg, 3)
+        @test_broken false # @test_throws DomainError(3, "Size minus 1 must be divisible by the ratio.") coarsen(mg, 3)
     end
 end
 
-@testset "curvilinear_grid" begin
+@testset "mapped_grid" begin
     x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
     J((ξ, η)) = @SMatrix[
         1         0;
         η*(2ξ-1)  1+ξ*(ξ-1);
     ]
-    cg = curvilinear_grid(x̄, J, 10, 11)
-    @test cg isa CurvilinearGrid{SVector{2,Float64}, 2}
+    mg = mapped_grid(x̄, J, 10, 11)
+    @test mg isa MappedGrid{SVector{2,Float64}, 2}
 
     lg = equidistant_grid((10,11), (0,0), (1,1))
-    @test logicalgrid(cg) == lg
-    @test collect(cg) == map(x̄, lg)
+    @test logicalgrid(mg) == lg
+    @test collect(mg) == map(x̄, lg)
 end

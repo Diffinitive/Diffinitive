@@ -33,11 +33,11 @@ export spacing
 export equidistant_grid
 
 
-# CurvilinearGrid
-export CurvilinearGrid
+# MappedGrid
+export MappedGrid
 export jacobian
 export logicalgrid
-export curvilinear_grid
+export mapped_grid
 
 abstract type BoundaryIdentifier end
 
@@ -45,6 +45,6 @@ include("grid.jl")
 include("tensor_grid.jl")
 include("equidistant_grid.jl")
 include("zero_dim_grid.jl")
-include("curvilinear_grid.jl")
+include("mapped_grid.jl")
 
 end # module
