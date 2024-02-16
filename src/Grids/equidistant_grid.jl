@@ -106,6 +106,7 @@ completely integer grid, `equidistant_grid` will still return a floating point
 grid. This simlifies the implementation and avoids certain surprise
 behaviours.
 """
+# TODO: Change signature to `equidistant_grid(limit_lower,limit_upper, size...)
 function equidistant_grid(size::Dims, limit_lower, limit_upper)
     gs = map(equidistant_grid, size, limit_lower, limit_upper)
     return TensorGrid(gs...)

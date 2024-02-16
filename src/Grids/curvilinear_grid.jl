@@ -2,7 +2,7 @@
 struct CurvilinearGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractArray{<:Any, 2}, D}} <: Grid{T,D}
     logicalgrid::GT
     physicalcoordinates::CT
-    jacobian::JT
+    jacobian::JT # TBD: currectly ∂xᵢ/∂ξⱼ. Is this the correct index order?
 end
 
 jacobian(g::CurvilinearGrid) = g.jacobian
@@ -37,8 +37,6 @@ function boundary_grid(g::CurvilinearGrid, id::TensorGridBoundary)
         g.jacobian[b_indices...],
     )
 end
-
-
 
 # Do we add a convenience function `curvilinear_grid`? It could help with
 # creating the logical grid, evaluating functions and possibly calculating the

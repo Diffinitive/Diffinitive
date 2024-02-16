@@ -132,6 +132,7 @@ function eval_on(g::Grid, f, ::Base.HasShape)
     if hasmethod(f, (Any,))
         return LazyTensors.LazyFunctionArray((I...)->f(g[I...]), size(g))
     else
+        # TBD This branch can be removed if we accept the trade off that we define f with the syntax f((x,y)) instead if we don't want to handle the vector in the body of f. (Add an example in the docs)
         return LazyTensors.LazyFunctionArray((I...)->f(g[I...]...), size(g))
     end
 end
