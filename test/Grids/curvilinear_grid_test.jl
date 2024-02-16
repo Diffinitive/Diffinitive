@@ -117,10 +117,44 @@ using StaticArrays
     end
 
     @testset "boundary_grid" begin
-        @test boundary_grid(cg, TensorGridBoundary{1, Lower}()) == 2. * boundary_grid(lg,TensorGridBoundary{1, Lower}())
-        @test_broken boundary_grid(cg, TensorGridBoundary{1, Upper}()) == 2. * boundary_grid(lg,TensorGridBoundary{1, Upper}())
-        @test_broken boundary_grid(cg, TensorGridBoundary{2, Lower}()) == 2. * boundary_grid(lg,TensorGridBoundary{2, Lower}())
-        @test_broken boundary_grid(cg, TensorGridBoundary{2, Upper}()) == 2. * boundary_grid(lg,TensorGridBoundary{2, Upper}())
+        x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
+        J((ξ, η)) = @SMatrix[
+            1         0;
+            η*(2ξ-1)  1+ξ*(ξ-1);
+        ]
+
+        cg = curvilinear_grid(x̄, J, 10, 11)
+        J1((ξ, η)) = @SMatrix[
+            1       ;
+            η*(2ξ-1);
+        ]
+        J2((ξ, η)) = @SMatrix[
+            0;
+            1+ξ*(ξ-1);
+        ]
+
+        function test_boundary_grid(cg, bId, Jb)
+            bg = boundary_grid(cg, bId)
+
+            lg = logicalgrid(cg)
+            expected_bg = CurvilinearGrid(
+                boundary_grid(lg, bId),
+                map(x̄, boundary_grid(lg, bId)),
+                map(Jb, boundary_grid(lg, bId)),
+            )
+
+            @testset let bId=bId, bg=bg, expected_bg=expected_bg
+                @test collect(bg) == collect(expected_bg)
+                @test logicalgrid(bg) == logicalgrid(expected_bg)
+                @test jacobian(bg) == jacobian(expected_bg)
+                # TODO: Implement equality of a curvilinear grid and simlify the above
+            end
+        end
+
+        @testset test_boundary_grid(cg, TensorGridBoundary{1, Lower}(), J2)
+        @testset test_boundary_grid(cg, TensorGridBoundary{1, Upper}(), J2)
+        @testset test_boundary_grid(cg, TensorGridBoundary{2, Lower}(), J1)
+        @testset test_boundary_grid(cg, TensorGridBoundary{2, Upper}(), J1)
     end
 
     # TBD: Should curvilinear grid support refining and coarsening?
@@ -147,8 +181,8 @@ end
 @testset "curvilinear_grid" begin
     x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
     J((ξ, η)) = @SMatrix[
-        1     0;
-        2ξ-1  1+ξ*(ξ-1);
+        1         0;
+        η*(2ξ-1)  1+ξ*(ξ-1);
     ]
     cg = curvilinear_grid(x̄, J, 10, 11)
     @test cg isa CurvilinearGrid{SVector{2,Float64}, 2}

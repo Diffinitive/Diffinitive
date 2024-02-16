@@ -31,10 +31,21 @@ boundary_indices(g::CurvilinearGrid, id::TensorGridBoundary) = boundary_indices(
 
 function boundary_grid(g::CurvilinearGrid, id::TensorGridBoundary)
     b_indices = boundary_indices(g.logicalgrid, id)
+
+    # Calculate indices of needed jacobian combonents
+    D = ndims(g)
+    all_indices = SVector{D}(1:D)
+    free_variable_indices = deleteat(all_indices, grid_id(id))
+    jacobian_components = (:, free_variable_indices)
+
+    # Create grid function for boundary grid jacobian
+    boundary_jacobian = componentview((@view g.jacobian[b_indices...])  , jacobian_components...)
+    boundary_physicalcoordinates = @view g.physicalcoordinates[b_indices...]
+
     return CurvilinearGrid(
         boundary_grid(g.logicalgrid, id),
-        g.physicalcoordinates[b_indices...],
-        g.jacobian[b_indices...],
+        boundary_physicalcoordinates,
+        boundary_jacobian,
     )
 end
 
