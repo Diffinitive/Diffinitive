@@ -143,3 +143,17 @@ using StaticArrays
         @test_broken false # @test_throws DomainError(3, "Size minus 1 must be divisible by the ratio.") coarsen(cg, 3)
     end
 end
+
+@testset "curvilinear_grid" begin
+    x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
+    J((ξ, η)) = @SMatrix[
+        1     0;
+        2ξ-1  1+ξ*(ξ-1);
+    ]
+    cg = curvilinear_grid(x̄, J, 10, 11)
+    @test cg isa CurvilinearGrid{SVector{2,Float64}, 2}
+
+    lg = equidistant_grid((10,11), (0,0), (1,1))
+    @test logicalgrid(cg) == lg
+    @test collect(cg) == map(x̄, lg)
+end

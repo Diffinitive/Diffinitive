@@ -42,3 +42,12 @@ end
 # creating the logical grid, evaluating functions and possibly calculating the
 # entries in the jacobian.
 
+function curvilinear_grid(x, J, size...)
+    D = length(size)
+    lg = equidistant_grid(size, ntuple(i->0., D), ntuple(i->1., D))
+    return CurvilinearGrid(
+        lg,
+        map(x,lg),
+        map(J,lg),
+    )
+end

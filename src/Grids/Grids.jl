@@ -37,6 +37,7 @@ export equidistant_grid
 export CurvilinearGrid
 export jacobian
 export logicalgrid
+export curvilinear_grid
 
 abstract type BoundaryIdentifier end
 
