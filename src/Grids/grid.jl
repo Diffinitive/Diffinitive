@@ -45,6 +45,9 @@ componentview(gf, component_index...) = ArrayComponentView(gf, component_index)
 # REVIEW: Should this only be defined for vector-valued component types of the same dimension?
 # Now one can for instance do:  v = [rand(2,2),rand(2,2), rand(2,1)] and cv = componentview(v,1,2)
 # resulting in #undef in the third component of cv.
+# RESPONSE: I don't think it's possible to stop the user from
+# doing stupid things. My inclination is to just keep it simple and let the
+# user read the error messages they get.
 struct ArrayComponentView{CT,T,D,AT <: AbstractArray{T,D}, IT} <: AbstractArray{CT,D}
     v::AT
     component_index::IT
@@ -58,6 +61,10 @@ end
 Base.size(cv) = size(cv.v)
 Base.getindex(cv::ArrayComponentView, i::Int) = cv.v[i][cv.component_index...]
 Base.getindex(cv::ArrayComponentView, I::Vararg{Int}) = cv.v[I...][cv.component_index...] #REVIEW: Will this allocate if I... slices v? if so, we should probably use a view on v?
+# RESPONSE: I imagine the values of `cv` will be small static vectors most of
+# the time for which this won't be a problem. I say we cross that bridge when
+# there is an obvoius need. (Just slapping a @view on there seems to be
+# changing the return tyoe to a 0-dimensional array. That's where i gave up.)
 IndexStyle(::Type{<:ArrayComponentView{<:Any,<:Any,AT}}) where AT = IndexStyle(AT)
 
 # TODO: Implement the remaining optional methods from the array interface
