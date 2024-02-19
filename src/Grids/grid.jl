@@ -35,7 +35,7 @@ coordinate_size(g::Grid) = coordinate_size(typeof(g)) # TBD: Name of this functi
 """
     component_type(gf)
 
-The type of the components of `gf`.
+The type of the components of the elements of `gf`.
 """
 component_type(T::Type) = eltype(eltype(T))
 component_type(t) = component_type(typeof(t))
