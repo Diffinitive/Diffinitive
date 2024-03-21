@@ -15,19 +15,21 @@ using StaticArrays
     @test coordinate_size(DummyGrid{SVector{3,Float64}, 2}()) == 3
 
     @test coordinate_size(DummyGrid{SVector{3,Float64}, 2}) == 3
+end
 
-    @testset "component_type" begin
-        @test component_type(DummyGrid{Int,1}()) == Int
-        @test component_type(DummyGrid{Float64,1}()) == Float64
-        @test component_type(DummyGrid{Rational,1}()) == Rational
+@testset "component_type" begin
+    @test component_type(DummyGrid{Int,1}()) == Int
+    @test component_type(DummyGrid{Float64,1}()) == Float64
+    @test component_type(DummyGrid{Rational,1}()) == Rational
 
-        @test component_type(DummyGrid{SVector{3,Int},2}()) == Int
-        @test component_type(DummyGrid{SVector{2,Float64},3}()) == Float64
-        @test component_type(DummyGrid{SVector{4,Rational},4}()) == Rational
+    @test component_type(DummyGrid{SVector{3,Int},2}()) == Int
+    @test component_type(DummyGrid{SVector{2,Float64},3}()) == Float64
+    @test component_type(DummyGrid{SVector{4,Rational},4}()) == Rational
 
-        @test component_type(DummyGrid{Float64,1}) == Float64
-        @test component_type(DummyGrid{SVector{2,Float64},3}) == Float64
-    end
+    @test component_type(DummyGrid{Float64,1}) == Float64
+    @test component_type(DummyGrid{SVector{2,Float64},3}) == Float64
+
+    @test component_type(fill(@SVector[1,2], 4,2)) == Int
 end
 
 @testset "eval_on" begin

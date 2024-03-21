@@ -5,7 +5,7 @@ using TOML
     StencilSet
 
 A `StencilSet` contains a set of associated stencils. The stencils
-are are stored in a table, and can be accesed by indexing into the `StencilSet`.
+are are stored in a table, and can be accessed by indexing into the `StencilSet`.
 """
 struct StencilSet
     table
@@ -21,7 +21,7 @@ filters. If more than one set matches the filters an error is raised. The
 table of the `StencilSet` is a parsed TOML intended for functions like
 `parse_scalar` and `parse_stencil`.
 
-The `StencilSet` table is not parsed beyond the inital TOML parse. To get usable
+The `StencilSet` table is not parsed beyond the initial TOML parse. To get usable
 stencils use the `parse_stencil` functions on the fields of the stencil set.
 
 The reason for this is that since stencil sets are intended to be very

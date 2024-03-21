@@ -3,7 +3,7 @@
 
 Splits the multi-index `I` into two parts. One part which is expected to be
 used as a view, and one which is expected to be used as an index.
-Eg.
+E.g.
 ```julia-repl
 julia> LazyTensors.split_index(1, 3, 2, 1, (1,2,3,4)...)
 ((1, Colon(), Colon(), Colon(), 4), (2, 3))
@@ -33,7 +33,7 @@ end
     split_tuple(t, szs)
 
 Split the tuple `t` into a set of tuples of the sizes given in `szs`.
-`sum(szs)` should equal `lenght(t)`.
+`sum(szs)` should equal `length(t)`.
 
 E.g
 ```julia-repl

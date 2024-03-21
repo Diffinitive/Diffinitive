@@ -27,7 +27,7 @@ Base.getindex(g::Grid, I::CartesianIndex) = g[Tuple(I)...]
 """
     coordinate_size(g)
 
-The lenght of the coordinate vector of `Grid` `g`.
+The length of the coordinate vector of `Grid` `g`.
 """
 coordinate_size(::Type{<:Grid{T}}) where T = _ncomponents(T)
 coordinate_size(g::Grid) = coordinate_size(typeof(g)) # TBD: Name of this function?!
@@ -35,7 +35,15 @@ coordinate_size(g::Grid) = coordinate_size(typeof(g)) # TBD: Name of this functi
 """
     component_type(gf)
 
-The type of the components of the elements of `gf`.
+The type of the components of the elements of `gf`. I.e if `gf` is a vector
+valued grid function, `component_view(gf)` is the element type of the vectors
+at each grid point.
+
+# Examples
+```julia-repl
+julia> component_type([[1,2], [2,3], [3,4]])
+Int64
+```
 """
 component_type(T::Type) = eltype(eltype(T))
 component_type(t) = component_type(typeof(t))
