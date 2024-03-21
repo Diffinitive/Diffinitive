@@ -27,7 +27,7 @@ Base.getindex(g::Grid, I::CartesianIndex) = g[Tuple(I)...]
 """
     coordinate_size(g)
 
-The lenght of the coordinate vector of `Grid` `g`.
+The length of the coordinate vector of `Grid` `g`.
 """
 coordinate_size(::Type{<:Grid{T}}) where T = _ncomponents(T)
 coordinate_size(g::Grid) = coordinate_size(typeof(g)) # TBD: Name of this function?!
