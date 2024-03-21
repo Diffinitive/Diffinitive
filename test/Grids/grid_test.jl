@@ -94,7 +94,6 @@ end
         # REVIEW: I think we can reduce the index ranges.
         v = [@SMatrix[1 3; 2 4] .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
 
-        # switch to indexing in test?
         @test ArrayComponentView(v, (1, 1))  == [1 .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
         @test ArrayComponentView(v, (1, 2))  == [3 .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
         @test ArrayComponentView(v, (2, 1))  == [2 .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]

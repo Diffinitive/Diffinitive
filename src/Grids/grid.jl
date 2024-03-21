@@ -67,20 +67,7 @@ Base.getindex(cv::ArrayComponentView, I::Vararg{Int}) = cv.v[I...][cv.component_
 # changing the return tyoe to a 0-dimensional array. That's where i gave up.)
 IndexStyle(::Type{<:ArrayComponentView{<:Any,<:Any,AT}}) where AT = IndexStyle(AT)
 
-# TODO: Implement the remaining optional methods from the array interface
-# setindex!(A, v, i::Int)
-# setindex!(A, v, I::Vararg{Int, N})
-# iterate
-# length(A)
-# similar(A)
-# similar(A, ::Type{S})
-# similar(A, dims::Dims)
-# similar(A, ::Type{S}, dims::Dims)
-# # Non-traditional indices
-# axes(A)
-# similar(A, ::Type{S}, inds)
-# similar(T::Union{Type,Function}, inds)
-
+# TODO: Implement setindex!?
 # TODO: Implement a more general ComponentView that can handle non-AbstractArrays.
 
 """
