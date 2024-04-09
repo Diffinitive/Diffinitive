@@ -103,8 +103,8 @@ by the tuple `size`.
 
 Note: If `limit_lower` and `limit_upper` are integers and `size` would allow a
 completely integer grid, `equidistant_grid` will still return a floating point
-grid. This simlifies the implementation and avoids certain surprise
-behaviours.
+grid. This simplifies the implementation and avoids certain surprise
+behaviors.
 """
 # TODO: Change signature to `equidistant_grid(limit_lower,limit_upper, size...)
 function equidistant_grid(size::Dims, limit_lower, limit_upper)
