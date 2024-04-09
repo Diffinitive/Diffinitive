@@ -157,25 +157,6 @@ using StaticArrays
         @testset test_boundary_grid(mg, TensorGridBoundary{2, Upper}(), J1)
     end
 
-    # TBD: Should curvilinear grid support refining and coarsening?
-    # This would require keeping the coordinate mapping around which seems burdensome, and might increase compilation time?
-    @testset "refine" begin
-        @test_broken refine(mg, 1) == mg
-        @test_broken refine(mg, 2) == MappedGrid(refine(lg,2), x̄, J)
-        @test_broken refine(mg, 3) == MappedGrid(refine(lg,3), x̄, J)
-    end
-
-    @testset "coarsen" begin
-        lg = equidistant_grid((11,11), (0,0), (1,1)) # TODO: Change dims of the grid to be different
-        x̄ = map(ξ̄ -> 2ξ̄, lg)
-        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
-        mg = MappedGrid(lg, x̄, J)
-
-        @test_broken coarsen(mg, 1) == mg
-        @test_broken coarsen(mg, 2) == MappedGrid(coarsen(lg,2), x̄, J)
-
-        @test_broken false # @test_throws DomainError(3, "Size minus 1 must be divisible by the ratio.") coarsen(mg, 3)
-    end
 end
 
 @testset "mapped_grid" begin

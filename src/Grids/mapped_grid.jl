@@ -48,6 +48,9 @@ function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
     )
 end
 
+# TBD: refine and coarsen could be implemented once we have a simple manifold implementation.
+# Before we do, we should consider the overhead of including such a field in the mapped grid struct.
+
 function mapped_grid(x, J, size...)
     D = length(size)
     lg = equidistant_grid(size, ntuple(i->0., D), ntuple(i->1., D))
