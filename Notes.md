@@ -186,18 +186,41 @@ lmap(f,  I) = LazyIndexableMap(f,I)
 
 The interaction of the map methods with the probable design of multiblock functions involving nested indecies complicate the picture slightly. It's clear at the time of writing how this would work with `Base.map`. Perhaps we want to implement our own versions of both eager and lazy map.
 
+
+### 2024-04
+MappedArrays.jl provides a simple array type and function like the description
+of LazyMapping above. One option is to remove `eval_on` completely and rely on
+destructuring arguments if handling the function input as a vector is
+undesirable.
+
+If we can let multi-block grids be iterators over grid points we could even
+handle those by specialized implementation of `map` and `mappedarray`.
+
 ## Multiblock implementation
 We want multiblock things to work very similarly to regular one block things.
 
 ### Grid functions
-Should probably support a nested indexing so that we first have an index for subgrid and then an index for nodes on that grid. E.g `g[1,2][2,3]` or `g[3][43,21]`.
+Should probably support a nested indexing so that we first have an index for
+subgrid and then an index for nodes on that grid. E.g `g[1,2][2,3]` or
+`g[3][43,21]`.
 
-We could also possibly provide a combined indexing style `g[1,2,3,4]` where the first group of indices are for the subgrid and the remaining are for the nodes.
+We could also possibly provide a combined indexing style `g[1,2,3,4]` where
+the first group of indices are for the subgrid and the remaining are for the
+nodes.
 
-We should make sure the underlying buffer for gridfunctions are continuously stored and are easy to convert to, so that interaction with for example DifferentialEquations is simple and without much boilerplate.
+We should make sure the underlying buffer for grid functions are continuously
+stored and are easy to convert to, so that interaction with for example
+DifferentialEquations is simple and without much boilerplate.
 
 #### `map` and `collect` and nested indexing
-We need to make sure `collect`, `map` and a potential lazy map work correctly through the nested indexing.
+We need to make sure `collect`, `map` and a potential lazy map work correctly
+through the nested indexing. Also see notes on `eval_on` above.
+
+Possibly this can be achieved by providing special nested indexing but not
+adhering to an array interface at the top level, instead being implemented as
+an iterator over the grid points. A custom trait can let map and other methods
+know the shape (or structure) of the nesting so that they can efficiently
+allocate result arrays.
 
 ### Tensor applications
 Should behave as grid functions
