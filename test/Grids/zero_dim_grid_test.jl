@@ -41,4 +41,8 @@ using StaticArrays
     @testset "boundary_grid" begin
         @test_throws ArgumentError("ZeroDimGrid has no boundaries") boundary_grid(ZeroDimGrid(@SVector[1.0,2.0]), :bid)
     end
+
+    @testset "boundary_indices" begin
+        @test_throws ArgumentError("ZeroDimGrid has no boundaries") boundary_indices(ZeroDimGrid(@SVector[1.0,2.0]), :bid)
+    end
 end
