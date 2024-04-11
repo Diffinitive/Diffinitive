@@ -1,7 +1,7 @@
 """
     LazyArray{T,D} <: AbstractArray{T,D}
 
-Array which is calcualted lazily when indexing.
+Array which is calculated lazily when indexing.
 
 A subtype of `LazyArray` will use lazy version of `+`, `-`, `*`, `/`.
 """
@@ -42,7 +42,7 @@ end
 
 """
     LazyElementwiseOperation{T,D,Op} <: LazyArray{T,D}
-Struct allowing for lazy evaluation of elementwise operations on `AbstractArray`s.
+Struct allowing for lazy evaluation of element-wise operations on `AbstractArray`s.
 
 A `LazyElementwiseOperation` contains two arrays together with an operation.
 The operations are carried out when the `LazyElementwiseOperation` is indexed.
