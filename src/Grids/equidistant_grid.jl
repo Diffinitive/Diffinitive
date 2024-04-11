@@ -51,7 +51,8 @@ inverse_spacing(g::EquidistantGrid) = 1/step(g.points)
 boundary_identifiers(::EquidistantGrid) = (Lower(), Upper())
 boundary_grid(g::EquidistantGrid, id::Lower) = ZeroDimGrid(g[begin])
 boundary_grid(g::EquidistantGrid, id::Upper) = ZeroDimGrid(g[end])
-
+boundary_indices(g::EquidistantGrid, id::Lower) = (1,)
+boundary_indices(g::EquidistantGrid, id::Upper) = (length(g),)
 
 """
     refine(g::EquidistantGrid, r::Int)
@@ -102,8 +103,8 @@ by the tuple `size`.
 
 Note: If `limit_lower` and `limit_upper` are integers and `size` would allow a
 completely integer grid, `equidistant_grid` will still return a floating point
-grid. This simlifies the implementation and avoids certain surprise
-behaviours.
+grid. This simplifies the implementation and avoids certain surprise
+behaviors.
 """
 function equidistant_grid(size::Dims, limit_lower, limit_upper)
     gs = map(equidistant_grid, size, limit_lower, limit_upper)
