@@ -7,8 +7,8 @@ using Sbplib.RegionIndices
 import Sbplib.SbpOperators.BoundaryOperator
 
 @testset "normal_derivative" begin
-    g_1D = equidistant_grid(11, 0.0, 1.0)
-    g_2D = equidistant_grid((11,12), (0.0, 0.0), (1.0,1.0))
+    g_1D = equidistant_grid(0.0, 1.0, 11)
+    g_2D = equidistant_grid((0.0, 0.0), (1.0,1.0), 11, 12)
     @testset "normal_derivative" begin
     	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin

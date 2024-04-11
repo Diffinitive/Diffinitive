@@ -12,7 +12,7 @@ using LinearAlgebra
     stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
 
     @testset "1D" begin
-        g = equidistant_grid(11, 0., 1.)
+        g = equidistant_grid(0., 1., 11)
         c = [  1.,  3.,  6., 10., 15., 21., 28., 36., 45., 55., 66.]
 
         @testset "checking c" begin
@@ -27,7 +27,7 @@ using LinearAlgebra
 
         @testset "application" begin
             function apply_to_functions(; v, c)
-                g = equidistant_grid(11, 0., 10.) # h = 1
+                g = equidistant_grid(0., 10., 11) # h = 1
                 c̄ = eval_on(g,c)
                 v̄ = eval_on(g,v)
 
@@ -44,12 +44,12 @@ using LinearAlgebra
     end
 
     @testset "2D" begin
-        g = equidistant_grid((11,9), (0.,0.), (10.,8.)) # h = 1
+        g = equidistant_grid((0.,0.), (10.,8.), 11, 9) # h = 1
         c = eval_on(g, (x,y)->x+y)
 
         @testset "application" begin
             function apply_to_functions(dir; v, c)
-                g = equidistant_grid((11,9), (0.,0.), (10.,8.)) # h = 1
+                g = equidistant_grid((0.,0.), (10.,8.), 11, 9) # h = 1
                 c̄ = eval_on(g,c)
                 v̄ = eval_on(g,v)
 
@@ -89,7 +89,7 @@ using LinearAlgebra
                 Dxv(x,y) = cos(x)*exp(x) - (exp(x) + exp(1.5 - 1.5y))*sin(x)
                 Dyv(x,y) = -1.5(1.5exp(x) + 1.5exp(1.5 - 1.5y))*cos(1.5 - 1.5y) - 2.25exp(1.5 - 1.5y)*sin(1.5 - 1.5y)
 
-                g₁ = equidistant_grid((60,67), (0.,0.), (1.,2.))
+                g₁ = equidistant_grid((0.,0.), (1.,2.), 60, 67)
                 g₂ = refine(g₁,2)
 
                 c̄₁ = eval_on(g₁, c)
@@ -155,7 +155,7 @@ end
         @testset "application" begin
 
             function apply_to_functions(; v, c)
-                g = equidistant_grid(11, 0., 10.) # h = 1
+                g = equidistant_grid(0., 10., 11) # h = 1
                 c̄ = eval_on(g,c)
                 v̄ = eval_on(g,v)
 
@@ -171,7 +171,7 @@ end
         end
 
         @testset "type stability" begin
-            g = equidistant_grid(11, 0., 10.) # h = 1
+            g = equidistant_grid(0., 10., 11) # h = 1
             c̄ = eval_on(g,x-> -1)
             v̄ = eval_on(g,x->1.)
 
@@ -185,7 +185,7 @@ end
     end
 
     @testset "2D" begin
-        g = equidistant_grid((11,9), (0.,0.), (10.,8.)) # h = 1
+        g = equidistant_grid((0.,0.), (10.,8.), 11, 9) # h = 1
         c = eval_on(g, (x,y)->x+y)
         @testset "Constructors" begin
             @test SecondDerivativeVariable(c, interior_stencil, closure_stencils, 1) isa LazyTensor
@@ -210,7 +210,7 @@ end
 
         @testset "application" begin
             function apply_to_functions(dir; v, c)
-                g = equidistant_grid((11,9), (0.,0.), (10.,8.)) # h = 1
+                g = equidistant_grid((0.,0.), (10.,8.), 11, 9) # h = 1
                 c̄ = eval_on(g,c)
                 v̄ = eval_on(g,v)
 

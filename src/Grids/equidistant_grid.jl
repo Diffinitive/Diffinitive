@@ -88,7 +88,7 @@ end
 
 
 """
-    equidistant_grid(size::Dims, limit_lower, limit_upper)
+    equidistant_grid(limit_lower, limit_upper, dims...)
 
 Construct an equidistant grid with corners at the coordinates `limit_lower` and
 `limit_upper`.
@@ -99,24 +99,24 @@ The length of the domain sides are given by the components of
 of the grid are not allowed to be negative.
 
 The number of equispaced points in each coordinate direction are given
-by the tuple `size`.
+by the tuple `dims`.
 
-Note: If `limit_lower` and `limit_upper` are integers and `size` would allow a
+Note: If `limit_lower` and `limit_upper` are integers and `dims` would allow a
 completely integer grid, `equidistant_grid` will still return a floating point
 grid. This simplifies the implementation and avoids certain surprise
 behaviors.
 """
-function equidistant_grid(size::Dims, limit_lower, limit_upper)
-    gs = map(equidistant_grid, size, limit_lower, limit_upper)
+function equidistant_grid(limit_lower, limit_upper, dims::Vararg{Int})
+    gs = map(equidistant_grid, limit_lower, limit_upper, dims)
     return TensorGrid(gs...)
 end
 
 """
-    equidistant_grid(size::Int, limit_lower::T, limit_upper::T)
+    equidistant_grid(limit_lower::T, limit_upper::T, size::Int)
 
 Constructs a 1D equidistant grid.
 """
-function equidistant_grid(size::Int, limit_lower::T, limit_upper::T) where T
+function equidistant_grid(limit_lower::T, limit_upper::T, size::Int) where T
     if any(size .<= 0)
         throw(DomainError("size must be postive"))
     end

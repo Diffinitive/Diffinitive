@@ -9,8 +9,8 @@ using Sbplib.SbpOperators: BoundaryOperator, Stencil
 @testset "boundary_restriction" begin
 	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 4)
 	e_closure = parse_stencil(stencil_set["e"]["closure"])
-    g_1D = equidistant_grid(11, 0.0, 1.0)
-    g_2D = equidistant_grid((11,15), (0.0, 0.0), (1.0,1.0))
+    g_1D = equidistant_grid(0.0, 1.0, 11)
+    g_2D = equidistant_grid((0.0, 0.0), (1.0,1.0), 11, 15)
 
     @testset "boundary_restriction" begin
         @testset "1D" begin
