@@ -25,3 +25,4 @@ coarsen(g::ZeroDimGrid, ::Int) = g
 
 boundary_identifiers(g::ZeroDimGrid) = ()
 boundary_grid(g::ZeroDimGrid, ::Any) = throw(ArgumentError("ZeroDimGrid has no boundaries"))
+boundary_indices(g::ZeroDimGrid, ::Any) = throw(ArgumentError("ZeroDimGrid has no boundaries"))
