@@ -348,3 +348,11 @@ v[I]
 * This would impact how tensor grid works.
 * To make things homogenous maybe these index collections should be used for the more simple grids too.
 * The function `to_indices` from Base could be useful to implement for `IndexCollection`
+
+
+## Stencil application pipeline
+We should make sure that `@inbounds` and `Base.@propagate_inbounds` are
+applied correctly throughout the stack. When testing the performance of
+stencil application on the bugfix/sbp_operators/stencil_return_type branch
+there seemed to be some strange results where such errors could be the
+culprit.
