@@ -72,7 +72,7 @@ function run_benchmark(rev; kwargs...)
 end
 
 """
-    compare_benchmarks(target, baseline, f=minimum; judgekwargs=Dict())
+    compare_benchmarks(target, baseline; f=minimum, judgekwargs=Dict(), kwargs...)
 
 Runs the benchmark at revisions `target` and `baseline` and compares them
 using `PkgBenchmark.judge`. `f` is the function used to compare. `judgekwargs`
@@ -82,7 +82,7 @@ are keyword arguments passed to `judge`.
 
 Returns a `PkgBenchmark.BenchmarkJudgement`
 """
-function compare_benchmarks(target, baseline, f=minimum; judgekwargs=Dict(), kwargs...)
+function compare_benchmarks(target, baseline; f=minimum, judgekwargs=Dict(), kwargs...)
     t = run_benchmark(target; kwargs...)
     b = run_benchmark(baseline; kwargs...)
 
@@ -97,7 +97,7 @@ specified in `baseline`.
 
 Accepts the same arguments as the two revision version.
 """
-function compare_benchmark(baseline, f=minimum; judgekwargs=Dict(), kwargs...)
+function compare_benchmarks(baseline; f=minimum, judgekwargs=Dict(), kwargs...)
     t = run_benchmark(;kwargs...)
     b = run_benchmark(baseline; kwargs...)
 
