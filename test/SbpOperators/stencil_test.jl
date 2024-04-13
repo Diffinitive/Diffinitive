@@ -1,8 +1,10 @@
 using Test
 using Sbplib.SbpOperators
+using StaticArrays
 import Sbplib.SbpOperators.Stencil
 import Sbplib.SbpOperators.NestedStencil
 import Sbplib.SbpOperators.scale
+import Sbplib.SbpOperators: apply_stencil, apply_stencil_backwards
 
 @testset "Stencil" begin
     s = Stencil(-2:2, (1.,2.,2.,3.,4.))
@@ -42,6 +44,52 @@ import Sbplib.SbpOperators.scale
 
     @testset "promotion" begin
         @test promote(Stencil(1,1;center=1), Stencil(2.,2.;center=2)) == (Stencil(1.,1.;center=1), Stencil(2.,2.;center=2))
+    end
+
+    @testset "apply_stencil" begin
+        v = [1, 2, 4, 8, 16, 32, 64, 128]
+        s = Stencil(1,2,3,4, center = 2)
+        @test apply_stencil(s,v, 2) == v[1] + 2*v[2] + 3*v[3] + 4*v[4]
+        @test apply_stencil(s,v, 4) == v[3] + 2*v[4] + 3*v[5] + 4*v[6]
+        @test apply_stencil_backwards(s,v, 3) == 4*v[1] + 3*v[2] + 2*v[3] + 1*v[4]
+        @test apply_stencil_backwards(s,v, 7) == 4*v[5] + 3*v[6] + 2*v[7] + 1*v[8]
+        @test apply_stencil(s,v, 2) isa Int
+        @test apply_stencil_backwards(s,v, 7) isa Int
+
+        v = [1, 2, 4, 8, 16, 32, 64, 128]
+        s = Stencil(1.,2.,3.,4., center = 2)
+        @test apply_stencil(s,v, 4) == v[3] + 2. *v[4] + 3. *v[5] + 4. *v[6]
+        @test apply_stencil_backwards(s,v, 7) == 4. *v[5] + 3. *v[6] + 2. *v[7] + v[8]
+        @test apply_stencil(s,v, 2) isa Float64
+        @test apply_stencil_backwards(s,v, 7) isa Float64
+
+        v = [1., 2., 4., 8., 16., 32., 64., 128.]
+        s = Stencil(1,2,3,4, center = 2)
+        @test apply_stencil(s,v, 2) == v[1] + 2*v[2] + 3*v[3] + 4*v[4]
+        @test apply_stencil_backwards(s,v, 3) == 4*v[1] + 3*v[2] + 2*v[3] + 1*v[4]
+        @test apply_stencil(s,v, 2) isa Float64
+        @test apply_stencil_backwards(s,v, 3) isa Float64
+
+        v = [@SVector[1, 2], @SVector[3, 4], @SVector[5, 6], @SVector[7, 8]]
+        s = Stencil(1,2, center = 1)
+        @test apply_stencil(s,v,1) == @SVector[7, 10]
+        @test apply_stencil_backwards(s,v,3) == @SVector[11, 14]
+        @test apply_stencil(s,v,1) isa SVector{2, Int}
+        @test apply_stencil_backwards(s,v,3) isa SVector{2, Int}
+
+        v = [@SVector[1., 2.], @SVector[3., 4.], @SVector[5., 6.], @SVector[7., 8.]]
+        s = Stencil(1,2, center = 1)
+        @test apply_stencil(s,v,1) == @SVector[7., 10.]
+        @test apply_stencil_backwards(s,v,3) == @SVector[11., 14.]
+        @test apply_stencil(s,v,1) isa SVector{2, Float64}
+        @test apply_stencil_backwards(s,v,3) isa SVector{2, Float64}
+
+        v = [@SVector[1, 2], @SVector[3, 4], @SVector[5, 6], @SVector[7, 8]]
+        s = Stencil(1.,2., center = 1)
+        @test apply_stencil(s,v,1) == @SVector[7., 10.]
+        @test apply_stencil_backwards(s,v,3) == @SVector[11., 14.]
+        @test apply_stencil(s,v,1) isa SVector{2, Float64}
+        @test apply_stencil_backwards(s,v,3) isa SVector{2, Float64}
     end
 
     @testset "type stability" begin
@@ -155,6 +203,27 @@ end
 
         @test SbpOperators.apply_stencil(ns, c, v, 4) == 5*7 + 11*11 + 6*13
         @test SbpOperators.apply_stencil_backwards(ns, c, v, 4) == -3*3 - 7*5 - 4*7
+
+        # Different types in vector and stencil
+        ns = NestedStencil((-1.,1.,0.),(-1.,0.,1.),(0.,-2.,2.), center=2)
+        @test SbpOperators.apply_inner_stencils(ns, c, 4) isa Stencil{Float64, 3}
+        @test SbpOperators.apply_inner_stencils(ns, c, 4) == Stencil(4.,9.,10.; center=2)
+        @test SbpOperators.apply_inner_stencils_backwards(ns, c, 4) isa Stencil{Float64, 3}
+        @test SbpOperators.apply_inner_stencils_backwards(ns, c, 4) == Stencil(-5.,-9.,-8.; center=2)
+
+        @test SbpOperators.apply_stencil(ns, c, v, 4) isa Float64
+        @test SbpOperators.apply_stencil(ns, c, v, 4) == 193.
+        @test SbpOperators.apply_stencil_backwards(ns, c, v, 4) isa Float64
+        @test SbpOperators.apply_stencil_backwards(ns, c, v, 4) == -158.
+
+        # Arrays of vectors
+        ns = NestedStencil((-1.,1.,0.),(-1.,0.,1.),(0.,-2.,2.), center=2)
+        c = [  1,  3,  6, 10]
+        v = [@SVector[1, 2], @SVector[3, 4], @SVector[5, 6], @SVector[7, 8]]
+        @test SbpOperators.apply_stencil(ns, c, v, 2) isa SVector{2,Float64}
+        @test SbpOperators.apply_stencil(ns, c, v, 2) == 2v[1] + 5v[2] + 6v[3]
+        @test SbpOperators.apply_stencil_backwards(ns, c, v, 2) isa SVector{2,Float64}
+        @test SbpOperators.apply_stencil_backwards(ns, c, v, 2) == -4v[1] - 5v[2] - 3v[3]
     end
 
     @testset "type stability" begin

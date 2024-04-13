@@ -23,7 +23,7 @@ file in `benchmark/results`.
 For control over what happens to the benchmark result datastructure see the
 different methods of [`run_benchmark`](@ref)
 """
-function main(;rev=nothing, target=nothing, baseline=nothing , kwargs...)
+function main(;rev=nothing, target=nothing, baseline=nothing, name=nothing, kwargs...)
     if !isnothing(rev)
         r = run_benchmark(rev; kwargs...)
     elseif !isnothing(baseline)
@@ -37,7 +37,7 @@ function main(;rev=nothing, target=nothing, baseline=nothing , kwargs...)
         r = run_benchmark(;kwargs...)
     end
 
-    file_path = write_result_html(r)
+    file_path = write_result_html(r; name)
     open_in_default_browser(file_path)
 end
 
@@ -137,9 +137,14 @@ function write_result_html(io, r)
     Mustache.render(io, template, Dict("title"=>dt, "content"=>content))
 end
 
-function write_result_html(r)
+function write_result_html(r; name=nothing)
     dt = Dates.format(PkgBenchmark.date(r), "yyyy-mm-dd HHMMSS")
-    file_path = joinpath(results_dir, dt*".html")
+
+    if isnothing(name)
+        file_path = joinpath(results_dir, dt*".html")
+    else
+        file_path = joinpath(results_dir, dt*" "*name*".html")
+    end
 
     open(file_path, "w") do io
         write_result_html(io, r)
