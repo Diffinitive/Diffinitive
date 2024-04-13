@@ -24,8 +24,8 @@ end
     @testset "Constructors" begin
         stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
 
-        g₁ = equidistant_grid(11, 0., 1.)
-        g₂ = equidistant_grid((11,14), (0.,1.), (1.,3.))
+        g₁ = equidistant_grid(0., 1., 11)
+        g₂ = equidistant_grid((0.,1.), (1.,3.), 11, 14)
         
         @test first_derivative(g₁, stencil_set) isa LazyTensor{Float64,1,1}
         @test first_derivative(g₂, stencil_set, 2) isa LazyTensor{Float64,2,2}
@@ -38,7 +38,7 @@ end
 
     @testset "Accuracy conditions" begin
         N = 20
-        g = equidistant_grid(N, 0//1,2//1)
+        g = equidistant_grid(0//1, 2//1, N)
         @testset for order ∈ [2,4]
             stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order)
             D₁ = first_derivative(g, stencil_set)
@@ -68,7 +68,7 @@ end
 
     @testset "Accuracy on function" begin
         @testset "1D" begin
-            g = equidistant_grid(30, 0.,1.)
+            g = equidistant_grid(0., 1., 30)
             v = eval_on(g, x->exp(x))
             @testset for (order, tol) ∈ [(2, 6e-3),(4, 2e-4)]
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order)
@@ -79,7 +79,7 @@ end
         end
 
         @testset "2D" begin
-            g = equidistant_grid((30,60), (0.,0.),(1.,2.))
+            g = equidistant_grid((0.,0.),(1.,2.), 30, 60)
             v = eval_on(g, (x,y)->exp(0.8x+1.2*y))
             @testset for (order, tol) ∈ [(2, 6e-3),(4, 3e-4)]
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order)

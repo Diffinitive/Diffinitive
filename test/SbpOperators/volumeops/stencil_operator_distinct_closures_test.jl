@@ -8,7 +8,7 @@ import Sbplib.SbpOperators.Stencil
 import Sbplib.SbpOperators.StencilOperatorDistinctClosures
 
 @testset "StencilOperatorDistinctClosures" begin
-    g = equidistant_grid(11, 0., 1.)
+    g = equidistant_grid(0., 1., 11)
 
     lower_closure = (
         Stencil(-1,1, center=1),
