@@ -15,8 +15,8 @@ import Sbplib.SbpOperators.VolumeOperator
     closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
     Lx = 3.5
     Ly = 3.
-    g_1D = equidistant_grid(121, 0.0, Lx)
-    g_2D = equidistant_grid((121,123), (0.0, 0.0), (Lx, Ly))
+    g_1D = equidistant_grid(0.0, Lx, 121)
+    g_2D = equidistant_grid((0.0, 0.0), (Lx, Ly), 121, 123)
 
     @testset "Constructors" begin
         @testset "1D" begin

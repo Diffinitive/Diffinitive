@@ -10,7 +10,7 @@ const operator_path = sbp_operators_path()*"standard_diagonal.toml"
 
 function benchmark_const_coeff_1d(;N = 100, order = 4)
     stencil_set = read_stencil_set(operator_path; order=order)
-    g = equidistant_grid(N, 0., 1.)
+    g = equidistant_grid(0., 1., N)
     D = second_derivative(g, stencil_set)
     u = rand(size(g)...)
     u_xx = rand(size(g)...)
@@ -25,7 +25,7 @@ end
 
 function benchmark_var_coeff_1d(;N = 100, order = 4)
     stencil_set = read_stencil_set(operator_path; order=order)
-    g = equidistant_grid(N, 0., 1.)
+    g = equidistant_grid(0., 1., N)
     c = rand(size(g)...)
     c_lz = eval_on(g, x -> 0.5)
     D = second_derivative_variable(g, c, stencil_set)
@@ -49,7 +49,7 @@ end
 
 function benchmark_const_coeff_2d(;N = 100, order = 4)
     stencil_set = read_stencil_set(operator_path; order=order)
-    g = equidistant_grid((N,N), (0.,0.,),(1.,1.))
+    g = equidistant_grid((0.,0.,),(1.,1.), N, N)
     D = Laplace(g, stencil_set)
     u = rand(size(g)...)
     u_xx = rand(size(g)...)
@@ -71,7 +71,7 @@ end
 
 function benchmark_var_coeff_2d(;N = 100, order = 4)
     stencil_set = read_stencil_set(operator_path; order=order)
-    g = equidistant_grid((N,N), (0.,0.,),(1.,1.))
+    g = equidistant_grid((0.,0.,),(1.,1.), N, N)
     c = rand(size(g)...)
     c_lz = eval_on(g, x-> 0.5)
     D = second_derivative_variable(g, c, stencil_set, 1) + second_derivative_variable(g, c, stencil_set, 2)

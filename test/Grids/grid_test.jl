@@ -47,7 +47,7 @@ end
     @test eval_on(EquidistantGrid(range(0,1,length=4)), x->2x) == 2 .* range(0,1,length=4)
 
 
-    g = equidistant_grid((5,3), (0.0,0.0), (2.0,1.0))
+    g = equidistant_grid((0.0,0.0), (2.0,1.0), 5, 3)
 
     @test eval_on(g, x̄ -> 0.) isa LazyArray
     @test eval_on(g, x̄ -> 0.) == fill(0., (5,3))

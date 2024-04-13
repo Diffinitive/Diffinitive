@@ -9,8 +9,8 @@ import Sbplib.SbpOperators.ConstantInteriorScalingOperator
 @testset "Diagonal-stencil inverse_inner_product" begin
     Lx = π/2.
     Ly = Float64(π)
-    g_1D = equidistant_grid(77, 0.0, Lx)
-    g_2D = equidistant_grid((77,66), (0.0, 0.0), (Lx,Ly))
+    g_1D = equidistant_grid(0.0, Lx, 77)
+    g_2D = equidistant_grid((0.0, 0.0), (Lx,Ly), 77, 66)
     @testset "inverse_inner_product" begin
         stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "0D" begin
