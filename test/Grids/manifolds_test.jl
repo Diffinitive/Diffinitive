@@ -6,6 +6,11 @@ using Sbplib.LazyTensors
 
 # using StaticArrays
 
+@testset "ParameterSpace" begin
+    @test ndims(HyperBox([1,1], [2,2])) == 2
+    @test ndims(unittetrahedron()) == 3
+end
+
 @testset "HyperBox" begin
     @test HyperBox([1,1], [2,2]) isa HyperBox{Int, 2}
 

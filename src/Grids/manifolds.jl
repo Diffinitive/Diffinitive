@@ -18,6 +18,7 @@ See also: [`Interval`](@ref), [`Rectangle`](@ref), [`Box`](@ref),
 [`Simplex`](@ref),
 """
 abstract type ParameterSpace{D} end
+Base.ndims(::ParameterSpace{D}) where D = D
 
 struct HyperBox{T,D} <: ParameterSpace{D}
     a::SVector{D,T}
