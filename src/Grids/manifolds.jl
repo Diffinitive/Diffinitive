@@ -43,24 +43,26 @@ unithyperbox(T, D) = HyperBox((@SVector zeros(T,D)), (@SVector ones(T,D)))
 unithyperbox(D) = unithyperbox(Float64,D)
 
 
-struct Simplex{T,D} <: ParameterSpace{D}
-    verticies::NTuple{D,SVector{D,T}}
+struct Simplex{T,D,NV} <: ParameterSpace{D}
+    verticies::NTuple{NV,SVector{D,T}}
 end
 
 Simplex(verticies::Vararg{AbstractArray}) = Simplex(Tuple(SVector(v...) for v ∈ verticies))
 
+verticies(s::Simplex) = s.verticies
+
 Triangle{T} = Simplex{T,2}
 Tetrahedron{T} = Simplex{T,3}
 
-unittriangle(T) = unitsimplex(T,2)
-unittetrahedron(T) = unitsimplex(T,3)
+unittriangle(T=Float64) = unitsimplex(T,2)
+unittetrahedron(T=Float64) = unitsimplex(T,3)
 function unitsimplex(T,D)
     z = @SVector zeros(T,D)
     unitelement = one(eltype(z))
-    verticies = ntuple(i->setindex(z, unitelement, i), 4)
-    return Simplex(verticies)
+    verticies = ntuple(i->setindex(z, unitelement, i), D)
+    return Simplex((z,verticies...))
 end
-
+unitsimplex(D) = unitsimplex(Float64, D)
 
 """
 

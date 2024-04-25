@@ -32,6 +32,16 @@ end
 @testset "Simplex" begin
     @test Simplex([1,2], [3,4]) isa Simplex{Int, 2}
     @test Simplex([1,2,3], [4,5,6],[1,1,1]) isa Simplex{Int, 3}
+
+    @test verticies(Simplex([1,2], [3,4])) == ([1,2], [3,4])
+
+    @test unittriangle() isa Simplex{Float64,2}
+    @test verticies(unittriangle()) == ([0,0], [1,0], [0,1])
+
+    @test unittetrahedron() isa  Simplex{Float64,3}
+    @test verticies(unittetrahedron()) == ([0,0,0], [1,0,0], [0,1,0],[0,0,1])
+
+    @test unitsimplex(4) isa Simplex{Float64,4}
 end
 
 @testset "Chart" begin
