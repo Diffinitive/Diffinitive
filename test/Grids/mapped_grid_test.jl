@@ -4,7 +4,7 @@ using Test
 using StaticArrays
 
 @testset "MappedGrid" begin
-    lg = equidistant_grid((11,11), (0,0), (1,1)) # TODO: Change dims of the grid to be different
+    lg = equidistant_grid((0,0), (1,1), 11, 11) # TODO: Change dims of the grid to be different
     x̄ = map(ξ̄ -> 2ξ̄, lg)
     J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
     mg = MappedGrid(lg, x̄, J)
@@ -64,7 +64,7 @@ using StaticArrays
 
     @testset "Iterator interface" begin
         sg = MappedGrid(
-            equidistant_grid((15,11), (0,0), (1,1)),
+            equidistant_grid((0,0), (1,1), 15, 11),
             map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11)
         )
 
@@ -180,7 +180,7 @@ end
     mg = mapped_grid(x̄, J, 10, 11)
     @test mg isa MappedGrid{SVector{2,Float64}, 2}
 
-    lg = equidistant_grid((10,11), (0,0), (1,1))
+    lg = equidistant_grid((0,0), (1,1), 10, 11)
     @test logicalgrid(mg) == lg
     @test collect(mg) == map(x̄, lg)
 
