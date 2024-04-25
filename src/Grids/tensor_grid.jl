@@ -1,3 +1,5 @@
+# TODO: Check this file and other grids for duplicate implementation of general methods implemented for Grid
+
 """
     TensorGrid{T,D} <: Grid{T,D}
 

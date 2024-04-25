@@ -1,3 +1,4 @@
+# TODO: Double check that the interfaces for indexing and iterating are fully implemented and tested for all grids.
 module Grids
 
 using Sbplib.RegionIndices
@@ -50,6 +51,15 @@ export spacing
 export equidistant_grid
 
 
+# MappedGrid
+export MappedGrid
+export jacobian
+export logicalgrid
+export mapped_grid
+export jacobian_determinant
+export geometric_tensor
+export geometric_tensor_inverse
+
 abstract type BoundaryIdentifier end
 
 include("manifolds.jl")
@@ -57,5 +67,6 @@ include("grid.jl")
 include("tensor_grid.jl")
 include("equidistant_grid.jl")
 include("zero_dim_grid.jl")
+include("mapped_grid.jl")
 
 end # module
