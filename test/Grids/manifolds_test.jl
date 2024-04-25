@@ -35,7 +35,13 @@ end
 end
 
 @testset "Chart" begin
-    @test ConcreteChart(x->2x, unitsquare()) isa Chart{2}
+end
+
+@testset "ConcreteChart" begin
+    c = ConcreteChart(x->2x, unitsquare())
+    @test c isa Chart{2}
+    @test c([3,2]) == [6,4]
+    @test parameterspace(c) == unitsquare()
 end
 
 @testset "Atlas" begin

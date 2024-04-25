@@ -99,7 +99,8 @@ struct ConcreteChart{D, PST<:ParameterSpace{D}, MT} <: Chart{D}
     parameterspace::PST
 end
 
-(c::Chart)(x̄) = c.mapping(x̄)
+(c::ConcreteChart)(x̄) = c.mapping(x̄)
+parameterspace(c::ConcreteChart) = c.parameterspace
 
 
 """

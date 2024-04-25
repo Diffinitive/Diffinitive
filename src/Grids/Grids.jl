@@ -22,6 +22,7 @@ export unithyperbox
 
 export Chart
 export ConcreteChart
+export parameterspace
 
 # Grid
 export Grid
