@@ -69,8 +69,6 @@ A parametrized description of a manifold or part of a manifold.
 Should implement a methods for
 * `parameterspace`
 * `(::Chart)(ξs...)`
-
-There is a default implementation for `(::Chart{D})(::SVector{D})`
 """
 abstract type Chart{D} end
 # abstract type Chart{D,R} end
