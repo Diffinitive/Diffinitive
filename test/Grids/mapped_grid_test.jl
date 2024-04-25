@@ -185,12 +185,13 @@ end
     @test collect(mg) == map(x̄, lg)
 
 
-    @testset "mapped_grid(::Chart,J)" begin
-        c = ConcreteChart(unitsquare()) do (x,y)
-            @SVector[2x, 3y]
+    @testset "mapped_grid(::Chart)" begin
+        c = ConcreteChart(unitsquare()) do (ξ,η)
+            @SVector[2ξ, 3η]
         end
+        Grids.jacobian(c::typeof(c)) = x̄ -> @SMatrix[2 0; 0 3] ## TODO Maybe shouldn't return a function
 
-        @test mapped_grid(c, 5, 4)
+        @test mapped_grid(c, 5, 4) isa Grid
     end
 
 end

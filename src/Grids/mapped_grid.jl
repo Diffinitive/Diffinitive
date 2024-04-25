@@ -61,6 +61,15 @@ function mapped_grid(x, J, size...)
     )
 end
 
+function mapped_grid(c::Chart, size...)
+    lg = equidistant_grid(parameterspace(c), size...)
+    return MappedGrid(
+        lg,
+        map(c,lg),
+        map(jacobian(c), lg),
+    )
+end
+
 function jacobian_determinant(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ
         det(∂x∂ξ)
