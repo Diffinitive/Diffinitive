@@ -72,12 +72,12 @@ end
     g_1D = equidistant_grid(0.0, 1., 101)
     g_3D = equidistant_grid((0.0, -1.0, 0.0), (1., 1., 1.), 51, 101, 52)
 
-    @testset "1D" begin
+    @testset "EquidistantGrid" begin
         Δ = laplace(g_1D, stencil_set)
         @test Δ == second_derivative(g_1D, stencil_set)
         @test Δ isa LazyTensor{Float64,1,1}
     end
-    @testset "3D" begin
+    @testset "TensorGrid" begin
         Δ = laplace(g_3D, stencil_set)
         @test Δ isa LazyTensor{Float64,3,3}
         Dxx = second_derivative(g_3D, stencil_set, 1)
@@ -85,6 +85,10 @@ end
         Dzz = second_derivative(g_3D, stencil_set, 3)
         @test Δ == Dxx + Dyy + Dzz
         @test Δ isa LazyTensor{Float64,3,3}
+    end
+
+    @testset "MappedGrid" begin
+        @test_broken false
     end
 end
 
