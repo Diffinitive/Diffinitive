@@ -5,6 +5,21 @@ using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using StaticArrays
 
+
+export HyperBox
+export Simplex
+export Interval
+export Rectangle
+export Box
+export Triangle
+export Tetrahedron
+
+export limits
+export unitinterval
+export unitsquare
+export unitcube
+export unithyperbox
+
 # Grid
 export Grid
 export coordinate_size
@@ -44,6 +59,7 @@ export geometric_tensor_inverse
 
 abstract type BoundaryIdentifier end
 
+include("manifolds.jl")
 include("grid.jl")
 include("tensor_grid.jl")
 include("equidistant_grid.jl")
