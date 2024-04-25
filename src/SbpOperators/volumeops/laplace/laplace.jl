@@ -52,3 +52,25 @@ function laplace(g::TensorGrid, stencil_set)
     return Δ
 end
 laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
+
+
+function laplace(g::MappedGrid, stencil_set)
+    J = jacobian_determinant(g)
+    J⁻¹ = map(inv, J)
+
+    Jḡ = map(*, J, ggeometric_tensor_inverse(g))
+    lg = logicalgrid(g)
+
+    return mapreduce(+, CartesianIndices(first(ḡ))) do I
+        i,j = I[1], I[2]
+        Jgⁱʲ = componentview(Jḡ, I[1], I[2])
+
+        if i == j
+            J⁻¹∘second_derivative_variable(lg, Jgⁱʲ, stencil_set, i)
+        else
+            Dᵢ = first_derivative(lg, stencil_set, i)
+            Dⱼ = first_derivative(lg, stencil_set, j)
+            J⁻¹∘Dᵢ∘DiagonalTensor(Jgⁱʲ)∘Dⱼ
+        end
+    end
+end
