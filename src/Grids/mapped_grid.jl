@@ -53,7 +53,7 @@ end
 
 function mapped_grid(x, J, size...)
     D = length(size)
-    lg = equidistant_grid(size, ntuple(i->0., D), ntuple(i->1., D))
+    lg = equidistant_grid(ntuple(i->0., D), ntuple(i->1., D), size...)
     return MappedGrid(
         lg,
         map(x,lg),
