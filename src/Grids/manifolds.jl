@@ -47,6 +47,8 @@ struct Simplex{T,D} <: ParameterSpace{D}
     verticies::NTuple{D,SVector{D,T}}
 end
 
+Simplex(verticies::Vararg{AbstractArray}) = Simplex(Tuple(SVector(v...) for v ∈ verticies))
+
 Triangle{T} = Simplex{T,2}
 Tetrahedron{T} = Simplex{T,3}
 
@@ -84,9 +86,9 @@ function parameterspace end
 (c::Chart{D})(x̄::SVector{D}) where D = c(x̄...)
 
 
-struct ConcereteChart{PST<:ParameterSpace, MT}
-    parameterspace::PST
+struct ConcreteChart{D, PST<:ParameterSpace{D}, MT} <: Chart{D}
     mapping::MT
+    parameterspace::PST
 end
 
 (c::Chart)(x̄) = c.mapping(x̄)

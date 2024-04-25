@@ -19,6 +19,9 @@ export unitsquare
 export unitcube
 export unithyperbox
 
+export Chart
+export ConcreteChart
+
 # Grid
 export Grid
 export coordinate_size
