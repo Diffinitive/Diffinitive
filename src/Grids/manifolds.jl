@@ -83,8 +83,6 @@ The parameterspace of a chart
 """
 function parameterspace end
 
-(c::Chart{D})(x̄::SVector{D}) where D = c(x̄...)
-
 
 # TODO: Add trait for if there is a jacobian available?
 # Add package extension to allow calling the getter function anyway if it's not available
