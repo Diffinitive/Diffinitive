@@ -95,10 +95,10 @@ struct ConcreteChart{D, PST<:ParameterSpace{D}, MT} <: Chart{D}
     parameterspace::PST
 end
 
-(c::ConcreteChart)(x̄) = c.mapping(x̄)
+(c::ConcreteChart)(ξ) = c.mapping(ξ)
 parameterspace(c::ConcreteChart) = c.parameterspace
 
-jacobian(c::ConcreteChart, x) = jacobian(c.mapping, x)
+jacobian(c::ConcreteChart, ξ) = jacobian(c.mapping, ξ)
 
 """
     Atlas
