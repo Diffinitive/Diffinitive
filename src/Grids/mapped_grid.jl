@@ -61,8 +61,6 @@ function mapped_grid(x, J, size...)
     )
 end
 
-# TODO add mapped_grid(x, size...) as a package extension with ForwardDiff
-
 function jacobian_determinant(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ
         det(∂x∂ξ)

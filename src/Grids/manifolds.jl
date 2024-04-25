@@ -86,6 +86,14 @@ function parameterspace end
 (c::Chart{D})(x̄::SVector{D}) where D = c(x̄...)
 
 
+# TODO: Add trait for if there is a jacobian available?
+# Add package extension to allow calling the getter function anyway if it's not available
+# And can we add an informative error that ForwardDiff could be loaded to make it work?
+# Or can we handle this be custom implementations? For sometypes in the library it can be implemented explicitly.
+# And as an example for ConcreteChart it can be implemented by the user like
+# c = ConcreteChart(...)
+# jacobian(c::typeof(c)) = ...
+
 struct ConcreteChart{D, PST<:ParameterSpace{D}, MT} <: Chart{D}
     mapping::MT
     parameterspace::PST
