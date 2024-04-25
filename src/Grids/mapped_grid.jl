@@ -60,3 +60,22 @@ function mapped_grid(x, J, size...)
         map(J,lg),
     )
 end
+
+function jacobian_determinant(g::MappedGrid)
+    return map(jacobian(g)) do ∂x∂ξ
+        det(∂x∂ξ)
+    end
+end
+
+function geometric_tensor(g::MappedGrid)
+    return map(jacobian(g)) do ∂x∂ξ
+        ∂x∂ξ'*∂x∂ξ
+    end
+end
+
+function geometric_tensor_inverse(g::MappedGrid)
+    return map(jacobian(g)) do ∂x∂ξ
+        inv(∂x∂ξ'*∂x∂ξ)
+    end
+end
+
