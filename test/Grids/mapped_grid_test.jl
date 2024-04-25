@@ -157,6 +157,18 @@ using StaticArrays
         @testset test_boundary_grid(mg, TensorGridBoundary{2, Upper}(), J1)
     end
 
+    @testset "jacobian_determinant" begin
+        @test_broken false
+    end
+
+    @testset "geometric_tensor" begin
+        @test_broken false
+    end
+
+    @testset "geometric_tensor_inverse" begin
+        @test_broken false
+    end
+
 end
 
 @testset "mapped_grid" begin

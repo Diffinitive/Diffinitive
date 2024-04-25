@@ -38,6 +38,9 @@ export MappedGrid
 export jacobian
 export logicalgrid
 export mapped_grid
+export jacobian_determinant
+export geometric_tensor
+export geometric_tensor_inverse
 
 abstract type BoundaryIdentifier end
 
