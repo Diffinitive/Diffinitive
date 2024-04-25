@@ -183,4 +183,14 @@ end
     lg = equidistant_grid((10,11), (0,0), (1,1))
     @test logicalgrid(mg) == lg
     @test collect(mg) == map(x̄, lg)
+
+
+    @testset "mapped_grid(::Chart,J)" begin
+        c = ConcreteChart(unitsquare()) do (x,y)
+            @SVector[2x, 3y]
+        end
+
+        @test mapped_grid(c, 5, 4)
+    end
+
 end
