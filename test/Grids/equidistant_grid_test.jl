@@ -2,6 +2,7 @@ using Sbplib.Grids
 using Test
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
+using StaticArrays
 
 
 @testset "EquidistantGrid" begin
@@ -142,6 +143,13 @@ end
         for i ∈ eachindex(gp)
             @test [gp[i]...] ≈ [p[i]...] atol=5e-13
         end
+    end
+
+
+    @testset "equidistant_grid(::ParameterSpace)" begin
+        ps = HyperBox((0,0),(2,1))
+
+        @test equidistant_grid(ps, 3,4) == equidistant_grid((0,0), (2,1), 3,4)
     end
 end
 
