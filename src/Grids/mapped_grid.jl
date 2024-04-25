@@ -66,7 +66,7 @@ function mapped_grid(c::Chart, size...)
     return MappedGrid(
         lg,
         map(c,lg),
-        map(jacobian(c), lg),
+        map(ξ->jacobian(c, ξ), lg),
     )
 end
 

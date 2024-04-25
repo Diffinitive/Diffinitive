@@ -98,6 +98,7 @@ end
 (c::ConcreteChart)(x̄) = c.mapping(x̄)
 parameterspace(c::ConcreteChart) = c.parameterspace
 
+jacobian(c::ConcreteChart, x) = jacobian(c.mapping, x)
 
 """
     Atlas
