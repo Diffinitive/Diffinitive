@@ -186,7 +186,7 @@ end
 
 
     @testset "mapped_grid(::Chart)" begin
-        c = ConcreteChart(unitsquare()) do (ξ,η)
+        c = Chart(unitsquare()) do (ξ,η)
             @SVector[2ξ, 3η]
         end
         Grids.jacobian(c::typeof(c), ξ̄) = @SMatrix[2 0; 0 3]

@@ -50,10 +50,7 @@ end
 end
 
 @testset "Chart" begin
-end
-
-@testset "ConcreteChart" begin
-    c = ConcreteChart(x->2x, unitsquare())
+    c = Chart(x->2x, unitsquare())
     @test c isa Chart{2}
     @test c([3,2]) == [6,4]
     @test parameterspace(c) == unitsquare()

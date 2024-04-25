@@ -66,42 +66,39 @@ end
 unitsimplex(D) = unitsimplex(Float64, D)
 
 """
+    Chart{D}
 
 A parametrized description of a manifold or part of a manifold.
-
-Should implement a methods for
-* `parameterspace`
-* `(::Chart)(ξs...)`
 """
-abstract type Chart{D} end
-# abstract type Chart{D,R} end
-
-domain_dim(::Chart{D}) where D = D
-# range_dim(::Chart{D,R}) where {D,R} = R
-
-"""
-The parameterspace of a chart
-"""
-function parameterspace end
-
-
-# TODO: Add trait for if there is a jacobian available?
-# Add package extension to allow calling the getter function anyway if it's not available
-# And can we add an informative error that ForwardDiff could be loaded to make it work?
-# Or can we handle this be custom implementations? For sometypes in the library it can be implemented explicitly.
-# And as an example for ConcreteChart it can be implemented by the user like
-# c = ConcreteChart(...)
-# jacobian(c::typeof(c)) = ...
-
-struct ConcreteChart{D, PST<:ParameterSpace{D}, MT} <: Chart{D}
+struct Chart{D, PST<:ParameterSpace{D}, MT}
     mapping::MT
     parameterspace::PST
 end
 
-(c::ConcreteChart)(ξ) = c.mapping(ξ)
-parameterspace(c::ConcreteChart) = c.parameterspace
+domain_dim(::Chart{D}) where D = D
+(c::Chart)(ξ) = c.mapping(ξ)
+parameterspace(c::Chart) = c.parameterspace
 
-jacobian(c::ConcreteChart, ξ) = jacobian(c.mapping, ξ)
+"""
+    jacobian(c::Chart, ξ)
+
+The jacobian of the mapping evaluated at `ξ`. This defers to the
+implementation of `jacobian` for the mapping itself. If no implementation is
+available one can easily be specified for either the mapping function or the
+chart itself.
+```julia
+c = Chart(f, ps)
+jacobian(f::typeof(f), ξ) = f′(ξ)
+```
+or
+```julia
+c = Chart(f, ps)
+jacobian(c::typeof(c),ξ) = f′(ξ)
+```
+which will both allow calling `jacobian(c,ξ)`.
+"""
+jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
+
 
 """
     Atlas
