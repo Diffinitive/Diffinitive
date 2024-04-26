@@ -5,7 +5,7 @@ using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using StaticArrays
 
-
+export ParameterSpace
 export HyperBox
 export Simplex
 export Interval
