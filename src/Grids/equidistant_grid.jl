@@ -130,6 +130,15 @@ end
 
 equidistant_grid(hb::HyperBox, dims::Vararg{Int}) = equidistant_grid(hb.a, hb.b, dims...)
 
+function equidistant_grid(c::Chart, dims::Vararg{Int})
+    lg = equidistant_grid(parameterspace(c), dims...)
+    return MappedGrid(
+        lg,
+        map(c,lg),
+        map(ξ->jacobian(c, ξ), lg),
+    )
+end
+
 
 CartesianBoundary{D,BID} = TensorGridBoundary{D,BID} # TBD: What should we do about the naming of this boundary?
 
