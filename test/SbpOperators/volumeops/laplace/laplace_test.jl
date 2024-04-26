@@ -4,6 +4,8 @@ using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
 
+using StaticArrays
+
 @testset "Laplace" begin
     # Default stencils (4th order)
     operator_path = sbp_operators_path()*"standard_diagonal.toml"
@@ -88,7 +90,22 @@ end
     end
 
     @testset "MappedGrid" begin
-        @test_broken false
+        c = Chart(unitsquare()) do (ξ,η)
+            @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
+        end
+        Grids.jacobian(c::typeof(c), (ξ,η)) = @SMatrix[2 1-2η; 1+η/2 3+ξ^2/2]
+
+        g = equidistant_grid(c, 15,15)
+
+        @test laplace(g, stencil_set) isa LazyTensor{<:Any,2,2}
+
+        gf = map(g) do (x,y)
+            sin((x^2 + y^2))
+        end
+
+        Δ = laplace(g, stencil_set)
+
+        @test collect(Δ*gf) isa Array{<:Any,2}
     end
 end
 
