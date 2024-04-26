@@ -54,16 +54,16 @@ end
 laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
 
 
-function laplace(g::MappedGrid, stencil_set)
-    J = jacobian_determinant(g)
-    J⁻¹ = map(inv, J)
+function laplace(grid::MappedGrid, stencil_set)
+    J = jacobian_determinant(grid)
+    J⁻¹ = DiagonalTensor(map(inv, J))
 
-    Jḡ = map(*, J, ggeometric_tensor_inverse(g))
-    lg = logicalgrid(g)
+    Jg = map(*, J, ggeometric_tensor_inverse(grid))
+    lg = logicalgrid(grid)
 
-    return mapreduce(+, CartesianIndices(first(ḡ))) do I
+    return mapreduce(+, CartesianIndices(first(Jg))) do I
         i,j = I[1], I[2]
-        Jgⁱʲ = componentview(Jḡ, I[1], I[2])
+        Jgⁱʲ = componentview(Jg, I[1], I[2])
 
         if i == j
             J⁻¹∘second_derivative_variable(lg, Jgⁱʲ, stencil_set, i)
