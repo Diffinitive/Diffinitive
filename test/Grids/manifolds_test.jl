@@ -6,6 +6,11 @@ using Sbplib.LazyTensors
 
 # using StaticArrays
 
+@testset "ParameterSpace" begin
+    @test ndims(HyperBox([1,1], [2,2])) == 2
+    @test ndims(unittetrahedron()) == 3
+end
+
 @testset "HyperBox" begin
     @test HyperBox([1,1], [2,2]) isa HyperBox{Int, 2}
 
@@ -31,11 +36,24 @@ end
 
 @testset "Simplex" begin
     @test Simplex([1,2], [3,4]) isa Simplex{Int, 2}
-    @test Simplex([1,2,3], [4,5,6]) isa Simplex{Int, 3}
+    @test Simplex([1,2,3], [4,5,6],[1,1,1]) isa Simplex{Int, 3}
+
+    @test verticies(Simplex([1,2], [3,4])) == ([1,2], [3,4])
+
+    @test unittriangle() isa Simplex{Float64,2}
+    @test verticies(unittriangle()) == ([0,0], [1,0], [0,1])
+
+    @test unittetrahedron() isa  Simplex{Float64,3}
+    @test verticies(unittetrahedron()) == ([0,0,0], [1,0,0], [0,1,0],[0,0,1])
+
+    @test unitsimplex(4) isa Simplex{Float64,4}
 end
 
 @testset "Chart" begin
-
+    c = Chart(x->2x, unitsquare())
+    @test c isa Chart{2}
+    @test c([3,2]) == [6,4]
+    @test parameterspace(c) == unitsquare()
 end
 
 @testset "Atlas" begin

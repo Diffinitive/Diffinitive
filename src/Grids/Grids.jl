@@ -20,6 +20,15 @@ export unitsquare
 export unitcube
 export unithyperbox
 
+export verticies
+export unittriangle
+export unittetrahedron
+export unitsimplex
+
+export Chart
+export ConcreteChart
+export parameterspace
+
 # Grid
 export Grid
 export coordinate_size

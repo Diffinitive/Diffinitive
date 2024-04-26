@@ -127,6 +127,10 @@ function equidistant_grid(limit_lower::T, limit_upper::T, size::Int) where T
 	return EquidistantGrid(range(limit_lower, limit_upper, length=size)) # TBD: Should it use LinRange instead?
 end
 
+
+equidistant_grid(hb::HyperBox, dims::Vararg{Int}) = equidistant_grid(hb.a, hb.b, dims...)
+
+
 CartesianBoundary{D,BID} = TensorGridBoundary{D,BID} # TBD: What should we do about the naming of this boundary?
 
 

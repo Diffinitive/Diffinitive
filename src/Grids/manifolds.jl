@@ -18,6 +18,7 @@ See also: [`Interval`](@ref), [`Rectangle`](@ref), [`Box`](@ref),
 [`Simplex`](@ref),
 """
 abstract type ParameterSpace{D} end
+Base.ndims(::ParameterSpace{D}) where D = D
 
 struct HyperBox{T,D} <: ParameterSpace{D}
     a::SVector{D,T}
@@ -43,53 +44,60 @@ unithyperbox(T, D) = HyperBox((@SVector zeros(T,D)), (@SVector ones(T,D)))
 unithyperbox(D) = unithyperbox(Float64,D)
 
 
-struct Simplex{T,D} <: ParameterSpace{D}
-    verticies::NTuple{D,SVector{D,T}}
+struct Simplex{T,D,NV} <: ParameterSpace{D}
+    verticies::NTuple{NV,SVector{D,T}}
 end
+
+Simplex(verticies::Vararg{AbstractArray}) = Simplex(Tuple(SVector(v...) for v ∈ verticies))
+
+verticies(s::Simplex) = s.verticies
 
 Triangle{T} = Simplex{T,2}
 Tetrahedron{T} = Simplex{T,3}
 
-unittriangle(T) = unitsimplex(T,2)
-unittetrahedron(T) = unitsimplex(T,3)
+unittriangle(T=Float64) = unitsimplex(T,2)
+unittetrahedron(T=Float64) = unitsimplex(T,3)
 function unitsimplex(T,D)
     z = @SVector zeros(T,D)
     unitelement = one(eltype(z))
-    verticies = ntuple(i->setindex(z, unitelement, i), 4)
-    return Simplex(verticies)
+    verticies = ntuple(i->setindex(z, unitelement, i), D)
+    return Simplex((z,verticies...))
 end
-
+unitsimplex(D) = unitsimplex(Float64, D)
 
 """
+    Chart{D}
 
 A parametrized description of a manifold or part of a manifold.
-
-Should implement a methods for
-* `parameterspace`
-* `(::Chart)(ξs...)`
-
-There is a default implementation for `(::Chart{D})(::SVector{D})`
 """
-abstract type Chart{D} end
-# abstract type Chart{D,R} end
-
-domain_dim(::Chart{D}) where D = D
-# range_dim(::Chart{D,R}) where {D,R} = R
-
-"""
-The parameterspace of a chart
-"""
-function parameterspace end
-
-(c::Chart{D})(x̄::SVector{D}) where D = c(x̄...)
-
-
-struct ConcereteChart{PST<:ParameterSpace, MT}
-    parameterspace::PST
+struct Chart{D, PST<:ParameterSpace{D}, MT}
     mapping::MT
+    parameterspace::PST
 end
 
-(c::Chart)(x̄) = c.mapping(x̄)
+domain_dim(::Chart{D}) where D = D
+(c::Chart)(ξ) = c.mapping(ξ)
+parameterspace(c::Chart) = c.parameterspace
+
+"""
+    jacobian(c::Chart, ξ)
+
+The jacobian of the mapping evaluated at `ξ`. This defers to the
+implementation of `jacobian` for the mapping itself. If no implementation is
+available one can easily be specified for either the mapping function or the
+chart itself.
+```julia
+c = Chart(f, ps)
+jacobian(f::typeof(f), ξ) = f′(ξ)
+```
+or
+```julia
+c = Chart(f, ps)
+jacobian(c::typeof(c),ξ) = f′(ξ)
+```
+which will both allow calling `jacobian(c,ξ)`.
+"""
+jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
 
 
 """

@@ -53,11 +53,20 @@ end
 
 function mapped_grid(x, J, size...)
     D = length(size)
-    lg = equidistant_grid(size, ntuple(i->0., D), ntuple(i->1., D))
+    lg = equidistant_grid(ntuple(i->0., D), ntuple(i->1., D), size...)
     return MappedGrid(
         lg,
         map(x,lg),
         map(J,lg),
+    )
+end
+
+function mapped_grid(c::Chart, size...)
+    lg = equidistant_grid(parameterspace(c), size...)
+    return MappedGrid(
+        lg,
+        map(c,lg),
+        map(ξ->jacobian(c, ξ), lg),
     )
 end
 
