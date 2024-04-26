@@ -8,5 +8,13 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 TiledIteration = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 
+[weakdeps]
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+
+[extensions]
+SbplibPlotsExt = "Plots"
+SbplibMakieExt = "Makie"
+
 [compat]
 julia = "1.5"
