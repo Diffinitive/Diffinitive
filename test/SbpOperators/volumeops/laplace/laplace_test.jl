@@ -93,7 +93,7 @@ end
         c = Chart(unitsquare()) do (ξ,η)
             @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
         end
-        Grids.jacobian(c::typeof(c), (ξ,η)) = @SMatrix[2 1-2η; 1+η/2 3+ξ^2/2]
+        Grids.jacobian(c::typeof(c), (ξ,η)) = @SMatrix[2 1-2η; (2+η)*ξ 3+ξ^2/2]
 
         g = equidistant_grid(c, 15,15)
 
