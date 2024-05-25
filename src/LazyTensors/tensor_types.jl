@@ -1,7 +1,7 @@
 """
     IdentityTensor{T,D} <: LazyTensor{T,D,D}
 
-The lazy identity LazyTensor for a given size. Usefull for building up higher dimensional tensor mappings from lower
+The lazy identity LazyTensor for a given size. Useful for building up higher dimensional tensor mappings from lower
 dimensional ones through outer products. Also used in the Implementation for InflatedTensor.
 """
 struct IdentityTensor{T,D} <: LazyTensor{T,D,D}
@@ -57,8 +57,8 @@ LazyTensors.apply_transpose(tm::DiagonalTensor{T,D}, v::AbstractArray{<:Any,D}, 
 """
     DenseTensor{T,R,D,...}(A, range_indicies, domain_indicies)
 
-LazyTensor defined by the AbstractArray A. `range_indicies` and `domain_indicies` define which indicies of A should
-be considerd the range and domain of the LazyTensor. Each set of indices must be ordered in ascending order.
+LazyTensor defined by the AbstractArray A. `range_indicies` and `domain_indicies` define which indices of A should
+be considered the range and domain of the LazyTensor. Each set of indices must be ordered in ascending order.
 
 For instance, if A is a m x n matrix, and range_size = (1,), domain_size = (2,), then the DenseTensor performs the
 standard matrix-vector product on vectors of size n.

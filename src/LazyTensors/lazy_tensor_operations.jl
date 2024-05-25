@@ -5,7 +5,7 @@ Struct for lazy application of a LazyTensor. Created using `*`.
 
 Allows the result of a `LazyTensor` applied to a vector to be treated as an `AbstractArray`.
 With a mapping `m` and a vector `v` the TensorApplication object can be created by `m*v`.
-The actual result will be calcualted when indexing into `m*v`.
+The actual result will be calculated when indexing into `m*v`.
 """
 struct TensorApplication{T,R,D, TM<:LazyTensor{<:Any,R,D}, AA<:AbstractArray{<:Any,D}} <: LazyArray{T,R}
     t::TM
@@ -102,7 +102,7 @@ end
     TensorComposition(tm, tmi::IdentityTensor)
     TensorComposition(tmi::IdentityTensor, tm)
 
-Composes a `Tensormapping` `tm` with an `IdentityTensor` `tmi`, by returning `tm`
+Composes a `LazyTensor` `tm` with an `IdentityTensor` `tmi`, by returning `tm`
 """
 function TensorComposition(tm::LazyTensor{T,R,D}, tmi::IdentityTensor{T,D}) where {T,R,D}
     @boundscheck check_domain_size(tm, range_size(tmi))
@@ -126,7 +126,7 @@ Base.:-(tm::LazyTensor{T}) where T = (-one(T))*tm
 """
     InflatedTensor{T,R,D} <: LazyTensor{T,R,D}
 
-An inflated `LazyTensor` with dimensions added before and afer its actual dimensions.
+An inflated `LazyTensor` with dimensions added before and after its actual dimensions.
 """
 struct InflatedTensor{T,R,D,D_before,R_middle,D_middle,D_after, TM<:LazyTensor{T,R_middle,D_middle}} <: LazyTensor{T,R,D}
     before::IdentityTensor{T,D_before}
@@ -220,7 +220,7 @@ end
 @doc raw"""
     LazyOuterProduct(tms...)
 
-Creates a `TensorComposition` for the outerproduct of `tms...`.
+Creates a `TensorComposition` for the outer product of `tms...`.
 This is done by separating the outer product into regular products of outer products involving only identity mappings and one non-identity mapping.
 
 First let
@@ -279,7 +279,7 @@ Here `sz[dir]` is ignored and replaced with the range and domains size of
 `tm`.
 
 An example of when this operation is useful is when extending a one
-dimensional difference operator `D` to a 2D grid of a ceratin size. In that
+dimensional difference operator `D` to a 2D grid of a certain size. In that
 case we could have
 
 ```julia

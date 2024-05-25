@@ -27,7 +27,7 @@ function monomial(x,k)
 end
 
 @testset "undivided_skewed04" begin
-    g = equidistant_grid(20, 0., 11.)
+    g = equidistant_grid(0., 11., 20)
     D,Dᵀ = undivided_skewed04(g, 1)
 
     @test D isa LazyTensor{Float64,1,1}
@@ -35,7 +35,7 @@ end
 
      @testset "Accuracy conditions" begin
         N = 20
-        g = equidistant_grid(N, 0//1,2//1)
+        g = equidistant_grid(0//1, 2//1, N)
         h = only(spacing(g))
         @testset "D_$p" for p ∈ [1,2,3,4]
             D,Dᵀ = undivided_skewed04(g, p)
@@ -67,7 +67,7 @@ end
             return Dmat
         end
 
-        g = equidistant_grid(11, 0., 1.)
+        g = equidistant_grid(0., 1., 11)
         @testset "D_$p" for p ∈ [1,2,3,4]
             D,Dᵀ = undivided_skewed04(g, p)
 
@@ -80,7 +80,7 @@ end
 
     @testset "2D" begin
         N = 20
-        g = equidistant_grid((N,2N), (0,0), (2,1))
+        g = equidistant_grid((0,0), (2,1), N, 2N)
         h = spacing.(g.grids)
 
         D,Dᵀ = undivided_skewed04(g, 3, 2)

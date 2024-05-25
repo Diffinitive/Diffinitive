@@ -69,21 +69,28 @@ end
 end
 
 Base.@propagate_inbounds @inline function apply_stencil(s::Stencil, v::AbstractVector, i::Int)
-    w = zero(promote_type(eltype(s),eltype(v)))
-    @simd for k ∈ 1:length(s)
-        w += s.weights[k]*v[i + s.range[k]]
+    return sum(enumerate(s.weights)) do (k,w) #TBD: Which optimizations are needed here?
+        w*v[i + @inbounds s.range[k]]
     end
-
-    return w
 end
 
 Base.@propagate_inbounds @inline function apply_stencil_backwards(s::Stencil, v::AbstractVector, i::Int)
-    w = zero(promote_type(eltype(s),eltype(v)))
-    @simd for k ∈ length(s):-1:1
-        w += s.weights[k]*v[i - s.range[k]]
+    return sum(enumerate(s.weights)) do (k,w) #TBD: Which optimizations are needed here?
+        w*v[i - @inbounds s.range[k]]
     end
-    return w
 end
+
+# There are many options for the implementation of `apply_stencil` and
+# `apply_stencil_backwards`. Some alternatives were tried on the branch
+# bugfix/sbp_operators/stencil_return_type and can be found at the following
+# revision:
+#
+# * 237b980ffb91 (baseline)
+# * a72bab15228e (mapreduce)
+# * ffd735354d54 (multiplication)
+# * b5abd5191f2c (promote_op)
+# * 8d56846185fc (return_type)
+#
 
 function left_pad(s::Stencil, N)
     weights = LazyTensors.left_pad_tuple(s.weights, zero(eltype(s)), N)

@@ -9,8 +9,8 @@ using Sbplib.BoundaryConditions
     # Default stencils (4th order)
     operator_path = sbp_operators_path()*"standard_diagonal.toml"
     stencil_set = read_stencil_set(operator_path; order=4)
-    g_1D = equidistant_grid(101, 0.0, 1.)
-    g_3D = equidistant_grid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
+    g_1D = equidistant_grid(0.0, 1., 101)
+    g_3D = equidistant_grid((0.0, -1.0, 0.0), (1., 1., 1.), 51, 101, 52)
 
     @testset "Constructors" begin
         @testset "1D" begin
@@ -70,8 +70,8 @@ end
 @testset "laplace" begin
     operator_path = sbp_operators_path()*"standard_diagonal.toml"
     stencil_set = read_stencil_set(operator_path; order=4)
-    g_1D = equidistant_grid(101, 0.0, 1.)
-    g_3D = equidistant_grid((51,101,52), (0.0, -1.0, 0.0), (1., 1., 1.))
+    g_1D = equidistant_grid(0.0, 1., 101)
+    g_3D = equidistant_grid((0.0, -1.0, 0.0), (1., 1., 1.), 51, 101, 52)
 
     @testset "1D" begin
         Δ = laplace(g_1D, stencil_set)
