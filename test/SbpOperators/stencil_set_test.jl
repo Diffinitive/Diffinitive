@@ -152,6 +152,14 @@ import Sbplib.SbpOperators.NestedStencil
         @test_throws ArgumentError parse_tuple(toml["e3"])
         @test_throws ArgumentError parse_tuple(toml["e4"])
     end
+
+    @testset "parse_named_tuple" begin
+        toml = TOML.parse("""
+            NamedTuple = {a = "17/48", b = "0.2505765857"}
+        """)
+        @test parse_named_tuple(toml["NamedTuple"]) == (b = Rational(0.2505765857), a = 17//48)
+    end
+
 end
 
 @testset "parse_rational" begin
