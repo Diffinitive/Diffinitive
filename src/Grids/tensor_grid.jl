@@ -95,6 +95,9 @@ function boundary_indices(g::TensorGrid, id::TensorGridBoundary)
     return LazyTensors.concatenate_tuples(b_ind...)
 end
 
+orthogonal_grid(g::TensorGrid, id::BoundaryIdentifier) = g.grids[grid_id(id)]
+
+
 function combined_coordinate_vector_type(coordinate_types...)
     combined_coord_length = mapreduce(_ncomponents, +, coordinate_types)
     combined_coord_type = mapreduce(eltype, promote_type, coordinate_types)
@@ -133,3 +136,4 @@ function grid_and_local_dim_index(nds, d)
         return (I, d-cumsum(nds)[I-1])
     end
 end
+

@@ -79,6 +79,12 @@ using Sbplib.LazyTensors
 
     end
 
+    @testset "orthogonal_grid" begin
+        g = EquidistantGrid(0:0.1:1)
+        @test orthogonal_grid(g, Lower()) == g
+        @test orthogonal_grid(g, Upper()) == g
+    end
+
     @testset "refine" begin
         g = EquidistantGrid(0:0.1:1)
         @test refine(g, 1) == g

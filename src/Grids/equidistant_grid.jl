@@ -47,12 +47,12 @@ The reciprocal of the spacing between grid points.
 """
 inverse_spacing(g::EquidistantGrid) = 1/step(g.points)
 
-
 boundary_identifiers(::EquidistantGrid) = (Lower(), Upper())
 boundary_grid(g::EquidistantGrid, id::Lower) = ZeroDimGrid(g[begin])
 boundary_grid(g::EquidistantGrid, id::Upper) = ZeroDimGrid(g[end])
 boundary_indices(g::EquidistantGrid, id::Lower) = (1,)
 boundary_indices(g::EquidistantGrid, id::Upper) = (length(g),)
+orthogonal_grid(g::EquidistantGrid, id::Union{Lower,Upper}) = g
 
 """
     refine(g::EquidistantGrid, r::Int)
