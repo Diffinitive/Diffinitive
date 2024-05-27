@@ -17,13 +17,6 @@ function BoundaryConditions.sat_tensors(op::MockOp, g::Grid, bc::DirichletCondit
     return sat_op, L
 end
 
-function BoundaryConditions.sat_tensors(op::MockOp, g::Grid, bc::DirichletCondition, a)
-    e = boundary_restriction(g, stencil_set, id(bc))
-    L = a*e
-    sat_op = e'
-    return sat_op, L
-end
-
 function BoundaryConditions.sat_tensors(op::MockOp, g::Grid, bc::NeumannCondition)
     e = boundary_restriction(g, stencil_set, id(bc))
     d = normal_derivative(g, stencil_set, id(bc))
@@ -35,7 +28,7 @@ end
 @testset "sat" begin
     op = MockOp()
     @testset "1D" begin
-        grid  = equidistant_grid(11, 0., 1.)
+        grid  = equidistant_grid(0., 1., 11)
         l, r = boundary_identifiers(grid)
         u = eval_on(grid, x-> 1. + 2x^2)
         dc = DirichletCondition(1.0, l)
@@ -49,7 +42,7 @@ end
         @test SAT_r(u, g_r) ≈ zeros((size(grid))) atol = 1e-13
     end
     @testset "2D" begin
-        grid  = equidistant_grid((11,13), (0.,0.), (1.,1.))
+        grid  = equidistant_grid((0.,0.), (1.,1.), 11, 13)
         W, E, S, N = boundary_identifiers(grid)
         u = eval_on(grid, (x,y) -> x+y^2)
 
@@ -61,10 +54,10 @@ end
         @test SAT_W(u, g_W) ≈ r_W atol = 1e-13
 
         dc_E = DirichletCondition(2, E)
-        SAT_E = sat(op, grid, dc_E, 2.)
+        SAT_E = sat(op, grid, dc_E)
         g_E = discretize_data(grid, dc_E)
         r_E = zeros(size(grid))
-        r_E[end,:] .= map(y -> (2*(1. + y^2)-2.), range(0., 1., length=13))
+        r_E[end,:] .= map(y -> ((1. + y^2)-2.), range(0., 1., length=13))
         @test SAT_E(u, g_E) ≈ r_E atol = 1e-13
 
         nc_S = NeumannCondition(.0, S)

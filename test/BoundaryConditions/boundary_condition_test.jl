@@ -4,9 +4,9 @@ using Sbplib.BoundaryConditions
 using Sbplib.Grids
 
 @testset "BoundaryCondition" begin
-    grid_1d = equidistant_grid(11, 0.0, 1.0)
-    grid_2d = equidistant_grid((11,15), (0.0, 0.0), (1.0,1.0))
-    grid_3d = equidistant_grid((11,15,13), (0.0, 0.0, 0.0), (1.0,1.0, 1.0))
+    grid_1d = equidistant_grid(0.0, 1.0, 11)
+    grid_2d = equidistant_grid((0.0, 0.0), (1.0,1.0), 11, 15)
+    grid_3d = equidistant_grid((0.0, 0.0, 0.0), (1.0,1.0, 1.0), 11, 15, 13)
     (id_l,_) = boundary_identifiers(grid_1d)
     (_,_,_,id_n) = boundary_identifiers(grid_2d)
     (_,_,_,_,id_b,_) = boundary_identifiers(grid_3d)
