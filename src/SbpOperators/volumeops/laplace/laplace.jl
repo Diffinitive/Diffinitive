@@ -53,12 +53,31 @@ function laplace(g::TensorGrid, stencil_set)
 end
 laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
 
-# TODO: Add sat_tensor for Diirichlet condition
+"""
+sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition, tuning)
+
+The operators required to construct the SAT for imposing a Dirichlet condition.
+`tuning` specifies the strength of the penalty. See
+
+See also: [`sat`,`DirichletCondition`, `positivity_decomposition`](@ref).
+"""
+function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition, tuning)
+    id = bc.id
+    set  = Δ.stencil_set
+    H⁻¹ = inverse_inner_product(g,set)
+    Hᵧ = inner_product(boundary_grid(g, id), set)
+    e = boundary_restriction(g, set, id)
+    d = normal_derivative(g, set, id)
+    B = positivity_decomposition(Δ, g, bc, tuning)
+    sat_op = H⁻¹∘(d' - B*e')∘Hᵧ
+    return sat_op, e
+end
+BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition) = BoundaryConditions.sat_tensors(Δ, g, bc, (1.,1.))
 
 """
 sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
 
-The operators required to construct the SAT for imposing Neumann condition
+The operators required to construct the SAT for imposing a Neumann condition
 
 
 See also: [`sat`,`NeumannCondition`](@ref).
@@ -71,6 +90,19 @@ function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::NeumannConditi
     e = boundary_restriction(g, set, id)
     d = normal_derivative(g, set, id)
 
-    sat_op = H⁻¹∘e'∘Hᵧ
+    sat_op = -H⁻¹∘e'∘Hᵧ
     return sat_op, d
 end
+
+function positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition, tuning)
+    pos_prop = positivity_properties(Δ)
+    h = spacing(orthogonal_grid(g, bc.id))
+    θ_H = pos_prop.theta_H
+    τ_H = tuning[1]*ndims(g)/(h*θ_H)
+    θ_R = pos_prop.theta_R
+    τ_R = tuning[2]/(h*θ_R)
+    B = τ_H + τ_R
+    return B
+end
+
+positivity_properties(Δ::Laplace) = parse_named_tuple(Δ.stencil_set["Positivity"]["D2"])

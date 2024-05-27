@@ -91,47 +91,58 @@ end
 
 @testset "sat_tensors" begin
     operator_path = sbp_operators_path()*"standard_diagonal.toml"
-    stencil_set = read_stencil_set(operator_path; order=4)
-    g = equidistant_grid((101,102), (-1.,-1.), (1.,1.))
-    W,E,S,N = boundary_identifiers(g)
+    orders = (2,4)
+    tols = (5e-2,5e-4)
+    sz = (201,401)
+    g = equidistant_grid((0.,0.), (1.,1.), sz...)
     
-    u = eval_on(g, (x,y) -> sin(x+y))
-    uWx = eval_on(boundary_grid(g,W), (x,y) -> -cos(x+y))
-    uEx = eval_on(boundary_grid(g,E), (x,y) -> cos(x+y))
-    uSy = eval_on(boundary_grid(g,S), (x,y) -> -cos(x+y))
-    uNy = eval_on(boundary_grid(g,N), (x,y) -> cos(x+y))
-    
-    
-    v = eval_on(g, (x,y) -> cos(x+y))
-    vW = eval_on(boundary_grid(g,W), (x,y) -> cos(x+y))
-    vE = eval_on(boundary_grid(g,E), (x,y) -> cos(x+y))
-    vS = eval_on(boundary_grid(g,S), (x,y) -> cos(x+y))
-    vN = eval_on(boundary_grid(g,N), (x,y) -> cos(x+y))
+    # Verify implementation of sat_tesnors by testing accuracy and symmetry (TODO) 
+    # of the operator D = Δ + SAT, where SAT is the tensor composition of the 
+    # operators from sat_tensor. Note that SAT*u should approximate 0 for the 
+    # conditions chosen.
 
+    @testset "Dirichlet" begin
+        for (o, tol) ∈ zip(orders,tols)
+            stencil_set = read_stencil_set(operator_path; order=o)
+            Δ = Laplace(g, stencil_set)
+            H = inner_product(g, stencil_set)
+            u = collect(eval_on(g, (x,y) -> sin(π*x)sin(2*π*y)))
+            Δu = collect(eval_on(g, (x,y) -> -5*π^2*sin(π*x)sin(2*π*y)))
+            D = Δ 
+            for id ∈ boundary_identifiers(g)
+                D = D + foldl(∘, sat_tensors(Δ, g, DirichletCondition(0., id)))
+            end
+            e = D*u .- Δu
+            # Accuracy
+            @test sqrt(sum(H*e.^2)) ≈ 0 atol = tol
+            # Symmetry
+            # TODO: # Consider generating the matrices to H and D and test D'H == H'D
+            r = randn(size(u))
+            @test_broken (D'∘H - H∘D)*r .≈ 0 atol = 1e-13 # TODO: Need to implement apply_transpose for D.
+        end
+    end
 
     @testset "Neumann" begin
-        Δ = Laplace(g, stencil_set)
-        H = inner_product(g, stencil_set)
-        HW = inner_product(boundary_grid(g,W), stencil_set)
-        HE = inner_product(boundary_grid(g,E), stencil_set)
-        HS = inner_product(boundary_grid(g,S), stencil_set)
-        HN = inner_product(boundary_grid(g,N), stencil_set)
-        
-        ncW = NeumannCondition(0., W)
-        ncE = NeumannCondition(0., E)
-        ncS = NeumannCondition(0., S)
-        ncN = NeumannCondition(0., N)
-        
-        SATW = foldl(∘,sat_tensors(Δ, g, ncW))
-        SATE = foldl(∘,sat_tensors(Δ, g, ncE))
-        SATS = foldl(∘,sat_tensors(Δ, g, ncS))
-        SATN = foldl(∘,sat_tensors(Δ, g, ncN))
-        
-
-        @test sum((H*SATW*u).*v) ≈ sum((HW*uWx).*vW) rtol = 1e-6
-        @test sum((H*SATE*u).*v) ≈ sum((HE*uEx).*vE) rtol = 1e-6
-        @test sum((H*SATS*u).*v) ≈ sum((HS*uSy).*vS) rtol = 1e-6
-        @test sum((H*SATN*u).*v) ≈ sum((HN*uNy).*vN) rtol = 1e-6
+        @testset "Dirichlet" begin
+            for (o, tol) ∈ zip(orders,tols)
+                stencil_set = read_stencil_set(operator_path; order=o)
+                Δ = Laplace(g, stencil_set)
+                H = inner_product(g, stencil_set)
+                u = collect(eval_on(g, (x,y) -> cos(π*x)cos(2*π*y)))
+                Δu = collect(eval_on(g, (x,y) -> -5*π^2*cos(π*x)cos(2*π*y)))
+                op = Δ 
+                for id ∈ boundary_identifiers(g)
+                    op = op + foldl(∘, sat_tensors(Δ, g, NeumannCondition(0., id)))
+                end
+                e = op*u .- Δu
+                # Accuracy
+                @test sqrt(sum(H*e.^2)) ≈ 0 atol = tol
+                # Symmetry
+                # TODO: # Consider generating the matrices to H and D and test D'H == H'D
+                r = randn(size(u))
+                @test_broken (D'∘H - H∘D)*r .≈ 0 atol = 1e-13 # TODO: Need to implement apply_transpose for D.
+            end
+        end
     end
 end
 
