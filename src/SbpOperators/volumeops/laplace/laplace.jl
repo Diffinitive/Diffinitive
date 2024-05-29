@@ -53,6 +53,8 @@ function laplace(g::TensorGrid, stencil_set)
 end
 laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
 
+# REVIEW: I think the handling of tuning parameters below should be through kwargs instead.
+
 """
 sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition, tuning)
 
@@ -72,7 +74,7 @@ function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondi
     sat_op = H⁻¹∘(d' - B*e')∘Hᵧ
     return sat_op, e
 end
-BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition) = BoundaryConditions.sat_tensors(Δ, g, bc, (1.,1.))
+BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition) = BoundaryConditions.sat_tensors(Δ, g, bc, (1.,1.)) # REVIEW: Should be possible to replace this with argument default values.
 
 """
 sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
@@ -94,6 +96,7 @@ function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::NeumannConditi
     return sat_op, d
 end
 
+# REVIEW: This function assumes a TensorGrid right? In that case there should probably be a type annotation to get clearer error messages.
 function positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition, tuning)
     pos_prop = positivity_properties(Δ)
     h = spacing(orthogonal_grid(g, bc.id))
