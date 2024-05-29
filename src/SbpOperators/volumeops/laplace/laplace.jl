@@ -105,4 +105,4 @@ function positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition, 
     return B
 end
 
-positivity_properties(Δ::Laplace) = parse_named_tuple(Δ.stencil_set["Positivity"]["D2"])
+positivity_properties(Δ::Laplace) = parse_named_tuple(Δ.stencil_set["Positivity"]["D2"]) # REVIEW: Can this function extract theta_H from the inner product instead of storing it twice in the TOML?

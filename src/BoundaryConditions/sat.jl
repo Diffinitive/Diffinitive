@@ -8,6 +8,7 @@ For `sat_op, L  = sat_tensors(...)` then `SAT = sat_op*(L*u - g)`  where `g`
 is the boundary data.
 """
 function sat_tensors end
+# REVIEW: Rename `sat_op` to `penalty_tensor`?
 
 
 """

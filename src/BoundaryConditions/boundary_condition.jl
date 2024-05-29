@@ -4,7 +4,7 @@
 A type for implementing data needed in order to impose a boundary condition.
 Subtypes refer to perticular types of boundary conditions, e.g. Neumann conditions.
 """
-abstract type BoundaryCondition{T1,T2} end
+abstract type BoundaryCondition{T1,T2} end # REVIEW: No type parameters needed here.
 
 """
     id(::BoundaryCondition)
@@ -33,14 +33,14 @@ end
 
 struct DirichletCondition{T1,T2} <: BoundaryCondition{T1,T2}
     data::T1
-    id::T2
+    id::T2 # REVIEW: This field not needed since BoundaryId are usually type parameters?
 end
 id(bc::DirichletCondition) = bc.id
 data(bc::DirichletCondition) = bc.data
 
 struct NeumannCondition{T1,T2} <: BoundaryCondition{T1,T2}
     data::T1
-    id::T2
+    id::T2 # REVIEW: This field not needed since BoundaryId are usually type parameters?
 end
 id(bc::NeumannCondition) = bc.id
 data(bc::NeumannCondition) = bc.data
