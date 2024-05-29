@@ -137,7 +137,7 @@ D2variable.closure_stencils = [
     ]}
 ]
 
-Positivity.D2 = {theta_H = "17/48", theta_M = "0.2505765857", theta_R = "0.577587500088313", m_b = "4"}
+Positivity.D2 = {theta_H = "17/48", theta_M = "0.2505765857", theta_R = "0.577587500088313", m_b = "4"} # REVIEW: Shouldn't the keys be reversed here (D2.positivity instead of Positivity.D2)
 
 [[stencil_set]]
 
