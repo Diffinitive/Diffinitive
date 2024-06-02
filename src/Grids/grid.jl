@@ -127,15 +127,6 @@ be used to index grid functions to obtain grid functions on the boundary grid.
 """
 function boundary_indices end
 
-"""
-    orthogonal_grid(g::Grid, id::BoundaryIdentifier)
-
-The grid for the coordinate direction orthogonal to that of the boundary
-with given id
-"""
-function orthogonal_grid end
-
-function boundary_indices end
 
 """
     eval_on(g::Grid, f)

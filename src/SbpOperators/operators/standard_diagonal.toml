@@ -39,7 +39,7 @@ D2variable.closure_stencils = [
         {s = [["2", "-1", "0"],["-3", "1",   "0"],["1","0","0"]], c = 1},
 ]
 
-Positivity.D2 = {theta_H = "1/2", theta_M = "0.3636363636", theta_R = "1.000000538455350", m_b = "2"}
+D2.positivity = {theta_M = "0.3636363636", theta_R = "1.000000538455350", m_b = "2"}
 
 [[stencil_set]]
 
@@ -137,7 +137,7 @@ D2variable.closure_stencils = [
     ]}
 ]
 
-Positivity.D2 = {theta_H = "17/48", theta_M = "0.2505765857", theta_R = "0.577587500088313", m_b = "4"} # REVIEW: Shouldn't the keys be reversed here (D2.positivity instead of Positivity.D2)
+D2.positivity = {theta_M = "0.2505765857", theta_R = "0.577587500088313", m_b = "4"}
 
 [[stencil_set]]
 
@@ -153,4 +153,4 @@ H.closure = ["13649/43200", "12013/8640", "2711/4320", "5359/4320", "7877/8640",
 e.closure = ["1"]
 d1.closure = ["-25/12", "4", "-3", "4/3", "-1/4"]
 
-Positivity.D2 = {theta_H = "13649/43200", theta_M = "0.1878687080", theta_R = "0.3697", m_b = "7"}
+D2.positivity = {theta_M = "0.1878687080", theta_R = "0.3697", m_b = "7"}

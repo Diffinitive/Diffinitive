@@ -185,16 +185,6 @@ using Sbplib.RegionIndices
         @test boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Upper}()) == (11,)
     end
 
-    @testset "orthogonal_grid" begin
-        g₁ = EquidistantGrid(range(0,1,length=11))
-        g₂ = EquidistantGrid(range(2,3,length=6))
-        g₃ = EquidistantGrid(range(4,5,length=7))
-    
-        @test orthogonal_grid(TensorGrid(g₁, g₂, g₃), TensorGridBoundary{1, Lower}()) == g₁
-        @test orthogonal_grid(TensorGrid(g₁, g₂, g₃), TensorGridBoundary{2, Lower}()) == g₂
-        @test orthogonal_grid(TensorGrid(g₁, g₂, g₃), TensorGridBoundary{3, Upper}()) == g₃
-    end
-
 end
 
 @testset "combined_coordinate_vector_type" begin

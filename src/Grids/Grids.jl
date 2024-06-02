@@ -18,7 +18,6 @@ export refine
 export eval_on
 export componentview
 export ArrayComponentView
-export orthogonal_grid
 
 export BoundaryIdentifier
 export TensorGridBoundary

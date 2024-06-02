@@ -53,28 +53,26 @@ function laplace(g::TensorGrid, stencil_set)
 end
 laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
 
-# REVIEW: I think the handling of tuning parameters below should be through kwargs instead.
 
 """
-sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition, tuning)
+sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; tuning)
 
 The operators required to construct the SAT for imposing a Dirichlet condition.
 `tuning` specifies the strength of the penalty. See
 
 See also: [`sat`,`DirichletCondition`, `positivity_decomposition`](@ref).
 """
-function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition, tuning)
-    id = bc.id
+function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; tuning = (1., 1.))
+    id = boundary(bc)
     set  = Δ.stencil_set
     H⁻¹ = inverse_inner_product(g,set)
     Hᵧ = inner_product(boundary_grid(g, id), set)
     e = boundary_restriction(g, set, id)
     d = normal_derivative(g, set, id)
     B = positivity_decomposition(Δ, g, bc, tuning)
-    sat_op = H⁻¹∘(d' - B*e')∘Hᵧ
-    return sat_op, e
+    penalty_tensor = H⁻¹∘(d' - B*e')∘Hᵧ
+    return penalty_tensor, e
 end
-BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition) = BoundaryConditions.sat_tensors(Δ, g, bc, (1.,1.)) # REVIEW: Should be possible to replace this with argument default values.
 
 """
 sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
@@ -85,21 +83,23 @@ The operators required to construct the SAT for imposing a Neumann condition
 See also: [`sat`,`NeumannCondition`](@ref).
 """
 function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
-    id = bc.id
+    id = boundary(bc)
     set  = Δ.stencil_set
     H⁻¹ = inverse_inner_product(g,set)
     Hᵧ = inner_product(boundary_grid(g, id), set)
     e = boundary_restriction(g, set, id)
     d = normal_derivative(g, set, id)
 
-    sat_op = -H⁻¹∘e'∘Hᵧ
-    return sat_op, d
+    penalty_tensor = -H⁻¹∘e'∘Hᵧ
+    return penalty_tensor, d
 end
 
-# REVIEW: This function assumes a TensorGrid right? In that case there should probably be a type annotation to get clearer error messages.
-function positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition, tuning)
+# TODO: We should consider implementing a proper BoundaryIdentifier for EquidistantGrid and then
+# change bc::BoundaryCondition to id::BoundaryIdentifier
+
+function positivity_decomposition(Δ::Laplace, g::EquidistantGrid, bc::BoundaryCondition, tuning)
     pos_prop = positivity_properties(Δ)
-    h = spacing(orthogonal_grid(g, bc.id))
+    h = spacing(g)
     θ_H = pos_prop.theta_H
     τ_H = tuning[1]*ndims(g)/(h*θ_H)
     θ_R = pos_prop.theta_R
@@ -108,4 +108,19 @@ function positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition, 
     return B
 end
 
-positivity_properties(Δ::Laplace) = parse_named_tuple(Δ.stencil_set["Positivity"]["D2"]) # REVIEW: Can this function extract theta_H from the inner product instead of storing it twice in the TOML?
+function positivity_decomposition(Δ::Laplace, g::TensorGrid, bc::BoundaryCondition, tuning)
+    pos_prop = positivity_properties(Δ)
+    h = spacing(g.grids[grid_id(boundary(bc))]) # grid spacing of the 1D grid normal to the boundary
+    θ_H = pos_prop.theta_H
+    τ_H = tuning[1]*ndims(g)/(h*θ_H)
+    θ_R = pos_prop.theta_R
+    τ_R = tuning[2]/(h*θ_R)
+    B = τ_H + τ_R
+    return B
+end
+
+function positivity_properties(Δ::Laplace)
+    D2_pos_prop = parse_named_tuple(Δ.stencil_set["D2"]["positivity"])
+    H_closure = parse_tuple(Δ.stencil_set["H"]["closure"])
+    return merge(D2_pos_prop, (theta_H = H_closure[1],))
+end

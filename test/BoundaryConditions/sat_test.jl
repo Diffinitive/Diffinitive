@@ -10,16 +10,16 @@ stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; or
 
 struct MockOp end
 
-function BoundaryConditions.sat_tensors(op::MockOp, g::Grid, bc::DirichletCondition)
-    e = boundary_restriction(g, stencil_set, id(bc))
-    L = e
+function BoundaryConditions.sat_tensors(op::MockOp, g::Grid, bc::DirichletCondition; a = 1.)
+    e = boundary_restriction(g, stencil_set, boundary(bc))
+    L = a*e
     sat_op = e'
     return sat_op, L
 end
 
 function BoundaryConditions.sat_tensors(op::MockOp, g::Grid, bc::NeumannCondition)
-    e = boundary_restriction(g, stencil_set, id(bc))
-    d = normal_derivative(g, stencil_set, id(bc))
+    e = boundary_restriction(g, stencil_set, boundary(bc))
+    d = normal_derivative(g, stencil_set, boundary(bc))
     L = d
     sat_op = e'
     return sat_op, L
@@ -54,10 +54,10 @@ end
         @test SAT_W(u, g_W) ≈ r_W atol = 1e-13
 
         dc_E = DirichletCondition(2, E)
-        SAT_E = sat(op, grid, dc_E)
+        SAT_E = sat(op, grid, dc_E; a = 2.)
         g_E = discretize_data(grid, dc_E)
         r_E = zeros(size(grid))
-        r_E[end,:] .= map(y -> ((1. + y^2)-2.), range(0., 1., length=13))
+        r_E[end,:] .= map(y -> (2*(1. + y^2)-2.), range(0., 1., length=13))
         @test SAT_E(u, g_E) ≈ r_E atol = 1e-13
 
         nc_S = NeumannCondition(.0, S)

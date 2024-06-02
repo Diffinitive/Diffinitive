@@ -1,47 +1,48 @@
 """
-    BoundaryCondition
+    BoundaryCondition{BID}
 
-A type for implementing data needed in order to impose a boundary condition.
+A type for implementing boundary_data needed in order to impose a boundary condition.
 Subtypes refer to perticular types of boundary conditions, e.g. Neumann conditions.
 """
-abstract type BoundaryCondition{T1,T2} end # REVIEW: No type parameters needed here.
+abstract type BoundaryCondition{BID} end
 
 """
-    id(::BoundaryCondition)
+    boundary(::BoundaryCondition)
 
 The boundary identifier of the BoundaryCondition.
-Must be implemented by subtypes.
 """
-function id end
+boundary(::BoundaryCondition{BID}) where {BID} = BID()
 
 """
-    data(::BoundaryCondition)
+    boundary_data(::BoundaryCondition)
 
 If implemented, the data associated with the BoundaryCondition
 """
-function data end
+function boundary_data end
 
 """
     discretize(grid, bc::BoundaryCondition)
 
-The grid function obtained from discretizing the `bc` data on the boundary grid
+The grid function obtained from discretizing the `bc` boundary_data on the boundary grid
     specified the by bc `id`.
 """
 function discretize_data(grid, bc::BoundaryCondition)
-    return eval_on(boundary_grid(grid, id(bc)), data(bc))
+    return eval_on(boundary_grid(grid, boundary(bc)), boundary_data(bc))
 end
 
-struct DirichletCondition{T1,T2} <: BoundaryCondition{T1,T2}
+struct DirichletCondition{T1,T2} <: BoundaryCondition{T2}
     data::T1
-    id::T2 # REVIEW: This field not needed since BoundaryId are usually type parameters?
+    function DirichletCondition(data, id)
+        return new{typeof(data),typeof(id)}(data)
+    end
 end
-id(bc::DirichletCondition) = bc.id
-data(bc::DirichletCondition) = bc.data
+boundary_data(bc::DirichletCondition) = bc.data
 
-struct NeumannCondition{T1,T2} <: BoundaryCondition{T1,T2}
+struct NeumannCondition{T1,T2} <: BoundaryCondition{T2}
     data::T1
-    id::T2 # REVIEW: This field not needed since BoundaryId are usually type parameters?
+    function NeumannCondition(data, id)
+        return new{typeof(data),typeof(id)}(data)
+    end
 end
-id(bc::NeumannCondition) = bc.id
-data(bc::NeumannCondition) = bc.data
+boundary_data(bc::NeumannCondition) = bc.data
 

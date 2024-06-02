@@ -4,8 +4,8 @@ module BoundaryConditions
 
 export BoundaryCondition
 export discretize_data
-export data # REVIEW: Name too generic to export.
-export id # REVIEW: Also to generic. Change to `boundary`?
+export boundary_data
+export boundary
 
 export NeumannCondition
 export DirichletCondition

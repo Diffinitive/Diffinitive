@@ -95,8 +95,6 @@ function boundary_indices(g::TensorGrid, id::TensorGridBoundary)
     return LazyTensors.concatenate_tuples(b_ind...)
 end
 
-orthogonal_grid(g::TensorGrid, id::BoundaryIdentifier) = g.grids[grid_id(id)] # REVIEW: Seems clearer to me to just inline this and remove the function definition?
-
 
 function combined_coordinate_vector_type(coordinate_types...)
     combined_coord_length = mapreduce(_ncomponents, +, coordinate_types)
