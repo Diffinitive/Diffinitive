@@ -1,7 +1,5 @@
 using Test
 
-
-using Sbplib.BoundaryConditions
 using Sbplib.Grids
 using Sbplib.LazyTensors
 using Sbplib.SbpOperators
@@ -10,14 +8,14 @@ stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; or
 
 struct MockOp end
 
-function BoundaryConditions.sat_tensors(op::MockOp, g::Grid, bc::DirichletCondition; a = 1.)
+function SbpOperators.sat_tensors(op::MockOp, g::Grid, bc::DirichletCondition; a = 1.)
     e = boundary_restriction(g, stencil_set, boundary(bc))
     L = a*e
     sat_op = e'
     return sat_op, L
 end
 
-function BoundaryConditions.sat_tensors(op::MockOp, g::Grid, bc::NeumannCondition)
+function SbpOperators.sat_tensors(op::MockOp, g::Grid, bc::NeumannCondition)
     e = boundary_restriction(g, stencil_set, boundary(bc))
     d = normal_derivative(g, stencil_set, boundary(bc))
     L = d

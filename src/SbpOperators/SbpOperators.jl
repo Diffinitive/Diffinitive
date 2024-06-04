@@ -23,21 +23,34 @@ export first_derivative
 export second_derivative
 export second_derivative_variable
 export undivided_skewed04
-
-using Sbplib.RegionIndices
-using Sbplib.LazyTensors
-using Sbplib.Grids
-using Sbplib.BoundaryConditions
+export closure_size
 
 @enum Parity begin
     odd = -1
     even = 1
 end
 
-export closure_size
 
+# Boundary conditions
+export BoundaryCondition
+export NeumannCondition
+export DirichletCondition
+export discretize_data
+export boundary_data
+export boundary
+export sat
+export sat_tensors
+
+# Using
+using Sbplib.RegionIndices
+using Sbplib.LazyTensors
+using Sbplib.Grids
+
+# Includes
 include("stencil.jl")
 include("stencil_set.jl")
+include("boundary_conditions/boundary_condition.jl")
+include("boundary_conditions/sat.jl")
 include("volumeops/volume_operator.jl")
 include("volumeops/stencil_operator_distinct_closures.jl")
 include("volumeops/constant_interior_scaling_operator.jl")

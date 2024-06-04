@@ -3,7 +3,6 @@ using Test
 using Sbplib.SbpOperators
 using Sbplib.Grids
 using Sbplib.LazyTensors
-using Sbplib.BoundaryConditions
 
 @testset "Laplace" begin
     # Default stencils (4th order)

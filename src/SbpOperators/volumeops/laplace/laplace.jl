@@ -62,7 +62,7 @@ The operators required to construct the SAT for imposing a Dirichlet condition.
 
 See also: [`sat`,`DirichletCondition`, `positivity_decomposition`](@ref).
 """
-function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; tuning = (1., 1.))
+function sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; tuning = (1., 1.))
     id = boundary(bc)
     set  = Δ.stencil_set
     H⁻¹ = inverse_inner_product(g,set)
@@ -82,7 +82,7 @@ The operators required to construct the SAT for imposing a Neumann condition
 
 See also: [`sat`,`NeumannCondition`](@ref).
 """
-function BoundaryConditions.sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
+function sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
     id = boundary(bc)
     set  = Δ.stencil_set
     H⁻¹ = inverse_inner_product(g,set)
