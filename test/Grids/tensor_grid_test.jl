@@ -184,7 +184,6 @@ using Sbplib.RegionIndices
         @test boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Lower}()) == (1,)
         @test boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Upper}()) == (11,)
     end
-
 end
 
 @testset "combined_coordinate_vector_type" begin

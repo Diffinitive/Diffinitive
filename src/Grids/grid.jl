@@ -127,7 +127,6 @@ be used to index grid functions to obtain grid functions on the boundary grid.
 """
 function boundary_indices end
 
-
 """
     eval_on(g::Grid, f)
 
