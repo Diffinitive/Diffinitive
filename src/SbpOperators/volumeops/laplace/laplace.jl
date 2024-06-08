@@ -104,11 +104,11 @@ end
 # TODO: We should consider implementing a proper BoundaryIdentifier for EquidistantGrid and then
 # change bc::BoundaryCondition to id::BoundaryIdentifier
 function positivity_limits(Δ::Laplace, g::EquidistantGrid, bc::DirichletCondition)
-    pos_prop = positivity_properties(Δ)
     h = spacing(g)
-    θ_H = pos_prop.theta_H
+    θ_H = parse_scalar(Δ.stencil_set["H"]["closure"][1])
+    θ_R = parse_scalar(Δ.stencil_set["D2"]["positivity"]["theta_R"])
+
     τ_H = 1/(h*θ_H)
-    θ_R = pos_prop.theta_R
     τ_R = 1/(h*θ_R)
     return τ_H, τ_R
 end
@@ -116,11 +116,4 @@ end
 function positivity_limits(Δ::Laplace, g::TensorGrid, bc::DirichletCondition)
     τ_H, τ_R = positivity_limits(Δ, g.grids[grid_id(boundary(bc))], bc)
     return τ_H*ndims(g), τ_R
-end
-
-
-function positivity_properties(Δ::Laplace)
-    D2_pos_prop = parse_named_tuple(Δ.stencil_set["D2"]["positivity"])
-    H_closure = parse_tuple(Δ.stencil_set["H"]["closure"])
-    return merge(D2_pos_prop, (theta_H = H_closure[1],))
 end

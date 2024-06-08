@@ -166,17 +166,6 @@ function parse_tuple(parsed_toml)
     return Tuple(parse_scalar.(parsed_toml))
 end
 
-"""
-    parse_named_tuple(parsed_toml)
-
-Parse the keys (names) and values (scalars) into a named tuple of rationals.
-
-See also [`parse_scalar`](@ref).
-"""
-function parse_named_tuple(parsed_toml)
-    NamedTuple(Symbol(key) => parse_scalar(val) for (key, val) in parsed_toml)
-end
-
 
 """
     parse_rational(parsed_toml)

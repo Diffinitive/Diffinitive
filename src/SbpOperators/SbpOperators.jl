@@ -8,7 +8,6 @@ export parse_stencil
 export parse_nested_stencil
 export parse_scalar
 export parse_tuple
-export parse_named_tuple
 export sbp_operators_path
 
 # Operators
