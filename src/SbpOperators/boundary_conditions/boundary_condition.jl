@@ -30,16 +30,16 @@ function discretize_data(grid, bc::BoundaryCondition)
     return eval_on(boundary_grid(grid, boundary(bc)), boundary_data(bc))
 end
 
-struct DirichletCondition{T1,T2} <: BoundaryCondition{T2}
-    data::T1
+struct DirichletCondition{DT,BID} <: BoundaryCondition{BID}
+    data::DT
     function DirichletCondition(data, id)
         return new{typeof(data),typeof(id)}(data)
     end
 end
 boundary_data(bc::DirichletCondition) = bc.data
 
-struct NeumannCondition{T1,T2} <: BoundaryCondition{T2}
-    data::T1
+struct NeumannCondition{DT,BID} <: BoundaryCondition{BID}
+    data::DT
     function NeumannCondition(data, id)
         return new{typeof(data),typeof(id)}(data)
     end

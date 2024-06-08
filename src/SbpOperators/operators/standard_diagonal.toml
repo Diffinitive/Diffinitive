@@ -34,12 +34,13 @@ D2.closure_stencils = [
     {s = ["1", "-2", "1"], c = 1},
 ]
 
+D2.positivity = {theta_M = "0.3636363636", theta_R = "1.000000538455350", m_b = "2"}
+
 D2variable.inner_stencil = [["1/2", "1/2", "0"],[ "-1/2", "-1", "-1/2"],["0", "1/2", "1/2"]]
 D2variable.closure_stencils = [
         {s = [["2", "-1", "0"],["-3", "1",   "0"],["1","0","0"]], c = 1},
 ]
 
-D2.positivity = {theta_M = "0.3636363636", theta_R = "1.000000538455350", m_b = "2"}
 
 [[stencil_set]]
 
@@ -66,6 +67,8 @@ D2.closure_stencils = [
     {s = [ "-4/43", "59/43", "-110/43",   "59/43", "-4/43",     "0"], c = 3},
     {s = [ "-1/49",     "0",   "59/49", "-118/49", "64/49", "-4/49"], c = 4},
 ]
+
+D2.positivity = {theta_M = "0.2505765857", theta_R = "0.577587500088313", m_b = "4"}
 
 D2variable.inner_stencil = [
     ["-1/8",   "1/6", "-1/8",   "0",    "0"  ],
@@ -137,7 +140,6 @@ D2variable.closure_stencils = [
     ]}
 ]
 
-D2.positivity = {theta_M = "0.2505765857", theta_R = "0.577587500088313", m_b = "4"}
 
 [[stencil_set]]
 
