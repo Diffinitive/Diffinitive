@@ -94,30 +94,30 @@ function sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
     return penalty_tensor, d
 end
 
+
+function positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
+    Nτ_H, τ_R = positivity_limits(Δ,g,bc)
+    return H_tuning*Nτ_H + R_tuning*τ_R
+end
+
+
 # TODO: We should consider implementing a proper BoundaryIdentifier for EquidistantGrid and then
 # change bc::BoundaryCondition to id::BoundaryIdentifier
-
-function positivity_decomposition(Δ::Laplace, g::EquidistantGrid, bc::BoundaryCondition; H_tuning, R_tuning)
+function positivity_limits(Δ::Laplace, g::EquidistantGrid, bc::DirichletCondition)
     pos_prop = positivity_properties(Δ)
     h = spacing(g)
     θ_H = pos_prop.theta_H
-    τ_H = H_tuning*ndims(g)/(h*θ_H)
+    τ_H = 1/(h*θ_H)
     θ_R = pos_prop.theta_R
-    τ_R = R_tuning/(h*θ_R)
-    B = τ_H + τ_R
-    return B
+    τ_R = 1/(h*θ_R)
+    return τ_H, τ_R
 end
 
-function positivity_decomposition(Δ::Laplace, g::TensorGrid, bc::BoundaryCondition; H_tuning, R_tuning)
-    pos_prop = positivity_properties(Δ)
-    h = spacing(g.grids[grid_id(boundary(bc))]) # grid spacing of the 1D grid normal to the boundary
-    θ_H = pos_prop.theta_H
-    τ_H = H_tuning*ndims(g)/(h*θ_H)
-    θ_R = pos_prop.theta_R
-    τ_R = R_tuning/(h*θ_R)
-    B = τ_H + τ_R
-    return B
+function positivity_limits(Δ::Laplace, g::TensorGrid, bc::DirichletCondition)
+    τ_H, τ_R = positivity_limits(Δ, g.grids[grid_id(boundary(bc))], bc)
+    return τ_H*ndims(g), τ_R
 end
+
 
 function positivity_properties(Δ::Laplace)
     D2_pos_prop = parse_named_tuple(Δ.stencil_set["D2"]["positivity"])
