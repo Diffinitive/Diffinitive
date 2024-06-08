@@ -62,14 +62,14 @@ The operators required to construct the SAT for imposing a Dirichlet condition.
 
 See also: [`sat`,`DirichletCondition`, `positivity_decomposition`](@ref).
 """
-function sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; tuning = (1., 1.))
+function sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning = 1., R_tuning = 1.)
     id = boundary(bc)
     set  = Δ.stencil_set
     H⁻¹ = inverse_inner_product(g,set)
     Hᵧ = inner_product(boundary_grid(g, id), set)
     e = boundary_restriction(g, set, id)
     d = normal_derivative(g, set, id)
-    B = positivity_decomposition(Δ, g, bc, tuning)
+    B = positivity_decomposition(Δ, g, bc; H_tuning, R_tuning)
     penalty_tensor = H⁻¹∘(d' - B*e')∘Hᵧ
     return penalty_tensor, e
 end
@@ -97,24 +97,24 @@ end
 # TODO: We should consider implementing a proper BoundaryIdentifier for EquidistantGrid and then
 # change bc::BoundaryCondition to id::BoundaryIdentifier
 
-function positivity_decomposition(Δ::Laplace, g::EquidistantGrid, bc::BoundaryCondition, tuning)
+function positivity_decomposition(Δ::Laplace, g::EquidistantGrid, bc::BoundaryCondition; H_tuning, R_tuning)
     pos_prop = positivity_properties(Δ)
     h = spacing(g)
     θ_H = pos_prop.theta_H
-    τ_H = tuning[1]*ndims(g)/(h*θ_H)
+    τ_H = H_tuning*ndims(g)/(h*θ_H)
     θ_R = pos_prop.theta_R
-    τ_R = tuning[2]/(h*θ_R)
+    τ_R = R_tuning/(h*θ_R)
     B = τ_H + τ_R
     return B
 end
 
-function positivity_decomposition(Δ::Laplace, g::TensorGrid, bc::BoundaryCondition, tuning)
+function positivity_decomposition(Δ::Laplace, g::TensorGrid, bc::BoundaryCondition; H_tuning, R_tuning)
     pos_prop = positivity_properties(Δ)
     h = spacing(g.grids[grid_id(boundary(bc))]) # grid spacing of the 1D grid normal to the boundary
     θ_H = pos_prop.theta_H
-    τ_H = tuning[1]*ndims(g)/(h*θ_H)
+    τ_H = H_tuning*ndims(g)/(h*θ_H)
     θ_R = pos_prop.theta_R
-    τ_R = tuning[2]/(h*θ_R)
+    τ_R = R_tuning/(h*θ_R)
     B = τ_H + τ_R
     return B
 end
