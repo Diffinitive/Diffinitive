@@ -129,11 +129,11 @@ end
                 H = inner_product(g, stencil_set)
                 u = collect(eval_on(g, (x,y) -> cos(π*x)cos(2*π*y)))
                 Δu = collect(eval_on(g, (x,y) -> -5*π^2*cos(π*x)cos(2*π*y)))
-                op = Δ 
+                D = Δ 
                 for id ∈ boundary_identifiers(g)
-                    op = op + foldl(∘, sat_tensors(Δ, g, NeumannCondition(0., id)))
+                    D = D + foldl(∘, sat_tensors(Δ, g, NeumannCondition(0., id)))
                 end
-                e = op*u .- Δu
+                e = D*u .- Δu
                 # Accuracy
                 @test sqrt(sum(H*e.^2)) ≈ 0 atol = tol
                 # Symmetry
