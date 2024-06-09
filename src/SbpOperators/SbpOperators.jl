@@ -11,7 +11,6 @@ export parse_tuple
 export sbp_operators_path
 
 # Operators
-export boundary_quadrature
 export boundary_restriction
 export inner_product
 export inverse_inner_product
