@@ -56,10 +56,11 @@ laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
 """
     sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
 
-The operators required to construct the SAT for imposing a Dirichlet condition.
-`H_tuning` and `R_tuning` are used to specify the strength of the penalty.
+The operators required to construct the SAT for imposing a Dirichlet
+condition. `H_tuning` and `R_tuning` are used to specify the strength of the
+penalty.
 
-See also: [`sat`](@ref),[`DirichletCondition`](@ref),[`positivity_decomposition`](@ref).
+See also: [`sat`](@ref),[`DirichletCondition`](@ref), [`positivity_decomposition`](@ref).
 """
 function sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning = 1., R_tuning = 1.)
     id = boundary(bc)
@@ -76,9 +77,9 @@ end
 """
     sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
 
-The operators required to construct the SAT for imposing a Neumann condition
+The operators required to construct the SAT for imposing a Neumann condition.
 
-See also: [`sat`](@ref),[`NeumannCondition`](@ref).
+See also: [`sat`](@ref), [`NeumannCondition`](@ref).
 """
 function sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
     id = boundary(bc)
@@ -95,11 +96,13 @@ end
 """
     positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
 
-Constructs the scalar `B` such that `d' - 1/2*B*e'` is symmetric positive definite with respect to
-the boundary quadrature. Here `d` is the normal derivative and `e` is the boundary restriction operator.
-`B` can then be used to form a symmetric and energy stable penalty for a Dirichlet condition.
-The parameters `H_tuning` and `R_tuning` are used to specify the strength of the penalty and
-must be greater than 1. For details we refer to https://doi.org/10.1016/j.jcp.2020.109294
+Constructs the scalar `B` such that `d' - 1/2*B*e'` is symmetric positive
+definite with respect to the boundary quadrature. Here `d` is the normal
+derivative and `e` is the boundary restriction operator. `B` can then be used
+to form a symmetric and energy stable penalty for a Dirichlet condition. The
+parameters `H_tuning` and `R_tuning` are used to specify the strength of the
+penalty and must be greater than 1. For details we refer to
+https://doi.org/10.1016/j.jcp.2020.109294
 """
 function positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
     @assert(H_tuning ≥ 1.)
