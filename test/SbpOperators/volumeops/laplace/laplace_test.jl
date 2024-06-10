@@ -89,13 +89,21 @@ end
 end
 
 @testset "sat_tensors" begin
+    # TODO: The following tests should be implemented
+    #       1. Symmetry D'H == H'D (test_broken below)
+    #       2. Test eigenvalues of and/or solution to Poisson
+    #       3. Test tuning of Dirichlet conditions
+    #
+    #       These tests are likely easiest to implement once
+    #       we have support for generating matrices from tensors.
+
     operator_path = sbp_operators_path()*"standard_diagonal.toml"
     orders = (2,4)
     tols = (5e-2,5e-4)
     sz = (201,401)
     g = equidistant_grid((0.,0.), (1.,1.), sz...)
     
-    # Verify implementation of sat_tesnors by testing accuracy and symmetry (TODO) 
+    # Verify implementation of sat_tensors by testing accuracy and symmetry (TODO) 
     # of the operator D = Δ + SAT, where SAT is the tensor composition of the 
     # operators from sat_tensor. Note that SAT*u should approximate 0 for the 
     # conditions chosen.
@@ -115,7 +123,6 @@ end
             # Accuracy
             @test sqrt(sum(H*e.^2)) ≈ 0 atol = tol
             # Symmetry
-            # TODO: # Consider generating the matrices to H and D and test D'H == H'D
             r = randn(size(u))
             @test_broken (D'∘H - H∘D)*r .≈ 0 atol = 1e-13 # TODO: Need to implement apply_transpose for D.
         end
@@ -137,7 +144,6 @@ end
                 # Accuracy
                 @test sqrt(sum(H*e.^2)) ≈ 0 atol = tol
                 # Symmetry
-                # TODO: # Consider generating the matrices to H and D and test D'H == H'D
                 r = randn(size(u))
                 @test_broken (D'∘H - H∘D)*r .≈ 0 atol = 1e-13 # TODO: Need to implement apply_transpose for D.
             end
