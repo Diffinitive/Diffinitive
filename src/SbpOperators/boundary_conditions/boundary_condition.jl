@@ -1,8 +1,12 @@
 """
     BoundaryCondition{BID}
 
-A type for implementing data needed in order to impose a boundary condition.
-Subtypes refer to perticular types of boundary conditions, e.g. Neumann conditions.
+Description of a boundary condition. Implementations describe the kind of
+boundary condition, what boundary the condition applies to, and any associated
+data. Should implement [`boundary`](@ref) and may implement
+[`boundary_data`](@ref) if applicable.
+
+For examples see [`DirichletCondition`](@ref) and [`NeumannCondition`](@ref)
 """
 abstract type BoundaryCondition{BID} end
 
@@ -16,15 +20,15 @@ boundary(::BoundaryCondition{BID}) where {BID} = BID()
 """
     boundary_data(::BoundaryCondition)
 
-If implemented, the data associated with the BoundaryCondition
+If implemented, the data associated with the BoundaryCondition.
 """
 function boundary_data end
 
 """
-    discretize(grid, bc::BoundaryCondition)
+    discretize_data(grid, bc::BoundaryCondition)
 
-The grid function obtained from discretizing the `bc` boundary_data on the boundary grid
-    specified the by bc `id`.
+The data of `bc` as a lazily evaluated grid function on the boundary grid
+specified by `boundary(bc)`.
 """
 function discretize_data(grid, bc::BoundaryCondition)
     return eval_on(boundary_grid(grid, boundary(bc)), boundary_data(bc))
@@ -45,7 +49,7 @@ end
 boundary_data(bc::DirichletCondition) = bc.data
 
 """
-    DirichletCondition{DT,BID}
+    NeumannCondition{DT,BID}
 
 A Neumann condition with `data::DT` on the boundary
 specified by the boundary identifier `BID`.
