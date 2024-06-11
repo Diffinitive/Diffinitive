@@ -15,10 +15,8 @@ using Sbplib.SbpOperators
     g = 3.14
     f(x,y,z) = x^2+y^2+z^2
     @testset "Constructors" begin
-        @test DirichletCondition(g,id_l) isa BoundaryCondition{Lower}
-        @test DirichletCondition(g,id_n) isa BoundaryCondition{CartesianBoundary{2,Upper}}
         @test DirichletCondition(g,id_l) isa DirichletCondition{Float64,Lower}
-        @test NeumannCondition(f,id_b) isa NeumannCondition{<:Function}
+        @test NeumannCondition(f,id_b) isa NeumannCondition{<:Function,CartesianBoundary{3,Lower}}
     end
 
     @testset "boundary" begin

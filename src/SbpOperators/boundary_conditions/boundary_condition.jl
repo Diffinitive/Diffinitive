@@ -1,5 +1,5 @@
 """
-    BoundaryCondition{BID}
+    BoundaryCondition
 
 Description of a boundary condition. Implementations describe the kind of
 boundary condition, what boundary the condition applies to, and any associated
@@ -8,14 +8,14 @@ data. Should implement [`boundary`](@ref) and may implement
 
 For examples see [`DirichletCondition`](@ref) and [`NeumannCondition`](@ref)
 """
-abstract type BoundaryCondition{BID} end
+abstract type BoundaryCondition end
 
 """
     boundary(::BoundaryCondition)
 
 The boundary identifier of the BoundaryCondition.
 """
-boundary(::BoundaryCondition{BID}) where {BID} = BID()
+function boundary end
 
 """
     boundary_data(::BoundaryCondition)
@@ -40,13 +40,12 @@ end
 A Dirichlet condition with `data::DT` on the boundary
 specified by the boundary identifier `BID`.
 """
-struct DirichletCondition{DT,BID} <: BoundaryCondition{BID}
+struct DirichletCondition{DT,BID} <: BoundaryCondition
     data::DT
-    function DirichletCondition(data, id)
-        return new{typeof(data),typeof(id)}(data)
-    end
+    boundary::BID
 end
 boundary_data(bc::DirichletCondition) = bc.data
+boundary(bc::DirichletCondition) = bc.boundary
 
 """
     NeumannCondition{DT,BID}
@@ -54,11 +53,10 @@ boundary_data(bc::DirichletCondition) = bc.data
 A Neumann condition with `data::DT` on the boundary
 specified by the boundary identifier `BID`.
 """
-struct NeumannCondition{DT,BID} <: BoundaryCondition{BID}
+struct NeumannCondition{DT,BID} <: BoundaryCondition
     data::DT
-    function NeumannCondition(data, id)
-        return new{typeof(data),typeof(id)}(data)
-    end
+    boundary::BID
 end
 boundary_data(bc::NeumannCondition) = bc.data
+boundary(bc::NeumannCondition) = bc.boundary
 
