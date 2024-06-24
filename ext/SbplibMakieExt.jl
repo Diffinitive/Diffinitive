@@ -2,6 +2,7 @@ module SbplibMakieExt
 
 using Sbplib.Grids
 using Makie
+using StaticArrays
 
 
 function verticies_and_faces_and_values(g::Grid{<:Any,2}, gf::AbstractArray{<:Any, 2})
@@ -67,5 +68,21 @@ function Makie.plot!(plot::Plot(Grid{<:Any,2},AbstractArray{<:Any, 2}))
     )
 end
 
-Makie.convert_arguments(::Type{<:Scatter}, g::Grid) = (map(Tuple,collect(g)[:]),)
+
+Makie.convert_arguments(::Type{<:Scatter}, g::Grid) = (reshape(map(Point,g),:),) # (map(Point,collect(g)[:]),)
+function Makie.convert_arguments(::Type{<:Lines}, g::Grid{<:Any,2})
+    M = collect(g)
+
+    function cat_with_NaN(a,b)
+        vcat(a,[@SVector[NaN,NaN]],b)
+    end
+
+    xlines = reduce(cat_with_NaN, eachrow(M))
+    ylines = reduce(cat_with_NaN, eachcol(M))
+
+    return (cat_with_NaN(xlines,ylines),)
+end
+
+Makie.plot!(plot::Plot(Grid{<:Any,2})) = lines!(plot, plot.attributes, plot[1])
+# Makie.convert_arguments(::PointBased, g::Grid) = (map(Tuple,collect(g)[:]),)
 end
