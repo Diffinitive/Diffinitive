@@ -160,6 +160,16 @@ end
 (c::LineSegment)(s) = (1-s)*c.a + s*c.b
 
 
+function linesegments(ps...)
+    return [LineSegment(ps[i], ps[i+1]) for i ∈ 1:length(ps)-1]
+end
+
+
+function polygon_edges(ps...)
+    n = length(ps)
+    return [LineSegment(ps[i], ps[mod1(i+1,n)]) for i ∈ eachindex(Ps)]
+end
+
 struct Circle{T,PT} <: Curve
     c::PT
     r::T
@@ -190,7 +200,3 @@ function (s::TransfiniteInterpolationSurface)(ξ̄::AbstractArray)
 end
 
 
-function polygon_sides(Ps...)
-    n = length(Ps)
-    return [t->line(t,Ps[i],Ps[mod1(i+1,n)]) for i ∈ eachindex(Ps)]
-end
