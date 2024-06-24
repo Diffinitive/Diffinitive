@@ -34,40 +34,7 @@ function verticies_and_faces_and_values(g::Grid{<:Any,2}, gf::AbstractArray{<:An
 end
 
 
-function make_plot(g,gf)
-    v,f,c = verticies_and_faces_and_values(g,gf)
-    mesh(v,f,color=c,
-        shading = NoShading,
-    )
-end
-
-# scatter(collect(g)[:])
-
-function Makie.surface(g::Grid{<:Any,2}, gf::AbstractArray{<:Any, 2}; kwargs...)
-    surface(getindex.(g,1), getindex.(g,2), gf;
-        shading = NoShading,
-        kwargs...,
-    )
-end
-
-function Makie.mesh(g::Grid{<:Any,2}, gf::AbstractArray{<:Any, 2}; kwargs...)
-    v,f,c = verticies_and_faces_and_values(g, gf)
-    mesh(v,f,color=c,
-        shading = NoShading,
-        kwargs...,
-    )
-end
-
-function Makie.plot!(plot::Plot(Grid{<:Any,2},AbstractArray{<:Any, 2}))
-    # TODO: How to handle kwargs?
-    # v,f,c = verticies_and_faces_and_values(plot[1], plot[2])
-    r = @lift verticies_and_faces_and_values($(plot[1]), $(plot[2]))
-    v,f,c = (@lift $r[1]), (@lift $r[2]), (@lift $r[3])
-    mesh!(plot, v, f, color=c,
-        shading = NoShading,
-    )
-end
-
+## Grids
 
 Makie.convert_arguments(::Type{<:Scatter}, g::Grid) = (reshape(map(Point,g),:),) # (map(Point,collect(g)[:]),)
 function Makie.convert_arguments(::Type{<:Lines}, g::Grid{<:Any,2})
@@ -84,5 +51,41 @@ function Makie.convert_arguments(::Type{<:Lines}, g::Grid{<:Any,2})
 end
 
 Makie.plot!(plot::Plot(Grid{<:Any,2})) = lines!(plot, plot.attributes, plot[1])
-# Makie.convert_arguments(::PointBased, g::Grid) = (map(Tuple,collect(g)[:]),)
+
+
+## Grid functions
+
+### 1D
+function Makie.convert_arguments(::Type{<:Lines}, g::Grid{<:Any,1}, gf::AbstractArray{<:Any, 1})
+    (collect(g), gf)
+end
+
+function Makie.convert_arguments(::Type{<:Scatter}, g::Grid{<:Any,1}, gf::AbstractArray{<:Any, 1})
+    (collect(g), gf)
+end
+
+Makie.plot!(plot::Plot(Grid{<:Any,1}, AbstractArray{<:Any,1})) = lines!(plot, plot.attributes, plot[1], plot[2])
+
+### 2D
+function Makie.convert_arguments(::Type{<:Surface}, g::Grid{<:Any,2}, gf::AbstractArray{<:Any, 2})
+    (getindex.(g,1), getindex.(g,2), gf)
+end
+
+function Makie.plot!(plot::Plot(Grid{<:Any,2},AbstractArray{<:Any, 2}))
+    r = @lift verticies_and_faces_and_values($(plot[1]), $(plot[2]))
+    v,f,c = (@lift $r[1]), (@lift $r[2]), (@lift $r[3])
+    mesh!(plot, plot.attributes, v, f;
+        color=c,
+        shading = NoShading,
+    )
+end
+# TBD: Can we define `mesh` instead of the above function and then forward plot! to that?
+
+function Makie.convert_arguments(::Type{<:Scatter}, g::Grid{<:Any,2}, gf::AbstractArray{<:Any, 2})
+    ps = map(g,gf) do (x,y), z
+        @SVector[x,y,z]
+    end
+    (reshape(ps,:),)
+end
+
 end
