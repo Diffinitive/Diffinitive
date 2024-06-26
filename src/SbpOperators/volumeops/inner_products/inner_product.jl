@@ -50,3 +50,8 @@ Implemented to simplify 1D code for SBP operators.
 """
 inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor{component_type(g)}()
 
+
+function inner_product(g::MappedGrid, stencil_set)
+    J = jacobian_determinant(g)
+    DiagonalTensor(J)∘inner_product(logicalgrid(g), stencil_set)
+end

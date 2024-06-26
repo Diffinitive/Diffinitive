@@ -6,6 +6,8 @@ using Sbplib.LazyTensors
 
 import Sbplib.SbpOperators.ConstantInteriorScalingOperator
 
+using StaticArrays
+
 @testset "Diagonal-stencil inner_product" begin
     Lx = π/2.
     Ly = Float64(π)
@@ -93,5 +95,18 @@ import Sbplib.SbpOperators.ConstantInteriorScalingOperator
                 @test sum(H*u) ≈ π rtol = 1e-8
             end
         end
+    end
+
+    @testset "MappedGrid" begin
+        stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        c = Chart(unitsquare()) do (ξ,η)
+            @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
+        end
+        Grids.jacobian(c::typeof(c), (ξ,η)) = @SMatrix[2 1-2η; (2+η)*ξ 3+ξ^2/2]
+
+        mg = equidistant_grid(c, 10,13)
+
+        @test inner_product(mg, stencil_set) isa LazyTensor{<:Any, 2,2}
+        @test_broken false # Test that it calculates the right thing
     end
 end
