@@ -138,6 +138,15 @@ using Sbplib.RegionIndices
         @test axes(g) == (1:11,1:6)
     end
 
+    @testset "min_spacing" begin
+        g₁ = EquidistantGrid(range(0,1,length=11))
+        g₂ = EquidistantGrid(range(2,3,length=6))
+        g₃ = ZeroDimGrid(@SVector[1,2])
+
+        @test min_spacing(TensorGrid(g₁, g₂)) == 1/10
+        @test min_spacing(TensorGrid(g₂, g₃)) == 1/5
+    end
+
     @testset "refine" begin
         g1(n) = EquidistantGrid(range(0,1,length=n))
         g2(n) = EquidistantGrid(range(2,3,length=n))
