@@ -28,3 +28,14 @@ function normal_derivative(g::EquidistantGrid, stencil_set::StencilSet, boundary
     scaled_stencil = scale(closure_stencil,h_inv)
     return BoundaryOperator(g, scaled_stencil, boundary)
 end
+
+function normal_derivative(g::MappedGrid, stencil_set::StencilSet, boundary)
+    g⁻¹ = geometric_tensor_inverse(g) # Extract boundary part
+    k = NaN # Dimension of boundary
+    mapreduce(1:ndims(g)) do i
+        gᵏⁱ = componentview(g⁻¹,k,i)
+        gᵏᵏ = componentview(g⁻¹,k,k)
+        # ∂ξᵢ = ...
+        DiagonalTensor(gᵏⁱ./sqrt.(gᵏᵏ)) * ∂ξᵢ # Should the metric expression be mapped lazily?
+    end
+end
