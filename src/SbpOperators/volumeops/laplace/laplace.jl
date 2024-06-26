@@ -62,8 +62,8 @@ function laplace(grid::MappedGrid, stencil_set)
     lg = logicalgrid(grid)
 
     return mapreduce(+, CartesianIndices(first(Jg))) do I
-        i,j = I[1], I[2]
-        Jgⁱʲ = componentview(Jg, I[1], I[2])
+        i, j = I[1], I[2]
+        Jgⁱʲ = componentview(Jg, i, j)
 
         if i == j
             J⁻¹∘second_derivative_variable(lg, Jgⁱʲ, stencil_set, i)
