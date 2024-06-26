@@ -107,6 +107,9 @@ grid. This simplifies the implementation and avoids certain surprise
 behaviors.
 """
 function equidistant_grid(limit_lower, limit_upper, dims::Vararg{Int})
+    if !(length(limit_lower) == length(limit_upper) == length(dims))
+        throw(ArgumentError("All arguments must be of the same length"))
+    end
     gs = map(equidistant_grid, limit_lower, limit_upper, dims)
     return TensorGrid(gs...)
 end
@@ -129,6 +132,7 @@ end
 
 
 equidistant_grid(hb::HyperBox, dims::Vararg{Int}) = equidistant_grid(hb.a, hb.b, dims...)
+# TODO: One dimensional grids shouldn't have vector eltype right?, Change here or in HyperBox?
 
 function equidistant_grid(c::Chart, dims::Vararg{Int})
     lg = equidistant_grid(parameterspace(c), dims...)

@@ -51,8 +51,8 @@ function laplace(g::TensorGrid, stencil_set)
     end
     return Δ
 end
-laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
 
+laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
 
 function laplace(grid::MappedGrid, stencil_set)
     J = jacobian_determinant(grid)
@@ -73,4 +73,80 @@ function laplace(grid::MappedGrid, stencil_set)
             J⁻¹∘Dᵢ∘DiagonalTensor(Jgⁱʲ)∘Dⱼ
         end
     end
+end
+
+
+"""
+    sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
+
+The operators required to construct the SAT for imposing a Dirichlet
+condition. `H_tuning` and `R_tuning` are used to specify the strength of the
+penalty.
+
+See also: [`sat`](@ref),[`DirichletCondition`](@ref), [`positivity_decomposition`](@ref).
+"""
+function sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning = 1., R_tuning = 1.)
+    id = boundary(bc)
+    set  = Δ.stencil_set
+    H⁻¹ = inverse_inner_product(g,set)
+    Hᵧ = inner_product(boundary_grid(g, id), set)
+    e = boundary_restriction(g, set, id)
+    d = normal_derivative(g, set, id)
+    B = positivity_decomposition(Δ, g, bc; H_tuning, R_tuning)
+    penalty_tensor = H⁻¹∘(d' - B*e')∘Hᵧ
+    return penalty_tensor, e
+end
+
+"""
+    sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
+
+The operators required to construct the SAT for imposing a Neumann condition.
+
+See also: [`sat`](@ref), [`NeumannCondition`](@ref).
+"""
+function sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
+    id = boundary(bc)
+    set  = Δ.stencil_set
+    H⁻¹ = inverse_inner_product(g,set)
+    Hᵧ = inner_product(boundary_grid(g, id), set)
+    e = boundary_restriction(g, set, id)
+    d = normal_derivative(g, set, id)
+
+    penalty_tensor = -H⁻¹∘e'∘Hᵧ
+    return penalty_tensor, d
+end
+
+"""
+    positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
+
+Constructs the scalar `B` such that `d' - 1/2*B*e'` is symmetric positive
+definite with respect to the boundary quadrature. Here `d` is the normal
+derivative and `e` is the boundary restriction operator. `B` can then be used
+to form a symmetric and energy stable penalty for a Dirichlet condition. The
+parameters `H_tuning` and `R_tuning` are used to specify the strength of the
+penalty and must be greater than 1. For details we refer to
+https://doi.org/10.1016/j.jcp.2020.109294
+"""
+function positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
+    @assert(H_tuning ≥ 1.)
+    @assert(R_tuning ≥ 1.)
+    Nτ_H, τ_R = positivity_limits(Δ,g,bc)
+    return H_tuning*Nτ_H + R_tuning*τ_R
+end
+
+# TODO: We should consider implementing a proper BoundaryIdentifier for EquidistantGrid and then
+# change bc::BoundaryCondition to id::BoundaryIdentifier
+function positivity_limits(Δ::Laplace, g::EquidistantGrid, bc::DirichletCondition)
+    h = spacing(g)
+    θ_H = parse_scalar(Δ.stencil_set["H"]["closure"][1])
+    θ_R = parse_scalar(Δ.stencil_set["D2"]["positivity"]["theta_R"])
+
+    τ_H = 1/(h*θ_H)
+    τ_R = 1/(h*θ_R)
+    return τ_H, τ_R
+end
+
+function positivity_limits(Δ::Laplace, g::TensorGrid, bc::DirichletCondition)
+    τ_H, τ_R = positivity_limits(Δ, g.grids[grid_id(boundary(bc))], bc)
+    return τ_H*ndims(g), τ_R
 end

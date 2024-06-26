@@ -21,6 +21,10 @@
        See (https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing)
  - [ ] Samla noggrannhets- och SBP-ness-tester för alla operatorer på ett ställe
  - [ ] Move export statements to top of each module
+ - [ ] Implement apply_transpose for
+      - [ ] ElementwiseTensorOperation
+      - [ ] VolumeOperator
+      - [ ] Laplace
 
 
  - [ ] Gå igenom alla typ parametrar och kolla om de är motiverade. Både i signaturer och typer, tex D i VariableSecondDerivative. Kan vi använda promote istället?

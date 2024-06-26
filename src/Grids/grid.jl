@@ -74,7 +74,7 @@ struct ArrayComponentView{CT,T,D,AT <: AbstractArray{T,D}, IT} <: AbstractArray{
     end
 end
 
-Base.size(cv) = size(cv.v)
+Base.size(cv::ArrayComponentView) = size(cv.v)
 Base.getindex(cv::ArrayComponentView, i::Int) = cv.v[i][cv.component_index...]
 Base.getindex(cv::ArrayComponentView, I::Vararg{Int}) = cv.v[I...][cv.component_index...]
 IndexStyle(::Type{<:ArrayComponentView{<:Any,<:Any,AT}}) where AT = IndexStyle(AT)
@@ -106,6 +106,8 @@ function coarsen end
 Identifiers for all the boundaries of `g`.
 """
 function boundary_identifiers end
+
+# TBD: Boundary identifiers for charts and atlases?
 
 """
     boundary_grid(g::Grid, id::BoundaryIdentifier)

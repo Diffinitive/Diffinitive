@@ -19,6 +19,7 @@ See also: [`Interval`](@ref), [`Rectangle`](@ref), [`Box`](@ref),
 """
 abstract type ParameterSpace{D} end
 Base.ndims(::ParameterSpace{D}) where D = D
+# TBD:  Should implement domain_dim?
 
 struct HyperBox{T,D} <: ParameterSpace{D}
     a::SVector{D,T}
@@ -98,7 +99,10 @@ jacobian(c::typeof(c),ξ) = f′(ξ)
 which will both allow calling `jacobian(c,ξ)`.
 """
 jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
+# TBD: Can we register a error hint for when jacobian is called with a function that doesn't have a registered jacobian?
 
+
+# TBD: Should Charts, parameterspaces have boundary names?
 
 """
     Atlas
@@ -160,6 +164,16 @@ end
 (c::LineSegment)(s) = (1-s)*c.a + s*c.b
 
 
+function linesegments(ps...)
+    return [LineSegment(ps[i], ps[i+1]) for i ∈ 1:length(ps)-1]
+end
+
+
+function polygon_edges(ps...)
+    n = length(ps)
+    return [LineSegment(ps[i], ps[mod1(i+1,n)]) for i ∈ eachindex(Ps)]
+end
+
 struct Circle{T,PT} <: Curve
     c::PT
     r::T
@@ -189,8 +203,5 @@ function (s::TransfiniteInterpolationSurface)(ξ̄::AbstractArray)
     s(ξ̄...)
 end
 
+# TODO: Implement jacobian() for the different mapping helpers
 
-function polygon_sides(Ps...)
-    n = length(Ps)
-    return [t->line(t,Ps[i],Ps[mod1(i+1,n)]) for i ∈ eachindex(Ps)]
-end
