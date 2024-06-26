@@ -107,6 +107,8 @@ Identifiers for all the boundaries of `g`.
 """
 function boundary_identifiers end
 
+# TBD: Boundary identifiers for charts and atlases?
+
 """
     boundary_grid(g::Grid, id::BoundaryIdentifier)
 

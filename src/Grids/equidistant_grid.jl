@@ -129,6 +129,7 @@ end
 
 
 equidistant_grid(hb::HyperBox, dims::Vararg{Int}) = equidistant_grid(hb.a, hb.b, dims...)
+# TODO: One dimensional grids shouldn't have vector eltype right?, Change here or in HyperBox?
 
 function equidistant_grid(c::Chart, dims::Vararg{Int})
     lg = equidistant_grid(parameterspace(c), dims...)
