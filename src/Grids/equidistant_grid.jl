@@ -107,6 +107,9 @@ grid. This simplifies the implementation and avoids certain surprise
 behaviors.
 """
 function equidistant_grid(limit_lower, limit_upper, dims::Vararg{Int})
+    if !(length(limit_lower) == length(limit_upper) == length(dims))
+        throw(ArgumentError("All arguments must be of the same length"))
+    end
     gs = map(equidistant_grid, limit_lower, limit_upper, dims)
     return TensorGrid(gs...)
 end

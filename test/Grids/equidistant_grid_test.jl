@@ -118,6 +118,8 @@ end
     @test_throws DomainError equidistant_grid((1.0,1.0),(1.0,1.0), 1, 1)
     @test_throws DomainError equidistant_grid((1.0,1.0),(-1.0,-1.0), 1, 1)
 
+    @test_throws ArgumentError equidistant_grid((0.0,),(8.0,5.0), 4, 3, 4)
+
     @testset "Base" begin
         @test eltype(equidistant_grid(0.0, 1.0, 4)) == Float64
         @test eltype(equidistant_grid((0,0),(1,3), 4, 3)) <: AbstractVector{Float64}
