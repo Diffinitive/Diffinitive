@@ -25,3 +25,7 @@ function boundary_restriction(g::EquidistantGrid, stencil_set::StencilSet, bound
     converted_stencil = convert(Stencil{eltype(g)}, closure_stencil)
     return BoundaryOperator(g, converted_stencil, boundary)
 end
+
+function boundary_restriction(g::MappedGrid, stencil_set::StencilSet, boundary)
+    return boundary_restriction(logicalgrid(g), stencil_set, boundary)
+end
