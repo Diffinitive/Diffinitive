@@ -1,5 +1,41 @@
 # Notes
 
+## How to dispatch for different operators
+We have a problem in how dispatch for different operators work.
+ * We want to keep the types simple and flat (Awkward to forward `apply`)
+ * We want to dispatch SATs on the parameters of the continuous operator. (a * div for example)
+ * We want to allow keeping the same stencil_set across different calls. (maybe not so bad for the user to be responsible)
+
+Could remove the current opset idea and introduce a description of continuous operators
+ ```julia
+abstract type DifferentialOperator end
+
+struct Laplace <: DifferentialOperator end
+struct Advection <: DifferentialOperator
+    v
+end
+
+difference_operator(::Laplace, grid, stencil_set) = ... # Returns a plain LazyTensor. Replaces the current `laplace()` function.
+sat_tensors(::Laplace, grid, stencil_set, bc) = ...
+
+sat(::DifferentialOperator, grid, stencil_set, bc) = ...
+ ```
+
+
+### Update 2024-06-26
+We will run into trouble if we start assuming things about the coupling
+between the continuous and discrete setting. We could add representations of
+continuous operators but we will also need representations of discrete
+operators. Ideally it should be possible to ignore the continuous
+representations and only work with the discrete operators without losing
+functionality. The discrete representations does not have to be LazyTensors.
+The could be used as inputs to methods for `sat`, `difference_operator` and so
+on.
+
+To see need for a fully functional discrete layer we can consider the
+optimization of material parameters or something similar. In this case we do
+not necessarily want to handle continuous objects.
+
 ## Reading operators
 
 Jonatan's suggestion is to add methods to `Laplace`, `SecondDerivative` and
