@@ -14,6 +14,7 @@ Base.eachindex(g::MappedGrid) = eachindex(g.logicalgrid)
 
 Base.firstindex(g::MappedGrid, d) = firstindex(g.logicalgrid, d)
 Base.lastindex(g::MappedGrid, d) = lastindex(g.logicalgrid, d)
+# TODO: axes(...)?
 
 # Iteration interface
 
