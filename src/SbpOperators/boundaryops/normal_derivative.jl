@@ -30,12 +30,29 @@ function normal_derivative(g::EquidistantGrid, stencil_set::StencilSet, boundary
 end
 
 function normal_derivative(g::MappedGrid, stencil_set::StencilSet, boundary)
-    g⁻¹ = geometric_tensor_inverse(g) # Extract boundary part
-    k = NaN # Dimension of boundary
-    mapreduce(1:ndims(g)) do i
-        gᵏⁱ = componentview(g⁻¹,k,i)
-        gᵏᵏ = componentview(g⁻¹,k,k)
-        # ∂ξᵢ = ...
-        DiagonalTensor(gᵏⁱ./sqrt.(gᵏᵏ)) * ∂ξᵢ # Should the metric expression be mapped lazily?
+    b_indices = boundary_indices(logicalgrid(g), boundary)
+
+    k = grid_id(boundary)
+
+
+    # Compute the weights for the logival derivatives
+    g⁻¹ = geometric_tensor_inverse(g)
+    α = map(CartesianIndices(g⁻¹)[b_indices...]) do I # TODO: Fix iterator here
+        gᵏⁱ = g⁻¹[I][k,:]
+        gᵏᵏ = g⁻¹[I][k,k]
+
+        gᵏⁱ./sqrt(gᵏᵏ)
+    end
+
+
+    mapreduce(+,1:ndims(g)) do i
+        if i == k
+            ∂ξᵢ = normal_derivative(logicalgrid(g), stencil_set, boundary)
+        else
+            ∂ξᵢ = first_derivative(logicalgrid(g), stencil_set, i)
+        end
+
+        αᵢ = componentview(α,i)
+        DiagonalTensor(αᵢ) ∘ ∂ξᵢ
     end
 end
