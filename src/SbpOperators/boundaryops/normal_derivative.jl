@@ -31,7 +31,7 @@ end
 
 function normal_derivative(g::MappedGrid, stencil_set::StencilSet, boundary)
     k = grid_id(boundary)
-    b_indices = boundary_indices(logicalgrid(g), boundary)
+    b_indices = boundary_indices(g, boundary)
 
     # Compute the weights for the logical derivatives
     g⁻¹ = geometric_tensor_inverse(g)
