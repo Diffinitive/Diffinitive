@@ -183,4 +183,15 @@ end
     lg = equidistant_grid((0,0), (1,1), 10, 11)
     @test logicalgrid(mg) == lg
     @test collect(mg) == map(x̄, lg)
+
+
+    @testset "normal" begin
+        @test normal(mg, CartesianBoundary{1,Lower}()) == fill(@SVector[-1,0], 11)
+        @test normal(mg, CartesianBoundary{1,Upper}()) == fill(@SVector[1,0], 11)
+        @test normal(mg, CartesianBoundary{2,Lower}()) == fill(@SVector[0,-1], 10)
+        @test normal(mg, CartesianBoundary{2,Upper}()) ≈ map(boundary_grid(mg,CartesianBoundary{2,Upper}())|>logicalgrid) do ξ̄
+            α = 1-2ξ̄[1]
+            @SVector[α,1]/√(α^2 + 1)
+        end
+    end
 end

@@ -44,6 +44,7 @@ export refine
 export eval_on
 export componentview
 export ArrayComponentView
+export normal
 
 export BoundaryIdentifier
 export TensorGridBoundary
