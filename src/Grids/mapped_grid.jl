@@ -80,3 +80,27 @@ function geometric_tensor_inverse(g::MappedGrid)
     end
 end
 
+"""
+    normal(g::MappedGrid, boundary)
+
+The outward pointing normal as a grid function on the boundary
+"""
+function normal(g::MappedGrid, boundary)
+    b_indices = boundary_indices(g, boundary)
+    σ =_boundary_sign(component_type(g), boundary)
+    return map(jacobian(g)[b_indices...]) do ∂x∂ξ
+        ∂ξ∂x = inv(∂x∂ξ)
+        k = grid_id(boundary)
+        σ*∂ξ∂x[k,:]/norm(∂ξ∂x[k,:])
+    end
+end
+
+function _boundary_sign(T, boundary)
+    if boundary_id(boundary) == Upper()
+        return one(T)
+    elseif boundary_id(boundary) == Lower()
+        return -one(T)
+    else
+        throw(ArgumentError("The boundary identifier must be either `Lower()` or `Upper()`"))
+    end
+end
