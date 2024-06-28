@@ -43,6 +43,7 @@ export sat_tensors
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using Sbplib.Grids
+using LinearAlgebra
 
 # Includes
 include("stencil.jl")
