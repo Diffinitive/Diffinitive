@@ -56,6 +56,11 @@ using Sbplib.LazyTensors
         @test inverse_spacing(EquidistantGrid(0:0.1:10)) == 10
     end
 
+    @testset "min_spacing" begin
+        @test min_spacing(EquidistantGrid(0:10)) == 1
+        @test min_spacing(EquidistantGrid(0:0.1:10)) == 0.1
+    end
+
     @testset "boundary_identifiers" begin
         g = EquidistantGrid(0:0.1:10)
         @test boundary_identifiers(g) == (Lower(), Upper())
