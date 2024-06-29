@@ -13,7 +13,7 @@ struct Index{R<:Region, T<:Integer}
     Index{R,T}(i::T) where {R<:Region,T<:Integer} = new{R,T}(i)
     Index{R}(i::T) where {R<:Region,T<:Integer} = new{R,T}(i)
     Index(i::T, ::Type{R}) where {R<:Region,T<:Integer} = Index{R,T}(i)
-    Index(t::Tuple{T, DataType}) where {R<:Region,T<:Integer} = Index{t[2],T}(t[1]) # TBD: This is not very specific in what types are allowed in t[2]. Can this be fixed?
+    Index(t::Tuple{T, DataType}) where T<:Integer = Index{t[2],T}(t[1]) # TBD: This is not very specific in what types are allowed in t[2]. Can this be fixed?
 end
 
 export Index
