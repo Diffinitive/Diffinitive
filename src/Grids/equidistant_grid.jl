@@ -47,6 +47,8 @@ The reciprocal of the spacing between grid points.
 """
 inverse_spacing(g::EquidistantGrid) = 1/step(g.points)
 
+min_spacing(g::EquidistantGrid) = spacing(g)
+
 
 boundary_identifiers(::EquidistantGrid) = (Lower(), Upper())
 boundary_grid(g::EquidistantGrid, id::Lower) = ZeroDimGrid(g[begin])

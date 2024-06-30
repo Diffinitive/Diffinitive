@@ -7,6 +7,24 @@ The module also has functionality for creating and working with grid functions.
 ## Interface for grids
 All grids are expected to work as a grid function for the coordinate function, and thus implements Julia's Indexing- and Iteration-interfaces. Notably they are *not* abstract arrays because that inteface is too restrictive for the types of grids we wish to implement.
 
+
+## Plotting
+Plotting of grids and grid functions is supported through a package extension with Makie.jl.
+
+For grids we have:
+* `plot(::Grid{<:Any,2})` (same as `lines`)
+* `lines(::Grid{<:Any,2})`
+* `scatter(::Grid{<:Any,2})`
+
+For 1D grid functions we have:
+* `plot(::Grid{<:Any,1}, ::AbstractVector)` (same as `lines`)
+* `lines(::Grid{<:Any,1}, ::AbstractVector)`
+* `scatter(::Grid{<:Any,1}, ::AbstractVector)`
+
+For 2D grid functions we have:
+* `plot(::Grid{<:Any,2}, ::AbstractArray{<:Any,2})` (constructs a 2d mesh)
+* `surface(::Grid{<:Any,2}, ::AbstractArray{<:Any,2})`
+
 ## To write about
 <!-- # TODO: -->
 * Grid functions
