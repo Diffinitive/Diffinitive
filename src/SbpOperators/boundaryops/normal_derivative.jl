@@ -42,13 +42,19 @@ function normal_derivative(g::MappedGrid, stencil_set::StencilSet, boundary)
         gᵏⁱ./sqrt(gᵏᵏ)
     end
 
+    σ = ScalingTensor(
+        Grids._boundary_sign(component_type(g), boundary),
+        size(boundary_grid(g,boundary)),
+    )
+
+
     # Assemble difference operator
     mapreduce(+,1:ndims(g)) do i
         if i == k
             ∂_ξᵢ = normal_derivative(logicalgrid(g), stencil_set, boundary)
         else
             e = boundary_restriction(logicalgrid(g), stencil_set, boundary)
-            ∂_ξᵢ = e ∘ first_derivative(logicalgrid(g), stencil_set, i)
+            ∂_ξᵢ = σ ∘ e ∘ first_derivative(logicalgrid(g), stencil_set, i)
         end
 
         αᵢ = componentview(α,i)

@@ -66,15 +66,44 @@ using StaticArrays
             @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
         end
         Grids.jacobian(c::typeof(c), (ξ,η)) = @SMatrix[2 1-2η; (2+η)*ξ 3+ξ^2/2]
-
         mg = equidistant_grid(c, 10,13)
 
-        b_w, b_e, b_s, b_n = boundary_identifiers(mg)
 
-        @test_broken normal_derivative(mg, stencil_set, b_w) isa LazyTensor{<:Any, 1, 2}
-        @test_broken normal_derivative(mg, stencil_set, b_e) isa LazyTensor{<:Any, 1, 2}
-        @test_broken normal_derivative(mg, stencil_set, b_s) isa LazyTensor{<:Any, 1, 2}
-        @test_broken normal_derivative(mg, stencil_set, b_n) isa LazyTensor{<:Any, 1, 2}
+        # x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
+        # J((ξ, η)) = @SMatrix[
+        #     1         0;
+        #     η*(2ξ-1)  1+ξ*(ξ-1);
+        # ]
+        # mg = mapped_grid(x̄, J, 20, 21)
+
+
+        # x̄((ξ, η)) = @SVector[ξ,η]
+        # J((ξ, η)) = @SMatrix[
+        #     1  0;
+        #     0  1;
+        # ]
+        # mg = mapped_grid(identity, J, 10, 11)
+
+        for bid ∈ boundary_identifiers(mg)
+            @testset let bid=bid
+                @test normal_derivative(mg, stencil_set, bid) isa LazyTensor{<:Any, 1, 2}
+            end
+        end
+
+        @testset "Consistency" begin
+            v = map(identity, mg)
+
+             @testset "4nd order" begin
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+
+                for bid ∈ boundary_identifiers(mg)
+                    @testset let bid=bid
+                        d = normal_derivative(mg, stencil_set, bid)
+                        @test d*v ≈ normal(mg, bid) rtol=1e-13
+                    end
+                end
+             end
+        end
 
         @testset "Accuracy" begin
             v = map(x̄ -> NaN, mg)
