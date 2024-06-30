@@ -14,6 +14,7 @@ export boundary_id
 export boundary_indices
 export boundary_identifiers
 export boundary_grid
+export min_spacing
 export coarsen
 export refine
 export eval_on
