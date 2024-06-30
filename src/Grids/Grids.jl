@@ -30,6 +30,30 @@ export Chart
 export ConcreteChart
 export parameterspace
 
+export ParameterSpace
+export HyperBox
+export Simplex
+export Interval
+export Rectangle
+export Box
+export Triangle
+export Tetrahedron
+
+export limits
+export unitinterval
+export unitsquare
+export unitcube
+export unithyperbox
+
+export verticies
+export unittriangle
+export unittetrahedron
+export unitsimplex
+
+export Chart
+export ConcreteChart
+export parameterspace
+
 # Grid
 export Grid
 export coordinate_size
@@ -39,6 +63,7 @@ export boundary_id
 export boundary_indices
 export boundary_identifiers
 export boundary_grid
+export min_spacing
 export coarsen
 export refine
 export eval_on

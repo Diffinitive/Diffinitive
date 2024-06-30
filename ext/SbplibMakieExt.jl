@@ -8,9 +8,6 @@ using StaticArrays
 function verticies_and_faces_and_values(g::Grid{<:Any,2}, gf::AbstractArray{<:Any, 2})
     ps = map(Tuple, g)[:]
     values = gf[:]
-
-    N = length(ps)
-
     faces = Vector{NTuple{3,Int}}()
 
     n,m = size(g)

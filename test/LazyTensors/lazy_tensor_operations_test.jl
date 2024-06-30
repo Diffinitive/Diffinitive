@@ -4,13 +4,13 @@ using Sbplib.RegionIndices
 
 using Tullio
 
-struct DummyMapping{T,R,D} <: LazyTensor{T,R,D} end
+struct TransposableDummyMapping{T,R,D} <: LazyTensor{T,R,D} end
 
-LazyTensors.apply(m::DummyMapping{T,R}, v, I::Vararg{Any,R}) where {T,R} = :apply
-LazyTensors.apply_transpose(m::DummyMapping{T,R,D}, v, I::Vararg{Any,D}) where {T,R,D} = :apply_transpose
+LazyTensors.apply(m::TransposableDummyMapping{T,R}, v, I::Vararg{Any,R}) where {T,R} = :apply
+LazyTensors.apply_transpose(m::TransposableDummyMapping{T,R,D}, v, I::Vararg{Any,D}) where {T,R,D} = :apply_transpose
 
-LazyTensors.range_size(m::DummyMapping) = :range_size
-LazyTensors.domain_size(m::DummyMapping) = :domain_size
+LazyTensors.range_size(m::TransposableDummyMapping) = :range_size
+LazyTensors.domain_size(m::TransposableDummyMapping) = :domain_size
 
 
 struct SizeDoublingMapping{T,R,D} <: LazyTensor{T,R,D}
@@ -24,7 +24,7 @@ LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
 
 
 @testset "Mapping transpose" begin
-    m = DummyMapping{Float64,2,3}()
+    m = TransposableDummyMapping{Float64,2,3}()
     @test m' isa LazyTensor{Float64, 3,2}
     @test m'' == m
     @test apply(m',zeros(Float64,(0,0)), 0, 0, 0) == :apply_transpose
