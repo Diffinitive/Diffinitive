@@ -1,6 +1,5 @@
 using Sbplib.Grids
 using Test
-using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 
 
@@ -63,24 +62,24 @@ using Sbplib.LazyTensors
 
     @testset "boundary_identifiers" begin
         g = EquidistantGrid(0:0.1:10)
-        @test boundary_identifiers(g) == (Lower(), Upper())
+        @test boundary_identifiers(g) == (LowerBoundary(), UpperBoundary())
         @inferred boundary_identifiers(g)
     end
 
     @testset "boundary_grid" begin
         g = EquidistantGrid(0:0.1:1)
-        @test boundary_grid(g, Lower()) == ZeroDimGrid(0.0)
-        @test boundary_grid(g, Upper()) == ZeroDimGrid(1.0)
+        @test boundary_grid(g, LowerBoundary()) == ZeroDimGrid(0.0)
+        @test boundary_grid(g, UpperBoundary()) == ZeroDimGrid(1.0)
     end
 
     @testset "boundary_indices" begin
         g = EquidistantGrid(0:0.1:1)
-        @test boundary_indices(g, Lower()) == (1,)
-        @test boundary_indices(g, Upper()) == (11,)
+        @test boundary_indices(g, LowerBoundary()) == (1,)
+        @test boundary_indices(g, UpperBoundary()) == (11,)
 
         g = EquidistantGrid(2:0.1:10)
-        @test boundary_indices(g, Lower()) == (1,)
-        @test boundary_indices(g, Upper()) == (81,)
+        @test boundary_indices(g, LowerBoundary()) == (1,)
+        @test boundary_indices(g, UpperBoundary()) == (81,)
 
     end
 

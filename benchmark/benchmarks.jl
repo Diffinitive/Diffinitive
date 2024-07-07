@@ -3,7 +3,6 @@ using BenchmarkTools
 using Sbplib
 using Sbplib.Grids
 using Sbplib.SbpOperators
-using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 
 using LinearAlgebra
@@ -168,20 +167,20 @@ H⁻¹ = inverse_inner_product(g2, stencil_set)
 Dxx = second_derivative(g2, stencil_set, 1)
 Dyy = second_derivative(g2, stencil_set, 2)
 
-e₁ₗ = boundary_restriction(g2, stencil_set, CartesianBoundary{1,Lower}())
-e₁ᵤ = boundary_restriction(g2, stencil_set, CartesianBoundary{1,Upper}())
-e₂ₗ = boundary_restriction(g2, stencil_set, CartesianBoundary{2,Lower}())
-e₂ᵤ = boundary_restriction(g2, stencil_set, CartesianBoundary{2,Upper}())
+e₁ₗ = boundary_restriction(g2, stencil_set, CartesianBoundary{1,LowerBoundary}())
+e₁ᵤ = boundary_restriction(g2, stencil_set, CartesianBoundary{1,UpperBoundary}())
+e₂ₗ = boundary_restriction(g2, stencil_set, CartesianBoundary{2,LowerBoundary}())
+e₂ᵤ = boundary_restriction(g2, stencil_set, CartesianBoundary{2,UpperBoundary}())
 
-d₁ₗ = normal_derivative(g2, stencil_set, CartesianBoundary{1,Lower}())
-d₁ᵤ = normal_derivative(g2, stencil_set, CartesianBoundary{1,Upper}())
-d₂ₗ = normal_derivative(g2, stencil_set, CartesianBoundary{2,Lower}())
-d₂ᵤ = normal_derivative(g2, stencil_set, CartesianBoundary{2,Upper}())
+d₁ₗ = normal_derivative(g2, stencil_set, CartesianBoundary{1,LowerBoundary}())
+d₁ᵤ = normal_derivative(g2, stencil_set, CartesianBoundary{1,UpperBoundary}())
+d₂ₗ = normal_derivative(g2, stencil_set, CartesianBoundary{2,LowerBoundary}())
+d₂ᵤ = normal_derivative(g2, stencil_set, CartesianBoundary{2,UpperBoundary}())
 
-H₁ₗ = inner_product(boundary_grid(g2, CartesianBoundary{1,Lower}()), stencil_set)
-H₁ᵤ = inner_product(boundary_grid(g2, CartesianBoundary{1,Upper}()), stencil_set)
-H₂ₗ = inner_product(boundary_grid(g2, CartesianBoundary{2,Lower}()), stencil_set)
-H₂ᵤ = inner_product(boundary_grid(g2, CartesianBoundary{2,Upper}()), stencil_set)
+H₁ₗ = inner_product(boundary_grid(g2, CartesianBoundary{1,LowerBoundary}()), stencil_set)
+H₁ᵤ = inner_product(boundary_grid(g2, CartesianBoundary{1,UpperBoundary}()), stencil_set)
+H₂ₗ = inner_product(boundary_grid(g2, CartesianBoundary{2,LowerBoundary}()), stencil_set)
+H₂ᵤ = inner_product(boundary_grid(g2, CartesianBoundary{2,UpperBoundary}()), stencil_set)
 
 SUITE["boundary_terms"]["pre_composition"] = @benchmarkable $u2 .= $(H⁻¹∘e₁ₗ'∘H₁ₗ∘d₁ₗ)*$v2
 SUITE["boundary_terms"]["composition"]     = @benchmarkable $u2 .= ($H⁻¹∘$e₁ₗ'∘$H₁ₗ∘$d₁ₗ)*$v2

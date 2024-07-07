@@ -14,19 +14,19 @@ using Sbplib.SbpOperators: BoundaryOperator, Stencil
 
     @testset "boundary_restriction" begin
         @testset "1D" begin
-            e_l = boundary_restriction(g_1D,stencil_set,Lower())
-            @test e_l == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),Lower())
-            @test e_l isa BoundaryOperator{T,Lower} where T
+            e_l = boundary_restriction(g_1D,stencil_set,LowerBoundary())
+            @test e_l == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),LowerBoundary())
+            @test e_l isa BoundaryOperator{T,LowerBoundary} where T
             @test e_l isa LazyTensor{T,0,1} where T
 
-            e_r = boundary_restriction(g_1D,stencil_set,Upper())
-            @test e_r == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),Upper())
-            @test e_r isa BoundaryOperator{T,Upper} where T
+            e_r = boundary_restriction(g_1D,stencil_set,UpperBoundary())
+            @test e_r == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),UpperBoundary())
+            @test e_r isa BoundaryOperator{T,UpperBoundary} where T
             @test e_r isa LazyTensor{T,0,1} where T
         end
 
         @testset "2D" begin
-            e_w = boundary_restriction(g_2D,stencil_set,CartesianBoundary{1,Upper}())
+            e_w = boundary_restriction(g_2D,stencil_set,CartesianBoundary{1,UpperBoundary}())
             @test e_w isa InflatedTensor
             @test e_w isa LazyTensor{T,1,2} where T
         end

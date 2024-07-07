@@ -129,8 +129,24 @@ When do we need to know the size of the range and domain?
  - [ ] Figure out how to treat the borrowing parameters of operators. Include in into the struct? Expose via function dispatched on the operator type and grid?
 
 ## Identifiers for regions
-The identifiers (`Upper`, `Lower`, `Interior`) used for region indecies should probably be included in the grid module. This allows new grid types to come with their own regions.
-We implement this by refactoring RegionIndices to be agnostic to the region types and then moving the actual types to Grids.
+The identifiers (`Upper`, `Lower`, `Interior`) used for region indecies should probably be included in the grid module. This allows new grid types to come with their own regions. We implement this by refactoring RegionIndices to be agnostic to the region types and then moving the actual types to Grids.
+
+`Region`s denote the parts of an operator for which closures and interior stencils are applied respectively. Boundaries/interfaces are included in the closure regions but or are separate concepts. The currently used `Upper`, `Lower` should perhaps instead be subtypes of `BoundaryIdentifier`. Perhaps we should also change the name of `Region` to `StencilRegion`.
+
+Dispatching on regions:
+ * Use region indices `Index{Region}` as presently. This is simply an integer parametrized on the region. 
+ * Use tag dispatch in the apply functions, i.e. `apply(op,u,I,::Region)` where `I` now is a regular `CartesianIndex`. Drawback with this approch is that regular indexing (op*u)[I] won't be aware of regions.
+
+The structure of the apply function may then either be (using the tag dispatch alternative)
+```julia
+function apply(op,u,I,r::Region)
+    if r == Lower()
+        return apply_lower(op,u,I)
+    ...
+    end
+end
+```
+with specific implementations of `apply_lower`. Here we need to make sure that the top level apply function actually is removed by the compiler. This should be possible since `r` is known in compile time. Alternatively one directly specializes `apply(op,u,I,::Lower)` and then introduces a toplevel function `apply(op,u,I) = apply(op,u,I,get_region(op,I))`. The second alterative seems more Julian to me.
 
 ## Regions and tensormappings
 - [ ] Use a trait to indicate if a LazyTensor uses indices with regions.

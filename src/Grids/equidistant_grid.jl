@@ -49,12 +49,30 @@ inverse_spacing(g::EquidistantGrid) = 1/step(g.points)
 
 min_spacing(g::EquidistantGrid) = spacing(g)
 
+"""
+    LowerBoundary <: BoundaryIdentifier
 
-boundary_identifiers(::EquidistantGrid) = (Lower(), Upper())
-boundary_grid(g::EquidistantGrid, id::Lower) = ZeroDimGrid(g[begin])
-boundary_grid(g::EquidistantGrid, id::Upper) = ZeroDimGrid(g[end])
-boundary_indices(g::EquidistantGrid, id::Lower) = (1,)
-boundary_indices(g::EquidistantGrid, id::Upper) = (length(g),)
+Boundary identifier for the the lower (left) boundary of an EquidistantGrid
+
+See also: [`BoundaryIdentifier`](@ref)
+"""
+struct LowerBoundary <: BoundaryIdentifier end
+
+"""
+    UpperBoundary <: BoundaryIdentifier
+
+Boundary identifier for the the upper (right) boundary of an EquidistantGrid
+
+See also: [`BoundaryIdentifier`](@ref)
+"""
+struct UpperBoundary <: BoundaryIdentifier end
+
+
+boundary_identifiers(::EquidistantGrid) = (LowerBoundary(), UpperBoundary())
+boundary_grid(g::EquidistantGrid, id::LowerBoundary) = ZeroDimGrid(g[begin])
+boundary_grid(g::EquidistantGrid, id::UpperBoundary) = ZeroDimGrid(g[end])
+boundary_indices(g::EquidistantGrid, id::LowerBoundary) = (firstindex(g),)
+boundary_indices(g::EquidistantGrid, id::UpperBoundary) = (lastindex(g),)
 
 """
     refine(g::EquidistantGrid, r::Int)
