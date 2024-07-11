@@ -161,11 +161,11 @@ using StaticArrays
         @test_broken false
     end
 
-    @testset "geometric_tensor" begin
+    @testset "metric_tensor" begin
         @test_broken false
     end
 
-    @testset "geometric_tensor_inverse" begin
+    @testset "metric_tensor_inverse" begin
         @test_broken false
     end
 

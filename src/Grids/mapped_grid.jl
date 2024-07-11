@@ -69,13 +69,13 @@ function jacobian_determinant(g::MappedGrid)
     end
 end
 
-function geometric_tensor(g::MappedGrid)
+function metric_tensor(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ
         ∂x∂ξ'*∂x∂ξ
     end
 end
 
-function geometric_tensor_inverse(g::MappedGrid)
+function metric_tensor_inverse(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ
         inv(∂x∂ξ'*∂x∂ξ)
     end
