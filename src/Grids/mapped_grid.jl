@@ -61,6 +61,7 @@ function mapped_grid(x, J, size...)
         map(J,lg),
     )
 end
+# TODO: Delete this function
 
 function jacobian_determinant(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ
