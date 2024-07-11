@@ -4,6 +4,7 @@ module Grids
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using StaticArrays
+using LinearAlgebra
 
 # Grid
 export Grid
