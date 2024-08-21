@@ -122,13 +122,14 @@ end
 Constructs a 1D equidistant grid.
 """
 function equidistant_grid(limit_lower::Number, limit_upper::Number, size::Int)
-    if any(size .<= 0)
+    if size <= 0
         throw(DomainError("size must be postive"))
     end
 
-    if any(limit_upper.-limit_lower .<= 0)
+    if limit_upper-limit_lower <= 0
         throw(DomainError("side length must be postive"))
     end
+
 	return EquidistantGrid(range(limit_lower, limit_upper, length=size)) # TBD: Should it use LinRange instead?
 end
 
