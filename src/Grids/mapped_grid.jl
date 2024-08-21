@@ -81,6 +81,18 @@ function metric_tensor_inverse(g::MappedGrid)
     end
 end
 
+function min_spacing(g::MappedGrid{T,1} where T)
+    n, = size(g)
+
+    ms = Inf
+    for i ∈ 1:n-1
+        ms = min(ms, norm(g[i+1]-g[i]))
+    end
+
+    return ms
+end
+
+
 """
     normal(g::MappedGrid, boundary)
 

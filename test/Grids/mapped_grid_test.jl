@@ -169,6 +169,21 @@ using StaticArrays
         @test_broken false
     end
 
+
+    @testset "min_spacing" begin
+        let g = mapped_grid(identity, x->@SMatrix[1], 11)
+            @test min_spacing(g) ≈ 0.1
+        end
+
+        let g = mapped_grid(x->x+x.^2/2, x->@SMatrix[1 .+ x], 11)
+            @test min_spacing(g) ≈ 0.105
+        end
+
+        let g = mapped_grid(x->x + x.*(1 .- x)/2, x->@SMatrix[1.5 .- x], 11)
+            @test min_spacing(g) ≈ 0.055
+        end
+    end
+
 end
 
 @testset "mapped_grid" begin
