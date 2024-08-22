@@ -2,6 +2,7 @@ using Sbplib.Grids
 using Sbplib.RegionIndices
 using Test
 using StaticArrays
+using LinearAlgebra
 
 @testset "MappedGrid" begin
     lg = equidistant_grid((0,0), (1,1), 11, 11) # TODO: Change dims of the grid to be different
@@ -182,6 +183,30 @@ using StaticArrays
         let g = mapped_grid(x->x + x.*(1 .- x)/2, x->@SMatrix[1.5 .- x], 11)
             @test min_spacing(g) ≈ 0.055
         end
+
+        let g = mapped_grid(identity, x->@SMatrix[1 0; 0 1], 11,11)
+            @test min_spacing(g) ≈ 0.1
+        end
+
+        let g = mapped_grid(identity, x->@SMatrix[1 0; 0 1], 11,21)
+            @test min_spacing(g) ≈ 0.05
+        end
+
+        skew_grid(a,b, sz...) = mapped_grid(ξ̄->ξ̄[1]*a + ξ̄[2]*b, ξ̄->[a  b], sz...)
+
+        @testset let a = @SVector[1,0], b = @SVector[1,1]/√2
+            g = skew_grid(a,b,11,11)
+
+            @test min_spacing(g) ≈ 0.1*norm(b-a)
+        end
+
+        @testset let a = @SVector[1,0], b = @SVector[-1,1]/√2
+            g = skew_grid(a,b,11,11)
+
+            @test min_spacing(g) ≈ 0.1*norm(a+b)
+        end
+
+        # Skevt nät
     end
 
 end

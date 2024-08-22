@@ -92,6 +92,28 @@ function min_spacing(g::MappedGrid{T,1} where T)
     return ms
 end
 
+function min_spacing(g::MappedGrid{T,2} where T)
+    n, m = size(g)
+
+    ms = Inf
+    for i ∈ 1:n-1, j ∈ 1:m-1 # loop over each cell of the grid
+
+        ms = min(
+            ms,
+            norm(g[i+1,j]-g[i,j]),
+            norm(g[i,j+1]-g[i,j]),
+
+            norm(g[i+1,j]-g[i+1,j+1]),
+            norm(g[i,j+1]-g[i+1,j+1]),
+
+            norm(g[i+1,j+1]-g[i,j]),
+            norm(g[i+1,j]-g[i,j+1]),
+        )
+        # NOTE: This could be optimized to avoid checking all interior edges twice.
+    end
+
+    return ms
+end
 
 """
     normal(g::MappedGrid, boundary)
