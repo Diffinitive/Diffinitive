@@ -4,6 +4,29 @@ using Test
 using StaticArrays
 using LinearAlgebra
 
+
+_skew_mapping(a,b) = (ξ̄->ξ̄[1]*a + ξ̄[2]*b, ξ̄->[a  b])
+
+function _partially_curved_mapping()
+    x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
+    J((ξ, η)) = @SMatrix[
+        1         0;
+        η*(2ξ-1)  1+ξ*(ξ-1);
+    ]
+
+    return x̄, J
+end
+
+function _fully_curved_mapping()
+    x̄((ξ, η)) = @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
+    J((ξ, η)) = @SMatrix[
+        2       1-2η;
+        (2+η)*ξ 3+1/2*ξ^2;
+    ]
+
+    return x̄, J
+end
+
 @testset "MappedGrid" begin
     lg = equidistant_grid((0,0), (1,1), 11, 11) # TODO: Change dims of the grid to be different
     x̄ = map(ξ̄ -> 2ξ̄, lg)
@@ -118,12 +141,7 @@ using LinearAlgebra
     end
 
     @testset "boundary_grid" begin
-        x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
-        J((ξ, η)) = @SMatrix[
-            1         0;
-            η*(2ξ-1)  1+ξ*(ξ-1);
-        ]
-
+        x̄, J = _partially_curved_mapping()
         mg = mapped_grid(x̄, J, 10, 11)
         J1((ξ, η)) = @SMatrix[
             1       ;
@@ -160,11 +178,7 @@ using LinearAlgebra
 end
 
 @testset "mapped_grid" begin
-    x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
-    J((ξ, η)) = @SMatrix[
-        1         0;
-        η*(2ξ-1)  1+ξ*(ξ-1);
-    ]
+    x̄, J = _partially_curved_mapping()
     mg = mapped_grid(x̄, J, 10, 11)
     @test mg isa MappedGrid{SVector{2,Float64}, 2}
 
@@ -206,28 +220,22 @@ end
         @test min_spacing(g) ≈ 0.05
     end
 
-    skew_grid(a,b, sz...) = mapped_grid(ξ̄->ξ̄[1]*a + ξ̄[2]*b, ξ̄->[a  b], sz...)
 
     @testset let a = @SVector[1,0], b = @SVector[1,1]/√2
-        g = skew_grid(a,b,11,11)
+        g = mapped_grid(_skew_mapping(a,b)...,11,11)
 
         @test min_spacing(g) ≈ 0.1*norm(b-a)
     end
 
     @testset let a = @SVector[1,0], b = @SVector[-1,1]/√2
-        g = skew_grid(a,b,11,11)
+        g = mapped_grid(_skew_mapping(a,b)...,11,11)
 
         @test min_spacing(g) ≈ 0.1*norm(a+b)
     end
 end
 
 @testset "normal" begin
-    x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
-    J((ξ, η)) = @SMatrix[
-        1         0;
-        η*(2ξ-1)  1+ξ*(ξ-1);
-    ]
-    g = mapped_grid(x̄, J, 10, 11)
+    g = mapped_grid(_partially_curved_mapping()...,10, 11)
 
     @test normal(g, CartesianBoundary{1,Lower}()) == fill(@SVector[-1,0], 11)
     @test normal(g, CartesianBoundary{1,Upper}()) == fill(@SVector[1,0], 11)
@@ -237,13 +245,7 @@ end
         @SVector[α,1]/√(α^2 + 1)
     end
 
-    x̄((ξ, η)) = @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
-    J((ξ, η)) = @SMatrix[
-        2       1-2η;
-        (2+η)*ξ 3+1/2*ξ^2;
-    ]
-
-    g = mapped_grid(x̄,J,5,4)
+    g = mapped_grid(_fully_curved_mapping()...,5,4)
 
     unit(v) = v/norm(v)
     @testset let bId = CartesianBoundary{1,Lower}()
