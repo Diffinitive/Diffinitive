@@ -233,5 +233,47 @@ end
             α = 1-2ξ̄[1]
             @SVector[α,1]/√(α^2 + 1)
         end
+
+
+        x̄((ξ, η)) = @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
+        J((ξ, η)) = @SMatrix[
+            2       1-2η;
+            (2+η)*ξ 3+1/2*ξ^2;
+        ]
+
+        g = mapped_grid(x̄,J,21,14)
+        g = mapped_grid(x̄,J,3,4)
+
+        unit(v) = v/norm(v)
+        @testset let bId = CartesianBoundary{1,Lower}()
+            lbg = boundary_grid(logicalgrid(g), bId)
+            @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+                -unit(@SVector[1/2,  η/3-1/6])
+            end
+        end
+
+        @testset let bId = CartesianBoundary{1,Upper}()
+            lbg = boundary_grid(logicalgrid(g), bId)
+            @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+                unit(@SVector[7/2, 2η-1]/(5 + 3η + 2η^2))
+            end
+        end
+
+        @testset let bId = CartesianBoundary{2,Lower}()
+            lbg = boundary_grid(logicalgrid(g), bId)
+            @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+                -unit(@SVector[-2ξ, 2]/(6 + ξ^2 - 2ξ))
+            end
+        end
+
+        @testset let bId = CartesianBoundary{2,Upper}()
+            lbg = boundary_grid(logicalgrid(g), bId)
+            @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+                unit(@SVector[-3ξ, 2]/(6 + ξ^2 + 3ξ))
+            end
+        end
     end
 end
+
+# TODO: Reorganize tests to not be nested.
+# Want to ues "mapped_grid" to contruct tests for some of the differential geometry methods
