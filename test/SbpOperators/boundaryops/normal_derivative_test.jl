@@ -7,6 +7,7 @@ using Sbplib.RegionIndices
 import Sbplib.SbpOperators.BoundaryOperator
 
 using StaticArrays
+using LinearAlgebra
 
 @testset "normal_derivative" begin
 	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
@@ -106,27 +107,28 @@ using StaticArrays
         end
 
         @testset "Accuracy" begin
-            v = map(x̄ -> NaN, mg)
-            dₙv = map(x̄ -> NaN, mg)
-
-            @testset "2nd order" begin
-                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
-                d_w, d_e, d_s, d_n = normal_derivative.(Ref(mg), Ref(stencil_set), boundary_identifiers(mg))
-
-                @test_broken d_w*v ≈ dₙv atol = 1e-13
-                @test_broken d_e*v ≈ dₙv atol = 1e-13
-                @test_broken d_s*v ≈ dₙv atol = 1e-13
-                @test_broken d_n*v ≈ dₙv atol = 1e-13
+            v = function(x̄)
+                sin(norm(x̄+@SVector[1,1]))
+            end
+            ∇v = function(x̄)
+                ȳ = x̄+@SVector[1,1]
+                cos(norm(ȳ))*(ȳ/norm(ȳ))
             end
 
-            @testset "4th order" begin
-                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
-                d_w, d_e, d_s, d_n = normal_derivative.(Ref(mg), Ref(stencil_set), boundary_identifiers(mg))
+            mg = equidistant_grid(c, 80,80)
+            v̄ = map(v, mg)
 
-                @test_broken d_w*v ≈ dₙv atol = 1e-13
-                @test_broken d_e*v ≈ dₙv atol = 1e-13
-                @test_broken d_s*v ≈ dₙv atol = 1e-13
-                @test_broken d_n*v ≈ dₙv atol = 1e-13
+            @testset for (order, atol) ∈ [(2,4e-2),(4,2e-3)]
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=order)
+
+                @testset for bId ∈ boundary_identifiers(mg)
+                    ∂ₙv = map(boundary_grid(mg,bId),normal(mg,bId)) do x̄,n̂
+                        n̂⋅∇v(x̄)
+                    end
+
+                    dₙ = normal_derivative(mg, stencil_set, bId)
+                    @test dₙ*v̄ ≈ ∂ₙv atol=atol
+                end
             end
         end
     end
