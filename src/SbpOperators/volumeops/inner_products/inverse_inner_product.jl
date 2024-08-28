@@ -51,6 +51,6 @@ Implemented to simplify 1D code for SBP operators.
 inverse_inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor{component_type(g)}()
 
 function inverse_inner_product(g::MappedGrid, stencil_set)
-    J⁻¹ = map(inv∘sqrt∘det, geometric_tensor(g))
+    J⁻¹ = map(inv∘sqrt∘det, metric_tensor(g))
     DiagonalTensor(J⁻¹)∘inner_product(logicalgrid(g), stencil_set)
 end

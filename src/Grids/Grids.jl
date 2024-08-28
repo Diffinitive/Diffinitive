@@ -30,30 +30,6 @@ export Chart
 export ConcreteChart
 export parameterspace
 
-export ParameterSpace
-export HyperBox
-export Simplex
-export Interval
-export Rectangle
-export Box
-export Triangle
-export Tetrahedron
-
-export limits
-export unitinterval
-export unitsquare
-export unitcube
-export unithyperbox
-
-export verticies
-export unittriangle
-export unittetrahedron
-export unitsimplex
-
-export Chart
-export ConcreteChart
-export parameterspace
-
 # Grid
 export Grid
 export coordinate_size
@@ -90,8 +66,8 @@ export jacobian
 export logicalgrid
 export mapped_grid
 export jacobian_determinant
-export geometric_tensor
-export geometric_tensor_inverse
+export metric_tensor
+export metric_tensor_inverse
 
 abstract type BoundaryIdentifier end
 
