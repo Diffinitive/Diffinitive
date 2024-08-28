@@ -52,5 +52,5 @@ inverse_inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor{
 
 function inverse_inner_product(g::MappedGrid, stencil_set)
     J⁻¹ = map(inv∘sqrt∘det, metric_tensor(g))
-    DiagonalTensor(J⁻¹)∘inner_product(logicalgrid(g), stencil_set)
+    DiagonalTensor(J⁻¹)∘inverse_inner_product(logicalgrid(g), stencil_set)
 end
