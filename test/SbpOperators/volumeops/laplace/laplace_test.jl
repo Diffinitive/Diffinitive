@@ -95,18 +95,18 @@ end
         end
         Grids.jacobian(c::typeof(c), (ξ,η)) = @SMatrix[2 1-2η; (2+η)*ξ 3+ξ^2/2]
 
-        g = equidistant_grid(c, 30,30)
+        g = equidistant_grid(c, 60,60)
 
         @test laplace(g, stencil_set) isa LazyTensor{<:Any,2,2}
 
         f((x,y)) = sin(4(x + y))
-        Δf((x,y)) = -16sin(4(x + y))
+        Δf((x,y)) = -32sin(4(x + y))
         gf = map(f,g)
 
         Δ = laplace(g, stencil_set)
 
         @test collect(Δ*gf) isa Array{<:Any,2}
-        @test Δ*gf ≈ map(Δf, g)
+        @test Δ*gf ≈ map(Δf, g) rtol=2e-2
     end
 end
 
