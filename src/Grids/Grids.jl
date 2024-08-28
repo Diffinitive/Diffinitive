@@ -4,6 +4,7 @@ module Grids
 using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using StaticArrays
+using LinearAlgebra
 
 export ParameterSpace
 export HyperBox
@@ -65,8 +66,8 @@ export jacobian
 export logicalgrid
 export mapped_grid
 export jacobian_determinant
-export geometric_tensor
-export geometric_tensor_inverse
+export metric_tensor
+export metric_tensor_inverse
 
 abstract type BoundaryIdentifier end
 

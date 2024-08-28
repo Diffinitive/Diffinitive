@@ -2,6 +2,30 @@ using Sbplib.Grids
 using Sbplib.RegionIndices
 using Test
 using StaticArrays
+using LinearAlgebra
+
+
+_skew_mapping(a,b) = (ξ̄->ξ̄[1]*a + ξ̄[2]*b, ξ̄->[a  b])
+
+function _partially_curved_mapping()
+    x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
+    J((ξ, η)) = @SMatrix[
+        1         0;
+        η*(2ξ-1)  1+ξ*(ξ-1);
+    ]
+
+    return x̄, J
+end
+
+function _fully_curved_mapping()
+    x̄((ξ, η)) = @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
+    J((ξ, η)) = @SMatrix[
+        2       1-2η;
+        (2+η)*ξ 3+1/2*ξ^2;
+    ]
+
+    return x̄, J
+end
 
 @testset "MappedGrid" begin
     lg = equidistant_grid((0,0), (1,1), 11, 11) # TODO: Change dims of the grid to be different
@@ -117,12 +141,7 @@ using StaticArrays
     end
 
     @testset "boundary_grid" begin
-        x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
-        J((ξ, η)) = @SMatrix[
-            1         0;
-            η*(2ξ-1)  1+ξ*(ξ-1);
-        ]
-
+        x̄, J = _partially_curved_mapping()
         mg = mapped_grid(x̄, J, 10, 11)
         J1((ξ, η)) = @SMatrix[
             1       ;
@@ -156,42 +175,104 @@ using StaticArrays
         @testset test_boundary_grid(mg, TensorGridBoundary{2, Lower}(), J1)
         @testset test_boundary_grid(mg, TensorGridBoundary{2, Upper}(), J1)
     end
-
-    @testset "jacobian_determinant" begin
-        @test_broken false
-    end
-
-    @testset "geometric_tensor" begin
-        @test_broken false
-    end
-
-    @testset "geometric_tensor_inverse" begin
-        @test_broken false
-    end
-
 end
 
 @testset "mapped_grid" begin
-    x̄((ξ, η)) = @SVector[ξ, η*(1+ξ*(ξ-1))]
-    J((ξ, η)) = @SMatrix[
-        1         0;
-        η*(2ξ-1)  1+ξ*(ξ-1);
-    ]
+    x̄, J = _partially_curved_mapping()
     mg = mapped_grid(x̄, J, 10, 11)
     @test mg isa MappedGrid{SVector{2,Float64}, 2}
 
     lg = equidistant_grid((0,0), (1,1), 10, 11)
     @test logicalgrid(mg) == lg
     @test collect(mg) == map(x̄, lg)
+end
+
+@testset "jacobian_determinant" begin
+    @test_broken false
+end
+
+@testset "metric_tensor" begin
+    @test_broken false
+end
+
+@testset "metric_tensor_inverse" begin
+    @test_broken false
+end
+
+@testset "min_spacing" begin
+    let g = mapped_grid(identity, x->@SMatrix[1], 11)
+        @test min_spacing(g) ≈ 0.1
+    end
+
+    let g = mapped_grid(x->x+x.^2/2, x->@SMatrix[1 .+ x], 11)
+        @test min_spacing(g) ≈ 0.105
+    end
+
+    let g = mapped_grid(x->x + x.*(1 .- x)/2, x->@SMatrix[1.5 .- x], 11)
+        @test min_spacing(g) ≈ 0.055
+    end
+
+    let g = mapped_grid(identity, x->@SMatrix[1 0; 0 1], 11,11)
+        @test min_spacing(g) ≈ 0.1
+    end
+
+    let g = mapped_grid(identity, x->@SMatrix[1 0; 0 1], 11,21)
+        @test min_spacing(g) ≈ 0.05
+    end
 
 
-    @testset "normal" begin
-        @test normal(mg, CartesianBoundary{1,Lower}()) == fill(@SVector[-1,0], 11)
-        @test normal(mg, CartesianBoundary{1,Upper}()) == fill(@SVector[1,0], 11)
-        @test normal(mg, CartesianBoundary{2,Lower}()) == fill(@SVector[0,-1], 10)
-        @test normal(mg, CartesianBoundary{2,Upper}()) ≈ map(boundary_grid(mg,CartesianBoundary{2,Upper}())|>logicalgrid) do ξ̄
-            α = 1-2ξ̄[1]
-            @SVector[α,1]/√(α^2 + 1)
+    @testset let a = @SVector[1,0], b = @SVector[1,1]/√2
+        g = mapped_grid(_skew_mapping(a,b)...,11,11)
+
+        @test min_spacing(g) ≈ 0.1*norm(b-a)
+    end
+
+    @testset let a = @SVector[1,0], b = @SVector[-1,1]/√2
+        g = mapped_grid(_skew_mapping(a,b)...,11,11)
+
+        @test min_spacing(g) ≈ 0.1*norm(a+b)
+    end
+end
+
+@testset "normal" begin
+    g = mapped_grid(_partially_curved_mapping()...,10, 11)
+
+    @test normal(g, CartesianBoundary{1,Lower}()) == fill(@SVector[-1,0], 11)
+    @test normal(g, CartesianBoundary{1,Upper}()) == fill(@SVector[1,0], 11)
+    @test normal(g, CartesianBoundary{2,Lower}()) == fill(@SVector[0,-1], 10)
+    @test normal(g, CartesianBoundary{2,Upper}()) ≈ map(boundary_grid(g,CartesianBoundary{2,Upper}())|>logicalgrid) do ξ̄
+        α = 1-2ξ̄[1]
+        @SVector[α,1]/√(α^2 + 1)
+    end
+
+    g = mapped_grid(_fully_curved_mapping()...,5,4)
+
+    unit(v) = v/norm(v)
+    @testset let bId = CartesianBoundary{1,Lower}()
+        lbg = boundary_grid(logicalgrid(g), bId)
+        @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+            -unit(@SVector[1/2,  η/3-1/6])
+        end
+    end
+
+    @testset let bId = CartesianBoundary{1,Upper}()
+        lbg = boundary_grid(logicalgrid(g), bId)
+        @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+            unit(@SVector[7/2, 2η-1]/(5 + 3η + 2η^2))
+        end
+    end
+
+    @testset let bId = CartesianBoundary{2,Lower}()
+        lbg = boundary_grid(logicalgrid(g), bId)
+        @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+            -unit(@SVector[-2ξ, 2]/(6 + ξ^2 - 2ξ))
+        end
+    end
+
+    @testset let bId = CartesianBoundary{2,Upper}()
+        lbg = boundary_grid(logicalgrid(g), bId)
+        @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+            unit(@SVector[-3ξ, 2]/(6 + ξ^2 + 3ξ))
         end
     end
 end
