@@ -10,9 +10,14 @@ TiledIteration = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 
 [weakdeps]
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+SparseArrayKit = "a9a3c162-d163-4c15-8926-b8794fbefed2"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+Tokens = "040c2ec2-8d69-4aca-bf03-7d3a7092f2f6"
 
 [extensions]
 SbplibMakieExt = "Makie"
+SbplibSparseArrayKitExt = ["SparseArrayKit", "Tokens"]
+SbplibSparseArraysExt = ["SparseArrays", "Tokens"]
 
 [compat]
 julia = "1.5"
