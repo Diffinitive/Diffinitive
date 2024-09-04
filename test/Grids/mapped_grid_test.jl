@@ -35,6 +35,7 @@ end
 
     # TODO: Test constructor for different dims of range and domain for the coordinates
     # TODO: Test constructor with different type than TensorGrid. a dummy type?
+    # TODO: Test that the element types agree
 
     @test_broken false # @test_throws ArgumentError("Sizes must match") MappedGrid(lg, map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11))
 
@@ -186,6 +187,8 @@ end
     lg = equidistant_grid((0,0), (1,1), 10, 11)
     @test logicalgrid(mg) == lg
     @test collect(mg) == map(x̄, lg)
+
+    @test_broken mapped_grid(lg, x̄, J) == mg
 end
 
 @testset "jacobian_determinant" begin

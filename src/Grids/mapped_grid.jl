@@ -16,7 +16,6 @@ Base.firstindex(g::MappedGrid, d) = firstindex(g.logicalgrid, d)
 Base.lastindex(g::MappedGrid, d) = lastindex(g.logicalgrid, d)
 
 # Iteration interface
-
 Base.iterate(g::MappedGrid) = iterate(g.physicalcoordinates)
 Base.iterate(g::MappedGrid, state) = iterate(g.physicalcoordinates, state)
 
@@ -60,7 +59,6 @@ function mapped_grid(x, J, size...)
         map(J,lg),
     )
 end
-# TODO: Delete this function
 
 function jacobian_determinant(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ
