@@ -52,7 +52,7 @@ min_spacing(g::EquidistantGrid) = spacing(g)
 """
     LowerBoundary <: BoundaryIdentifier
 
-Boundary identifier for the the lower (left) boundary of an EquidistantGrid
+Boundary identifier for the the lower (left) boundary of a one-dimensional grid.
 
 See also: [`BoundaryIdentifier`](@ref)
 """
@@ -61,7 +61,7 @@ struct LowerBoundary <: BoundaryIdentifier end
 """
     UpperBoundary <: BoundaryIdentifier
 
-Boundary identifier for the the upper (right) boundary of an EquidistantGrid
+Boundary identifier for the the upper (right)  boundary of a one-dimensional grid.
 
 See also: [`BoundaryIdentifier`](@ref)
 """
