@@ -58,9 +58,13 @@ end
 # TBD: refine and coarsen could be implemented once we have a simple manifold implementation.
 # Before we do, we should consider the overhead of including such a field in the mapped grid struct.
 
-function mapped_grid(x, J, size...)
+function mapped_grid(x, J, size::Vararg{Int})
     D = length(size)
     lg = equidistant_grid(ntuple(i->0., D), ntuple(i->1., D), size...)
+    return mapped_grid(lg, x, J)
+end
+
+function mapped_grid(lg::Grid, x, J)
     return MappedGrid(
         lg,
         map(x,lg),

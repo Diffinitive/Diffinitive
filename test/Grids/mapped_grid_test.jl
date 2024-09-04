@@ -222,7 +222,7 @@ end
     @test logicalgrid(mg) == lg
     @test collect(mg) == map(x̄, lg)
 
-    @test_broken mapped_grid(lg, x̄, J) == mg
+    @test mapped_grid(lg, x̄, J) == mg
 end
 
 @testset "jacobian_determinant" begin
