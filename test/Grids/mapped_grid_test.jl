@@ -28,7 +28,7 @@ function _fully_curved_mapping()
 end
 
 @testset "MappedGrid" begin
-    lg = equidistant_grid((0,0), (1,1), 11, 11) # TODO: Change dims of the grid to be different
+    lg = equidistant_grid((0,0), (1,1), 11, 21)
     x̄ = map(ξ̄ -> 2ξ̄, lg)
     J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
     mg = MappedGrid(lg, x̄, J)
@@ -48,15 +48,14 @@ end
     @testset "Indexing Interface" begin
         mg = MappedGrid(lg, x̄, J)
         @test mg[1,1] == [0.0, 0.0]
-        @test mg[4,2] == [0.6, 0.2]
-        @test mg[6,10] == [1., 1.8]
+        @test mg[4,2] == [0.6, 0.1]
+        @test mg[6,10] == [1., 0.9]
 
         @test mg[begin, begin] == [0.0, 0.0]
         @test mg[end,end] == [2.0, 2.0]
         @test mg[begin,end] == [0., 2.]
 
-        @test eachindex(mg) == CartesianIndices((11,11))
-        @test axes(mg) == (1:11, 1:11)
+        @test axes(mg) == (1:11, 1:21)
 
         @testset "cartesian indexing" begin
             cases = [
@@ -73,7 +72,7 @@ end
         end
 
         @testset "eachindex" begin
-            @test eachindex(mg) == CartesianIndices((11,11))
+            @test eachindex(mg) == CartesianIndices((11,21))
         end
 
         @testset "firstindex" begin
@@ -83,7 +82,7 @@ end
 
         @testset "lastindex" begin
             @test lastindex(mg, 1) == 11
-            @test lastindex(mg, 2) == 11
+            @test lastindex(mg, 2) == 21
         end
     end
     # TODO: Test with different types of logical grids
@@ -100,13 +99,13 @@ end
         @test eltype(typeof(mg)) == SVector{2,Float64}
         @test eltype(typeof(sg)) == SVector{3,Float64}
 
-        @test size(mg) == (11,11)
+        @test size(mg) == (11,21)
         @test size(sg) == (15,11)
 
-        @test size(mg,2) == 11
+        @test size(mg,2) == 21
         @test size(sg,2) == 11
 
-        @test length(mg) == 121
+        @test length(mg) == 231
         @test length(sg) == 165
 
         @test Base.IteratorSize(mg) == Base.HasShape{2}()
