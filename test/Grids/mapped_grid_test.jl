@@ -132,11 +132,45 @@ end
         @test ndims(mg) == 2
     end
 
+    @testset "==" begin
+        sz = (15,11)
+        lg = equidistant_grid((0,0), (1,1), sz...)
+        x = rand(SVector{3,Float64}, sz...)
+        J = rand(SMatrix{2,3,Float64}, sz...)
+
+        sg = MappedGrid(lg, x, J)
+
+        sg1 = MappedGrid(equidistant_grid((0,0), (1,1), sz...), copy(x), copy(J))
+
+        sz2 = (15,12)
+        lg2 = equidistant_grid((0,0), (1,1), sz2...)
+        x2 = rand(SVector{3,Float64}, sz2...)
+        J2 = rand(SMatrix{2,3,Float64}, sz2...)
+        sg2 = MappedGrid(lg2, x2, J2)
+
+        sg3 = MappedGrid(lg, rand(SVector{3,Float64}, sz...), J)
+        sg4 = MappedGrid(lg, x, rand(SMatrix{2,3,Float64}, sz...))
+
+        @test sg == sg1
+        @test sg != sg2 # Different size
+        @test sg != sg3 # Different coordinates
+        @test sg != sg4 # Different jacobian
+    end
+
     @testset "boundary_identifiers" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 11) # TODO: Change dims of the grid to be different
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+        mg = MappedGrid(lg, x̄, J)
         @test boundary_identifiers(mg) == boundary_identifiers(lg)
     end
 
     @testset "boundary_indices" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 11) # TODO: Change dims of the grid to be different
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+        mg = MappedGrid(lg, x̄, J)
+
         @test boundary_indices(mg, CartesianBoundary{1,Lower}()) == boundary_indices(lg,CartesianBoundary{1,Lower}())
         @test boundary_indices(mg, CartesianBoundary{2,Lower}()) == boundary_indices(lg,CartesianBoundary{2,Lower}())
         @test boundary_indices(mg, CartesianBoundary{1,Upper}()) == boundary_indices(lg,CartesianBoundary{1,Upper}())

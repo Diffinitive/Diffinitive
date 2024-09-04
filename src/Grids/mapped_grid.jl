@@ -4,6 +4,14 @@ struct MappedGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractAr
     jacobian::JT
 end
 
+function Base.:(==)(a::MappedGrid, b::MappedGrid)
+    same_logicalgrid = logicalgrid(a) == logicalgrid(b)
+    same_coordinates = collect(a) == collect(b)
+    same_jacobian = jacobian(a) == jacobian(b)
+
+    return same_logicalgrid && same_coordinates && same_jacobian
+end
+
 jacobian(g::MappedGrid) = g.jacobian
 logicalgrid(g::MappedGrid) = g.logicalgrid
 
