@@ -55,6 +55,7 @@ end
         @test mg[begin,end] == [0., 2.]
 
         @test eachindex(mg) == CartesianIndices((11,11))
+        @test axes(mg) == (1:11, 1:11)
 
         @testset "cartesian indexing" begin
             cases = [
