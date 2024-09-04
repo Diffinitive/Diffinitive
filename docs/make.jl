@@ -31,6 +31,7 @@ pages = [
     "Home" => "index.md",
     "operator_file_format.md",
     "grids_and_grid_functions.md",
+    "matrix_and_tensor_representations.md",
     "Submodules" => [
         "submodules/grids.md",
         "submodules/diff_ops.md",
