@@ -33,6 +33,7 @@
  - [ ] Kolla att vi har @inline på rätt ställen
  - [ ] Profilera
 
+ - [ ] Keep a lookout for allowing dependencies of package extensions (https://github.com/JuliaLang/Pkg.jl/issues/3641) This should be used to simplify the matrix extensions so that you don't have to load Tokens which is only used internally to the extension
 
 ### Grids
 
