@@ -1,6 +1,5 @@
 module Grids
 
-using Sbplib.RegionIndices
 using Sbplib.LazyTensors
 using StaticArrays
 
@@ -23,6 +22,8 @@ export ArrayComponentView
 export BoundaryIdentifier
 export TensorGridBoundary
 export CartesianBoundary
+export LowerBoundary
+export UpperBoundary
 
 export TensorGrid
 export ZeroDimGrid
@@ -31,9 +32,6 @@ export EquidistantGrid
 export inverse_spacing
 export spacing
 export equidistant_grid
-
-
-abstract type BoundaryIdentifier end
 
 include("grid.jl")
 include("tensor_grid.jl")
