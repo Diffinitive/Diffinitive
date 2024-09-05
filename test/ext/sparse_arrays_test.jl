@@ -3,7 +3,6 @@ using Test
 using Sbplib
 using Sbplib.Grids
 using Sbplib.SbpOperators
-using Sbplib.RegionIndices
 
 using SparseArrays
 using Tokens
