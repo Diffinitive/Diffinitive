@@ -24,7 +24,7 @@ using Tokens
         @test Mv ≈ reshape(Δ*v,:)
     end
 
-    @testset let dₙ = normal_derivative(g, stencil_set,CartesianBoundary{1,Lower}()), M = sparse(dₙ)
+    @testset let dₙ = normal_derivative(g, stencil_set,CartesianBoundary{1,LowerBoundary}()), M = sparse(dₙ)
         @test ndims(M) == 2
         @test size(M) == (30,20*30)
 
