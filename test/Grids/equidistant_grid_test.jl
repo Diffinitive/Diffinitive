@@ -111,6 +111,7 @@ end
 @testset "equidistant_grid" begin
     @test equidistant_grid(0.0,1.0, 4) isa EquidistantGrid
     @test equidistant_grid((0.0,0.0),(8.0,5.0), 4, 3) isa TensorGrid
+    @test equidistant_grid((0.0,),(8.0,), 4) isa TensorGrid
 
     # constuctor
     @test_throws DomainError equidistant_grid(0.0, 1.0, 0)

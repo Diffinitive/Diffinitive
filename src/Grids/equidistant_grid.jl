@@ -139,7 +139,7 @@ end
 
 Constructs a 1D equidistant grid.
 """
-function equidistant_grid(limit_lower::T, limit_upper::T, size::Int) where T
+function equidistant_grid(limit_lower::Number, limit_upper::Number, size::Int)
     if any(size .<= 0)
         throw(DomainError("size must be postive"))
     end
