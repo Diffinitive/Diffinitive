@@ -60,7 +60,7 @@ The operators required to construct the SAT for imposing a Dirichlet
 condition. `H_tuning` and `R_tuning` are used to specify the strength of the
 penalty.
 
-See also: [`sat`](@ref),[`DirichletCondition`](@ref), [`positivity_decomposition`](@ref).
+See also: [`sat`](@ref), [`DirichletCondition`](@ref), [`positivity_decomposition`](@ref).
 """
 function sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning = 1., R_tuning = 1.)
     id = boundary(bc)
@@ -102,7 +102,7 @@ derivative and `e` is the boundary restriction operator. `B` can then be used
 to form a symmetric and energy stable penalty for a Dirichlet condition. The
 parameters `H_tuning` and `R_tuning` are used to specify the strength of the
 penalty and must be greater than 1. For details we refer to
-https://doi.org/10.1016/j.jcp.2020.109294
+<https://doi.org/10.1016/j.jcp.2020.109294>
 """
 function positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
     @assert(H_tuning ≥ 1.)
