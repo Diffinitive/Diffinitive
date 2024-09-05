@@ -109,6 +109,13 @@ See also: [`refine`](@ref).
 function coarsen end
 
 """
+   BoundaryIdentifier
+
+An identifier for a boundary of a grid.
+"""
+abstract type BoundaryIdentifier end
+
+"""
     boundary_identifiers(g::Grid)
 
 Identifiers for all the boundaries of `g`.
