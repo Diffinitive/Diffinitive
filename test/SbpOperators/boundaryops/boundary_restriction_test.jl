@@ -1,10 +1,10 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
-using Sbplib.RegionIndices
-using Sbplib.SbpOperators: BoundaryOperator, Stencil
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
+using Diffinitive.RegionIndices
+using Diffinitive.SbpOperators: BoundaryOperator, Stencil
 
 @testset "boundary_restriction" begin
 	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 4)

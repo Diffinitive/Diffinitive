@@ -1,6 +1,6 @@
-using Sbplib.Grids
+using Diffinitive.Grids
 using Test
-using Sbplib.LazyTensors
+using Diffinitive.LazyTensors
 
 
 @testset "EquidistantGrid" begin

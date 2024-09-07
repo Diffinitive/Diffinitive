@@ -1,7 +1,7 @@
-module SbplibSparseArrayKitExt
+module DiffinitiveSparseArrayKitExt
 
-using Sbplib
-using Sbplib.LazyTensors
+using Diffinitive
+using Diffinitive.LazyTensors
 
 using SparseArrayKit
 using Tokens

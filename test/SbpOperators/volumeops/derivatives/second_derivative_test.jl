@@ -1,10 +1,10 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
 
-import Sbplib.SbpOperators.VolumeOperator
+import Diffinitive.SbpOperators.VolumeOperator
 
 # TODO: Refactor these test to look more like the tests in first_derivative_test.jl.
 

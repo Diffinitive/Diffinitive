@@ -1,9 +1,9 @@
 using BenchmarkTools
 
-using Sbplib
-using Sbplib.Grids
-using Sbplib.SbpOperators
-using Sbplib.LazyTensors
+using Diffinitive
+using Diffinitive.Grids
+using Diffinitive.SbpOperators
+using Diffinitive.LazyTensors
 
 using LinearAlgebra
 

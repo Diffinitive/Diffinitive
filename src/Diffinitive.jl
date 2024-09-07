@@ -1,4 +1,4 @@
-module Sbplib
+module Diffinitive
 
 include("StaticDicts/StaticDicts.jl")
 include("RegionIndices/RegionIndices.jl")

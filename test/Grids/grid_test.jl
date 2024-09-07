@@ -1,6 +1,6 @@
 using Test
-using Sbplib.Grids
-using Sbplib.LazyTensors
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
 using StaticArrays
 
 @testset "Grid" begin

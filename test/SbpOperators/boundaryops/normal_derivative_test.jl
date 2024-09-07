@@ -1,10 +1,10 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
-using Sbplib.RegionIndices
-import Sbplib.SbpOperators.BoundaryOperator
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
+using Diffinitive.RegionIndices
+import Diffinitive.SbpOperators.BoundaryOperator
 
 @testset "normal_derivative" begin
     g_1D = equidistant_grid(0.0, 1.0, 11)

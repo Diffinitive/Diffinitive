@@ -1,8 +1,8 @@
 using Test
 
-using Sbplib.Grids
-using Sbplib.RegionIndices
-using Sbplib.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.RegionIndices
+using Diffinitive.SbpOperators
 
 @testset "BoundaryCondition" begin
     grid_1d = equidistant_grid(0.0, 1.0, 11)

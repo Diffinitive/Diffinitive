@@ -1,10 +1,10 @@
 using Test
-using Sbplib.SbpOperators
+using Diffinitive.SbpOperators
 using StaticArrays
-import Sbplib.SbpOperators.Stencil
-import Sbplib.SbpOperators.NestedStencil
-import Sbplib.SbpOperators.scale
-import Sbplib.SbpOperators: apply_stencil, apply_stencil_backwards
+import Diffinitive.SbpOperators.Stencil
+import Diffinitive.SbpOperators.NestedStencil
+import Diffinitive.SbpOperators.scale
+import Diffinitive.SbpOperators: apply_stencil, apply_stencil_backwards
 
 @testset "Stencil" begin
     s = Stencil(-2:2, (1.,2.,2.,3.,4.))

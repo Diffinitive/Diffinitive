@@ -1,5 +1,5 @@
 using Test
-using Sbplib.StaticDicts
+using Diffinitive.StaticDicts
 
 @testset "StaticDicts" begin
 

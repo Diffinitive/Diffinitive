@@ -1,4 +1,4 @@
-# Sbplib.jl
+# Diffinitive.jl
 
 ```@contents
 Depth = 1

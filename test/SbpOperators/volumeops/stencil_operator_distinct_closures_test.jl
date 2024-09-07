@@ -1,11 +1,11 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
 
-import Sbplib.SbpOperators.Stencil
-import Sbplib.SbpOperators.StencilOperatorDistinctClosures
+import Diffinitive.SbpOperators.Stencil
+import Diffinitive.SbpOperators.StencilOperatorDistinctClosures
 
 @testset "StencilOperatorDistinctClosures" begin
     g = equidistant_grid(0., 1., 11)
