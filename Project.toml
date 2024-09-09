@@ -1,7 +1,7 @@
 name = "Diffinitive"
 uuid = "5a373a26-915f-4769-bcab-bf03835de17b"
 authors = ["Jonatan Werpers <jonatan@werpers.com>", "Vidar Stiernström <vidar.stiernstrom@gmail.com>, and contributors"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
