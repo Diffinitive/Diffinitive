@@ -6,7 +6,6 @@ using Diffinitive.Grids
 using Diffinitive.LazyTensors
 using Diffinitive.RegionIndices
 using Diffinitive.SbpOperators
-using Diffinitive.StaticDicts
 
 sitename = "Diffinitive.jl"
 
@@ -38,7 +37,6 @@ pages = [
         "submodules/lazy_tensors.md",
         "submodules/region_indices.md",
         "submodules/sbp_operators.md",
-        "submodules/static_dicts.md",
     ],
     "doc_index.md",
 ]

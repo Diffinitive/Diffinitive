@@ -1,6 +1,5 @@
 module Diffinitive
 
-include("StaticDicts/StaticDicts.jl")
 include("RegionIndices/RegionIndices.jl")
 include("LazyTensors/LazyTensors.jl")
 include("Grids/Grids.jl")
