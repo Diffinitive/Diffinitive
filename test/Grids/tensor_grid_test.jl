@@ -1,5 +1,5 @@
 using Test
-using Sbplib.Grids
+using Diffinitive.Grids
 using StaticArrays
 
 @testset "TensorGrid" begin

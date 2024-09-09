@@ -1,6 +1,6 @@
-name = "Sbplib"
+name = "Diffinitive"
 uuid = "5a373a26-915f-4769-bcab-bf03835de17b"
-authors = ["Jonatan Werpers <jonatan@werpers.com>", "Vidar Stiernström <vidar.stiernstrom@it.uu.se>, and contributors"]
+authors = ["Jonatan Werpers <jonatan@werpers.com>", "Vidar Stiernström <vidar.stiernstrom@gmail.com>, and contributors"]
 version = "0.1.1"
 
 [deps]
@@ -15,9 +15,9 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Tokens = "040c2ec2-8d69-4aca-bf03-7d3a7092f2f6"
 
 [extensions]
-SbplibMakieExt = "Makie"
-SbplibSparseArrayKitExt = ["SparseArrayKit", "Tokens"]
-SbplibSparseArraysExt = ["SparseArrays", "Tokens"]
+DiffinitiveMakieExt = "Makie"
+DiffinitiveSparseArrayKitExt = ["SparseArrayKit", "Tokens"]
+DiffinitiveSparseArraysExt = ["SparseArrays", "Tokens"]
 
 [compat]
 julia = "1.5"

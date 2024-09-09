@@ -1,11 +1,11 @@
 using Test
 
-using Sbplib.LazyTensors
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.RegionIndices
-import Sbplib.SbpOperators.Stencil
-import Sbplib.SbpOperators.BoundaryOperator
+using Diffinitive.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.RegionIndices
+import Diffinitive.SbpOperators.Stencil
+import Diffinitive.SbpOperators.BoundaryOperator
 
 
 @testset "BoundaryOperator" begin

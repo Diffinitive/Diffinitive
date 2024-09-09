@@ -1,8 +1,8 @@
 using Test
 
-using Sbplib
-using Sbplib.Grids
-using Sbplib.SbpOperators
+using Diffinitive
+using Diffinitive.Grids
+using Diffinitive.SbpOperators
 
 using SparseArrays
 using Tokens

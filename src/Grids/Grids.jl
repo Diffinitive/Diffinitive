@@ -1,6 +1,6 @@
 module Grids
 
-using Sbplib.LazyTensors
+using Diffinitive.LazyTensors
 using StaticArrays
 
 # Grid

@@ -1,6 +1,6 @@
-module SbplibMakieExt
+module DiffinitiveMakieExt
 
-using Sbplib.Grids
+using Diffinitive.Grids
 using Makie
 using StaticArrays
 

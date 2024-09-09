@@ -1,10 +1,10 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
 
-import Sbplib.SbpOperators.ConstantInteriorScalingOperator
+import Diffinitive.SbpOperators.ConstantInteriorScalingOperator
 
 @testset "Diagonal-stencil inverse_inner_product" begin
     Lx = π/2.

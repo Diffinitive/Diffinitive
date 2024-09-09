@@ -40,9 +40,9 @@ export sat
 export sat_tensors
 
 # Using
-using Sbplib.RegionIndices
-using Sbplib.LazyTensors
-using Sbplib.Grids
+using Diffinitive.RegionIndices
+using Diffinitive.LazyTensors
+using Diffinitive.Grids
 
 # Includes
 include("stencil.jl")
