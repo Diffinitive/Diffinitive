@@ -28,22 +28,24 @@ function _fully_curved_mapping()
 end
 
 @testset "MappedGrid" begin
-    lg = equidistant_grid((0,0), (1,1), 11, 21)
-    x̄ = map(ξ̄ -> 2ξ̄, lg)
-    J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
-    mg = MappedGrid(lg, x̄, J)
+    @testset "Constructor" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 21)
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+        mg = MappedGrid(lg, x̄, J)
 
-    # TODO: Test constructor for different dims of range and domain for the coordinates
-    # TODO: Test constructor with different type than TensorGrid. a dummy type?
-    # TODO: Test that the element types agree
+        # TODO: Test constructor for different dims of range and domain for the coordinates
+        # TODO: Test constructor with different type than TensorGrid. a dummy type?
+        # TODO: Test that the element types agree
 
-    @test_broken false # @test_throws ArgumentError("Sizes must match") MappedGrid(lg, map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11))
+        @test_broken false # @test_throws ArgumentError("Sizes must match") MappedGrid(lg, map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11))
 
 
-    @test mg isa Grid{SVector{2, Float64},2}
+        @test mg isa Grid{SVector{2, Float64},2}
 
-    @test jacobian(mg) isa Array{<:AbstractMatrix}
-    @test logicalgrid(mg) isa Grid
+        @test jacobian(mg) isa Array{<:AbstractMatrix}
+        @test logicalgrid(mg) isa Grid
+    end
 
     @testset "Indexing Interface" begin
         lg = equidistant_grid((0,0), (1,1), 11, 21)
@@ -88,9 +90,13 @@ end
             @test lastindex(mg, 2) == 21
         end
     end
-    # TODO: Test with different types of logical grids
 
     @testset "Iterator interface" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 21)
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+        mg = MappedGrid(lg, x̄, J)
+
         sg = MappedGrid(
             equidistant_grid((0,0), (1,1), 15, 11),
             map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11)
@@ -131,6 +137,11 @@ end
     end
 
     @testset "Base" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 21)
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+        mg = MappedGrid(lg, x̄, J)
+
         @test ndims(mg) == 2
     end
 
@@ -160,7 +171,7 @@ end
     end
 
     @testset "boundary_identifiers" begin
-        lg = equidistant_grid((0,0), (1,1), 11, 11) # TODO: Change dims of the grid to be different
+        lg = equidistant_grid((0,0), (1,1), 11, 15)
         x̄ = map(ξ̄ -> 2ξ̄, lg)
         J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
         mg = MappedGrid(lg, x̄, J)
@@ -168,7 +179,7 @@ end
     end
 
     @testset "boundary_indices" begin
-        lg = equidistant_grid((0,0), (1,1), 11, 11) # TODO: Change dims of the grid to be different
+        lg = equidistant_grid((0,0), (1,1), 11, 15)
         x̄ = map(ξ̄ -> 2ξ̄, lg)
         J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
         mg = MappedGrid(lg, x̄, J)
