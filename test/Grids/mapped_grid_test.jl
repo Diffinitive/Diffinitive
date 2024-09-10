@@ -190,28 +190,30 @@ end
             1+ξ*(ξ-1);
         ]
 
-        function test_boundary_grid(mg, bId, Jb)
-            bg = boundary_grid(mg, bId)
-
+        function expected_bg(mg, bId, Jb)
             lg = logicalgrid(mg)
-            expected_bg = MappedGrid(
+            return MappedGrid(
                 boundary_grid(lg, bId),
                 map(x̄, boundary_grid(lg, bId)),
                 map(Jb, boundary_grid(lg, bId)),
             )
-
-            @testset let bId=bId, bg=bg, expected_bg=expected_bg
-                @test collect(bg) == collect(expected_bg)
-                @test logicalgrid(bg) == logicalgrid(expected_bg)
-                @test jacobian(bg) == jacobian(expected_bg)
-                # TODO: Implement equality of a curvilinear grid and simlify the above
-            end
         end
 
-        @testset test_boundary_grid(mg, TensorGridBoundary{1, LowerBoundary}(), J2)
-        @testset test_boundary_grid(mg, TensorGridBoundary{1, UpperBoundary}(), J2)
-        @testset test_boundary_grid(mg, TensorGridBoundary{2, LowerBoundary}(), J1)
-        @testset test_boundary_grid(mg, TensorGridBoundary{2, UpperBoundary}(), J1)
+        let bid = TensorGridBoundary{1, LowerBoundary}()
+            @test boundary_grid(mg, bid) == expected_bg(mg, bid, J2)
+        end
+
+        let bid = TensorGridBoundary{1, UpperBoundary}()
+            @test boundary_grid(mg, bid) == expected_bg(mg, bid, J2)
+        end
+
+        let bid = TensorGridBoundary{2, LowerBoundary}()
+            @test boundary_grid(mg, bid) == expected_bg(mg, bid, J1)
+        end
+
+        let bid = TensorGridBoundary{2, UpperBoundary}()
+            @test boundary_grid(mg, bid) == expected_bg(mg, bid, J1)
+        end
     end
 end
 
