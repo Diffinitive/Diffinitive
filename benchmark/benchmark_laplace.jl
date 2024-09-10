@@ -1,7 +1,7 @@
-using Sbplib
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.RegionIndices
+using Diffinitive
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.RegionIndices
 using BenchmarkTools
 
 # TODO: Move the below benchmarks into the benchmark suite

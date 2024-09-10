@@ -1,7 +1,6 @@
 using Test
-using Sbplib.Grids
+using Diffinitive.Grids
 using StaticArrays
-using Sbplib.RegionIndices
 
 @testset "TensorGrid" begin
     g₁ = EquidistantGrid(range(0,1,length=11))
@@ -170,13 +169,13 @@ using Sbplib.RegionIndices
     end
 
     @testset "boundary_identifiers" begin
-        @test boundary_identifiers(TensorGrid(g₁, g₂)) == map((n,id)->TensorGridBoundary{n,id}(), (1,1,2,2), (Lower,Upper,Lower,Upper))
-        @test boundary_identifiers(TensorGrid(g₁, g₄)) == (TensorGridBoundary{1,Lower}(),TensorGridBoundary{1,Upper}())
+        @test boundary_identifiers(TensorGrid(g₁, g₂)) == map((n,id)->TensorGridBoundary{n,id}(), (1,1,2,2), (LowerBoundary,UpperBoundary,LowerBoundary,UpperBoundary))
+        @test boundary_identifiers(TensorGrid(g₁, g₄)) == (TensorGridBoundary{1,LowerBoundary}(),TensorGridBoundary{1,UpperBoundary}())
     end
 
     @testset "boundary_grid" begin
-        @test boundary_grid(TensorGrid(g₁, g₂), TensorGridBoundary{1, Upper}()) == TensorGrid(ZeroDimGrid(g₁[end]), g₂)
-        @test boundary_grid(TensorGrid(g₁, g₄), TensorGridBoundary{1, Upper}()) == TensorGrid(ZeroDimGrid(g₁[end]), g₄)
+        @test boundary_grid(TensorGrid(g₁, g₂), TensorGridBoundary{1, UpperBoundary}()) == TensorGrid(ZeroDimGrid(g₁[end]), g₂)
+        @test boundary_grid(TensorGrid(g₁, g₄), TensorGridBoundary{1, UpperBoundary}()) == TensorGrid(ZeroDimGrid(g₁[end]), g₄)
     end
 
     @testset "boundary_indices" begin
@@ -184,14 +183,14 @@ using Sbplib.RegionIndices
         g₂ = EquidistantGrid(range(2,3,length=6))
         g₄ = ZeroDimGrid(@SVector[1,2])
 
-        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Lower}()) == (1,:)
-        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Upper}()) == (11,:)
-        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Lower}()) == (:,1)
-        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Upper}()) == (:,6)
-        @test boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Lower}()) == (1,)
-        @test boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Upper}()) == (11,)
-        @test boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Lower}()) == (1,)
-        @test boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Upper}()) == (11,)
+        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, LowerBoundary}()) == (1,:)
+        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, UpperBoundary}()) == (11,:)
+        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, LowerBoundary}()) == (:,1)
+        @test boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, UpperBoundary}()) == (:,6)
+        @test boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, LowerBoundary}()) == (1,)
+        @test boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, UpperBoundary}()) == (11,)
+        @test boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, LowerBoundary}()) == (1,)
+        @test boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, UpperBoundary}()) == (11,)
     end
 end
 

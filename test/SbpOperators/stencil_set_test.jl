@@ -1,10 +1,10 @@
 using Test
 
 using TOML
-using Sbplib.SbpOperators
+using Diffinitive.SbpOperators
 
-import Sbplib.SbpOperators.Stencil
-import Sbplib.SbpOperators.NestedStencil
+import Diffinitive.SbpOperators.Stencil
+import Diffinitive.SbpOperators.NestedStencil
 
 @testset "readoperator" begin
     toml_str = """

@@ -1,11 +1,11 @@
 using Test
 
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
 
-using Sbplib.SbpOperators: closure_size, Stencil, VolumeOperator
+using Diffinitive.SbpOperators: closure_size, Stencil, VolumeOperator
 
 @testset "first_derivative" begin
     @testset "Constructors" begin

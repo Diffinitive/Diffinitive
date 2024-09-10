@@ -1,5 +1,5 @@
-using Sbplib.Grids
-using Sbplib.RegionIndices
+using Diffinitive.Grids
+using Diffinitive.RegionIndices
 using Test
 using StaticArrays
 using LinearAlgebra
@@ -173,9 +173,9 @@ end
         J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
         mg = MappedGrid(lg, x̄, J)
 
-        @test boundary_indices(mg, CartesianBoundary{1,Lower}()) == boundary_indices(lg,CartesianBoundary{1,Lower}())
-        @test boundary_indices(mg, CartesianBoundary{2,Lower}()) == boundary_indices(lg,CartesianBoundary{2,Lower}())
-        @test boundary_indices(mg, CartesianBoundary{1,Upper}()) == boundary_indices(lg,CartesianBoundary{1,Upper}())
+        @test boundary_indices(mg, CartesianBoundary{1,LowerBoundary}()) == boundary_indices(lg,CartesianBoundary{1,LowerBoundary}())
+        @test boundary_indices(mg, CartesianBoundary{2,LowerBoundary}()) == boundary_indices(lg,CartesianBoundary{2,LowerBoundary}())
+        @test boundary_indices(mg, CartesianBoundary{1,UpperBoundary}()) == boundary_indices(lg,CartesianBoundary{1,UpperBoundary}())
     end
 
     @testset "boundary_grid" begin
@@ -208,10 +208,10 @@ end
             end
         end
 
-        @testset test_boundary_grid(mg, TensorGridBoundary{1, Lower}(), J2)
-        @testset test_boundary_grid(mg, TensorGridBoundary{1, Upper}(), J2)
-        @testset test_boundary_grid(mg, TensorGridBoundary{2, Lower}(), J1)
-        @testset test_boundary_grid(mg, TensorGridBoundary{2, Upper}(), J1)
+        @testset test_boundary_grid(mg, TensorGridBoundary{1, LowerBoundary}(), J2)
+        @testset test_boundary_grid(mg, TensorGridBoundary{1, UpperBoundary}(), J2)
+        @testset test_boundary_grid(mg, TensorGridBoundary{2, LowerBoundary}(), J1)
+        @testset test_boundary_grid(mg, TensorGridBoundary{2, UpperBoundary}(), J1)
     end
 end
 
@@ -277,10 +277,10 @@ end
 @testset "normal" begin
     g = mapped_grid(_partially_curved_mapping()...,10, 11)
 
-    @test normal(g, CartesianBoundary{1,Lower}()) == fill(@SVector[-1,0], 11)
-    @test normal(g, CartesianBoundary{1,Upper}()) == fill(@SVector[1,0], 11)
-    @test normal(g, CartesianBoundary{2,Lower}()) == fill(@SVector[0,-1], 10)
-    @test normal(g, CartesianBoundary{2,Upper}()) ≈ map(boundary_grid(g,CartesianBoundary{2,Upper}())|>logicalgrid) do ξ̄
+    @test normal(g, CartesianBoundary{1,LowerBoundary}()) == fill(@SVector[-1,0], 11)
+    @test normal(g, CartesianBoundary{1,UpperBoundary}()) == fill(@SVector[1,0], 11)
+    @test normal(g, CartesianBoundary{2,LowerBoundary}()) == fill(@SVector[0,-1], 10)
+    @test normal(g, CartesianBoundary{2,UpperBoundary}()) ≈ map(boundary_grid(g,CartesianBoundary{2,UpperBoundary}())|>logicalgrid) do ξ̄
         α = 1-2ξ̄[1]
         @SVector[α,1]/√(α^2 + 1)
     end
@@ -288,28 +288,28 @@ end
     g = mapped_grid(_fully_curved_mapping()...,5,4)
 
     unit(v) = v/norm(v)
-    @testset let bId = CartesianBoundary{1,Lower}()
+    @testset let bId = CartesianBoundary{1,LowerBoundary}()
         lbg = boundary_grid(logicalgrid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             -unit(@SVector[1/2,  η/3-1/6])
         end
     end
 
-    @testset let bId = CartesianBoundary{1,Upper}()
+    @testset let bId = CartesianBoundary{1,UpperBoundary}()
         lbg = boundary_grid(logicalgrid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             unit(@SVector[7/2, 2η-1]/(5 + 3η + 2η^2))
         end
     end
 
-    @testset let bId = CartesianBoundary{2,Lower}()
+    @testset let bId = CartesianBoundary{2,LowerBoundary}()
         lbg = boundary_grid(logicalgrid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             -unit(@SVector[-2ξ, 2]/(6 + ξ^2 - 2ξ))
         end
     end
 
-    @testset let bId = CartesianBoundary{2,Upper}()
+    @testset let bId = CartesianBoundary{2,UpperBoundary}()
         lbg = boundary_grid(logicalgrid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             unit(@SVector[-3ξ, 2]/(6 + ξ^2 + 3ξ))

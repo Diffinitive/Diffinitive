@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "f2b0634c12bbed93a17efc88d466604d5a07c465"
+project_hash = "9dddd5385164ee197d1b3f22302bc95701c1f5e5"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -74,9 +74,9 @@ version = "0.2.2"
 
 [[deps.JLLWrappers]]
 deps = ["Artifacts", "Preferences"]
-git-tree-sha1 = "7e5d6779a1e09a36db2a7b6cff50942a0a7d0fca"
+git-tree-sha1 = "f389674c99bfcde17dc57454011aa44d5a260a40"
 uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
-version = "1.5.0"
+version = "1.6.0"
 
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
@@ -176,6 +176,12 @@ git-tree-sha1 = "13652491f6856acfd2db29360e1bbcd4565d04f1"
 uuid = "efe28fd5-8261-553b-a9e1-b2916fc3738e"
 version = "0.5.5+0"
 
+[[deps.PackageExtensionCompat]]
+git-tree-sha1 = "fb28e33b8a95c4cee25ce296c817d89cc2e53518"
+uuid = "65ce6f38-6b18-4e1d-a461-8949797d7930"
+version = "1.0.2"
+weakdeps = ["Requires", "TOML"]
+
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
 git-tree-sha1 = "8489905bcdbcfac64d1daa51ca07c0d8f0283821"
@@ -230,6 +236,20 @@ uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+
+[[deps.SparseArrayKit]]
+deps = ["LinearAlgebra", "PackageExtensionCompat", "TupleTools", "VectorInterface"]
+git-tree-sha1 = "e06f75c460c16b5b08bf93324b7db2cf9c1fe831"
+uuid = "a9a3c162-d163-4c15-8926-b8794fbefed2"
+version = "0.3.1"
+
+    [deps.SparseArrayKit.extensions]
+    SparseArrayKitSparseArrays = "SparseArrays"
+    SparseArrayKitTensorOperations = "TensorOperations"
+
+    [deps.SparseArrayKit.weakdeps]
+    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+    TensorOperations = "6aa20fa7-93e2-5fca-9bc0-fbd0db3c71a2"
 
 [[deps.SparseArrays]]
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
@@ -297,6 +317,12 @@ git-tree-sha1 = "ccebd99935be339d2ad907589708ba1f0d62bab3"
 uuid = "98d24dd4-01ad-11ea-1b02-c9a08f80db04"
 version = "3.0.0"
 
+[[deps.Tokens]]
+deps = ["SparseArrayKit", "SparseArrays"]
+git-tree-sha1 = "c4f40125383ce3bfcfcd49a1b206080b7afd9a34"
+uuid = "040c2ec2-8d69-4aca-bf03-7d3a7092f2f6"
+version = "0.1.1"
+
 [[deps.Tullio]]
 deps = ["DiffRules", "LinearAlgebra", "Requires"]
 git-tree-sha1 = "6d476962ba4e435d7f4101a403b1d3d72afe72f3"
@@ -315,12 +341,23 @@ version = "0.3.7"
     FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
     Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
 
+[[deps.TupleTools]]
+git-tree-sha1 = "41d61b1c545b06279871ef1a4b5fcb2cac2191cd"
+uuid = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
+version = "1.5.0"
+
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[deps.VectorInterface]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "7aff7d62bffad9bba9928eb6ab55226b32a351eb"
+uuid = "409d34a3-91d5-4945-b6ec-7529ddf182d8"
+version = "0.4.6"
 
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
@@ -330,7 +367,7 @@ version = "1.2.13+1"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+1"
+version = "5.11.0+0"
 
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]

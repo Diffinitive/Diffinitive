@@ -1,3 +1,3 @@
-using Sbplib.RegionIndices
+using Diffinitive.RegionIndices
 using Test
 

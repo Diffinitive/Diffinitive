@@ -140,11 +140,11 @@ function normal(g::MappedGrid, boundary)
 end
 
 function _boundary_sign(T, boundary)
-    if boundary_id(boundary) == Upper()
+    if boundary_id(boundary) == UpperBoundary()
         return one(T)
-    elseif boundary_id(boundary) == Lower()
+    elseif boundary_id(boundary) == LowerBoundary()
         return -one(T)
     else
-        throw(ArgumentError("The boundary identifier must be either `Lower()` or `Upper()`"))
+        throw(ArgumentError("The boundary identifier must be either `LowerBoundary()` or `UpperBoundary()`"))
     end
 end
