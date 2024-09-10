@@ -5,7 +5,6 @@
 
 ## Coding
  - [ ] Ändra namn på variabler och funktioner så att det följer style-guide
- - [ ] Add new Laplace operator to DiffOps, probably named WaveEqOp(?!!?)
  - [ ] Create a struct that bundles the necessary Tensor operators for solving the wave equation.
  - [ ] Use `@inferred` in a lot of tests.
  - [ ] Replace `@inferred` tests with a benchmark suite that automatically tests for regressions.

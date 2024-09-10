@@ -1,7 +1,6 @@
 using Documenter
 using Diffinitive
 
-using Diffinitive.DiffOps
 using Diffinitive.Grids
 using Diffinitive.LazyTensors
 using Diffinitive.RegionIndices
@@ -33,7 +32,6 @@ pages = [
     "matrix_and_tensor_representations.md",
     "Submodules" => [
         "submodules/grids.md",
-        "submodules/diff_ops.md",
         "submodules/lazy_tensors.md",
         "submodules/region_indices.md",
         "submodules/sbp_operators.md",
