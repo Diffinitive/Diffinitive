@@ -46,6 +46,9 @@ end
     @test logicalgrid(mg) isa Grid
 
     @testset "Indexing Interface" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 21)
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
         mg = MappedGrid(lg, x̄, J)
         @test mg[1,1] == [0.0, 0.0]
         @test mg[4,2] == [0.6, 0.1]
