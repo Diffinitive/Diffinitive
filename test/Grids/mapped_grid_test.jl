@@ -241,15 +241,53 @@ end
 end
 
 @testset "jacobian_determinant" begin
-    @test_broken false
+    x̄((ξ, η)) = @SVector[ξ*η, ξ + η^2]
+    J((ξ, η)) = @SMatrix[
+        η    ξ;
+        1   2η;
+    ]
+
+    g = mapped_grid(x̄, J, 10, 11)
+    J = map(logicalgrid(g)) do (ξ,η)
+        2η^2 - ξ
+    end
+    @test jacobian_determinant(g) ≈ J
 end
 
 @testset "metric_tensor" begin
-    @test_broken false
+    x̄((ξ, η)) = @SVector[ξ*η, ξ + η^2]
+    J((ξ, η)) = @SMatrix[
+        η    ξ;
+        1   2η;
+    ]
+
+    g = mapped_grid(x̄, J, 10, 11)
+    G = map(logicalgrid(g)) do (ξ,η)
+        @SMatrix[
+            1+η^2   ξ*η+2η;
+            ξ*η+2η  ξ^2 + 4η^2;
+        ]
+    end
+    @test metric_tensor(g) ≈ G
 end
 
 @testset "metric_tensor_inverse" begin
-    @test_broken false
+    x̄((ξ, η)) = @SVector[ξ + ξ^2/2, η + η^2 + ξ^2/2]
+    J((ξ, η)) = @SMatrix[
+        1+ξ   0;
+        ξ    1+η;
+    ]
+
+    g = mapped_grid(x̄, J, 10, 11)
+    G⁻¹ = map(logicalgrid(g)) do (ξ,η)
+        @SMatrix[
+            (1+η)^2  -ξ*(1+η);
+            -ξ*(1+η) (1+ξ)^2+ξ^2;
+        ]/(((1+ξ)^2+ξ^2)*(1+η)^2 - ξ^2*(1+η)^2)
+
+    end
+
+    @test metric_tensor_inverse(g) ≈ G⁻¹
 end
 
 @testset "min_spacing" begin
