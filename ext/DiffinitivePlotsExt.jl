@@ -1,6 +1,6 @@
-module SbplibPlotsExt
+module DiffinitivePlotsExt
 
-using Sbplib.Grids
+using Diffinitive.Grids
 using Plots
 
 @recipe f(::Type{<:Grid}, g::Grid) = map(Tuple,g)[:]

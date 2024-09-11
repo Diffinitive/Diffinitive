@@ -3,11 +3,11 @@ import Markdown
 import Mustache
 import Dates
 
-import Sbplib
+import Diffinitive
 
-const sbplib_root = splitpath(pathof(Sbplib))[1:end-2] |> joinpath
-const results_dir = mkpath(joinpath(sbplib_root, "benchmark/results"))
-const template_path = joinpath(sbplib_root, "benchmark/result.tmpl")
+const diffinitive_root = splitpath(pathof(Diffinitive))[1:end-2] |> joinpath
+const results_dir = mkpath(joinpath(diffinitive_root, "benchmark/results"))
+const template_path = joinpath(diffinitive_root, "benchmark/result.tmpl")
 
 """
     mainmain(;rev=nothing, target=nothing, baseline=nothing , kwargs...)
@@ -49,7 +49,7 @@ Run the benchmark suite for the current working directory and return a
 `PkgBenchmark.BenchmarkResult`
 """
 function run_benchmark(;kwargs...)
-    r = PkgBenchmark.benchmarkpkg(Sbplib; kwargs...)
+    r = PkgBenchmark.benchmarkpkg(Diffinitive; kwargs...)
 
     rev = hg_rev() # Should be changed to hg_id() when the html can handle it.
 
@@ -158,17 +158,17 @@ PkgBenchmark.date(j::PkgBenchmark.BenchmarkJudgement) = PkgBenchmark.date(PkgBen
 
 
 function hg_id()
-    cmd = Cmd(`hg id`, dir=sbplib_root)
+    cmd = Cmd(`hg id`, dir=diffinitive_root)
     return readchomp(addenv(cmd, "HGPLAIN"=>""))
 end
 
 function hg_rev()
-    cmd = Cmd(`hg id -i`, dir=sbplib_root)
+    cmd = Cmd(`hg id -i`, dir=diffinitive_root)
     return readchomp(addenv(cmd, "HGPLAIN"=>""))
 end
 
 function hg_update(rev)
-    cmd = Cmd(`hg update --check -r $rev`, dir=sbplib_root)
+    cmd = Cmd(`hg update --check -r $rev`, dir=diffinitive_root)
     run(addenv(cmd, "HGPLAIN"=>""))
 
     return nothing
@@ -182,9 +182,9 @@ in the secret phase stopping it from being pushed.
 """
 function hg_commit(msg; secret=false)
     if secret
-        cmd = Cmd(`hg commit --verbose --secret --message $msg`, dir=sbplib_root)
+        cmd = Cmd(`hg commit --verbose --secret --message $msg`, dir=diffinitive_root)
     else
-        cmd = Cmd(`hg commit --verbose          --message $msg`, dir=sbplib_root)
+        cmd = Cmd(`hg commit --verbose          --message $msg`, dir=diffinitive_root)
     end
 
     out = readchomp(addenv(cmd, "HGPLAIN"=>""))
@@ -200,9 +200,9 @@ commit are kept in the working directory.
 """
 function hg_strip(rev; keep=false)
     if keep
-        cmd = Cmd(`hg --config extensions.strip= strip --keep -r $rev`, dir=sbplib_root)
+        cmd = Cmd(`hg --config extensions.strip= strip --keep -r $rev`, dir=diffinitive_root)
     else
-        cmd = Cmd(`hg --config extensions.strip= strip        -r $rev`, dir=sbplib_root)
+        cmd = Cmd(`hg --config extensions.strip= strip        -r $rev`, dir=diffinitive_root)
     end
 
     run(addenv(cmd, "HGPLAIN"=>""))
@@ -216,7 +216,7 @@ end
 Return true if the repositopry has uncommited changes.
 """
 function hg_is_dirty()
-    cmd = Cmd(`hg identify --id`, dir=sbplib_root)
+    cmd = Cmd(`hg identify --id`, dir=diffinitive_root)
     out = readchomp(addenv(cmd, "HGPLAIN"=>""))
 
     return endswith(out, "+")

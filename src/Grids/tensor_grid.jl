@@ -1,5 +1,3 @@
-# TODO: Check this file and other grids for duplicate implementation of general methods implemented for Grid
-
 """
     TensorGrid{T,D} <: Grid{T,D}
 
@@ -119,7 +117,7 @@ function combine_coordinates(coords...)
 end
 
 """
-   grid_and_local_dim_index(nds, d)
+    grid_and_local_dim_index(nds, d)
 
 Given a tuple of number of dimensions `nds`, and a global dimension index `d`,
 calculate which grid index, and local dimension, `d` corresponds to.

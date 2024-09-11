@@ -1,8 +1,8 @@
 using Test
 
-using Sbplib.Grids
-using Sbplib.LazyTensors
-using Sbplib.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
+using Diffinitive.SbpOperators
 
 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 4)
 
