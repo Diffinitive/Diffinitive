@@ -57,9 +57,25 @@ end
         @test logicalgrid(mg) == lg
 
         # TODO: Test that the element types agree
+        sz1 = (10,11)
+        sz2 = (10,12)
+        @test_throws ArgumentError("Sizes must match") MappedGrid(
+            equidistant_grid((0,0), (1,1), sz2...),
+            rand(SVector{2},sz1...),
+            rand(SMatrix{2,2},sz1...),
+        )
 
-        @test_broken false # @test_throws ArgumentError("Sizes must match") MappedGrid(lg, map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11))
+        @test_throws ArgumentError("Sizes must match") MappedGrid(
+            equidistant_grid((0,0), (1,1), sz1...),
+            rand(SVector{2},sz2...),
+            rand(SMatrix{2,2},sz1...),
+        )
 
+        @test_throws ArgumentError("Sizes must match") MappedGrid(
+            equidistant_grid((0,0), (1,1), sz1...),
+            rand(SVector{2},sz1...),
+            rand(SMatrix{2,2},sz2...),
+        )
 
     end
 
@@ -111,11 +127,13 @@ end
         lg = equidistant_grid((0,0), (1,1), 11, 21)
         x̄ = map(ξ̄ -> 2ξ̄, lg)
         J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+
         mg = MappedGrid(lg, x̄, J)
 
+        lg2 = equidistant_grid((0,0), (1,1), 15, 11)
         sg = MappedGrid(
             equidistant_grid((0,0), (1,1), 15, 11),
-            map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11)
+            map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg2), rand(SMatrix{2,3,Float64},15,11)
         )
 
         @test eltype(mg) == SVector{2,Float64}

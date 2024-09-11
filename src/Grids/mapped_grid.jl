@@ -2,6 +2,14 @@ struct MappedGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractAr
     logicalgrid::GT
     physicalcoordinates::CT
     jacobian::JT
+
+    function MappedGrid(logicalgrid::GT, physicalcoordinates::CT, jacobian::JT) where {T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractArray{<:Any, 2}, D}}
+        if !(size(logicalgrid) == size(physicalcoordinates) == size(jacobian))
+            throw(ArgumentError("Sizes must match"))
+        end
+
+        return new{T,D,GT,CT,JT}(logicalgrid, physicalcoordinates, jacobian)
+    end
 end
 
 function Base.:(==)(a::MappedGrid, b::MappedGrid)
