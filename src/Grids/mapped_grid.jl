@@ -8,6 +8,12 @@ struct MappedGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractAr
             throw(ArgumentError("Sizes must match"))
         end
 
+        if size(first(jacobian)) != (length(first(physicalcoordinates)),D)
+            @show size(first(jacobian))
+            @show (length(first(physicalcoordinates)),D)
+            throw(ArgumentError("The size of the jacobian must match the dimensions of the grid and coordinates"))
+        end
+
         return new{T,D,GT,CT,JT}(logicalgrid, physicalcoordinates, jacobian)
     end
 end

@@ -56,7 +56,6 @@ end
         @test jacobian(mg) == J
         @test logicalgrid(mg) == lg
 
-        # TODO: Test that the element types agree
         sz1 = (10,11)
         sz2 = (10,12)
         @test_throws ArgumentError("Sizes must match") MappedGrid(
@@ -77,6 +76,19 @@ end
             rand(SMatrix{2,2},sz2...),
         )
 
+        # TODO: Test that the element types agree
+        err_str = "The size of the jacobian must match the dimensions of the grid and coordinates"
+        @test_throws ArgumentError(err_str) MappedGrid(
+            equidistant_grid((0,0), (1,1), 10, 11),
+            rand(SVector{3}, 10, 11),
+            rand(SMatrix{3,4}, 10, 11),
+        )
+
+        @test_throws ArgumentError(err_str) MappedGrid(
+            equidistant_grid((0,0), (1,1), 10, 11),
+            rand(SVector{3}, 10, 11),
+            rand(SMatrix{4,2}, 10, 11),
+        )
     end
 
     @testset "Indexing Interface" begin
@@ -133,7 +145,7 @@ end
         lg2 = equidistant_grid((0,0), (1,1), 15, 11)
         sg = MappedGrid(
             equidistant_grid((0,0), (1,1), 15, 11),
-            map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg2), rand(SMatrix{2,3,Float64},15,11)
+            map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg2), rand(SMatrix{3,2,Float64},15,11)
         )
 
         @test eltype(mg) == SVector{2,Float64}
@@ -183,7 +195,7 @@ end
         sz = (15,11)
         lg = equidistant_grid((0,0), (1,1), sz...)
         x = rand(SVector{3,Float64}, sz...)
-        J = rand(SMatrix{2,3,Float64}, sz...)
+        J = rand(SMatrix{3,2,Float64}, sz...)
 
         sg = MappedGrid(lg, x, J)
 
@@ -192,11 +204,11 @@ end
         sz2 = (15,12)
         lg2 = equidistant_grid((0,0), (1,1), sz2...)
         x2 = rand(SVector{3,Float64}, sz2...)
-        J2 = rand(SMatrix{2,3,Float64}, sz2...)
+        J2 = rand(SMatrix{3,2,Float64}, sz2...)
         sg2 = MappedGrid(lg2, x2, J2)
 
         sg3 = MappedGrid(lg, rand(SVector{3,Float64}, sz...), J)
-        sg4 = MappedGrid(lg, x, rand(SMatrix{2,3,Float64}, sz...))
+        sg4 = MappedGrid(lg, x, rand(SMatrix{3,2,Float64}, sz...))
 
         @test sg == sg1
         @test sg != sg2 # Different size
