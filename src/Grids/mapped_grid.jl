@@ -1,11 +1,56 @@
+"""
+    MappedGrid{T,D} <: Grid{T,D}
+
+A grid defined by a coordinate mapping from a logical grid to some physical
+coordinates. The physical coordinates and the Jacobian are stored as grid
+functions corresponding to the logical grid.
+
+See also: [`logicalgrid`](@ref), [`jacobian`](@ref), [`metric_tensor`](@ref).
+"""
 struct MappedGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractArray{<:Any, 2}, D}} <: Grid{T,D}
     logicalgrid::GT
     physicalcoordinates::CT
     jacobian::JT
+
+    """
+        MappedGrid(logicalgrid, physicalcoordinates, jacobian)
+
+    A MappedGrid with the given physical coordinates and jacobian.
+    """
+    function MappedGrid(logicalgrid::GT, physicalcoordinates::CT, jacobian::JT) where {T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractArray{<:Any, 2}, D}}
+        if !(size(logicalgrid) == size(physicalcoordinates) == size(jacobian))
+            throw(ArgumentError("Sizes must match"))
+        end
+
+        if size(first(jacobian)) != (length(first(physicalcoordinates)),D)
+            throw(ArgumentError("The size of the jacobian must match the dimensions of the grid and coordinates"))
+        end
+
+        return new{T,D,GT,CT,JT}(logicalgrid, physicalcoordinates, jacobian)
+    end
 end
 
-jacobian(g::MappedGrid) = g.jacobian
+function Base.:(==)(a::MappedGrid, b::MappedGrid)
+    same_logicalgrid = logicalgrid(a) == logicalgrid(b)
+    same_coordinates = collect(a) == collect(b)
+    same_jacobian = jacobian(a) == jacobian(b)
+
+    return same_logicalgrid && same_coordinates && same_jacobian
+end
+
+"""
+    logicalgrid(g::MappedGrid)
+
+The logical grid of `g`.
+"""
 logicalgrid(g::MappedGrid) = g.logicalgrid
+
+"""
+    jacobian(g::MappedGrid)
+
+The Jacobian matrix of `g` as a grid function.
+"""
+jacobian(g::MappedGrid) = g.jacobian
 
 
 # Indexing interface
@@ -14,10 +59,8 @@ Base.eachindex(g::MappedGrid) = eachindex(g.logicalgrid)
 
 Base.firstindex(g::MappedGrid, d) = firstindex(g.logicalgrid, d)
 Base.lastindex(g::MappedGrid, d) = lastindex(g.logicalgrid, d)
-# TODO: axes(...)?
 
 # Iteration interface
-
 Base.iterate(g::MappedGrid) = iterate(g.physicalcoordinates)
 Base.iterate(g::MappedGrid, state) = iterate(g.physicalcoordinates, state)
 
@@ -49,33 +92,65 @@ function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
     )
 end
 
-# TBD: refine and coarsen could be implemented once we have a simple manifold implementation.
-# Before we do, we should consider the overhead of including such a field in the mapped grid struct.
 
-function mapped_grid(x, J, size...)
+"""
+    mapped_grid(x, J, size::Vararg{Int})
+
+A `MappedGrid` with a default logical grid on a unit hyper box. `x` and `J`
+are functions to be evaluated on the logical grid and `size` determines the
+size of the logical grid.
+"""
+function mapped_grid(x, J, size::Vararg{Int})
     D = length(size)
     lg = equidistant_grid(ntuple(i->0., D), ntuple(i->1., D), size...)
+    return mapped_grid(lg, x, J)
+end
+
+"""
+    mapped_grid(lg::Grid, x, J)
+
+A `MappedGrid` with logical grid `lg`. Physical coordinates and Jacobian are
+determined by the functions `x` and `J`.
+"""
+function mapped_grid(lg::Grid, x, J)
     return MappedGrid(
         lg,
         map(x,lg),
         map(J,lg),
     )
 end
-# TODO: Delete this function
 
+"""
+    jacobian_determinant(g::MappedGrid)
 
+The jacobian determinant of `g` as a grid function.
+"""
 function jacobian_determinant(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ
         det(∂x∂ξ)
     end
 end
+# TBD: Should this be changed to calculate sqrt(g) instead?
+#       This would make it well defined also for n-dim grids embedded in higher dimensions.
+# TBD: Is there a better name? metric_determinant?
+# TBD: Is the best option to delete it?
 
+"""
+    metric_tensor(g::MappedGrid)
+
+The metric tensor of `g` as a grid function.
+"""
 function metric_tensor(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ
         ∂x∂ξ'*∂x∂ξ
     end
 end
 
+"""
+    metric_tensor_inverse(g::MappedGrid)
+
+The inverse of the metric tensor of `g` as a grid function.
+"""
 function metric_tensor_inverse(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ
         inv(∂x∂ξ'*∂x∂ξ)
@@ -119,7 +194,7 @@ end
 """
     normal(g::MappedGrid, boundary)
 
-The outward pointing normal as a grid function on the boundary
+The outward pointing normal as a grid function on the corresponding boundary grid.
 """
 function normal(g::MappedGrid, boundary)
     b_indices = boundary_indices(g, boundary)
@@ -132,11 +207,11 @@ function normal(g::MappedGrid, boundary)
 end
 
 function _boundary_sign(T, boundary)
-    if boundary_id(boundary) == Upper()
+    if boundary_id(boundary) == UpperBoundary()
         return one(T)
-    elseif boundary_id(boundary) == Lower()
+    elseif boundary_id(boundary) == LowerBoundary()
         return -one(T)
     else
-        throw(ArgumentError("The boundary identifier must be either `Lower()` or `Upper()`"))
+        throw(ArgumentError("The boundary identifier must be either `LowerBoundary()` or `UpperBoundary()`"))
     end
 end

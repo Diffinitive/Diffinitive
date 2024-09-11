@@ -1,5 +1,5 @@
-using Sbplib.Grids
-using Sbplib.RegionIndices
+using Diffinitive.Grids
+using Diffinitive.RegionIndices
 using Test
 using StaticArrays
 using LinearAlgebra
@@ -28,33 +28,82 @@ function _fully_curved_mapping()
 end
 
 @testset "MappedGrid" begin
-    lg = equidistant_grid((0,0), (1,1), 11, 11) # TODO: Change dims of the grid to be different
-    x̄ = map(ξ̄ -> 2ξ̄, lg)
-    J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
-    mg = MappedGrid(lg, x̄, J)
+    @testset "Constructor" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 21)
 
-    # TODO: Test constructor for different dims of range and domain for the coordinates
-    # TODO: Test constructor with different type than TensorGrid. a dummy type?
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+        mg = MappedGrid(lg, x̄, J)
 
-    @test_broken false # @test_throws ArgumentError("Sizes must match") MappedGrid(lg, map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11))
+        @test mg isa Grid{SVector{2, Float64},2}
+        @test jacobian(mg) isa Array{<:AbstractMatrix}
+        @test logicalgrid(mg) isa Grid
+
+        @test collect(mg) == x̄
+        @test jacobian(mg) == J
+        @test logicalgrid(mg) == lg
 
 
-    @test mg isa Grid{SVector{2, Float64},2}
+        x̄ = map(ξ̄ -> @SVector[ξ̄[1],ξ̄[2], ξ̄[1] + ξ̄[2]], lg)
+        J = map(ξ̄ -> @SMatrix[1 0; 0 1; 1 1], lg)
+        mg = MappedGrid(lg, x̄, J)
 
-    @test jacobian(mg) isa Array{<:AbstractMatrix}
-    @test logicalgrid(mg) isa Grid
+        @test mg isa Grid{SVector{3, Float64},2}
+        @test jacobian(mg) isa Array{<:AbstractMatrix}
+        @test logicalgrid(mg) isa Grid
+
+        @test collect(mg) == x̄
+        @test jacobian(mg) == J
+        @test logicalgrid(mg) == lg
+
+        sz1 = (10,11)
+        sz2 = (10,12)
+        @test_throws ArgumentError("Sizes must match") MappedGrid(
+            equidistant_grid((0,0), (1,1), sz2...),
+            rand(SVector{2},sz1...),
+            rand(SMatrix{2,2},sz1...),
+        )
+
+        @test_throws ArgumentError("Sizes must match") MappedGrid(
+            equidistant_grid((0,0), (1,1), sz1...),
+            rand(SVector{2},sz2...),
+            rand(SMatrix{2,2},sz1...),
+        )
+
+        @test_throws ArgumentError("Sizes must match") MappedGrid(
+            equidistant_grid((0,0), (1,1), sz1...),
+            rand(SVector{2},sz1...),
+            rand(SMatrix{2,2},sz2...),
+        )
+
+        err_str = "The size of the jacobian must match the dimensions of the grid and coordinates"
+        @test_throws ArgumentError(err_str) MappedGrid(
+            equidistant_grid((0,0), (1,1), 10, 11),
+            rand(SVector{3}, 10, 11),
+            rand(SMatrix{3,4}, 10, 11),
+        )
+
+        @test_throws ArgumentError(err_str) MappedGrid(
+            equidistant_grid((0,0), (1,1), 10, 11),
+            rand(SVector{3}, 10, 11),
+            rand(SMatrix{4,2}, 10, 11),
+        )
+    end
 
     @testset "Indexing Interface" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 21)
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
         mg = MappedGrid(lg, x̄, J)
         @test mg[1,1] == [0.0, 0.0]
-        @test mg[4,2] == [0.6, 0.2]
-        @test mg[6,10] == [1., 1.8]
+        @test mg[4,2] == [0.6, 0.1]
+        @test mg[6,10] == [1., 0.9]
 
         @test mg[begin, begin] == [0.0, 0.0]
         @test mg[end,end] == [2.0, 2.0]
         @test mg[begin,end] == [0., 2.]
 
-        @test eachindex(mg) == CartesianIndices((11,11))
+        @test axes(mg) == (1:11, 1:21)
 
         @testset "cartesian indexing" begin
             cases = [
@@ -71,7 +120,7 @@ end
         end
 
         @testset "eachindex" begin
-            @test eachindex(mg) == CartesianIndices((11,11))
+            @test eachindex(mg) == CartesianIndices((11,21))
         end
 
         @testset "firstindex" begin
@@ -81,15 +130,21 @@ end
 
         @testset "lastindex" begin
             @test lastindex(mg, 1) == 11
-            @test lastindex(mg, 2) == 11
+            @test lastindex(mg, 2) == 21
         end
     end
-    # TODO: Test with different types of logical grids
 
     @testset "Iterator interface" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 21)
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+
+        mg = MappedGrid(lg, x̄, J)
+
+        lg2 = equidistant_grid((0,0), (1,1), 15, 11)
         sg = MappedGrid(
             equidistant_grid((0,0), (1,1), 15, 11),
-            map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg), rand(SMatrix{2,3,Float64},15,11)
+            map(ξ̄ -> @SArray[ξ̄[1], ξ̄[2], -ξ̄[1]], lg2), rand(SMatrix{3,2,Float64},15,11)
         )
 
         @test eltype(mg) == SVector{2,Float64}
@@ -98,13 +153,13 @@ end
         @test eltype(typeof(mg)) == SVector{2,Float64}
         @test eltype(typeof(sg)) == SVector{3,Float64}
 
-        @test size(mg) == (11,11)
+        @test size(mg) == (11,21)
         @test size(sg) == (15,11)
 
-        @test size(mg,2) == 11
+        @test size(mg,2) == 21
         @test size(sg,2) == 11
 
-        @test length(mg) == 121
+        @test length(mg) == 231
         @test length(sg) == 165
 
         @test Base.IteratorSize(mg) == Base.HasShape{2}()
@@ -127,17 +182,56 @@ end
     end
 
     @testset "Base" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 21)
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+        mg = MappedGrid(lg, x̄, J)
+
         @test ndims(mg) == 2
     end
 
+    @testset "==" begin
+        sz = (15,11)
+        lg = equidistant_grid((0,0), (1,1), sz...)
+        x = rand(SVector{3,Float64}, sz...)
+        J = rand(SMatrix{3,2,Float64}, sz...)
+
+        sg = MappedGrid(lg, x, J)
+
+        sg1 = MappedGrid(equidistant_grid((0,0), (1,1), sz...), copy(x), copy(J))
+
+        sz2 = (15,12)
+        lg2 = equidistant_grid((0,0), (1,1), sz2...)
+        x2 = rand(SVector{3,Float64}, sz2...)
+        J2 = rand(SMatrix{3,2,Float64}, sz2...)
+        sg2 = MappedGrid(lg2, x2, J2)
+
+        sg3 = MappedGrid(lg, rand(SVector{3,Float64}, sz...), J)
+        sg4 = MappedGrid(lg, x, rand(SMatrix{3,2,Float64}, sz...))
+
+        @test sg == sg1
+        @test sg != sg2 # Different size
+        @test sg != sg3 # Different coordinates
+        @test sg != sg4 # Different jacobian
+    end
+
     @testset "boundary_identifiers" begin
+        lg = equidistant_grid((0,0), (1,1), 11, 15)
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+        mg = MappedGrid(lg, x̄, J)
         @test boundary_identifiers(mg) == boundary_identifiers(lg)
     end
 
     @testset "boundary_indices" begin
-        @test boundary_indices(mg, CartesianBoundary{1,Lower}()) == boundary_indices(lg,CartesianBoundary{1,Lower}())
-        @test boundary_indices(mg, CartesianBoundary{2,Lower}()) == boundary_indices(lg,CartesianBoundary{2,Lower}())
-        @test boundary_indices(mg, CartesianBoundary{1,Upper}()) == boundary_indices(lg,CartesianBoundary{1,Upper}())
+        lg = equidistant_grid((0,0), (1,1), 11, 15)
+        x̄ = map(ξ̄ -> 2ξ̄, lg)
+        J = map(ξ̄ -> @SArray(fill(2., 2, 2)), lg)
+        mg = MappedGrid(lg, x̄, J)
+
+        @test boundary_indices(mg, CartesianBoundary{1,LowerBoundary}()) == boundary_indices(lg,CartesianBoundary{1,LowerBoundary}())
+        @test boundary_indices(mg, CartesianBoundary{2,LowerBoundary}()) == boundary_indices(lg,CartesianBoundary{2,LowerBoundary}())
+        @test boundary_indices(mg, CartesianBoundary{1,UpperBoundary}()) == boundary_indices(lg,CartesianBoundary{1,UpperBoundary}())
     end
 
     @testset "boundary_grid" begin
@@ -152,28 +246,30 @@ end
             1+ξ*(ξ-1);
         ]
 
-        function test_boundary_grid(mg, bId, Jb)
-            bg = boundary_grid(mg, bId)
-
+        function expected_bg(mg, bId, Jb)
             lg = logicalgrid(mg)
-            expected_bg = MappedGrid(
+            return MappedGrid(
                 boundary_grid(lg, bId),
                 map(x̄, boundary_grid(lg, bId)),
                 map(Jb, boundary_grid(lg, bId)),
             )
-
-            @testset let bId=bId, bg=bg, expected_bg=expected_bg
-                @test collect(bg) == collect(expected_bg)
-                @test logicalgrid(bg) == logicalgrid(expected_bg)
-                @test jacobian(bg) == jacobian(expected_bg)
-                # TODO: Implement equality of a curvilinear grid and simlify the above
-            end
         end
 
-        @testset test_boundary_grid(mg, TensorGridBoundary{1, Lower}(), J2)
-        @testset test_boundary_grid(mg, TensorGridBoundary{1, Upper}(), J2)
-        @testset test_boundary_grid(mg, TensorGridBoundary{2, Lower}(), J1)
-        @testset test_boundary_grid(mg, TensorGridBoundary{2, Upper}(), J1)
+        let bid = TensorGridBoundary{1, LowerBoundary}()
+            @test boundary_grid(mg, bid) == expected_bg(mg, bid, J2)
+        end
+
+        let bid = TensorGridBoundary{1, UpperBoundary}()
+            @test boundary_grid(mg, bid) == expected_bg(mg, bid, J2)
+        end
+
+        let bid = TensorGridBoundary{2, LowerBoundary}()
+            @test boundary_grid(mg, bid) == expected_bg(mg, bid, J1)
+        end
+
+        let bid = TensorGridBoundary{2, UpperBoundary}()
+            @test boundary_grid(mg, bid) == expected_bg(mg, bid, J1)
+        end
     end
 end
 
@@ -185,18 +281,66 @@ end
     lg = equidistant_grid((0,0), (1,1), 10, 11)
     @test logicalgrid(mg) == lg
     @test collect(mg) == map(x̄, lg)
+
+    @test mapped_grid(lg, x̄, J) == mg
 end
 
 @testset "jacobian_determinant" begin
-    @test_broken false
+    x̄((ξ, η)) = @SVector[ξ*η, ξ + η^2]
+    J((ξ, η)) = @SMatrix[
+        η    ξ;
+        1   2η;
+    ]
+
+    g = mapped_grid(x̄, J, 10, 11)
+    J = map(logicalgrid(g)) do (ξ,η)
+        2η^2 - ξ
+    end
+    @test jacobian_determinant(g) ≈ J
+
+
+    lg = equidistant_grid((0,0), (1,1), 11, 21)
+    x̄ = map(ξ̄ -> @SVector[ξ̄[1],ξ̄[2], ξ̄[1] + ξ̄[2]], lg)
+    J = map(ξ̄ -> @SMatrix[1 0; 0 1; 1 1], lg)
+    mg = MappedGrid(lg, x̄, J)
+
+    @test_broken jacobian(mg) isa AbstractArray{2,Float64}
 end
 
 @testset "metric_tensor" begin
-    @test_broken false
+    x̄((ξ, η)) = @SVector[ξ*η, ξ + η^2]
+    J((ξ, η)) = @SMatrix[
+        η    ξ;
+        1   2η;
+    ]
+
+    g = mapped_grid(x̄, J, 10, 11)
+    G = map(logicalgrid(g)) do (ξ,η)
+        @SMatrix[
+            1+η^2   ξ*η+2η;
+            ξ*η+2η  ξ^2 + 4η^2;
+        ]
+    end
+    @test metric_tensor(g) ≈ G
 end
 
 @testset "metric_tensor_inverse" begin
-    @test_broken false
+    x̄((ξ, η)) = @SVector[ξ + ξ^2/2, η + η^2 + ξ^2/2]
+    J((ξ, η)) = @SMatrix[
+        1+ξ   0;
+        ξ    1+η;
+    ]
+
+    g = mapped_grid(x̄, J, 10, 11)
+    G⁻¹ = map(logicalgrid(g)) do (ξ,η)
+        @SMatrix[
+            (1+η)^2  -ξ*(1+η);
+            -ξ*(1+η) (1+ξ)^2+ξ^2;
+        ]/(((1+ξ)^2+ξ^2)*(1+η)^2 - ξ^2*(1+η)^2)
+
+    end
+
+    @test metric_tensor_inverse(g) ≈ G⁻¹
 end
 
 @testset "min_spacing" begin
@@ -237,10 +381,10 @@ end
 @testset "normal" begin
     g = mapped_grid(_partially_curved_mapping()...,10, 11)
 
-    @test normal(g, CartesianBoundary{1,Lower}()) == fill(@SVector[-1,0], 11)
-    @test normal(g, CartesianBoundary{1,Upper}()) == fill(@SVector[1,0], 11)
-    @test normal(g, CartesianBoundary{2,Lower}()) == fill(@SVector[0,-1], 10)
-    @test normal(g, CartesianBoundary{2,Upper}()) ≈ map(boundary_grid(g,CartesianBoundary{2,Upper}())|>logicalgrid) do ξ̄
+    @test normal(g, CartesianBoundary{1,LowerBoundary}()) == fill(@SVector[-1,0], 11)
+    @test normal(g, CartesianBoundary{1,UpperBoundary}()) == fill(@SVector[1,0], 11)
+    @test normal(g, CartesianBoundary{2,LowerBoundary}()) == fill(@SVector[0,-1], 10)
+    @test normal(g, CartesianBoundary{2,UpperBoundary}()) ≈ map(boundary_grid(g,CartesianBoundary{2,UpperBoundary}())|>logicalgrid) do ξ̄
         α = 1-2ξ̄[1]
         @SVector[α,1]/√(α^2 + 1)
     end
@@ -248,28 +392,28 @@ end
     g = mapped_grid(_fully_curved_mapping()...,5,4)
 
     unit(v) = v/norm(v)
-    @testset let bId = CartesianBoundary{1,Lower}()
+    @testset let bId = CartesianBoundary{1,LowerBoundary}()
         lbg = boundary_grid(logicalgrid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             -unit(@SVector[1/2,  η/3-1/6])
         end
     end
 
-    @testset let bId = CartesianBoundary{1,Upper}()
+    @testset let bId = CartesianBoundary{1,UpperBoundary}()
         lbg = boundary_grid(logicalgrid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             unit(@SVector[7/2, 2η-1]/(5 + 3η + 2η^2))
         end
     end
 
-    @testset let bId = CartesianBoundary{2,Lower}()
+    @testset let bId = CartesianBoundary{2,LowerBoundary}()
         lbg = boundary_grid(logicalgrid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             -unit(@SVector[-2ξ, 2]/(6 + ξ^2 - 2ξ))
         end
     end
 
-    @testset let bId = CartesianBoundary{2,Upper}()
+    @testset let bId = CartesianBoundary{2,UpperBoundary}()
         lbg = boundary_grid(logicalgrid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             unit(@SVector[-3ξ, 2]/(6 + ξ^2 + 3ξ))

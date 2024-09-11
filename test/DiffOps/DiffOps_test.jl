@@ -1,9 +1,9 @@
 using Test
-using Sbplib.DiffOps
-using Sbplib.Grids
-using Sbplib.SbpOperators
-using Sbplib.RegionIndices
-using Sbplib.LazyTensors
+using Diffinitive.DiffOps
+using Diffinitive.Grids
+using Diffinitive.SbpOperators
+using Diffinitive.RegionIndices
+using Diffinitive.LazyTensors
 
 #
 # @testset "BoundaryValue" begin

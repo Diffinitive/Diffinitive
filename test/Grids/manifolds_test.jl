@@ -1,8 +1,8 @@
 using Test
 
-using Sbplib.Grids
-using Sbplib.RegionIndices
-using Sbplib.LazyTensors
+using Diffinitive.Grids
+using Diffinitive.RegionIndices
+using Diffinitive.LazyTensors
 
 # using StaticArrays
 

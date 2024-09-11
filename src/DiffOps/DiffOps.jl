@@ -1,9 +1,9 @@
 module DiffOps
 
-using Sbplib.RegionIndices
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
+using Diffinitive.RegionIndices
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
 
 """
     DiffOp

@@ -1,11 +1,11 @@
 using Test
 
-using Sbplib.LazyTensors
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.RegionIndices
-import Sbplib.SbpOperators.Stencil
-import Sbplib.SbpOperators.BoundaryOperator
+using Diffinitive.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.RegionIndices
+import Diffinitive.SbpOperators.Stencil
+import Diffinitive.SbpOperators.BoundaryOperator
 
 
 @testset "BoundaryOperator" begin
@@ -13,12 +13,12 @@ import Sbplib.SbpOperators.BoundaryOperator
     g_1D = EquidistantGrid(range(0,1,length=11))
 
     @testset "Constructors" begin
-        @test BoundaryOperator(g_1D, closure_stencil, Lower()) isa LazyTensor{T,0,1} where T
-        @test BoundaryOperator(g_1D, closure_stencil, Upper()) isa LazyTensor{T,0,1} where T
+        @test BoundaryOperator(g_1D, closure_stencil, LowerBoundary()) isa LazyTensor{T,0,1} where T
+        @test BoundaryOperator(g_1D, closure_stencil, UpperBoundary()) isa LazyTensor{T,0,1} where T
     end
 
-    op_l = BoundaryOperator(g_1D, closure_stencil, Lower())
-    op_r = BoundaryOperator(g_1D, closure_stencil, Upper())
+    op_l = BoundaryOperator(g_1D, closure_stencil, LowerBoundary())
+    op_r = BoundaryOperator(g_1D, closure_stencil, UpperBoundary())
 
     @testset "Sizes" begin
         @test domain_size(op_l) == (11,)
