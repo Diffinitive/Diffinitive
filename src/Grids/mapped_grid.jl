@@ -23,8 +23,6 @@ struct MappedGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractAr
         end
 
         if size(first(jacobian)) != (length(first(physicalcoordinates)),D)
-            @show size(first(jacobian))
-            @show (length(first(physicalcoordinates)),D)
             throw(ArgumentError("The size of the jacobian must match the dimensions of the grid and coordinates"))
         end
 
