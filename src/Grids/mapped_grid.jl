@@ -77,6 +77,9 @@ function jacobian_determinant(g::MappedGrid)
         det(∂x∂ξ)
     end
 end
+# TBD: Should this be changed to calculate sqrt(g) instead?
+#       This would make it well defined also for n-dim grids embedded in higher dimensions.
+# TBD: Is there a better name? metric_determinant?
 
 function metric_tensor(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ

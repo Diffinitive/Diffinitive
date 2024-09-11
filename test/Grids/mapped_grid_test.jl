@@ -258,6 +258,14 @@ end
         2η^2 - ξ
     end
     @test jacobian_determinant(g) ≈ J
+
+
+    lg = equidistant_grid((0,0), (1,1), 11, 21)
+    x̄ = map(ξ̄ -> @SVector[ξ̄[1],ξ̄[2], ξ̄[1] + ξ̄[2]], lg)
+    J = map(ξ̄ -> @SMatrix[1 0; 0 1; 1 1], lg)
+    mg = MappedGrid(lg, x̄, J)
+
+    @test_broken jacobian(mg) isa AbstractArray{2,Float64}
 end
 
 @testset "metric_tensor" begin
