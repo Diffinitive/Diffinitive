@@ -46,8 +46,6 @@ export jacobian_determinant
 export metric_tensor
 export metric_tensor_inverse
 
-abstract type BoundaryIdentifier end
-
 include("grid.jl")
 include("tensor_grid.jl")
 include("equidistant_grid.jl")
