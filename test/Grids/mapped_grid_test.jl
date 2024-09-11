@@ -76,7 +76,6 @@ end
             rand(SMatrix{2,2},sz2...),
         )
 
-        # TODO: Test that the element types agree
         err_str = "The size of the jacobian must match the dimensions of the grid and coordinates"
         @test_throws ArgumentError(err_str) MappedGrid(
             equidistant_grid((0,0), (1,1), 10, 11),
