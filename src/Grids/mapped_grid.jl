@@ -38,6 +38,8 @@ function Base.:(==)(a::MappedGrid, b::MappedGrid)
     return same_logicalgrid && same_coordinates && same_jacobian
 end
 
+# Review: rename function logicalgrid to logical_grid
+# for consistency with mapped_grid. 
 """
     logicalgrid(g::MappedGrid)
 
@@ -134,6 +136,13 @@ end
 #       This would make it well defined also for n-dim grids embedded in higher dimensions.
 # TBD: Is there a better name? metric_determinant?
 # TBD: Is the best option to delete it?
+# Review: I don't think we should delete it. Users building their own 
+#         curvilinear operators will need the functionality. Also the
+#         determinant of the jacobian (and not its square root) is required
+#         for quadratures on mapped grids right? For that reason I think we should
+#         keep the function as is. We could provide a function for the square root
+#         as well if we think it would be helpfull. Regarding naming, perhaps
+#         metric_determinant is better?
 
 """
     metric_tensor(g::MappedGrid)
