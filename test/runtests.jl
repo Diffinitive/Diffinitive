@@ -1,4 +1,7 @@
+using Diffinitive
 using Test
+using JET
+using Aqua
 using Glob
 
 """
@@ -18,7 +21,7 @@ function run_testfiles(args)
     run_testfiles(".", globs)
 end
 
-function  run_testfiles(path, globs)
+function  run_testfiles(path,   globs)
     for name ∈ readdir(path)
         filepath = joinpath(path, name)
 
@@ -48,6 +51,15 @@ end
 testsetname = isempty(ARGS) ? "Diffinitive.jl" : "["*join(ARGS, ", ")*"]"
 
 @testset "$testsetname" begin
+    if isempty(ARGS)
+        @testset "Code quality (Aqua.jl)" begin
+            Aqua.test_all(Diffinitive)
+        end
+        @testset "Code linting (JET.jl)" begin
+            JET.test_package(Diffinitive; target_defined_modules = true)
+        end
+    end
+
     run_testfiles(ARGS)
     println()
 end
