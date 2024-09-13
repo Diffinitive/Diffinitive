@@ -114,6 +114,9 @@ struct NestedStencil{T,N,M}
     s::Stencil{Stencil{T,N},M}
 end
 
+NestedStencil(;center) = NestedStencil(Stencil(;center))
+CenteredNestedStencil() = NestedStencil(CenteredStencil())
+
 # Stencil input
 NestedStencil(s::Vararg{Stencil}; center) = NestedStencil(Stencil(s... ; center))
 CenteredNestedStencil(s::Vararg{Stencil}) = NestedStencil(CenteredStencil(s...))
@@ -141,7 +144,7 @@ end
 function Base.convert(::Type{NestedStencil{T,N,M}}, s::NestedStencil{S,N,M}) where {T,S,N,M}
     return NestedStencil{T,N,M}(s)
 end
-Base.convert(::Type{NestedStencil{T}}, stencil) where T = NestedStencil{T}(stencil)
+Base.convert(::Type{NestedStencil{T}}, stencil::NestedStencil) where T = NestedStencil{T}(stencil)
 
 function Base.promote_rule(::Type{NestedStencil{T,N,M}}, ::Type{NestedStencil{S,N,M}}) where {T,S,N,M}
     return NestedStencil{promote_type(T,S),N,M}
