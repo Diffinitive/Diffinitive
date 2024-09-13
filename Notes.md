@@ -392,3 +392,38 @@ applied correctly throughout the stack. When testing the performance of
 stencil application on the bugfix/sbp_operators/stencil_return_type branch
 there seemed to be some strange results where such errors could be the
 culprit.
+
+
+## Tiled loops and regions in apply
+There should be easy ways to use functionalty splitting the application of a lazy array into regions and using tiled iteration. This could make the application more efficient by reducing branching and improving cache usage in the tight loop. On commit f215ac2a5c66 and before there were some early tests regarding this in a DiffOp submodule.
+
+The main ideas were:
+```julia
+function apply_region!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}) where T
+    apply_region!(D, u, v, Lower, Lower)
+    apply_region!(D, u, v, Lower, Interior)
+    apply_region!(D, u, v, Lower, Upper)
+    apply_region!(D, u, v, Interior, Lower)
+    apply_region!(D, u, v, Interior, Interior)
+    apply_region!(D, u, v, Interior, Upper)
+    apply_region!(D, u, v, Upper, Lower)
+    apply_region!(D, u, v, Upper, Interior)
+    apply_region!(D, u, v, Upper, Upper)
+    return nothing
+end
+```
+
+```julia
+using TiledIteration
+function apply_region_tiled!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
+    ri = regionindices(D.grid.size, closuresize(D.op), (r1,r2))
+    # TODO: Pass Tilesize to function
+    for tileaxs ∈ TileIterator(axes(ri), padded_tilesize(T, (5,5), 2))
+        for j ∈ tileaxs[2], i ∈ tileaxs[1]
+            I = ri[i,j]
+            u[I] = apply(D, v, (Index{r1}(I[1]), Index{r2}(I[2])))
+        end
+    end
+    return nothing
+end
+```
