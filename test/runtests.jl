@@ -32,31 +32,41 @@ function  run_testfiles(path,   globs)
         end
 
         if endswith(name, "_test.jl") && any(occursin.(globs, filepath))
-            printstyled("Running "; bold=true, color=:green)
-            print(filepath)
-
-            t_start = time()
-            @testset "$name" begin
-                include(filepath)
+            log_and_time(filepath) do
+                @testset "$name" begin
+                    include(filepath)
+                end
             end
-            t_end = time()
-
-            Δt = t_end - t_start
-            printstyled(" ($(round(Δt, digits=2)) s)"; color=:light_black)
-            println()
         end
     end
+end
+
+function log_and_time(f, msg)
+    printstyled("Running "; bold=true, color=:green)
+    print(msg)
+
+    t_start = time()
+    f()
+    t_end = time()
+    Δt = t_end - t_start
+    printstyled(" ($(round(Δt, digits=2)) s)"; color=:light_black)
+    println()
 end
 
 testsetname = isempty(ARGS) ? "Diffinitive.jl" : "["*join(ARGS, ", ")*"]"
 
 @testset "$testsetname" begin
     if isempty(ARGS)
-        @testset "Code quality (Aqua.jl)" begin
-            Aqua.test_all(Diffinitive)
+        log_and_time("code quality tests using Aqua.jl") do
+            @testset "Code quality (Aqua.jl)" begin
+                Aqua.test_all(Diffinitive)
+            end
         end
-        @testset "Code linting (JET.jl)" begin
-            JET.test_package(Diffinitive; target_defined_modules = true)
+
+        log_and_time("code linting using JET.jl") do
+            @testset "Code linting (JET.jl)" begin
+                JET.test_package(Diffinitive; target_defined_modules = true)
+            end
         end
     end
 
