@@ -5,14 +5,16 @@ struct Stencil{T,N}
     range::UnitRange{Int64}
     weights::NTuple{N,T}
 
-    function Stencil(range::UnitRange,weights::NTuple{N,T}) where {T, N}
+    function Stencil(range::UnitRange,weights::NTuple{N,Any}) where N
+        T = eltype(weights)
+
         @assert length(range) == N
         new{T,N}(range,weights)
     end
 end
 
 """
-    Stencil(weights::NTuple; center::Int)
+    Stencil(weights...; center::Int)
 
 Create a stencil with the given weights with element `center` as the center of the stencil.
 """
