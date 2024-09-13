@@ -117,15 +117,15 @@ NestedStencil(s::Vararg{Stencil}; center) = NestedStencil(Stencil(s... ; center)
 CenteredNestedStencil(s::Vararg{Stencil}) = NestedStencil(CenteredStencil(s...))
 
 # Tuple input
-function NestedStencil(weights::Vararg{NTuple{N,Any}}; center) where N
+function NestedStencil(weights::Vararg{NTuple{N,Any} where N}; center)
     inner_stencils = map(w -> Stencil(w...; center), weights)
     return NestedStencil(Stencil(inner_stencils... ; center))
 end
-function CenteredNestedStencil(weights::Vararg{NTuple{N,Any}}) where N
+
+function CenteredNestedStencil(weights::Vararg{NTuple{N,Any} where N})
     inner_stencils = map(w->CenteredStencil(w...), weights)
     return CenteredNestedStencil(inner_stencils...)
 end
-
 
 # Conversion
 function NestedStencil{T,N,M}(ns::NestedStencil{S,N,M}) where {T,S,N,M}
