@@ -36,7 +36,7 @@ function Index(i::Integer, boundary_width::Integer, dim_size::Integer)
     return Index{getregion(i,boundary_width,dim_size)}(i)
 end
 
-IndexTuple(t::Vararg{Tuple{T, DataType}}) where T<:Integer = Index.(t)
+IndexTuple(t::Vararg{Tuple{Integer, DataType}}) = Index.(t)
 export IndexTuple
 
 # TODO: Use the values of the region structs, e.g. Lower(), for the region parameter instead of the types.

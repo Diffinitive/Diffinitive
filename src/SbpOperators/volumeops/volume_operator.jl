@@ -8,6 +8,11 @@ struct VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
     closure_stencils::NTuple{M,Stencil{T,K}}
     size::NTuple{1,Int}
     parity::Parity
+
+    function VolumeOperator(inner_stencil::Stencil{T,N}, closure_stencils::Tuple{Stencil{T,K}, Vararg{Stencil{T,K}}}, size::NTuple{1,Int}, parity::Parity) where {T,N,K}
+        M = length(closure_stencils)
+        return new{T,N,M,K}(inner_stencil, closure_stencils, size, parity)
+    end
 end
 
 function VolumeOperator(grid::EquidistantGrid, inner_stencil, closure_stencils, parity)
