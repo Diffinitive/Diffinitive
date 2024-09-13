@@ -74,6 +74,8 @@ Base.size(g::MappedGrid, d) = size(g.logicalgrid, d)
 boundary_identifiers(g::MappedGrid) = boundary_identifiers(g.logicalgrid)
 boundary_indices(g::MappedGrid, id::TensorGridBoundary) = boundary_indices(g.logicalgrid, id)
 
+# Review: Error when calling plot(boundary_grid(g, id))
+# Currently need to collect first, i.e., plot(collect(boundary_grid(g, id)))
 function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
     b_indices = boundary_indices(g.logicalgrid, id)
 
@@ -122,6 +124,7 @@ function mapped_grid(lg::Grid, x, J)
     )
 end
 
+# Review: Error when calling jacobian_determinant(boundary_grid(g,id))
 """
     jacobian_determinant(g::MappedGrid)
 
@@ -200,6 +203,18 @@ function min_spacing(g::MappedGrid{T,2} where T)
     return ms
 end
 
+# Review: I would implement the normal through Nansons formula
+# nⱼ = inv(Jᵧ)*J*Fⱼᵢ*νᵢ
+# where 
+# Jᵧ  boundary jacobian determiant
+# J is the volume jacobian determinant
+# Fⱼᵢ = dξᵢ/dxⱼ
+# νᵢ normal on logical grid
+# j: indices on physical grid
+# i: indices on logical grid
+# ξ: coordinate vector on logical grid
+# x: coordinate vector on logical grid
+# Perhaps the below is equivalent?
 """
     normal(g::MappedGrid, boundary)
 
