@@ -6,7 +6,6 @@ version = "0.1.2"
 [deps]
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
-TiledIteration = "06e1c1a7-607b-532d-9fad-de7d9aa2abac"
 
 [weakdeps]
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
@@ -23,7 +22,6 @@ DiffinitiveSparseArraysExt = ["SparseArrays", "Tokens"]
 julia = "1.5"
 StaticArrays = "1.0"
 TOML = "1.0"
-TiledIteration = "0.5"
 Makie = "0.21"
 SparseArrayKit = "0.3"
 Tokens = "0.1.1"
