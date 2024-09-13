@@ -1,12 +1,10 @@
 using Documenter
 using Diffinitive
 
-using Diffinitive.DiffOps
 using Diffinitive.Grids
 using Diffinitive.LazyTensors
 using Diffinitive.RegionIndices
 using Diffinitive.SbpOperators
-using Diffinitive.StaticDicts
 
 sitename = "Diffinitive.jl"
 
@@ -34,11 +32,9 @@ pages = [
     "matrix_and_tensor_representations.md",
     "Submodules" => [
         "submodules/grids.md",
-        "submodules/diff_ops.md",
         "submodules/lazy_tensors.md",
         "submodules/region_indices.md",
         "submodules/sbp_operators.md",
-        "submodules/static_dicts.md",
     ],
     "doc_index.md",
 ]
