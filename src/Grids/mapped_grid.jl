@@ -122,29 +122,6 @@ function mapped_grid(lg::Grid, x, J)
     )
 end
 
-# Review: Error when calling jacobian_determinant(boundary_grid(g,id))
-"""
-    jacobian_determinant(g::MappedGrid)
-
-The jacobian determinant of `g` as a grid function.
-"""
-function jacobian_determinant(g::MappedGrid)
-    return map(jacobian(g)) do ∂x∂ξ
-        det(∂x∂ξ)
-    end
-end
-# TBD: Should this be changed to calculate sqrt(g) instead?
-#       This would make it well defined also for n-dim grids embedded in higher dimensions.
-# TBD: Is there a better name? metric_determinant?
-# TBD: Is the best option to delete it?
-# Review: I don't think we should delete it. Users building their own 
-#         curvilinear operators will need the functionality. Also the
-#         determinant of the jacobian (and not its square root) is required
-#         for quadratures on mapped grids right? For that reason I think we should
-#         keep the function as is. We could provide a function for the square root
-#         as well if we think it would be helpfull. Regarding naming, perhaps
-#         metric_determinant is better?
-
 """
     metric_tensor(g::MappedGrid)
 

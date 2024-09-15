@@ -285,28 +285,6 @@ end
     @test mapped_grid(lg, x̄, J) == mg
 end
 
-@testset "jacobian_determinant" begin
-    x̄((ξ, η)) = @SVector[ξ*η, ξ + η^2]
-    J((ξ, η)) = @SMatrix[
-        η    ξ;
-        1   2η;
-    ]
-
-    g = mapped_grid(x̄, J, 10, 11)
-    J = map(logical_grid(g)) do (ξ,η)
-        2η^2 - ξ
-    end
-    @test jacobian_determinant(g) ≈ J
-
-
-    lg = equidistant_grid((0,0), (1,1), 11, 21)
-    x̄ = map(ξ̄ -> @SVector[ξ̄[1],ξ̄[2], ξ̄[1] + ξ̄[2]], lg)
-    J = map(ξ̄ -> @SMatrix[1 0; 0 1; 1 1], lg)
-    mg = MappedGrid(lg, x̄, J)
-
-    @test_broken jacobian(mg) isa AbstractArray{2,Float64}
-end
-
 @testset "metric_tensor" begin
     x̄((ξ, η)) = @SVector[ξ*η, ξ + η^2]
     J((ξ, η)) = @SMatrix[

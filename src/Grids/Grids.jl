@@ -43,7 +43,6 @@ export MappedGrid
 export jacobian
 export logical_grid
 export mapped_grid
-export jacobian_determinant
 export metric_tensor
 export metric_tensor_inverse
 
