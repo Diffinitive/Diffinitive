@@ -41,7 +41,7 @@ export equidistant_grid
 # MappedGrid
 export MappedGrid
 export jacobian
-export logicalgrid
+export logical_grid
 export mapped_grid
 export jacobian_determinant
 export metric_tensor

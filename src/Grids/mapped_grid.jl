@@ -5,20 +5,20 @@ A grid defined by a coordinate mapping from a logical grid to some physical
 coordinates. The physical coordinates and the Jacobian are stored as grid
 functions corresponding to the logical grid.
 
-See also: [`logicalgrid`](@ref), [`jacobian`](@ref), [`metric_tensor`](@ref).
+See also: [`logical_grid`](@ref), [`jacobian`](@ref), [`metric_tensor`](@ref).
 """
 struct MappedGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractMatrix{<:Any}, D}} <: Grid{T,D}
-    logicalgrid::GT
+    logical_grid::GT
     physicalcoordinates::CT
     jacobian::JT
 
     """
-        MappedGrid(logicalgrid, physicalcoordinates, jacobian)
+        MappedGrid(logical_grid, physicalcoordinates, jacobian)
 
     A MappedGrid with the given physical coordinates and jacobian.
     """
-    function MappedGrid(logicalgrid::GT, physicalcoordinates::CT, jacobian::JT) where {T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractMatrix{<:Any}, D}}
-        if !(size(logicalgrid) == size(physicalcoordinates) == size(jacobian))
+    function MappedGrid(logical_grid::GT, physicalcoordinates::CT, jacobian::JT) where {T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractMatrix{<:Any}, D}}
+        if !(size(logical_grid) == size(physicalcoordinates) == size(jacobian))
             throw(ArgumentError("Sizes must match"))
         end
 
@@ -26,26 +26,24 @@ struct MappedGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractAr
             throw(ArgumentError("The size of the jacobian must match the dimensions of the grid and coordinates"))
         end
 
-        return new{T,D,GT,CT,JT}(logicalgrid, physicalcoordinates, jacobian)
+        return new{T,D,GT,CT,JT}(logical_grid, physicalcoordinates, jacobian)
     end
 end
 
 function Base.:(==)(a::MappedGrid, b::MappedGrid)
-    same_logicalgrid = logicalgrid(a) == logicalgrid(b)
+    same_logical_grid = logical_grid(a) == logical_grid(b)
     same_coordinates = collect(a) == collect(b)
     same_jacobian = jacobian(a) == jacobian(b)
 
-    return same_logicalgrid && same_coordinates && same_jacobian
+    return same_logical_grid && same_coordinates && same_jacobian
 end
 
-# Review: rename function logicalgrid to logical_grid
-# for consistency with mapped_grid. 
 """
-    logicalgrid(g::MappedGrid)
+    logical_grid(g::MappedGrid)
 
 The logical grid of `g`.
 """
-logicalgrid(g::MappedGrid) = g.logicalgrid
+logical_grid(g::MappedGrid) = g.logical_grid
 
 """
     jacobian(g::MappedGrid)
@@ -57,27 +55,27 @@ jacobian(g::MappedGrid) = g.jacobian
 
 # Indexing interface
 Base.getindex(g::MappedGrid, I::Vararg{Int}) = g.physicalcoordinates[I...]
-Base.eachindex(g::MappedGrid) = eachindex(g.logicalgrid)
+Base.eachindex(g::MappedGrid) = eachindex(g.logical_grid)
 
-Base.firstindex(g::MappedGrid, d) = firstindex(g.logicalgrid, d)
-Base.lastindex(g::MappedGrid, d) = lastindex(g.logicalgrid, d)
+Base.firstindex(g::MappedGrid, d) = firstindex(g.logical_grid, d)
+Base.lastindex(g::MappedGrid, d) = lastindex(g.logical_grid, d)
 
 # Iteration interface
 Base.iterate(g::MappedGrid) = iterate(g.physicalcoordinates)
 Base.iterate(g::MappedGrid, state) = iterate(g.physicalcoordinates, state)
 
 Base.IteratorSize(::Type{<:MappedGrid{<:Any, D}}) where D = Base.HasShape{D}()
-Base.length(g::MappedGrid) = length(g.logicalgrid)
-Base.size(g::MappedGrid) = size(g.logicalgrid)
-Base.size(g::MappedGrid, d) = size(g.logicalgrid, d)
+Base.length(g::MappedGrid) = length(g.logical_grid)
+Base.size(g::MappedGrid) = size(g.logical_grid)
+Base.size(g::MappedGrid, d) = size(g.logical_grid, d)
 
-boundary_identifiers(g::MappedGrid) = boundary_identifiers(g.logicalgrid)
-boundary_indices(g::MappedGrid, id::TensorGridBoundary) = boundary_indices(g.logicalgrid, id)
+boundary_identifiers(g::MappedGrid) = boundary_identifiers(g.logical_grid)
+boundary_indices(g::MappedGrid, id::TensorGridBoundary) = boundary_indices(g.logical_grid, id)
 
 # Review: Error when calling plot(boundary_grid(g, id))
 # Currently need to collect first, i.e., plot(collect(boundary_grid(g, id)))
 function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
-    b_indices = boundary_indices(g.logicalgrid, id)
+    b_indices = boundary_indices(g.logical_grid, id)
 
     # Calculate indices of needed jacobian components
     D = ndims(g)
@@ -90,7 +88,7 @@ function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
     boundary_physicalcoordinates = @view g.physicalcoordinates[b_indices...]
 
     return MappedGrid(
-        boundary_grid(g.logicalgrid, id),
+        boundary_grid(g.logical_grid, id),
         boundary_physicalcoordinates,
         boundary_jacobian,
     )
