@@ -7,7 +7,7 @@ functions corresponding to the logical grid.
 
 See also: [`logicalgrid`](@ref), [`jacobian`](@ref), [`metric_tensor`](@ref).
 """
-struct MappedGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractArray{<:Any, 2}, D}} <: Grid{T,D}
+struct MappedGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractMatrix{<:Any}, D}} <: Grid{T,D}
     logicalgrid::GT
     physicalcoordinates::CT
     jacobian::JT
@@ -17,7 +17,7 @@ struct MappedGrid{T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractAr
 
     A MappedGrid with the given physical coordinates and jacobian.
     """
-    function MappedGrid(logicalgrid::GT, physicalcoordinates::CT, jacobian::JT) where {T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractArray{<:Any, 2}, D}}
+    function MappedGrid(logicalgrid::GT, physicalcoordinates::CT, jacobian::JT) where {T,D, GT<:Grid{<:Any,D}, CT<:AbstractArray{T,D}, JT<:AbstractArray{<:AbstractMatrix{<:Any}, D}}
         if !(size(logicalgrid) == size(physicalcoordinates) == size(jacobian))
             throw(ArgumentError("Sizes must match"))
         end
