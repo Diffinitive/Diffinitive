@@ -157,6 +157,9 @@ end
         ps = HyperBox((0,0),(2,1))
 
         @test equidistant_grid(ps, 3,4) == equidistant_grid((0,0), (2,1), 3,4)
+
+        @test equidistant_grid(unitinterval(),3) == equidistant_grid(0,1,3)
+        @test equidistant_grid(HyperBox((0,),(2,)),4) == equidistant_grid(@SVector[0], @SVector[2], 4)
     end
 
 
