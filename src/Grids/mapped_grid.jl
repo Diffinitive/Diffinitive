@@ -178,18 +178,6 @@ function min_spacing(g::MappedGrid{T,2} where T)
     return ms
 end
 
-# Review: I would implement the normal through Nansons formula
-# nⱼ = inv(Jᵧ)*J*Fⱼᵢ*νᵢ
-# where 
-# Jᵧ  boundary jacobian determiant
-# J is the volume jacobian determinant
-# Fⱼᵢ = dξᵢ/dxⱼ
-# νᵢ normal on logical grid
-# j: indices on physical grid
-# i: indices on logical grid
-# ξ: coordinate vector on logical grid
-# x: coordinate vector on logical grid
-# Perhaps the below is equivalent?
 """
     normal(g::MappedGrid, boundary)
 
