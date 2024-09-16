@@ -51,10 +51,10 @@ function normal_derivative(g::MappedGrid, stencil_set::StencilSet, boundary)
     # Assemble difference operator
     mapreduce(+,1:ndims(g)) do i
         if i == k
-            ∂_ξᵢ = normal_derivative(logicalgrid(g), stencil_set, boundary)
+            ∂_ξᵢ = normal_derivative(logical_grid(g), stencil_set, boundary)
         else
-            e = boundary_restriction(logicalgrid(g), stencil_set, boundary)
-            ∂_ξᵢ = σ ∘ e ∘ first_derivative(logicalgrid(g), stencil_set, i)
+            e = boundary_restriction(logical_grid(g), stencil_set, boundary)
+            ∂_ξᵢ = σ ∘ e ∘ first_derivative(logical_grid(g), stencil_set, i)
         end
 
         αᵢ = componentview(α,i)

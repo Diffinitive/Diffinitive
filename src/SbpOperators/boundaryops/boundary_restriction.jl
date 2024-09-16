@@ -27,5 +27,5 @@ function boundary_restriction(g::EquidistantGrid, stencil_set::StencilSet, bound
 end
 
 function boundary_restriction(g::MappedGrid, stencil_set::StencilSet, boundary)
-    return boundary_restriction(logicalgrid(g), stencil_set, boundary)
+    return boundary_restriction(logical_grid(g), stencil_set, boundary)
 end

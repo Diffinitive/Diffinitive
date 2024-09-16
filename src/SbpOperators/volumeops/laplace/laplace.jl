@@ -55,11 +55,11 @@ end
 laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
 
 function laplace(grid::MappedGrid, stencil_set)
-    J = jacobian_determinant(grid)
+    J = map(det,jacobian(grid))
     J⁻¹ = DiagonalTensor(map(inv, J))
 
     Jg = map(*, J, metric_tensor_inverse(grid))
-    lg = logicalgrid(grid)
+    lg = logical_grid(grid)
 
     return mapreduce(+, CartesianIndices(first(Jg))) do I
         i, j = I[1], I[2]
