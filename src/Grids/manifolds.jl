@@ -149,6 +149,7 @@ struct CartesianAtlas <: Atlas
 end
 
 charts(a::CartesianAtlas) = a.charts
+connections(a::CartesianAtlas) = nothing
 
 struct UnstructuredAtlas <: Atlas
     charts::Vector{Chart}
@@ -156,6 +157,7 @@ struct UnstructuredAtlas <: Atlas
 end
 
 charts(a::UnstructuredAtlas) = a.charts
+connections(a::UnstructuredAtlas) = nothing
 
 
 ###
