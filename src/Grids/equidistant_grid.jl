@@ -151,9 +151,8 @@ function equidistant_grid(limit_lower::Number, limit_upper::Number, size::Int)
 	return EquidistantGrid(range(limit_lower, limit_upper, length=size)) # TBD: Should it use LinRange instead?
 end
 
-
-equidistant_grid(hb::HyperBox, dims::Vararg{Int}) = equidistant_grid(hb.a, hb.b, dims...)
-# TODO: One dimensional grids shouldn't have vector eltype right?, Change here or in HyperBox?
+equidistant_grid(d::Interval, size::Int) = equidistant_grid(limits(d)..., size)
+equidistant_grid(hb::HyperBox, dims::Vararg{Int}) = equidistant_grid(limits(hb)..., dims...)
 
 function equidistant_grid(c::Chart, dims::Vararg{Int})
     lg = equidistant_grid(parameterspace(c), dims...)

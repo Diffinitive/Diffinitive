@@ -21,6 +21,21 @@ abstract type ParameterSpace{D} end
 Base.ndims(::ParameterSpace{D}) where D = D
 # TBD:  Should implement domain_dim?
 
+struct Interval{T} <: ParameterSpace{1}
+    a::T
+    b::T
+
+    function Interval(a,b)
+        a, b = promote(a, b)
+        new{typeof(a)}(a,b)
+    end
+end
+
+limits(i::Interval) = (i.a, i.b)
+
+unitinterval(T=Float64) = Interval(zero(T), one(T))
+
+
 struct HyperBox{T,D} <: ParameterSpace{D}
     a::SVector{D,T}
     b::SVector{D,T}
@@ -31,14 +46,12 @@ function HyperBox(a,b)
     HyperBox(convert(T,a), convert(T,b))
 end
 
-Interval{T} = HyperBox{T,1}
 Rectangle{T} = HyperBox{T,2}
 Box{T} = HyperBox{T,3}
 
 limits(box::HyperBox, d) = (box.a[d], box.b[d])
 limits(box::HyperBox) = (box.a, box.b)
 
-unitinterval(T=Float64) = unithyperbox(T,1)
 unitsquare(T=Float64) = unithyperbox(T,2)
 unitcube(T=Float64) = unithyperbox(T,3)
 unithyperbox(T, D) = HyperBox((@SVector zeros(T,D)), (@SVector ones(T,D)))

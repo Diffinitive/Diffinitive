@@ -11,6 +11,21 @@ using Diffinitive.LazyTensors
     @test ndims(unittetrahedron()) == 3
 end
 
+@testset "Interval" begin
+    @test Interval <: ParameterSpace{1}
+
+    @test Interval(0,1) isa Interval{Int}
+    @test Interval(0,1.) isa Interval{Float64}
+
+    @test unitinterval() isa Interval{Float64}
+    @test unitinterval() == Interval(0.,1.)
+    @test limits(unitinterval()) == (0.,1.)
+
+    @test unitinterval(Int) isa Interval{Int}
+    @test unitinterval(Int) == Interval(0,1)
+    @test limits(unitinterval(Int)) == (0,1)
+end
+
 @testset "HyperBox" begin
     @test HyperBox{<:Any, 2} <: ParameterSpace{2}
     @test HyperBox([1,1], [2,2]) isa HyperBox{Int, 2}
@@ -18,12 +33,6 @@ end
     @test limits(HyperBox([1,2], [3,4])) == ([1,2], [3,4])
     @test limits(HyperBox([1,2], [3,4]), 1) == (1,3)
     @test limits(HyperBox([1,2], [3,4]), 2) == (2,4)
-
-    @test unitinterval() isa HyperBox{Float64,1}
-    @test limits(unitinterval()) == ([0], [1])
-
-    @test unitinterval(Int) isa HyperBox{Int,1}
-    @test limits(unitinterval(Int)) == ([0], [1])
 
     @test unitsquare() isa HyperBox{Float64,2}
     @test limits(unitsquare()) == ([0,0],[1,1])
