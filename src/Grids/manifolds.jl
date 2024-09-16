@@ -42,7 +42,8 @@ struct HyperBox{T,D} <: ParameterSpace{D}
 end
 
 function HyperBox(a,b)
-    T = SVector{length(a)}
+    ET = promote_type(eltype(a),eltype(b))
+    T = SVector{length(a),ET}
     HyperBox(convert(T,a), convert(T,b))
 end
 
@@ -62,7 +63,12 @@ struct Simplex{T,D,NV} <: ParameterSpace{D}
     verticies::NTuple{NV,SVector{D,T}}
 end
 
-Simplex(verticies::Vararg{AbstractArray}) = Simplex(Tuple(SVector(v...) for v ∈ verticies))
+function Simplex(verticies::Vararg{AbstractArray})
+    ET = mapreduce(eltype,promote_type,verticies)
+    T = SVector{length(verticies[1]),ET}
+
+    return Simplex(Tuple(convert(T,v) for v ∈ verticies))
+end
 
 verticies(s::Simplex) = s.verticies
 

@@ -30,6 +30,8 @@ end
     @test HyperBox{<:Any, 2} <: ParameterSpace{2}
     @test HyperBox([1,1], [2,2]) isa HyperBox{Int, 2}
 
+    @test HyperBox([1,2], [1.,2.]) isa HyperBox{Float64,2}
+
     @test limits(HyperBox([1,2], [3,4])) == ([1,2], [3,4])
     @test limits(HyperBox([1,2], [3,4]), 1) == (1,3)
     @test limits(HyperBox([1,2], [3,4]), 2) == (2,4)
@@ -48,6 +50,8 @@ end
     @test Simplex{<:Any, 3} <: ParameterSpace{3}
     @test Simplex([1,2], [3,4]) isa Simplex{Int, 2}
     @test Simplex([1,2,3], [4,5,6],[1,1,1]) isa Simplex{Int, 3}
+
+    @test Simplex([1,2], [3.,4.]) isa Simplex{Float64, 2}
 
     @test verticies(Simplex([1,2], [3,4])) == ([1,2], [3,4])
 
