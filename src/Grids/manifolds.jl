@@ -19,7 +19,6 @@ See also: [`Interval`](@ref), [`Rectangle`](@ref), [`Box`](@ref),
 """
 abstract type ParameterSpace{D} end
 Base.ndims(::ParameterSpace{D}) where D = D
-# TBD:  Should implement domain_dim?
 
 struct Interval{T} <: ParameterSpace{1}
     a::T
@@ -95,7 +94,7 @@ struct Chart{D, PST<:ParameterSpace{D}, MT}
     parameterspace::PST
 end
 
-domain_dim(::Chart{D}) where D = D
+Base.ndims(::Chart{D}) where D = D
 (c::Chart)(ξ) = c.mapping(ξ)
 parameterspace(c::Chart) = c.parameterspace
 

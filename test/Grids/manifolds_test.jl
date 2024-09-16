@@ -69,6 +69,7 @@ end
     @test c isa Chart{2}
     @test c([3,2]) == [6,4]
     @test parameterspace(c) == unitsquare()
+    @test ndims(c) == 2
 end
 
 @testset "Atlas" begin
