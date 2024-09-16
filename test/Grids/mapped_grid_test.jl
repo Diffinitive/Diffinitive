@@ -37,11 +37,11 @@ end
 
         @test mg isa Grid{SVector{2, Float64},2}
         @test jacobian(mg) isa Array{<:AbstractMatrix}
-        @test logicalgrid(mg) isa Grid
+        @test logical_grid(mg) isa Grid
 
         @test collect(mg) == x̄
         @test jacobian(mg) == J
-        @test logicalgrid(mg) == lg
+        @test logical_grid(mg) == lg
 
 
         x̄ = map(ξ̄ -> @SVector[ξ̄[1],ξ̄[2], ξ̄[1] + ξ̄[2]], lg)
@@ -50,11 +50,11 @@ end
 
         @test mg isa Grid{SVector{3, Float64},2}
         @test jacobian(mg) isa Array{<:AbstractMatrix}
-        @test logicalgrid(mg) isa Grid
+        @test logical_grid(mg) isa Grid
 
         @test collect(mg) == x̄
         @test jacobian(mg) == J
-        @test logicalgrid(mg) == lg
+        @test logical_grid(mg) == lg
 
         sz1 = (10,11)
         sz2 = (10,12)
@@ -247,7 +247,7 @@ end
         ]
 
         function expected_bg(mg, bId, Jb)
-            lg = logicalgrid(mg)
+            lg = logical_grid(mg)
             return MappedGrid(
                 boundary_grid(lg, bId),
                 map(x̄, boundary_grid(lg, bId)),
@@ -279,32 +279,10 @@ end
     @test mg isa MappedGrid{SVector{2,Float64}, 2}
 
     lg = equidistant_grid((0,0), (1,1), 10, 11)
-    @test logicalgrid(mg) == lg
+    @test logical_grid(mg) == lg
     @test collect(mg) == map(x̄, lg)
 
     @test mapped_grid(lg, x̄, J) == mg
-end
-
-@testset "jacobian_determinant" begin
-    x̄((ξ, η)) = @SVector[ξ*η, ξ + η^2]
-    J((ξ, η)) = @SMatrix[
-        η    ξ;
-        1   2η;
-    ]
-
-    g = mapped_grid(x̄, J, 10, 11)
-    J = map(logicalgrid(g)) do (ξ,η)
-        2η^2 - ξ
-    end
-    @test jacobian_determinant(g) ≈ J
-
-
-    lg = equidistant_grid((0,0), (1,1), 11, 21)
-    x̄ = map(ξ̄ -> @SVector[ξ̄[1],ξ̄[2], ξ̄[1] + ξ̄[2]], lg)
-    J = map(ξ̄ -> @SMatrix[1 0; 0 1; 1 1], lg)
-    mg = MappedGrid(lg, x̄, J)
-
-    @test_broken jacobian(mg) isa AbstractArray{2,Float64}
 end
 
 @testset "metric_tensor" begin
@@ -315,7 +293,7 @@ end
     ]
 
     g = mapped_grid(x̄, J, 10, 11)
-    G = map(logicalgrid(g)) do (ξ,η)
+    G = map(logical_grid(g)) do (ξ,η)
         @SMatrix[
             1+η^2   ξ*η+2η;
             ξ*η+2η  ξ^2 + 4η^2;
@@ -332,7 +310,7 @@ end
     ]
 
     g = mapped_grid(x̄, J, 10, 11)
-    G⁻¹ = map(logicalgrid(g)) do (ξ,η)
+    G⁻¹ = map(logical_grid(g)) do (ξ,η)
         @SMatrix[
             (1+η)^2  -ξ*(1+η);
             -ξ*(1+η) (1+ξ)^2+ξ^2;
@@ -384,7 +362,7 @@ end
     @test normal(g, CartesianBoundary{1,LowerBoundary}()) == fill(@SVector[-1,0], 11)
     @test normal(g, CartesianBoundary{1,UpperBoundary}()) == fill(@SVector[1,0], 11)
     @test normal(g, CartesianBoundary{2,LowerBoundary}()) == fill(@SVector[0,-1], 10)
-    @test normal(g, CartesianBoundary{2,UpperBoundary}()) ≈ map(boundary_grid(g,CartesianBoundary{2,UpperBoundary}())|>logicalgrid) do ξ̄
+    @test normal(g, CartesianBoundary{2,UpperBoundary}()) ≈ map(boundary_grid(g,CartesianBoundary{2,UpperBoundary}())|>logical_grid) do ξ̄
         α = 1-2ξ̄[1]
         @SVector[α,1]/√(α^2 + 1)
     end
@@ -393,28 +371,28 @@ end
 
     unit(v) = v/norm(v)
     @testset let bId = CartesianBoundary{1,LowerBoundary}()
-        lbg = boundary_grid(logicalgrid(g), bId)
+        lbg = boundary_grid(logical_grid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             -unit(@SVector[1/2,  η/3-1/6])
         end
     end
 
     @testset let bId = CartesianBoundary{1,UpperBoundary}()
-        lbg = boundary_grid(logicalgrid(g), bId)
+        lbg = boundary_grid(logical_grid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             unit(@SVector[7/2, 2η-1]/(5 + 3η + 2η^2))
         end
     end
 
     @testset let bId = CartesianBoundary{2,LowerBoundary}()
-        lbg = boundary_grid(logicalgrid(g), bId)
+        lbg = boundary_grid(logical_grid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             -unit(@SVector[-2ξ, 2]/(6 + ξ^2 - 2ξ))
         end
     end
 
     @testset let bId = CartesianBoundary{2,UpperBoundary}()
-        lbg = boundary_grid(logicalgrid(g), bId)
+        lbg = boundary_grid(logical_grid(g), bId)
         @test normal(g, bId) ≈ map(lbg) do (ξ, η)
             unit(@SVector[-3ξ, 2]/(6 + ξ^2 + 3ξ))
         end

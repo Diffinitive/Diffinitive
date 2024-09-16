@@ -1,4 +1,5 @@
 # TODO: Double check that the interfaces for indexing and iterating are fully implemented and tested for all grids.
+# Review: Address this todo?
 module Grids
 
 using Diffinitive.LazyTensors
@@ -64,9 +65,8 @@ export equidistant_grid
 # MappedGrid
 export MappedGrid
 export jacobian
-export logicalgrid
+export logical_grid
 export mapped_grid
-export jacobian_determinant
 export metric_tensor
 export metric_tensor_inverse
 

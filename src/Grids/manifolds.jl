@@ -19,7 +19,21 @@ See also: [`Interval`](@ref), [`Rectangle`](@ref), [`Box`](@ref),
 """
 abstract type ParameterSpace{D} end
 Base.ndims(::ParameterSpace{D}) where D = D
-# TBD:  Should implement domain_dim?
+
+struct Interval{T} <: ParameterSpace{1}
+    a::T
+    b::T
+
+    function Interval(a,b)
+        a, b = promote(a, b)
+        new{typeof(a)}(a,b)
+    end
+end
+
+limits(i::Interval) = (i.a, i.b)
+
+unitinterval(T=Float64) = Interval(zero(T), one(T))
+
 
 struct HyperBox{T,D} <: ParameterSpace{D}
     a::SVector{D,T}
@@ -27,18 +41,17 @@ struct HyperBox{T,D} <: ParameterSpace{D}
 end
 
 function HyperBox(a,b)
-    T = SVector{length(a)}
+    ET = promote_type(eltype(a),eltype(b))
+    T = SVector{length(a),ET}
     HyperBox(convert(T,a), convert(T,b))
 end
 
-Interval{T} = HyperBox{T,1}
 Rectangle{T} = HyperBox{T,2}
 Box{T} = HyperBox{T,3}
 
 limits(box::HyperBox, d) = (box.a[d], box.b[d])
 limits(box::HyperBox) = (box.a, box.b)
 
-unitinterval(T=Float64) = unithyperbox(T,1)
 unitsquare(T=Float64) = unithyperbox(T,2)
 unitcube(T=Float64) = unithyperbox(T,3)
 unithyperbox(T, D) = HyperBox((@SVector zeros(T,D)), (@SVector ones(T,D)))
@@ -49,7 +62,12 @@ struct Simplex{T,D,NV} <: ParameterSpace{D}
     verticies::NTuple{NV,SVector{D,T}}
 end
 
-Simplex(verticies::Vararg{AbstractArray}) = Simplex(Tuple(SVector(v...) for v ∈ verticies))
+function Simplex(verticies::Vararg{AbstractArray})
+    ET = mapreduce(eltype,promote_type,verticies)
+    T = SVector{length(verticies[1]),ET}
+
+    return Simplex(Tuple(convert(T,v) for v ∈ verticies))
+end
 
 verticies(s::Simplex) = s.verticies
 
@@ -76,7 +94,7 @@ struct Chart{D, PST<:ParameterSpace{D}, MT}
     parameterspace::PST
 end
 
-domain_dim(::Chart{D}) where D = D
+Base.ndims(::Chart{D}) where D = D
 (c::Chart)(ξ) = c.mapping(ξ)
 parameterspace(c::Chart) = c.parameterspace
 
@@ -131,6 +149,7 @@ struct CartesianAtlas <: Atlas
 end
 
 charts(a::CartesianAtlas) = a.charts
+connections(a::CartesianAtlas) = nothing
 
 struct UnstructuredAtlas <: Atlas
     charts::Vector{Chart}
@@ -138,6 +157,7 @@ struct UnstructuredAtlas <: Atlas
 end
 
 charts(a::UnstructuredAtlas) = a.charts
+connections(a::UnstructuredAtlas) = nothing
 
 
 ###
