@@ -84,16 +84,27 @@ function boundary_grid(g::TensorGrid, id::TensorGridBoundary)
     return TensorGrid(new_grids...)
 end
 
+
+function boundary_indices(g::TensorGrid{T,1} where T, id::TensorGridBoundary)
+    return boundary_indices(g.grids[grid_id(id)], boundary_id(id))
+end
 function boundary_indices(g::TensorGrid, id::TensorGridBoundary)
-    per_grid_ind = map(g.grids) do g
-        ntuple(i->:, ndims(g))
-    end
+    all_indices = map(eachindex, g.grids)
 
     local_b_ind = boundary_indices(g.grids[grid_id(id)], boundary_id(id))
-    b_ind = Base.setindex(per_grid_ind, local_b_ind, grid_id(id))
 
-    return LazyTensors.concatenate_tuples(b_ind...)
+    b_ind = Base.setindex(all_indices, local_b_ind, grid_id(id))
+
+    return view(_combine_indices(all_indices...), LazyTensors.concatenate_tuples(bla.(b_ind)...)...)
 end
+
+# function _combine_indices(Is::Vararg{Union{Int, <:AbstractRange}})
+function _combine_indices(Is...)
+    return CartesianIndices(LazyTensors.concatenate_tuples(bla.(Is)...))
+end
+
+bla(a) = (a,)
+bla(a::CartesianIndices) = a.indices
 
 function combined_coordinate_vector_type(coordinate_types...)
     combined_coord_length = mapreduce(_ncomponents, +, coordinate_types)

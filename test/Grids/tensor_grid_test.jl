@@ -181,14 +181,21 @@ using Sbplib.RegionIndices
         @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Lower}())] == gf[:,1]
         @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Upper}())] == gf[:,6]
 
+        gf = rand(11)
+        @show boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Lower}())
+        @test gf[boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Lower}())] == gf[1]
+        @test gf[boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Upper}())] == gf[11]
+        @test gf[boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Lower}())]== gf[1]
+        @test gf[boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Upper}())]== gf[11]
+
         @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Lower}())) == [CartesianIndex(1,i) for i ∈ 1:6]
         @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Upper}())) == [CartesianIndex(11,i) for i ∈ 1:6]
         @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Lower}())) == [CartesianIndex(i,1) for i ∈ 1:11]
         @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Upper}())) == [CartesianIndex(i,6) for i ∈ 1:11]
-        @test collect(boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Lower}())) == 1
-        @test collect(boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Upper}())) == 11
-        @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Lower}())) == 1
-        @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Upper}())) == 11
+        @test collect(boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Lower}())) == fill(1)
+        @test collect(boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Upper}())) == fill(11)
+        @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Lower}())) == fill(1)
+        @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Upper}())) == fill(11)
     end
 end
 
