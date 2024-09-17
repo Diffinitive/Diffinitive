@@ -70,18 +70,16 @@ using Sbplib.LazyTensors
 
     @testset "boundary_indices" begin
         g = EquidistantGrid(0:0.1:1)
-        @test collect(boundary_indices(g, Lower())) == [(1,)]
-        @test collect(boundary_indices(g, Upper())) == [(11,)]
+        @test boundary_indices(g, Lower()) == 1
+        @test boundary_indices(g, Upper()) == 11
 
-
-        gf = collect(1:length(g))
-        @test gf[boundary_indices(g, Lower()] == gf[1]
-        @test gf[boundary_indices(g, Upper()] == gf[11]
+        gf = collect(g)
+        @test gf[boundary_indices(g, Lower())] == gf[1]
+        @test gf[boundary_indices(g, Upper())] == gf[11]
 
         g = EquidistantGrid(2:0.1:10)
-        @test collect(boundary_indices(g, Lower())) == [(1,)]
-        @test collect(boundary_indices(g, Upper())) == [(81,)]
-
+        @test boundary_indices(g, Lower()) == 1
+        @test boundary_indices(g, Upper()) == 81
     end
 
     @testset "refine" begin

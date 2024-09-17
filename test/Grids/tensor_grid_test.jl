@@ -175,22 +175,20 @@ using Sbplib.RegionIndices
         g₂ = EquidistantGrid(range(2,3,length=6))
         g₄ = ZeroDimGrid(@SVector[1,2])
 
-        @test iterate(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Lower}()))
-
         gf = reshape(1:(11*6),11,6)
-        @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Lower}()))] == gf[1,:]
-        @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Upper}()))] == gf[11,:]
-        @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Lower}()))] == gf[:,1]
-        @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Upper}()))] == gf[:,6]
+        @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Lower}())] == gf[1,:]
+        @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Upper}())] == gf[11,:]
+        @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Lower}())] == gf[:,1]
+        @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Upper}())] == gf[:,6]
 
-        @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Lower}())) == [(1,i) for i ∈ 1:6]
-        @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Upper}())) == [(11,i) for i ∈ 1:6]
-        @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Lower}())) == [(i,1) for i ∈ 1:11]
-        @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Upper}())) == [(i,6) for i ∈ 1:11]
-        @test collect(boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Lower}())) == [(1,)]
-        @test collect(boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Upper}())) == [(11,)]
-        @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Lower}())) == [(1,)]
-        @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Upper}())) == [(11,)]
+        @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Lower}())) == [CartesianIndex(1,i) for i ∈ 1:6]
+        @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, Upper}())) == [CartesianIndex(11,i) for i ∈ 1:6]
+        @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Lower}())) == [CartesianIndex(i,1) for i ∈ 1:11]
+        @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, Upper}())) == [CartesianIndex(i,6) for i ∈ 1:11]
+        @test collect(boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Lower}())) == 1
+        @test collect(boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Upper}())) == 11
+        @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Lower}())) == 1
+        @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Upper}())) == 11
     end
 end
 
