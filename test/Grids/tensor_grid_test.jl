@@ -137,6 +137,13 @@ using StaticArrays
         @test axes(g) == (1:11,1:6)
     end
 
+    @testset "spacing" begin
+        g₁ = EquidistantGrid(range(0,1,length=11))
+        g₂ = EquidistantGrid(range(2,3,length=6))
+
+        @test spacing(TensorGrid(g₁, g₂)) == (1/10, 1/5)
+    end
+
     @testset "min_spacing" begin
         g₁ = EquidistantGrid(range(0,1,length=11))
         g₂ = EquidistantGrid(range(2,3,length=6))
