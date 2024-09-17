@@ -97,6 +97,7 @@ function boundary_indices(g::TensorGrid, id::TensorGridBoundary)
 
     return view(_combine_indices(all_indices...), LazyTensors.concatenate_tuples(bla.(b_ind)...)...)
 end
+# TODO: There must be a way to make the above code cleaner?
 
 # function _combine_indices(Is::Vararg{Union{Int, <:AbstractRange}})
 function _combine_indices(Is...)

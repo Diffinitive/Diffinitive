@@ -196,6 +196,7 @@ using Sbplib.RegionIndices
         @test collect(boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, Upper}())) == fill(11)
         @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Lower}())) == fill(1)
         @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, Upper}())) == fill(11)
+        # TBD: What do we actually expect for 1D grids?
     end
 end
 
