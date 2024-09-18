@@ -133,17 +133,6 @@ function metric_tensor(g::MappedGrid)
     end
 end
 
-"""
-    metric_tensor_inverse(g::MappedGrid)
-
-The inverse of the metric tensor of `g` as a grid function.
-"""
-function metric_tensor_inverse(g::MappedGrid)
-    return map(jacobian(g)) do ∂x∂ξ
-        inv(∂x∂ξ'*∂x∂ξ)
-    end
-end
-
 function min_spacing(g::MappedGrid{T,1} where T)
     n, = size(g)
 

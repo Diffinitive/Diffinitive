@@ -44,7 +44,6 @@ export jacobian
 export logical_grid
 export mapped_grid
 export metric_tensor
-export metric_tensor_inverse
 
 include("grid.jl")
 include("tensor_grid.jl")
