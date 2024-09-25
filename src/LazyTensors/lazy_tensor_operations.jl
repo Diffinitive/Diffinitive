@@ -64,6 +64,12 @@ struct ElementwiseTensorOperation{Op,T,R,D,TT<:NTuple{N, LazyTensor{T,R,D}} wher
         return new{Op,T,R,D,TT}(tms)
     end
 end
+# TBD: Can we introduce negation of LazyTensors? It could be done generically
+# with a ScalingTensor but also using specializations for specific tensor
+# types. This would allow simplification of ElementwiseTensorOperation to
+# TensorSum. The implementation of `-` can be done using negation and the
+# TensorSum type. We should make sure this doesn't impact the efficiency of
+# for example SATs.
 
 
 function ElementwiseTensorOperation{:+}(ts::Vararg{LazyTensor})
