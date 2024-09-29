@@ -98,9 +98,9 @@ end
 """
     mapped_grid(x, J, size::Vararg{Int})
 
-A `MappedGrid` with a default logical grid on a unit hyper box. `x` and `J`
-are functions to be evaluated on the logical grid and `size` determines the
-size of the logical grid.
+A `MappedGrid` with a default logical grid on the D-dimensional unit hyper 
+box [0,1]ᴰ. `x` and `J`are functions to be evaluated on the logical grid
+and `size` determines the size of the logical grid.
 """
 function mapped_grid(x, J, size::Vararg{Int})
     D = length(size)
