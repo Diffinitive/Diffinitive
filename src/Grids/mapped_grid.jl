@@ -72,8 +72,6 @@ Base.size(g::MappedGrid, d) = size(g.logical_grid, d)
 boundary_identifiers(g::MappedGrid) = boundary_identifiers(g.logical_grid)
 boundary_indices(g::MappedGrid, id::TensorGridBoundary) = boundary_indices(g.logical_grid, id)
 
-# Review: Error when calling plot(boundary_grid(g, id))
-# Currently need to collect first, i.e., plot(collect(boundary_grid(g, id)))
 function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
     b_indices = boundary_indices(g.logical_grid, id)
 
