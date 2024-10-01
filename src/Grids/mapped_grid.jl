@@ -180,9 +180,9 @@ function normal(g::MappedGrid, boundary)
     end
 end
 
-function normal(g::MappedGrid, boundary, i)
+function normal(g::MappedGrid, boundary, i...)
     σ = _boundary_sign(component_type(g), boundary)
-    ∂ξ∂x = inv(jacobian(g)[i])
+    ∂ξ∂x = inv(jacobian(g)[i...])
 
     k = grid_id(boundary)
     return σ*∂ξ∂x[k,:]/norm(∂ξ∂x[k,:])
