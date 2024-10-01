@@ -1,5 +1,3 @@
-# TODO: Double check that the interfaces for indexing and iterating are fully implemented and tested for all grids.
-# Review: Address this todo?
 module Grids
 
 using Diffinitive.LazyTensors
