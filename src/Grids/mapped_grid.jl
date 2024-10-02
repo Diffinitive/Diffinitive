@@ -183,6 +183,11 @@ function normal(g::MappedGrid, boundary)
     end
 end
 
+"""
+    normal(g::MappedGrid, boundary, i...)
+
+The outward pointing normal to the specified boundary in grid point `i`.
+"""
 function normal(g::MappedGrid, boundary, i...)
     σ = _boundary_sign(component_type(g), boundary)
     ∂ξ∂x = inv(jacobian(g)[i...])
