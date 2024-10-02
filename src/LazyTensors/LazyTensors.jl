@@ -1,5 +1,11 @@
 module LazyTensors
 
+export LazyTensor
+export apply
+export apply_transpose
+export range_dim, domain_dim
+export range_size, domain_size
+
 export TensorApplication
 export TensorTranspose
 export TensorComposition
@@ -12,6 +18,10 @@ export LazyOuterProduct
 export ⊗
 export DomainSizeMismatch
 export RangeSizeMismatch
+
+export LazyArray
+export LazyFunctionArray
+export +̃, -̃, *̃, /̃
 
 include("lazy_tensor.jl")
 include("tensor_types.jl")

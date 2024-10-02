@@ -72,8 +72,6 @@ Base.size(g::MappedGrid, d) = size(g.logical_grid, d)
 boundary_identifiers(g::MappedGrid) = boundary_identifiers(g.logical_grid)
 boundary_indices(g::MappedGrid, id::TensorGridBoundary) = boundary_indices(g.logical_grid, id)
 
-# Review: Error when calling plot(boundary_grid(g, id))
-# Currently need to collect first, i.e., plot(collect(boundary_grid(g, id)))
 function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
     b_indices = boundary_indices(g.logical_grid, id)
 
@@ -98,9 +96,9 @@ end
 """
     mapped_grid(x, J, size::Vararg{Int})
 
-A `MappedGrid` with a default logical grid on a unit hyper box. `x` and `J`
-are functions to be evaluated on the logical grid and `size` determines the
-size of the logical grid.
+A `MappedGrid` with a default logical grid on the D-dimensional unit hyper 
+box [0,1]ᴰ. `x` and `J`are functions to be evaluated on the logical grid
+and `size` determines the size of the logical grid.
 """
 function mapped_grid(x, J, size::Vararg{Int})
     D = length(size)
@@ -130,17 +128,6 @@ The metric tensor of `g` as a grid function.
 function metric_tensor(g::MappedGrid)
     return map(jacobian(g)) do ∂x∂ξ
         ∂x∂ξ'*∂x∂ξ
-    end
-end
-
-"""
-    metric_tensor_inverse(g::MappedGrid)
-
-The inverse of the metric tensor of `g` as a grid function.
-"""
-function metric_tensor_inverse(g::MappedGrid)
-    return map(jacobian(g)) do ∂x∂ξ
-        inv(∂x∂ξ'*∂x∂ξ)
     end
 end
 
@@ -185,13 +172,22 @@ The outward pointing normal as a grid function on the corresponding boundary gri
 """
 function normal(g::MappedGrid, boundary)
     b_indices = boundary_indices(g, boundary)
-    σ =_boundary_sign(component_type(g), boundary)
+    σ = _boundary_sign(component_type(g), boundary)
     return map(jacobian(g)[b_indices...]) do ∂x∂ξ
         ∂ξ∂x = inv(∂x∂ξ)
         k = grid_id(boundary)
         σ*∂ξ∂x[k,:]/norm(∂ξ∂x[k,:])
     end
 end
+
+function normal(g::MappedGrid, boundary, i...)
+    σ = _boundary_sign(component_type(g), boundary)
+    ∂ξ∂x = inv(jacobian(g)[i...])
+
+    k = grid_id(boundary)
+    return σ*∂ξ∂x[k,:]/norm(∂ξ∂x[k,:])
+end
+
 
 function _boundary_sign(T, boundary)
     if boundary_id(boundary) == UpperBoundary()
