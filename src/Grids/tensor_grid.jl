@@ -47,6 +47,9 @@ Base.length(g::TensorGrid) = prod(length, g.grids)
 Base.size(g::TensorGrid) = LazyTensors.concatenate_tuples(size.(g.grids)...)
 Base.size(g::TensorGrid, d) = size(g)[d]
 
+# Review: Handle boundary grids as well?
+# spacing(boundary_grid(g,id)) fails right now with
+# MethodError: no method matching spacing(::ZeroDimGrid{Float64})
 spacing(g::TensorGrid) = spacing.(g.grids)
 
 function min_spacing(g::TensorGrid)
