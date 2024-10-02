@@ -170,12 +170,11 @@ end
 
 The outward pointing normal as a grid function on the corresponding boundary grid.
 """
-# Review: I guess there is no clean way of calling normal(g::MappedGrid, boundary, i...)
-# here? Something along return map(i -> normal(g, boundary, i), boundary_indices(g, boundary))
-# If there is I think it would be cleaner. Otherwise, keep as it.
 function normal(g::MappedGrid, boundary)
     b_indices = boundary_indices(g, boundary)
     σ = _boundary_sign(component_type(g), boundary)
+
+    # TODO: Refactor this when `boundary_indices(g, ...)` has been made iterable.
     return map(jacobian(g)[b_indices...]) do ∂x∂ξ
         ∂ξ∂x = inv(∂x∂ξ)
         k = grid_id(boundary)
