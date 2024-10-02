@@ -1,6 +1,3 @@
-export CenteredStencil
-export CenteredNestedStencil
-
 struct Stencil{T,N}
     range::UnitRange{Int64}
     weights::NTuple{N,T}

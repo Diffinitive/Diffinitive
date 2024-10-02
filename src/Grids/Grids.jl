@@ -1,5 +1,3 @@
-# TODO: Double check that the interfaces for indexing and iterating are fully implemented and tested for all grids.
-# Review: Address this todo?
 module Grids
 
 using Diffinitive.LazyTensors
@@ -68,7 +66,6 @@ export jacobian
 export logical_grid
 export mapped_grid
 export metric_tensor
-export metric_tensor_inverse
 
 include("manifolds.jl")
 include("grid.jl")

@@ -302,25 +302,6 @@ end
     @test metric_tensor(g) ≈ G
 end
 
-@testset "metric_tensor_inverse" begin
-    x̄((ξ, η)) = @SVector[ξ + ξ^2/2, η + η^2 + ξ^2/2]
-    J((ξ, η)) = @SMatrix[
-        1+ξ   0;
-        ξ    1+η;
-    ]
-
-    g = mapped_grid(x̄, J, 10, 11)
-    G⁻¹ = map(logical_grid(g)) do (ξ,η)
-        @SMatrix[
-            (1+η)^2  -ξ*(1+η);
-            -ξ*(1+η) (1+ξ)^2+ξ^2;
-        ]/(((1+ξ)^2+ξ^2)*(1+η)^2 - ξ^2*(1+η)^2)
-
-    end
-
-    @test metric_tensor_inverse(g) ≈ G⁻¹
-end
-
 @testset "min_spacing" begin
     let g = mapped_grid(identity, x->@SMatrix[1], 11)
         @test min_spacing(g) ≈ 0.1
