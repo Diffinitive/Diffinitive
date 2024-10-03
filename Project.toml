@@ -1,7 +1,7 @@
 name = "Diffinitive"
 uuid = "5a373a26-915f-4769-bcab-bf03835de17b"
 authors = ["Jonatan Werpers <jonatan@werpers.com>", "Vidar Stiernström <vidar.stiernstrom@gmail.com>, and contributors"]
-version = "0.1.2"
+version = "0.1.3"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
