@@ -40,7 +40,7 @@ deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
 [[deps.Diffinitive]]
-deps = ["StaticArrays", "TOML"]
+deps = ["LinearAlgebra", "StaticArrays", "TOML"]
 path = ".."
 uuid = "5a373a26-915f-4769-bcab-bf03835de17b"
 version = "0.1.2"
