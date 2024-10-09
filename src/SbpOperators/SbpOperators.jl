@@ -1,5 +1,11 @@
 module SbpOperators
 
+# Stencils
+export Stencil
+export CenteredStencil
+export NestedStencil
+export CenteredNestedStencil
+
 # Stencil set
 export StencilSet
 export read_stencil_set
