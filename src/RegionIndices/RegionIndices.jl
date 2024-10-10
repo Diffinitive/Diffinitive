@@ -25,7 +25,7 @@ export Index
 Index(R::Type{<:Region}, T::Type{<:Integer}) = Index{R,T}
 IndexTupleType(T::Type{<:Integer},R::NTuple{N, DataType} where N) = Tuple{Index.(R, T)...}
 
-Base.convert(::Type{T}, i::Index{R,T} where R) where T = i.i
+Base.convert(::Type{T}, i::Index{R,T} where R) where T <: Integer = i.i
 Base.convert(::Type{CartesianIndex}, I::NTuple{N,Index} where N) = CartesianIndex(convert.(Int, I))
 
 Base.Int(I::Index) = I.i
