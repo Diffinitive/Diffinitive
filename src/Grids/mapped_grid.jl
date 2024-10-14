@@ -94,30 +94,49 @@ end
 
 
 """
+    mapped_grid(x,J,size...)
+    mapped_grid(x,J,size...)
+"""
+function mapped_grid end
+"""
     mapped_grid(x, J, size::Vararg{Int})
 
 A `MappedGrid` with a default logical grid on the D-dimensional unit hyper 
-box [0,1]ᴰ. `x` and `J`are functions to be evaluated on the logical grid
+box [0,1]ᴰ. `x` and `J` are functions to be evaluated on the logical grid
 and `size` determines the size of the logical grid.
 """
 function mapped_grid(x, J, size::Vararg{Int})
     D = length(size)
     lg = equidistant_grid(ntuple(i->0., D), ntuple(i->1., D), size...)
-    return mapped_grid(lg, x, J)
+    return mapped_grid(x, J, lg)
+
+    # parameterspace = ...
+    # return mapped_grid(x, J, parameterspace, size...)
 end
 
 """
-    mapped_grid(lg::Grid, x, J)
+    mapped_grid(x, J, lg::Grid)
 
 A `MappedGrid` with logical grid `lg`. Physical coordinates and Jacobian are
 determined by the functions `x` and `J`.
 """
-function mapped_grid(lg::Grid, x, J)
+function mapped_grid(x, J, lg::Grid)
     return MappedGrid(
         lg,
         map(x,lg),
         map(J,lg),
     )
+end
+
+"""
+    mapped_grid(x, J, lg::Grid)
+
+A `MappedGrid` with logical grid `lg`. Physical coordinates and Jacobian are
+determined by the functions `x` and `J`.
+"""
+function mapped_grid(x, J, parameterspace, size::Vararg{Int})
+    lg = equidistant_grid(parameterspace, size...)
+    return mapped_grid(x, J, lg)
 end
 
 """
