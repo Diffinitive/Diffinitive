@@ -11,7 +11,6 @@ export Grids
 export SbpOperators
 
 
-
 # Aqua.jl fixes
 using StaticArrays
 using .LazyTensors

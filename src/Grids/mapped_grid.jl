@@ -94,11 +94,6 @@ end
 
 
 """
-    mapped_grid(x,J,size...)
-    mapped_grid(x,J,size...)
-"""
-function mapped_grid end
-"""
     mapped_grid(x, J, size::Vararg{Int})
 
 A `MappedGrid` with a default logical grid on the D-dimensional unit hyper 
@@ -107,11 +102,8 @@ and `size` determines the size of the logical grid.
 """
 function mapped_grid(x, J, size::Vararg{Int})
     D = length(size)
-    lg = equidistant_grid(ntuple(i->0., D), ntuple(i->1., D), size...)
+        lg = equidistant_grid(ntuple(i->0., D), ntuple(i->1., D), size...) # TODO: Clean this up with ParamaterSpace once feature/grids/manifolds is merged
     return mapped_grid(x, J, lg)
-
-    # parameterspace = ...
-    # return mapped_grid(x, J, parameterspace, size...)
 end
 
 """
@@ -129,7 +121,7 @@ function mapped_grid(x, J, lg::Grid)
 end
 
 """
-    mapped_grid(x, J, lg::Grid)
+    mapped_grid(x, J, parameterspace, size)
 
 A `MappedGrid` with logical grid `lg`. Physical coordinates and Jacobian are
 determined by the functions `x` and `J`.
