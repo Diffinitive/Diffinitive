@@ -92,7 +92,7 @@ function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
     )
 end
 
-
+# TODO: Make sure all methods of `mapped_grid` are implemented correctly and tested.
 """
     mapped_grid(x, J, size::Vararg{Int})
 
