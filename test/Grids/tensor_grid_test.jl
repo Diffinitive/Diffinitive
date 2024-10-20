@@ -140,8 +140,22 @@ using StaticArrays
     @testset "spacing" begin
         g₁ = EquidistantGrid(range(0,1,length=11))
         g₂ = EquidistantGrid(range(2,3,length=6))
+        g₃ = ZeroDimGrid(@SVector[1,2])
+
+        @test spacing(TensorGrid(g₁)) == (1/10,)
+        @test spacing(TensorGrid(g₂)) == (1/5,)
 
         @test spacing(TensorGrid(g₁, g₂)) == (1/10, 1/5)
+
+        @test spacing(TensorGrid(g₁, g₃)) == (1/10,)
+        @test spacing(TensorGrid(g₃, g₂)) == (1/5,)
+
+
+        @test spacing(TensorGrid(g₁, g₂, g₁)) == (1/10, 1/5, 1/10)
+
+        @test spacing(TensorGrid(g₃, g₂, g₁)) == (1/5, 1/10)
+        @test spacing(TensorGrid(g₁, g₃, g₁)) == (1/10, 1/10)
+        @test spacing(TensorGrid(g₁, g₂, g₃)) == (1/10, 1/5)
     end
 
     @testset "min_spacing" begin
