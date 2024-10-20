@@ -71,8 +71,8 @@ struct UpperBoundary <: BoundaryIdentifier end
 boundary_identifiers(::EquidistantGrid) = (LowerBoundary(), UpperBoundary())
 boundary_grid(g::EquidistantGrid, id::LowerBoundary) = ZeroDimGrid(g[begin])
 boundary_grid(g::EquidistantGrid, id::UpperBoundary) = ZeroDimGrid(g[end])
-boundary_indices(g::EquidistantGrid, id::LowerBoundary) = (firstindex(g),)
-boundary_indices(g::EquidistantGrid, id::UpperBoundary) = (lastindex(g),)
+boundary_indices(g::EquidistantGrid, id::LowerBoundary) = firstindex(g)
+boundary_indices(g::EquidistantGrid, id::UpperBoundary) = lastindex(g)
 
 """
     refine(g::EquidistantGrid, r::Int)
