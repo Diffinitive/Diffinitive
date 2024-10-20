@@ -82,8 +82,8 @@ function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
     jacobian_components = (:, free_variable_indices)
 
     # Create grid function for boundary grid jacobian
-    boundary_jacobian = componentview((@view g.jacobian[b_indices...])  , jacobian_components...)
-    boundary_physicalcoordinates = @view g.physicalcoordinates[b_indices...]
+    boundary_jacobian = componentview((@view g.jacobian[b_indices])  , jacobian_components...)
+    boundary_physicalcoordinates = @view g.physicalcoordinates[b_indices]
 
     return MappedGrid(
         boundary_grid(g.logical_grid, id),
@@ -171,14 +171,8 @@ end
 The outward pointing normal as a grid function on the corresponding boundary grid.
 """
 function normal(g::MappedGrid, boundary)
-    b_indices = boundary_indices(g, boundary)
-    σ = _boundary_sign(component_type(g), boundary)
-
-    # TODO: Refactor this when `boundary_indices(g, ...)` has been made iterable.
-    return map(jacobian(g)[b_indices...]) do ∂x∂ξ
-        ∂ξ∂x = inv(∂x∂ξ)
-        k = grid_id(boundary)
-        σ*∂ξ∂x[k,:]/norm(∂ξ∂x[k,:])
+    return map(boundary_indices(g, boundary)) do I
+        normal(g, boundary, Tuple(I)...)
     end
 end
 
