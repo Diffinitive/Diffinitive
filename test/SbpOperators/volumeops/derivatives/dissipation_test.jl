@@ -1,32 +1,21 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
 
-using Sbplib.SbpOperators: Stencil
+using Diffinitive.SbpOperators: Stencil
 
-using Sbplib.SbpOperators: dissipation_interior_weights
-using Sbplib.SbpOperators: dissipation_interior_stencil, dissipation_transpose_interior_stencil
-using Sbplib.SbpOperators: midpoint, midpoint_transpose
-using Sbplib.SbpOperators: dissipation_lower_closure_size, dissipation_upper_closure_size
-using Sbplib.SbpOperators: dissipation_lower_closure_stencils,dissipation_upper_closure_stencils
-using Sbplib.SbpOperators: dissipation_transpose_lower_closure_stencils, dissipation_transpose_upper_closure_stencils
+using Diffinitive.SbpOperators: dissipation_interior_weights
+using Diffinitive.SbpOperators: dissipation_interior_stencil, dissipation_transpose_interior_stencil
+using Diffinitive.SbpOperators: midpoint, midpoint_transpose
+using Diffinitive.SbpOperators: dissipation_lower_closure_size, dissipation_upper_closure_size
+using Diffinitive.SbpOperators: dissipation_lower_closure_stencils,dissipation_upper_closure_stencils
+using Diffinitive.SbpOperators: dissipation_transpose_lower_closure_stencils, dissipation_transpose_upper_closure_stencils
 
-"""
-    monomial(x,k)
-
-Evaluates ``x^k/k!` with the convetion that it is ``0`` for all ``k<0``.
-Has the property that ``d/dx monomial(x,k) = monomial(x,k-1)``
-"""
-function monomial(x,k)
-    if k < 0
-        return zero(x)
-    end
-    x^k/factorial(k)
-end
 
 @testset "undivided_skewed04" begin
+    monomial(x,k) = k < 0 ? zero(x) : x^k/factorial(k)
     g = equidistant_grid(0., 11., 20)
     D,Dᵀ = undivided_skewed04(g, 1)
 

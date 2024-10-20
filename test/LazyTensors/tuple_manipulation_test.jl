@@ -1,5 +1,5 @@
 using Test
-using Sbplib.LazyTensors
+using Diffinitive.LazyTensors
 
 @testset "split_index" begin
     @test LazyTensors.split_index(2,1,2,2, 1,2,3,4,5,6) == ((1,2,:,5,6),(3,4))

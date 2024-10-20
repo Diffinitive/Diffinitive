@@ -45,7 +45,7 @@ function  run_testfiles(path, globs)
     end
 end
 
-testsetname = isempty(ARGS) ? "Sbplib.jl" : "["*join(ARGS, ", ")*"]"
+testsetname = isempty(ARGS) ? "Diffinitive.jl" : "["*join(ARGS, ", ")*"]"
 
 @testset "$testsetname" begin
     run_testfiles(ARGS)

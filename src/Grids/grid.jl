@@ -82,6 +82,14 @@ IndexStyle(::Type{<:ArrayComponentView{<:Any,<:Any,AT}}) where AT = IndexStyle(A
 # TODO: Implement `setindex!`?
 # TODO: Implement a more general ComponentView that can handle non-AbstractArrays.
 
+
+"""
+    min_spacing(g::Grid)
+
+The smallest distance between any pair of grid points in `g`.
+"""
+function min_spacing end
+
 """
     refine(g::Grid, r)
 
@@ -99,6 +107,13 @@ The grid where `g` is coarsened by the factor `r`.
 See also: [`refine`](@ref).
 """
 function coarsen end
+
+"""
+   BoundaryIdentifier
+
+An identifier for a boundary of a grid.
+"""
+abstract type BoundaryIdentifier end
 
 """
     boundary_identifiers(g::Grid)

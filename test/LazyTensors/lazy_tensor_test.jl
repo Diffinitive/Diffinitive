@@ -1,5 +1,5 @@
 using Test
-using Sbplib.LazyTensors
+using Diffinitive.LazyTensors
 
 @testset "Generic Mapping methods" begin
     struct DummyMapping{T,R,D} <: LazyTensor{T,R,D} end

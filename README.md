@@ -1,10 +1,10 @@
-# Sbplib
+# Diffinitive
 
 ## Running tests
 To run all tests simply run
 ```
 (@v1.5) pkg> activate .
-(Sbplib) pkg> test
+(Diffinitive) pkg> test
 ```
 
 If you want to run tests from a specific file in `test/`, you can do
@@ -59,8 +59,8 @@ PkgBenchmark can also be used directly.
 
 ```julia
 using PkgBenchmark
-import Sbplib
-r = benchmarkpkg(Sbplib)
+import Diffinitive
+r = benchmarkpkg(Diffinitive)
 
 export_markdown(stdout, r)
 ```

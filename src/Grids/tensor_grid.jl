@@ -48,6 +48,12 @@ Base.size(g::TensorGrid) = LazyTensors.concatenate_tuples(size.(g.grids)...)
 Base.size(g::TensorGrid, d) = size(g)[d]
 
 
+function min_spacing(g::TensorGrid)
+    relevant_grids = filter(g->!isa(g,ZeroDimGrid),g.grids)
+    d = min_spacing.(relevant_grids)
+    return minimum(d)
+end
+
 refine(g::TensorGrid, r::Int) = mapreduce(g->refine(g,r), TensorGrid, g.grids)
 coarsen(g::TensorGrid, r::Int) = mapreduce(g->coarsen(g,r), TensorGrid, g.grids)
 
@@ -123,7 +129,7 @@ function combine_coordinates(coords...)
 end
 
 """
-   grid_and_local_dim_index(nds, d)
+    grid_and_local_dim_index(nds, d)
 
 Given a tuple of number of dimensions `nds`, and a global dimension index `d`,
 calculate which grid index, and local dimension, `d` corresponds to.

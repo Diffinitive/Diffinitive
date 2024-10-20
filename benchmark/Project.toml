@@ -1,5 +1,5 @@
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+Diffinitive = "5a373a26-915f-4769-bcab-bf03835de17b"
 Mustache = "ffc61752-8dc7-55ee-8c37-f3e9cdd09e70"
 PkgBenchmark = "32113eaa-f34f-5b0d-bd6c-c81e245fc73d"
-Sbplib = "5a373a26-915f-4769-bcab-bf03835de17b"

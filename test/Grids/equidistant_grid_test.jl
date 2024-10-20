@@ -1,7 +1,6 @@
-using Sbplib.Grids
+using Diffinitive.Grids
 using Test
-using Sbplib.RegionIndices
-using Sbplib.LazyTensors
+using Diffinitive.LazyTensors
 
 
 @testset "EquidistantGrid" begin
@@ -56,30 +55,35 @@ using Sbplib.LazyTensors
         @test inverse_spacing(EquidistantGrid(0:0.1:10)) == 10
     end
 
+    @testset "min_spacing" begin
+        @test min_spacing(EquidistantGrid(0:10)) == 1
+        @test min_spacing(EquidistantGrid(0:0.1:10)) == 0.1
+    end
+
     @testset "boundary_identifiers" begin
         g = EquidistantGrid(0:0.1:10)
-        @test boundary_identifiers(g) == (Lower(), Upper())
+        @test boundary_identifiers(g) == (LowerBoundary(), UpperBoundary())
         @inferred boundary_identifiers(g)
     end
 
     @testset "boundary_grid" begin
         g = EquidistantGrid(0:0.1:1)
-        @test boundary_grid(g, Lower()) == ZeroDimGrid(0.0)
-        @test boundary_grid(g, Upper()) == ZeroDimGrid(1.0)
+        @test boundary_grid(g, LowerBoundary()) == ZeroDimGrid(0.0)
+        @test boundary_grid(g, UpperBoundary()) == ZeroDimGrid(1.0)
     end
 
     @testset "boundary_indices" begin
         g = EquidistantGrid(0:0.1:1)
-        @test boundary_indices(g, Lower()) == 1
-        @test boundary_indices(g, Upper()) == 11
+        @test boundary_indices(g, LowerBoundary()) == 1
+        @test boundary_indices(g, UpperBoundary()) == 11
 
         gf = collect(g)
-        @test gf[boundary_indices(g, Lower())] == gf[1]
-        @test gf[boundary_indices(g, Upper())] == gf[11]
+        @test gf[boundary_indices(g, LowerBoundary())] == gf[1]
+        @test gf[boundary_indices(g, UpperBoundary())] == gf[11]
 
         g = EquidistantGrid(2:0.1:10)
-        @test boundary_indices(g, Lower()) == 1
-        @test boundary_indices(g, Upper()) == 81
+        @test boundary_indices(g, LowerBoundary()) == 1
+        @test boundary_indices(g, UpperBoundary()) == 81
     end
 
     @testset "refine" begin
@@ -110,6 +114,7 @@ end
 @testset "equidistant_grid" begin
     @test equidistant_grid(0.0,1.0, 4) isa EquidistantGrid
     @test equidistant_grid((0.0,0.0),(8.0,5.0), 4, 3) isa TensorGrid
+    @test equidistant_grid((0.0,),(8.0,), 4) isa TensorGrid
 
     # constuctor
     @test_throws DomainError equidistant_grid(0.0, 1.0, 0)

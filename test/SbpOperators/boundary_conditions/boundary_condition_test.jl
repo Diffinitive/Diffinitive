@@ -1,8 +1,8 @@
 using Test
 
-using Sbplib.Grids
-using Sbplib.RegionIndices
-using Sbplib.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.RegionIndices
+using Diffinitive.SbpOperators
 
 @testset "BoundaryCondition" begin
     grid_1d = equidistant_grid(0.0, 1.0, 11)
@@ -15,8 +15,8 @@ using Sbplib.SbpOperators
     g = 3.14
     f(x,y,z) = x^2+y^2+z^2
     @testset "Constructors" begin
-        @test DirichletCondition(g,id_l) isa DirichletCondition{Float64,Lower}
-        @test NeumannCondition(f,id_b) isa NeumannCondition{<:Function,CartesianBoundary{3,Lower}}
+        @test DirichletCondition(g,id_l) isa DirichletCondition{Float64,LowerBoundary}
+        @test NeumannCondition(f,id_b) isa NeumannCondition{<:Function,CartesianBoundary{3,LowerBoundary}}
     end
 
     @testset "boundary" begin

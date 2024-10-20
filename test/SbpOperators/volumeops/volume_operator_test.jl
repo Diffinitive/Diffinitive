@@ -1,14 +1,14 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.RegionIndices
-using Sbplib.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.RegionIndices
+using Diffinitive.LazyTensors
 
-import Sbplib.SbpOperators.Stencil
-import Sbplib.SbpOperators.VolumeOperator
-import Sbplib.SbpOperators.odd
-import Sbplib.SbpOperators.even
+import Diffinitive.SbpOperators.Stencil
+import Diffinitive.SbpOperators.VolumeOperator
+import Diffinitive.SbpOperators.odd
+import Diffinitive.SbpOperators.even
 
 
 @testset "VolumeOperator" begin

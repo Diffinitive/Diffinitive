@@ -1,5 +1,11 @@
 module SbpOperators
 
+# Stencils
+export Stencil
+export CenteredStencil
+export NestedStencil
+export CenteredNestedStencil
+
 # Stencil set
 export StencilSet
 export read_stencil_set
@@ -40,9 +46,9 @@ export sat
 export sat_tensors
 
 # Using
-using Sbplib.RegionIndices
-using Sbplib.LazyTensors
-using Sbplib.Grids
+using Diffinitive.RegionIndices
+using Diffinitive.LazyTensors
+using Diffinitive.Grids
 
 # Includes
 include("stencil.jl")

@@ -1,10 +1,10 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
-using Sbplib.RegionIndices
-import Sbplib.SbpOperators.BoundaryOperator
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
+using Diffinitive.RegionIndices
+import Diffinitive.SbpOperators.BoundaryOperator
 
 @testset "normal_derivative" begin
     g_1D = equidistant_grid(0.0, 1.0, 11)
@@ -12,19 +12,19 @@ import Sbplib.SbpOperators.BoundaryOperator
     @testset "normal_derivative" begin
     	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "1D" begin
-            d_l = normal_derivative(g_1D, stencil_set, Lower())
-            @test d_l == normal_derivative(g_1D, stencil_set, Lower())
-            @test d_l isa BoundaryOperator{T,Lower} where T
+            d_l = normal_derivative(g_1D, stencil_set, LowerBoundary())
+            @test d_l == normal_derivative(g_1D, stencil_set, LowerBoundary())
+            @test d_l isa BoundaryOperator{T,LowerBoundary} where T
             @test d_l isa LazyTensor{T,0,1} where T
         end
         @testset "2D" begin
-            d_w = normal_derivative(g_2D, stencil_set, CartesianBoundary{1,Lower}())
-            d_n = normal_derivative(g_2D, stencil_set, CartesianBoundary{2,Upper}())
+            d_w = normal_derivative(g_2D, stencil_set, CartesianBoundary{1,LowerBoundary}())
+            d_n = normal_derivative(g_2D, stencil_set, CartesianBoundary{2,UpperBoundary}())
             Ix = IdentityTensor{Float64}((size(g_2D)[1],))
             Iy = IdentityTensor{Float64}((size(g_2D)[2],))
-            d_l = normal_derivative(g_2D.grids[1], stencil_set, Lower())
-            d_r = normal_derivative(g_2D.grids[2], stencil_set, Upper())
-            @test d_w == normal_derivative(g_2D, stencil_set, CartesianBoundary{1,Lower}())
+            d_l = normal_derivative(g_2D.grids[1], stencil_set, LowerBoundary())
+            d_r = normal_derivative(g_2D.grids[2], stencil_set, UpperBoundary())
+            @test d_w == normal_derivative(g_2D, stencil_set, CartesianBoundary{1,LowerBoundary}())
             @test d_w ==  d_l⊗Iy
             @test d_n ==  Ix⊗d_r
             @test d_w isa LazyTensor{T,1,2} where T

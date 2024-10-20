@@ -60,7 +60,7 @@ The operators required to construct the SAT for imposing a Dirichlet
 condition. `H_tuning` and `R_tuning` are used to specify the strength of the
 penalty.
 
-See also: [`sat`](@ref),[`DirichletCondition`](@ref), [`positivity_decomposition`](@ref).
+See also: [`sat`](@ref), [`DirichletCondition`](@ref), [`positivity_decomposition`](@ref).
 """
 function sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning = 1., R_tuning = 1.)
     id = boundary(bc)
@@ -69,7 +69,7 @@ function sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning = 1.
     Hᵧ = inner_product(boundary_grid(g, id), set)
     e = boundary_restriction(g, set, id)
     d = normal_derivative(g, set, id)
-    B = positivity_decomposition(Δ, g, bc; H_tuning, R_tuning)
+    B = positivity_decomposition(Δ, g, boundary(bc); H_tuning, R_tuning)
     penalty_tensor = H⁻¹∘(d' - B*e')∘Hᵧ
     return penalty_tensor, e
 end
@@ -94,7 +94,7 @@ function sat_tensors(Δ::Laplace, g::Grid, bc::NeumannCondition)
 end
 
 """
-    positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
+    positivity_decomposition(Δ::Laplace, g::Grid, b::BoundaryIdentifier; H_tuning, R_tuning)
 
 Constructs the scalar `B` such that `d' - 1/2*B*e'` is symmetric positive
 definite with respect to the boundary quadrature. Here `d` is the normal
@@ -102,28 +102,26 @@ derivative and `e` is the boundary restriction operator. `B` can then be used
 to form a symmetric and energy stable penalty for a Dirichlet condition. The
 parameters `H_tuning` and `R_tuning` are used to specify the strength of the
 penalty and must be greater than 1. For details we refer to
-https://doi.org/10.1016/j.jcp.2020.109294
+<https://doi.org/10.1016/j.jcp.2020.109294>
 """
-function positivity_decomposition(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
+function positivity_decomposition(Δ::Laplace, g::Grid, b::BoundaryIdentifier; H_tuning, R_tuning)
     @assert(H_tuning ≥ 1.)
     @assert(R_tuning ≥ 1.)
-    Nτ_H, τ_R = positivity_limits(Δ,g,bc)
+    Nτ_H, τ_R = positivity_limits(Δ,g,b)
     return H_tuning*Nτ_H + R_tuning*τ_R
 end
 
-# TODO: We should consider implementing a proper BoundaryIdentifier for EquidistantGrid and then
-# change bc::BoundaryCondition to id::BoundaryIdentifier
-function positivity_limits(Δ::Laplace, g::EquidistantGrid, bc::DirichletCondition)
+function positivity_limits(Δ::Laplace, g::EquidistantGrid, b::BoundaryIdentifier)
     h = spacing(g)
     θ_H = parse_scalar(Δ.stencil_set["H"]["closure"][1])
     θ_R = parse_scalar(Δ.stencil_set["D2"]["positivity"]["theta_R"])
 
-    τ_H = 1/(h*θ_H)
-    τ_R = 1/(h*θ_R)
+    τ_H = one(eltype(Δ))/(h*θ_H)
+    τ_R = one(eltype(Δ))/(h*θ_R)
     return τ_H, τ_R
 end
 
-function positivity_limits(Δ::Laplace, g::TensorGrid, bc::DirichletCondition)
-    τ_H, τ_R = positivity_limits(Δ, g.grids[grid_id(boundary(bc))], bc)
+function positivity_limits(Δ::Laplace, g::TensorGrid, b::BoundaryIdentifier)
+    τ_H, τ_R = positivity_limits(Δ, g.grids[grid_id(b)], b)
     return τ_H*ndims(g), τ_R
 end

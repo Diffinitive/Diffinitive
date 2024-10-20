@@ -1,10 +1,10 @@
 using Test
 
-using Sbplib.Grids
-using Sbplib.LazyTensors
-using Sbplib.SbpOperators
-using Sbplib.RegionIndices
-using Sbplib.SbpOperators: NestedStencil, CenteredNestedStencil, SecondDerivativeVariable
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.RegionIndices
+using Diffinitive.SbpOperators: NestedStencil, CenteredNestedStencil, SecondDerivativeVariable
 
 using LinearAlgebra
 

@@ -1,6 +1,6 @@
 using Test
-using Sbplib.LazyTensors
-using Sbplib.RegionIndices
+using Diffinitive.LazyTensors
+using Diffinitive.RegionIndices
 
 
 @testset "LazyArray" begin
