@@ -190,7 +190,6 @@ using StaticArrays
         @test gf[boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{2, UpperBoundary}())] == gf[:,6]
 
         gf = rand(11)
-        @show boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, LowerBoundary}())
         @test gf[boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, LowerBoundary}())] == gf[1]
         @test gf[boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, UpperBoundary}())] == gf[11]
         @test gf[boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, LowerBoundary}())]== gf[1]
@@ -204,7 +203,6 @@ using StaticArrays
         @test collect(boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, UpperBoundary}())) == fill(11)
         @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, LowerBoundary}())) == fill(1)
         @test collect(boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, UpperBoundary}())) == fill(11)
-        # TBD: What do we actually expect for 1D grids?
     end
 end
 
