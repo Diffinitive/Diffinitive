@@ -33,12 +33,12 @@ end
 
 ## Grids
 
-Makie.convert_arguments(::Type{<:Scatter}, g::Grid) = (reshape(map(Point,g),:),) # (map(Point,collect(g)[:]),)
-function Makie.convert_arguments(::Type{<:Lines}, g::Grid{<:Any,2})
+Makie.convert_arguments(::Type{<:Scatter}, g::Grid) = (reshape(map(Point,g),:),)
+function Makie.convert_arguments(::Type{<:Lines}, g::Grid{<:AbstractVector})
     M = collect(g)
 
     function cat_with_NaN(a,b)
-        vcat(a,[@SVector[NaN,NaN]],b)
+        vcat(a,[@SVector fill(NaN, coordinate_size(g))],b)
     end
 
     xlines = reduce(cat_with_NaN, eachrow(M))
@@ -47,7 +47,7 @@ function Makie.convert_arguments(::Type{<:Lines}, g::Grid{<:Any,2})
     return (cat_with_NaN(xlines,ylines),)
 end
 
-Makie.plot!(plot::Plot(Grid{<:Any,2})) = lines!(plot, plot.attributes, plot[1])
+Makie.plot!(plot::Plot(Grid)) = lines!(plot, plot.attributes, plot[1])
 
 
 ## Grid functions
