@@ -95,23 +95,12 @@ function boundary_indices(g::TensorGrid{T,1} where T, id::TensorGridBoundary)
     return boundary_indices(g.grids[grid_id(id)], boundary_id(id))
 end
 function boundary_indices(g::TensorGrid, id::TensorGridBoundary)
-    all_indices = map(eachindex, g.grids)
-
     local_b_ind = boundary_indices(g.grids[grid_id(id)], boundary_id(id))
 
-    b_ind = Base.setindex(all_indices, local_b_ind, grid_id(id))
+    b_ind = Base.setindex(map(eachindex, g.grids), local_b_ind, grid_id(id))
 
-    return view(_combine_indices(all_indices...), LazyTensors.concatenate_tuples(bla.(b_ind)...)...)
+    return view(eachindex(g), b_ind...)
 end
-# TODO: There must be a way to make the above code cleaner?
-
-# function _combine_indices(Is::Vararg{Union{Int, <:AbstractRange}})
-function _combine_indices(Is...)
-    return CartesianIndices(LazyTensors.concatenate_tuples(bla.(Is)...))
-end
-
-bla(a) = (a,)
-bla(a::CartesianIndices) = a.indices
 
 function combined_coordinate_vector_type(coordinate_types...)
     combined_coord_length = mapreduce(_ncomponents, +, coordinate_types)
