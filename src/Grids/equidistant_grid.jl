@@ -155,12 +155,7 @@ equidistant_grid(d::Interval, size::Int) = equidistant_grid(limits(d)..., size)
 equidistant_grid(hb::HyperBox, dims::Vararg{Int}) = equidistant_grid(limits(hb)..., dims...)
 
 function equidistant_grid(c::Chart, dims::Vararg{Int})
-    lg = equidistant_grid(parameterspace(c), dims...)
-    return MappedGrid(
-        lg,
-        map(c,lg),
-        map(ξ->jacobian(c, ξ), lg),
-    )
+    mapped_grid(c, ξ->jacobian(c,ξ), parameterspace(c), dims...)
 end
 
 

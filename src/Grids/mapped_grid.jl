@@ -121,6 +121,17 @@ function mapped_grid(lg::Grid, x, J)
 end
 
 """
+    mapped_grid(x, J, parameterspace, size)
+
+A `MappedGrid` with logical grid `lg`. Physical coordinates and Jacobian are
+determined by the functions `x` and `J`.
+"""
+function mapped_grid(x, J, ps::ParameterSpace, size::Vararg{Int})
+    lg = equidistant_grid(ps, size...)
+    return mapped_grid(lg, x, J)
+end
+
+"""
     metric_tensor(g::MappedGrid)
 
 The metric tensor of `g` as a grid function.
