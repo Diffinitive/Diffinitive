@@ -173,6 +173,8 @@ The outward pointing normal as a grid function on the corresponding boundary gri
 function normal(g::MappedGrid, boundary)
     b_indices = boundary_indices(g, boundary)
     σ = _boundary_sign(component_type(g), boundary)
+
+    # TODO: Refactor this when `boundary_indices(g, ...)` has been made iterable.
     return map(jacobian(g)[b_indices...]) do ∂x∂ξ
         ∂ξ∂x = inv(∂x∂ξ)
         k = grid_id(boundary)
@@ -180,6 +182,11 @@ function normal(g::MappedGrid, boundary)
     end
 end
 
+"""
+    normal(g::MappedGrid, boundary, i...)
+
+The outward pointing normal to the specified boundary in grid point `i`.
+"""
 function normal(g::MappedGrid, boundary, i...)
     σ = _boundary_sign(component_type(g), boundary)
     ∂ξ∂x = inv(jacobian(g)[i...])
