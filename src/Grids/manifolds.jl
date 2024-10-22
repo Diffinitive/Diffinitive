@@ -126,7 +126,7 @@ jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
     Atlas
 
 A collection of charts and their connections.
-Should implement methods for `charts` and
+Should implement methods for `charts` and `connections`.
 """
 abstract type Atlas end
 
@@ -138,11 +138,11 @@ The colloction of charts in the atlas.
 function charts end
 
 """
-    connections
+    connections(::Atlas)
 
 TBD: What exactly should this return?
-
 """
+function connections end
 
 struct CartesianAtlas <: Atlas
     charts::Matrix{Chart}
