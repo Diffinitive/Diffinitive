@@ -25,7 +25,12 @@ export unittetrahedron
 export unitsimplex
 
 export Chart
-export ConcreteChart
+
+export Atlas
+export charts
+export connections
+export CartesianAtlas
+
 export parameterspace
 
 # Grid

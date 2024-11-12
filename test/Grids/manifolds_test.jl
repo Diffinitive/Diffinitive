@@ -73,7 +73,29 @@ end
 end
 
 @testset "CartesianAtlas" begin
-    @test_broken false
+    c = Chart(identity, unitsquare())
+
+    a = CartesianAtlas([c c; c c])
+    @test a isa Atlas
+    @test charts(a) == [c c; c c]
+    @test_broken connections(a) == [
+        (
+            ((1,1), CartesianBoundary{1,UpperBoundary}()),
+            ((1,2), CartesianBoundary{1,LowerBoundary}()),
+        ),
+        (
+            ((1,1), CartesianBoundary{2,LowerBoundary}()),
+            ((2,1), CartesianBoundary{2,UpperBoundary}()),
+        ),
+        (
+            ((2,2), CartesianBoundary{1,LowerBoundary}()),
+            ((2,1), CartesianBoundary{1,UpperBoundary}()),
+        ),
+        (
+            ((2,2), CartesianBoundary{2,UpperBoundary}()),
+            ((1,2), CartesianBoundary{2,LowerBoundary}()),
+        )
+    ]
 end
 
 @testset "UnstructuredAtlas" begin

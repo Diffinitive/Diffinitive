@@ -120,7 +120,7 @@ jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
 # TBD: Can we register a error hint for when jacobian is called with a function that doesn't have a registered jacobian?
 
 
-# TBD: Should Charts, parameterspaces have boundary names?
+# TBD: Should Charts, parameterspaces, Atlases, have boundary names?
 
 """
     Atlas
