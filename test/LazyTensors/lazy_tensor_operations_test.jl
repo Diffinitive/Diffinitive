@@ -182,6 +182,30 @@ end
         @test_throws RangeSizeMismatch ScalingTensor(2.0, (2,)) + SizeDoublingMapping{Float64,1,1}((2,))
         @test_throws RangeSizeMismatch SizeDoublingMapping{Float64,1,1}((2,)) + ScalingTensor(2.0, (2,))
     end
+
+    @testset "Chained operators" begin
+        A = ScalingTensor(1.0, (3,))
+        B = ScalingTensor(2.0, (3,))
+        C = ScalingTensor(3.0, (3,))
+        D = ScalingTensor(4.0, (3,))
+
+        @test A+B+C+D isa TensorSum
+        @test length((A+B+C+D).tms) == 4
+
+
+        @test A+B-C+D isa TensorSum
+        @test length((A+B-C+D).tms) == 4
+
+        v = rand(3)
+        @test (A+B-C+D)*v == 1v + 2v - 3v + 4v
+
+
+        @test -A-B-C-D isa TensorSum
+        @test length((-A-B-C-D).tms) == 4
+
+        v = rand(3)
+        @test (-A-B-C-D)*v == -1v - 2v - 3v - 4v
+    end
 end
 
 
