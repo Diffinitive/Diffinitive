@@ -10,6 +10,7 @@ export TensorApplication
 export TensorTranspose
 export TensorComposition
 export TensorNegation
+export TensorSum
 export IdentityTensor
 export ScalingTensor
 export DiagonalTensor
@@ -36,9 +37,9 @@ Base.:*(a::LazyTensor, b::LazyTensor) = throw(MethodError(Base.:*,(a,b)))
 Base.:*(a::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*,(a,args...))
 
 # Addition and subtraction of lazy tensors
-Base.:+(ts::LazyTensor...) = ElementwiseTensorOperation{:+}(ts...)
+Base.:+(ts::LazyTensor...) = TensorSum(ts...)
 Base.:-(t::LazyTensor) = TensorNegation(t)
-Base.:-(s::LazyTensor, t::LazyTensor) = ElementwiseTensorOperation{:-}(s,t)
+Base.:-(s::LazyTensor, t::LazyTensor) = TensorSum(s,-t)
 
 # Composing lazy tensors
 Base.:∘(s::LazyTensor, t::LazyTensor) = TensorComposition(s,t)

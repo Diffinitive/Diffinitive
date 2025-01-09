@@ -22,7 +22,6 @@ LazyTensors.range_size(m::SizeDoublingMapping) = 2 .* m.domain_size
 LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
 
 
-
 @testset "Mapping transpose" begin
     m = TransposableDummyMapping{Float64,2,3}()
     @test m' isa LazyTensor{Float64, 3,2}
@@ -156,7 +155,7 @@ end
     @test range_size(-B̃) == (3,)
 end
 
-@testset "LazyTensor binary operations" begin
+@testset "TensorSum" begin
     A = ScalingTensor(2.0, (3,))
     B = ScalingTensor(3.0, (3,))
 
