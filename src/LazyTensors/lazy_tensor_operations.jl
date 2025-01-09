@@ -82,19 +82,6 @@ function TensorSum(ts::Vararg{LazyTensor})
     return TensorSum{T,R,D}(ts)
 end
 
-# The following methods for :+ are intended to reduce the depth of the tree of operations in some caes
-function TensorSum(t1::TensorSum, t2::TensorSum)
-    TensorSum(t1.tms..., t2.tms...)
-end
-
-function TensorSum(t1::TensorSum, t2::LazyTensor)
-    TensorSum(t1.tms..., t2)
-end
-
-function TensorSum(t1::LazyTensor, t2::TensorSum)
-    TensorSum(t1, t2.tms...)
-end
-
 function apply(tmBinOp::TensorSum{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
     vs = map(tmBinOp.tms) do tm
         apply(tm,v,I...)

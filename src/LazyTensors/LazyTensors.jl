@@ -39,7 +39,11 @@ Base.:*(a::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*,(a,a
 # Addition and subtraction of lazy tensors
 Base.:+(ts::LazyTensor...) = TensorSum(ts...)
 Base.:-(t::LazyTensor) = TensorNegation(t)
-Base.:-(s::LazyTensor, t::LazyTensor) = TensorSum(s,-t)
+Base.:-(s::LazyTensor, t::LazyTensor) = s + (-t)
+## Specializations to flatten the nesting of tensors. This helps Julia during inference.
+Base.:+(t::TensorSum, s::TensorSum) = TensorSum(t.tms..., s.tms...)
+Base.:+(t::TensorSum, s::LazyTensor) = TensorSum(t.tms..., s)
+Base.:+(t::LazyTensor, s::TensorSum) = TensorSum(t, s.tms...)
 
 # Composing lazy tensors
 Base.:∘(s::LazyTensor, t::LazyTensor) = TensorComposition(s,t)
