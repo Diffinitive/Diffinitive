@@ -128,6 +128,33 @@ end
     end
 end
 
+@testset "TensorNegation" begin
+    A = rand(2,3)
+    B = rand(3,4)
+
+    Ã = DenseTensor(A, (1,), (2,))
+    B̃ = DenseTensor(B, (1,), (2,))
+
+    @test -Ã isa TensorNegation
+
+    v = rand(3)
+    @test (-Ã)*v == -(Ã*v)
+
+    v = rand(4)
+    @test (-B̃)*v == -(B̃*v)
+
+    v = rand(2)
+    @test (-Ã)'*v == -(Ã'*v)
+
+    v = rand(3)
+    @test (-B̃)'*v == -(B̃'*v)
+
+    @test domain_size(-Ã) == (3,)
+    @test domain_size(-B̃) == (4,)
+
+    @test range_size(-Ã) == (2,)
+    @test range_size(-B̃) == (3,)
+end
 
 @testset "LazyTensor binary operations" begin
     A = ScalingTensor(2.0, (3,))

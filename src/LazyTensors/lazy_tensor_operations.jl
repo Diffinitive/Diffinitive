@@ -51,6 +51,16 @@ apply_transpose(tmt::TensorTranspose{T,R,D}, v::AbstractArray{<:Any,D}, I::Varar
 range_size(tmt::TensorTranspose) = domain_size(tmt.tm)
 domain_size(tmt::TensorTranspose) = range_size(tmt.tm)
 
+struct TensorNegation{T,R,D, TM<:LazyTensor{T,R,D}} <: LazyTensor{T,R,D}
+    tm::TM
+end
+
+apply(tm::TensorNegation, v, I...) = -apply(tm.tm, v, I...)
+apply_transpose(tm::TensorNegation, v, I...) = -apply_transpose(tm.tm, v, I...)
+
+range_size(tm::TensorNegation) = range_size(tm.tm)
+domain_size(tm::TensorNegation) = domain_size(tm.tm)
+
 
 struct ElementwiseTensorOperation{Op,T,R,D,TT<:NTuple{N, LazyTensor{T,R,D}} where N} <: LazyTensor{T,R,D}
     tms::TT
@@ -157,7 +167,6 @@ end
 
 Base.:*(a::T, tm::LazyTensor{T}) where T = TensorComposition(ScalingTensor{T,range_dim(tm)}(a,range_size(tm)), tm)
 Base.:*(tm::LazyTensor{T}, a::T) where T = a*tm
-Base.:-(tm::LazyTensor) = (-one(eltype(tm)))*tm
 
 """
     InflatedTensor{T,R,D} <: LazyTensor{T,R,D}

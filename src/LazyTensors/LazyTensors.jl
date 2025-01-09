@@ -9,6 +9,7 @@ export range_size, domain_size
 export TensorApplication
 export TensorTranspose
 export TensorComposition
+export TensorNegation
 export IdentityTensor
 export ScalingTensor
 export DiagonalTensor
@@ -36,6 +37,7 @@ Base.:*(a::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*,(a,a
 
 # Addition and subtraction of lazy tensors
 Base.:+(ts::LazyTensor...) = ElementwiseTensorOperation{:+}(ts...)
+Base.:-(t::LazyTensor) = TensorNegation(t)
 Base.:-(s::LazyTensor, t::LazyTensor) = ElementwiseTensorOperation{:-}(s,t)
 
 # Composing lazy tensors
