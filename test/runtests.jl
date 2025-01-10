@@ -21,7 +21,7 @@ function run_testfiles(args)
     run_testfiles(".", globs)
 end
 
-function  run_testfiles(path,   globs)
+function run_testfiles(path, globs)
     for name ∈ readdir(path)
         filepath = joinpath(path, name)
 
