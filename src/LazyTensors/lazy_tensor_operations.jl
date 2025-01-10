@@ -51,7 +51,13 @@ apply_transpose(tmt::TensorTranspose{T,R,D}, v::AbstractArray{<:Any,D}, I::Varar
 range_size(tmt::TensorTranspose) = domain_size(tmt.tm)
 domain_size(tmt::TensorTranspose) = range_size(tmt.tm)
 
-struct TensorNegation{T,R,D, TM<:LazyTensor{T,R,D}} <: LazyTensor{T,R,D}
+
+"""
+    TensorNegation{T,R,D,...} <: LazyTensor{T,R,D}
+
+The negation of a LazyTensor.
+"""
+struct TensorNegation{T,R,D,TM<:LazyTensor{T,R,D}} <: LazyTensor{T,R,D}
     tm::TM
 end
 
@@ -61,7 +67,11 @@ apply_transpose(tm::TensorNegation, v, I...) = -apply_transpose(tm.tm, v, I...)
 range_size(tm::TensorNegation) = range_size(tm.tm)
 domain_size(tm::TensorNegation) = domain_size(tm.tm)
 
+"""
+    TensorSum{T,R,D,...} <: LazyTensor{T,R,D}
 
+The sum of 2 or more lazy tensors.
+"""
 struct TensorSum{T,R,D,TT<:NTuple{N, LazyTensor{T,R,D}} where N} <: LazyTensor{T,R,D}
     tms::TT
 
