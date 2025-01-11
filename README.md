@@ -29,11 +29,17 @@ Pkg.test(test_args=["*/lazy_tensor_operations_test.jl", "Grids/*"])
 will run any file named `lazy_tensor_operations_test.jl` and all the files in the `Grids` folder.
 
 ## Running benchmarks
-Benchmarks are defined in `benchmark/` and use the tools for benchmark suites in BenchmarkTools.jl. The format is compatible with PkgBenchmark.jl which helps with running the suite, comparing results and presenting the results in a readable way. There are custom functions included for running the benchmarks in this Mercurial repository.
+Benchmarks are defined in `benchmark/` and use the tools for benchmark suites
+in BenchmarkTools.jl. The format is compatible with PkgBenchmark.jl which
+helps with running the suite, comparing results and presenting the results in
+a readable way. There are custom functions included for running the benchmarks
+in this Mercurial repository.
 
-`benchmark/` contains a julia environment with the necessary packages for working with the benchmarks.
+`benchmark/` contains a julia environment with the necessary packages for
+working with the benchmarks.
 
-To run the benchmarks, either use `make` run them manually from the REPL, as explained further below.
+To run the benchmarks, either use `make` or run them manually from the REPL, as
+explained further below.
 
 Using `make` there are four targets for benchmarks
 ```shell
@@ -42,18 +48,22 @@ make benchmarkrev REV=rev                           # Runs the suite at the spec
 make benchmarkcmp TARGET=target BASELINE=baseline   # Compares two revisions
 make cleanbenchmark                                 # Cleans up benchmark tunings and results
 ```
-Here `rev`, `target` and `baseline` are any valid Mercurial revision specifiers. Note that `make benchmarkrev` and `make benchmarkcmp` will fail if you have pending changes in your repository.
+Here `rev`, `target` and `baseline` are any valid Mercurial revision
+specifiers.
 
-
-Alternatively, the benchmarks can be run from the REPL. To do this, first activate the environment in `benchmark/` then include the file `benchmark_utils.jl`. The suite can then be run using the function `main` in one of the following ways
+Alternatively, the benchmarks can be run from the REPL. To do this, first
+activate the environment in `benchmark/` then include the file
+`benchmark_utils.jl`. The suite can then be run using the function `main` in
+one of the following ways
 
 ```julia
-main()                  # Runs the suite for the current working directory
-main(rev)               # Runs the suite at the specified revision
-main(target, baseline)  # Compares two revisions
+main()                              # Runs the suite for the current working directory
+main(rev="...")                     # Runs the suite at the specified revision
+main(target="...", baseline="...")  # Compares two revisions
 ```
 
-Again, `rev`, `target` and `baseline` are any valid Mercurial revision specifiers. Note that `main(rev)` and `main(target, baseline)` will fail if you have pending changes in your repository.
+Again, `rev`, `target` and `baseline` are any valid Mercurial revision
+specifiers.
 
 PkgBenchmark can also be used directly.
 
