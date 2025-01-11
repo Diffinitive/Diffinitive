@@ -1,9 +1,11 @@
 using BenchmarkTools
-using Sbplib
-using Sbplib.Grids
-using Sbplib.SbpOperators
-using Sbplib.RegionIndices
-using Sbplib.LazyTensors
+
+using Diffinitive
+using Diffinitive.Grids
+using Diffinitive.SbpOperators
+using Diffinitive.LazyTensors
+
+using LinearAlgebra
 
 const SUITE = BenchmarkGroup()
 
@@ -12,9 +14,9 @@ sz(d) = ntuple(i->100, d)
 ll(d) = ntuple(i->0., d)
 lu(d) = ntuple(i->1., d)
 
-g1 = equidistant_grid(sz(1)[1],ll(1)[1],lu(1)[1])
-g2 = equidistant_grid(sz(2),ll(2),lu(2))
-g3 = equidistant_grid(sz(3),ll(3),lu(3))
+g1 = equidistant_grid(ll(1)[1], lu(1)[1], sz(1)...)
+g2 = equidistant_grid(ll(2), lu(2), sz(2)...)
+g3 = equidistant_grid(ll(3), lu(3), sz(3)...)
 
 v1 = rand(sz(1)...)
 v2 = rand(sz(2)...)
@@ -67,6 +69,30 @@ SUITE["derivatives"]["second_derivative"]["3D"] = BenchmarkGroup()
 SUITE["derivatives"]["second_derivative"]["3D"]["x"] = @benchmarkable $u3 .= $Dx*$v3
 SUITE["derivatives"]["second_derivative"]["3D"]["y"] = @benchmarkable $u3 .= $Dy*$v3
 SUITE["derivatives"]["second_derivative"]["3D"]["z"] = @benchmarkable $u3 .= $Dz*$v3
+
+
+SUITE["derivatives"]["second_derivative_variable"] = BenchmarkGroup()
+
+c1 = map(x->sin(x)+2, g1)
+D₂ = second_derivative_variable(g1, c1, stencil_set)
+SUITE["derivatives"]["second_derivative_variable"]["1D"] = @benchmarkable $u1 .= $D₂*$v1
+
+c2 = map(x->sin(x[1] + x[2])+2, g2)
+Dx = second_derivative_variable(g2, c2, stencil_set, 1)
+Dy = second_derivative_variable(g2, c2, stencil_set, 2)
+SUITE["derivatives"]["second_derivative_variable"]["2D"] = BenchmarkGroup()
+SUITE["derivatives"]["second_derivative_variable"]["2D"]["x"] = @benchmarkable $u2 .= $Dx*$v2
+SUITE["derivatives"]["second_derivative_variable"]["2D"]["y"] = @benchmarkable $u2 .= $Dy*$v2
+
+c3 = map(x->sin(norm(x))+2, g3)
+Dx = second_derivative_variable(g3, c3, stencil_set, 1)
+Dy = second_derivative_variable(g3, c3, stencil_set, 2)
+Dz = second_derivative_variable(g3, c3, stencil_set, 3)
+SUITE["derivatives"]["second_derivative_variable"]["3D"] = BenchmarkGroup()
+SUITE["derivatives"]["second_derivative_variable"]["3D"]["x"] = @benchmarkable $u3 .= $Dx*$v3
+SUITE["derivatives"]["second_derivative_variable"]["3D"]["y"] = @benchmarkable $u3 .= $Dy*$v3
+SUITE["derivatives"]["second_derivative_variable"]["3D"]["z"] = @benchmarkable $u3 .= $Dz*$v3
+
 
 
 
@@ -141,20 +167,20 @@ H⁻¹ = inverse_inner_product(g2, stencil_set)
 Dxx = second_derivative(g2, stencil_set, 1)
 Dyy = second_derivative(g2, stencil_set, 2)
 
-e₁ₗ = boundary_restriction(g2, stencil_set, CartesianBoundary{1,Lower}())
-e₁ᵤ = boundary_restriction(g2, stencil_set, CartesianBoundary{1,Upper}())
-e₂ₗ = boundary_restriction(g2, stencil_set, CartesianBoundary{2,Lower}())
-e₂ᵤ = boundary_restriction(g2, stencil_set, CartesianBoundary{2,Upper}())
+e₁ₗ = boundary_restriction(g2, stencil_set, CartesianBoundary{1,LowerBoundary}())
+e₁ᵤ = boundary_restriction(g2, stencil_set, CartesianBoundary{1,UpperBoundary}())
+e₂ₗ = boundary_restriction(g2, stencil_set, CartesianBoundary{2,LowerBoundary}())
+e₂ᵤ = boundary_restriction(g2, stencil_set, CartesianBoundary{2,UpperBoundary}())
 
-d₁ₗ = normal_derivative(g2, stencil_set, CartesianBoundary{1,Lower}())
-d₁ᵤ = normal_derivative(g2, stencil_set, CartesianBoundary{1,Upper}())
-d₂ₗ = normal_derivative(g2, stencil_set, CartesianBoundary{2,Lower}())
-d₂ᵤ = normal_derivative(g2, stencil_set, CartesianBoundary{2,Upper}())
+d₁ₗ = normal_derivative(g2, stencil_set, CartesianBoundary{1,LowerBoundary}())
+d₁ᵤ = normal_derivative(g2, stencil_set, CartesianBoundary{1,UpperBoundary}())
+d₂ₗ = normal_derivative(g2, stencil_set, CartesianBoundary{2,LowerBoundary}())
+d₂ᵤ = normal_derivative(g2, stencil_set, CartesianBoundary{2,UpperBoundary}())
 
-H₁ₗ = inner_product(boundary_grid(g2, CartesianBoundary{1,Lower}()), stencil_set)
-H₁ᵤ = inner_product(boundary_grid(g2, CartesianBoundary{1,Upper}()), stencil_set)
-H₂ₗ = inner_product(boundary_grid(g2, CartesianBoundary{2,Lower}()), stencil_set)
-H₂ᵤ = inner_product(boundary_grid(g2, CartesianBoundary{2,Upper}()), stencil_set)
+H₁ₗ = inner_product(boundary_grid(g2, CartesianBoundary{1,LowerBoundary}()), stencil_set)
+H₁ᵤ = inner_product(boundary_grid(g2, CartesianBoundary{1,UpperBoundary}()), stencil_set)
+H₂ₗ = inner_product(boundary_grid(g2, CartesianBoundary{2,LowerBoundary}()), stencil_set)
+H₂ᵤ = inner_product(boundary_grid(g2, CartesianBoundary{2,UpperBoundary}()), stencil_set)
 
 SUITE["boundary_terms"]["pre_composition"] = @benchmarkable $u2 .= $(H⁻¹∘e₁ₗ'∘H₁ₗ∘d₁ₗ)*$v2
 SUITE["boundary_terms"]["composition"]     = @benchmarkable $u2 .= ($H⁻¹∘$e₁ₗ'∘$H₁ₗ∘$d₁ₗ)*$v2

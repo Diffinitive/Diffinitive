@@ -1,10 +1,10 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
 
-import Sbplib.SbpOperators.VolumeOperator
+import Diffinitive.SbpOperators.VolumeOperator
 
 # TODO: Refactor these test to look more like the tests in first_derivative_test.jl.
 
@@ -15,8 +15,8 @@ import Sbplib.SbpOperators.VolumeOperator
     closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
     Lx = 3.5
     Ly = 3.
-    g_1D = equidistant_grid(121, 0.0, Lx)
-    g_2D = equidistant_grid((121,123), (0.0, 0.0), (Lx, Ly))
+    g_1D = equidistant_grid(0.0, Lx, 121)
+    g_2D = equidistant_grid((0.0, 0.0), (Lx, Ly), 121, 123)
 
     @testset "Constructors" begin
         @testset "1D" begin

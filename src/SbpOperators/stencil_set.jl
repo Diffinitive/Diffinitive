@@ -5,7 +5,7 @@ using TOML
     StencilSet
 
 A `StencilSet` contains a set of associated stencils. The stencils
-are are stored in a table, and can be accesed by indexing into the `StencilSet`.
+are are stored in a table, and can be accessed by indexing into the `StencilSet`.
 """
 struct StencilSet
     table
@@ -21,7 +21,7 @@ filters. If more than one set matches the filters an error is raised. The
 table of the `StencilSet` is a parsed TOML intended for functions like
 `parse_scalar` and `parse_stencil`.
 
-The `StencilSet` table is not parsed beyond the inital TOML parse. To get usable
+The `StencilSet` table is not parsed beyond the initial TOML parse. To get usable
 stencils use the `parse_stencil` functions on the fields of the stencil set.
 
 The reason for this is that since stencil sets are intended to be very
@@ -109,6 +109,33 @@ function check_stencil_toml(parsed_toml)
         throw(ArgumentError("the center of a stencil must be specified as an integer."))
     end
 end
+
+
+"""
+    parse_nested_stencil(parsed_toml)
+
+Accept parsed TOML and read it as a nested tuple.
+
+See also [`read_stencil_set`](@ref), [`parse_stencil`](@ref).
+"""
+function parse_nested_stencil(parsed_toml)
+    if parsed_toml isa Array
+        weights = parse_stencil.(parsed_toml)
+        return CenteredNestedStencil(weights...)
+    end
+
+    center = parsed_toml["c"]
+    weights = parse_tuple.(parsed_toml["s"])
+    return NestedStencil(weights...; center)
+end
+
+"""
+    parse_nested_stencil(T, parsed_toml)
+
+Parse the input as a nested stencil with element type `T`.
+"""
+parse_nested_stencil(T, parsed_toml) = NestedStencil{T}(parse_nested_stencil(parsed_toml))
+
 
 """
     parse_scalar(parsed_toml)

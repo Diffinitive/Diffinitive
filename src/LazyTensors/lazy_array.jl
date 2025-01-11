@@ -1,12 +1,11 @@
 """
     LazyArray{T,D} <: AbstractArray{T,D}
 
-Array which is calcualted lazily when indexing.
+Array which is calculated lazily when indexing.
 
 A subtype of `LazyArray` will use lazy version of `+`, `-`, `*`, `/`.
 """
 abstract type LazyArray{T,D} <: AbstractArray{T,D} end
-export LazyArray
 
 struct LazyConstantArray{T,D} <: LazyArray{T,D}
 	val::T
@@ -25,7 +24,6 @@ struct LazyFunctionArray{F<:Function,T, D} <: LazyArray{T,D}
     f::F
     size::NTuple{D,Int}
 end
-export LazyFunctionArray
 
 function LazyFunctionArray(f::F, size::NTuple{D,Int}) where {F<:Function,D}
     T = typeof(f(ones(Int, D)...))
@@ -42,7 +40,7 @@ end
 
 """
     LazyElementwiseOperation{T,D,Op} <: LazyArray{T,D}
-Struct allowing for lazy evaluation of elementwise operations on `AbstractArray`s.
+Struct allowing for lazy evaluation of element-wise operations on `AbstractArray`s.
 
 A `LazyElementwiseOperation` contains two arrays together with an operation.
 The operations are carried out when the `LazyElementwiseOperation` is indexed.
@@ -110,5 +108,3 @@ Base.@propagate_inbounds Base.:-(a::LazyArray{T,D}, b::T) where {T,D} = a -̃ b
 
 Base.@propagate_inbounds Base.:+(a::T, b::LazyArray{T,D}) where {T,D} = a +̃ b
 Base.@propagate_inbounds Base.:-(a::T, b::LazyArray{T,D}) where {T,D} = a -̃  b
-
-export +̃, -̃, *̃, /̃

@@ -1,7 +1,6 @@
-using Sbplib.Grids
+using Diffinitive.Grids
 using Test
-using Sbplib.RegionIndices
-using Sbplib.LazyTensors
+using Diffinitive.LazyTensors
 
 
 @testset "EquidistantGrid" begin
@@ -19,6 +18,9 @@ using Sbplib.LazyTensors
         @test g[end] == 10.0
 
         @test all(eachindex(g) .== 1:101)
+
+        @test firstindex(g) == 1
+        @test lastindex(g) == 101
     end
 
     @testset "Iterator interface" begin
@@ -28,6 +30,8 @@ using Sbplib.LazyTensors
         @test size(EquidistantGrid(0:10)) == (11,)
         @test size(EquidistantGrid(0:0.1:10)) == (101,)
 
+        @test size(EquidistantGrid(0:0.1:10),1) == 101
+
         @test collect(EquidistantGrid(0:0.1:0.5)) == [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
 
         @test Base.IteratorSize(EquidistantGrid{Float64, StepRange{Float64}}) == Base.HasShape{1}()
@@ -35,6 +39,10 @@ using Sbplib.LazyTensors
 
     @testset "Base" begin
         @test ndims(EquidistantGrid(0:10)) == 1
+
+        g = EquidistantGrid(0:0.1:10)
+        @test axes(g,1) == 1:101
+        @test axes(g) == (1:101,)
     end
 
     @testset "spacing" begin
@@ -47,16 +55,32 @@ using Sbplib.LazyTensors
         @test inverse_spacing(EquidistantGrid(0:0.1:10)) == 10
     end
 
+    @testset "min_spacing" begin
+        @test min_spacing(EquidistantGrid(0:10)) == 1
+        @test min_spacing(EquidistantGrid(0:0.1:10)) == 0.1
+    end
+
     @testset "boundary_identifiers" begin
         g = EquidistantGrid(0:0.1:10)
-        @test boundary_identifiers(g) == (Lower(), Upper())
+        @test boundary_identifiers(g) == (LowerBoundary(), UpperBoundary())
         @inferred boundary_identifiers(g)
     end
 
     @testset "boundary_grid" begin
         g = EquidistantGrid(0:0.1:1)
-        @test boundary_grid(g, Lower()) == ZeroDimGrid(0.0)
-        @test boundary_grid(g, Upper()) == ZeroDimGrid(1.0)
+        @test boundary_grid(g, LowerBoundary()) == ZeroDimGrid(0.0)
+        @test boundary_grid(g, UpperBoundary()) == ZeroDimGrid(1.0)
+    end
+
+    @testset "boundary_indices" begin
+        g = EquidistantGrid(0:0.1:1)
+        @test boundary_indices(g, LowerBoundary()) == (1,)
+        @test boundary_indices(g, UpperBoundary()) == (11,)
+
+        g = EquidistantGrid(2:0.1:10)
+        @test boundary_indices(g, LowerBoundary()) == (1,)
+        @test boundary_indices(g, UpperBoundary()) == (81,)
+
     end
 
     @testset "refine" begin
@@ -85,29 +109,37 @@ end
 
 
 @testset "equidistant_grid" begin
-    @test equidistant_grid(4,0.0,1.0) isa EquidistantGrid
-    @test equidistant_grid((4,3),(0.0,0.0),(8.0,5.0)) isa TensorGrid
+    @test equidistant_grid(0.0,1.0, 4) isa EquidistantGrid
+    @test equidistant_grid((0.0,0.0),(8.0,5.0), 4, 3) isa TensorGrid
+    @test equidistant_grid((0.0,),(8.0,), 4) isa TensorGrid
 
     # constuctor
-    @test_throws DomainError equidistant_grid(0,0.0,1.0)
-    @test_throws DomainError equidistant_grid(1,1.0,1.0)
-    @test_throws DomainError equidistant_grid(1,1.0,-1.0)
+    @test_throws DomainError equidistant_grid(0.0, 1.0, 0)
+    @test_throws DomainError equidistant_grid(1.0, 1.0, 1)
+    @test_throws DomainError equidistant_grid(1.0, -1.0, 1)
 
-    @test_throws DomainError equidistant_grid((0,0),(0.0,0.0),(1.0,1.0))
-    @test_throws DomainError equidistant_grid((1,1),(1.0,1.0),(1.0,1.0))
-    @test_throws DomainError equidistant_grid((1,1),(1.0,1.0),(-1.0,-1.0))
+    @test_throws DomainError equidistant_grid((0.0,0.0),(1.0,1.0), 0, 0)
+    @test_throws DomainError equidistant_grid((1.0,1.0),(1.0,1.0), 1, 1)
+    @test_throws DomainError equidistant_grid((1.0,1.0),(-1.0,-1.0), 1, 1)
+
+    @test_throws ArgumentError equidistant_grid((0.0,),(8.0,5.0), 4, 3, 4)
 
     @testset "Base" begin
-        @test eltype(equidistant_grid(4,0.0,1.0)) == Float64
-        @test eltype(equidistant_grid((4,3),(0,0),(1,3))) <: AbstractVector{Float64}
-        @test size(equidistant_grid(4,0.0,1.0)) == (4,)
-        @test size(equidistant_grid((5,3), (0.0,0.0), (2.0,1.0))) == (5,3)
-        @test ndims(equidistant_grid(4,0.0,1.0)) == 1
-        @test ndims(equidistant_grid((5,3), (0.0,0.0), (2.0,1.0))) == 2
+        @test eltype(equidistant_grid(0.0, 1.0, 4)) == Float64
+        @test eltype(equidistant_grid((0,0),(1,3), 4, 3)) <: AbstractVector{Float64}
+
+        @test size(equidistant_grid(0.0, 1.0, 4)) == (4,)
+        @test size(equidistant_grid((0.0,0.0), (2.0,1.0), 5, 3)) == (5,3)
+
+        @test size(equidistant_grid((0.0,0.0), (2.0,1.0), 5, 3), 1) == 5
+        @test size(equidistant_grid((0.0,0.0), (2.0,1.0), 5, 3), 2) == 3
+
+        @test ndims(equidistant_grid(0.0, 1.0, 4)) == 1
+        @test ndims(equidistant_grid((0.0,0.0), (2.0,1.0), 5, 3)) == 2
     end
 
     @testset "getindex" begin
-        g = equidistant_grid((5,3), (-1.0,0.0), (0.0,7.11))
+        g = equidistant_grid((-1.0,0.0), (0.0,7.11), 5, 3)
         gp = collect(g);
         p = [(-1.,0.)      (-1.,7.11/2)   (-1.,7.11);
             (-0.75,0.)    (-0.75,7.11/2) (-0.75,7.11);

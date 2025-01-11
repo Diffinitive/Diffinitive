@@ -1,27 +1,27 @@
 """
-    BoundaryOperator{T,R,N} <: LazyTensor{T,0,1}
+    BoundaryOperator{T,B,N} <: LazyTensor{T,0,1}
 
 Implements the boundary operator `op` for 1D as a `LazyTensor`
 
 `op` is the restriction of a grid function to the boundary using some closure
-`Stencil{T,N}`. The boundary to restrict to is determined by `R`. `op'` is the
+`Stencil{T,N}`. The boundary to restrict to is determined by `B`. `op'` is the
 prolongation of a zero dimensional array to the whole grid using the same
 closure stencil.
 """
-struct BoundaryOperator{T,R<:Region,N} <: LazyTensor{T,0,1}
+struct BoundaryOperator{T,B<:BoundaryIdentifier,N} <: LazyTensor{T,0,1}
     stencil::Stencil{T,N}
     size::Int
 end
 
 """
-    BoundaryOperator(grid::EquidistantGrid, closure_stencil, region)
+    BoundaryOperator(grid::EquidistantGrid, closure_stencil, boundary)
 
 Constructs the BoundaryOperator with stencil `closure_stencil` for a
 `EquidistantGrid` `grid`, restricting to to the boundary specified by
-`region`.
+`boundary`.
 """
-function BoundaryOperator(grid::EquidistantGrid, closure_stencil::Stencil{T,N}, region::Region) where {T,N}
-    return BoundaryOperator{T,typeof(region),N}(closure_stencil,size(grid)[1])
+function BoundaryOperator(grid::EquidistantGrid, closure_stencil::Stencil{T,N}, boundary::BoundaryIdentifier) where {T,N}
+    return BoundaryOperator{T,typeof(boundary),N}(closure_stencil,size(grid)[1])
 end
 
 """
@@ -29,24 +29,24 @@ end
 
 The size of the closure stencil.
 """
-closure_size(::BoundaryOperator{T,R,N}) where {T,R,N} = N
+closure_size(::BoundaryOperator{T,B,N}) where {T,B,N} = N
 
 LazyTensors.range_size(op::BoundaryOperator) = ()
 LazyTensors.domain_size(op::BoundaryOperator) = (op.size,)
 
-function LazyTensors.apply(op::BoundaryOperator{<:Any,Lower}, v::AbstractVector)
+function LazyTensors.apply(op::BoundaryOperator{<:Any,LowerBoundary}, v::AbstractVector)
     apply_stencil(op.stencil,v,1)
 end
 
-function LazyTensors.apply(op::BoundaryOperator{<:Any,Upper}, v::AbstractVector)
+function LazyTensors.apply(op::BoundaryOperator{<:Any,UpperBoundary}, v::AbstractVector)
     apply_stencil_backwards(op.stencil,v,op.size)
 end
 
-function LazyTensors.apply_transpose(op::BoundaryOperator{<:Any,Lower}, v::AbstractArray{<:Any,0}, i::Index{Lower})
+function LazyTensors.apply_transpose(op::BoundaryOperator{<:Any,LowerBoundary}, v::AbstractArray{<:Any,0}, i::Index{Lower})
     return op.stencil[Int(i)-1]*v[]
 end
 
-function LazyTensors.apply_transpose(op::BoundaryOperator{<:Any,Upper}, v::AbstractArray{<:Any,0}, i::Index{Upper})
+function LazyTensors.apply_transpose(op::BoundaryOperator{<:Any,UpperBoundary}, v::AbstractArray{<:Any,0}, i::Index{Upper})
     return op.stencil[op.size[1] - Int(i)]*v[]
 end
 

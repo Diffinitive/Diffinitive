@@ -1,5 +1,41 @@
 # Notes
 
+## How to dispatch for different operators
+We have a problem in how dispatch for different operators work.
+ * We want to keep the types simple and flat (Awkward to forward `apply`)
+ * We want to dispatch SATs on the parameters of the continuous operator. (a * div for example)
+ * We want to allow keeping the same stencil_set across different calls. (maybe not so bad for the user to be responsible)
+
+Could remove the current opset idea and introduce a description of continuous operators
+ ```julia
+abstract type DifferentialOperator end
+
+struct Laplace <: DifferentialOperator end
+struct Advection <: DifferentialOperator
+    v
+end
+
+difference_operator(::Laplace, grid, stencil_set) = ... # Returns a plain LazyTensor. Replaces the current `laplace()` function.
+sat_tensors(::Laplace, grid, stencil_set, bc) = ...
+
+sat(::DifferentialOperator, grid, stencil_set, bc) = ...
+ ```
+
+
+### Update 2024-06-26
+We will run into trouble if we start assuming things about the coupling
+between the continuous and discrete setting. We could add representations of
+continuous operators but we will also need representations of discrete
+operators. Ideally it should be possible to ignore the continuous
+representations and only work with the discrete operators without losing
+functionality. The discrete representations does not have to be LazyTensors.
+The could be used as inputs to methods for `sat`, `difference_operator` and so
+on.
+
+To see need for a fully functional discrete layer we can consider the
+optimization of material parameters or something similar. In this case we do
+not necessarily want to handle continuous objects.
+
 ## Reading operators
 
 Jonatan's suggestion is to add methods to `Laplace`, `SecondDerivative` and
@@ -71,59 +107,6 @@ stencils so that a user calls `read_stencil_set` and gets a
 dictionary-structure containing stencils, tuples, scalars and other types
 ready for input to the methods creating the operators.
 
-## Variable second derivative
-
-2020-12-08 after discussion with Vidar:
-We will have to handle the variable second derivative in a new variant of
-VolumeOperator, "SecondDerivativeVariable?". Somehow it needs to know about
-the coefficients. They should be provided as an AbstractVector. Where they are
-provided is another question. It could be that you provide a reference to the
-array to the constructor of SecondDerivativeVariable. If that array is mutable
-you are free to change it whenever and the changes should propagate
-accordingly. Another option is that the counter part to "Laplace" for this
-variable second derivate returns a function or acts like a functions that
-takes an Abstract array and returns a SecondDerivativeVariable with the
-appropriate array. This would allow syntax like `D2(a)*v`. Can this be made
-performant?
-
-For the 1d case we can have a constructor
-`SecondDerivativeVariable(D2::SecondDerivativeVariable, a)` that just creates
-a copy with a different `a`.
-
-Apart from just the second derivative in 1D we need operators for higher
-dimensions. What happens if a=a(x,y)? Maybe this can be solved orthogonally to
-the `D2(a)*v` issue, meaning that if a constant nD version of
-SecondDerivativeVariable is available then maybe it can be wrapped to support
-function like syntax. We might have to implement `SecondDerivativeVariable`
-for N dimensions which takes a N dimensional a. If this could be easily
-closured to allow D(a) syntax we would have come a long way.
-
-For `Laplace` which might use a variable D2 if it is on a curvilinear grid we
-might want to choose how to calculate the metric coefficients. They could be
-known on closed form, they could be calculated from the grid coordinates or
-they could be provided as a vector. Which way you want to do it might change
-depending on for example if you are memory bound or compute bound. This choice
-cannot be done on the grid since the grid shouldn't care about the computer
-architecture. The most sensible option seems to be to have an argument to the
-`Laplace` function which controls how the coefficients are gotten from the
-grid. The argument could for example be a function which is to be applied to
-the grid.
-
-What happens if the grid or the varible coefficient is dependent on time?
-Maybe it becomes important to support `D(a)` or even `D(t,a)` syntax in a more
-general way.
-
-```
-g = TimeDependentGrid()
-L = Laplace(g)
-function Laplace(g::TimeDependentGrid)
-    g_logical = logical(g) # g_logical is time independent
-    ... Build a L(a) assuming we can do that ...
-    a(t) = metric_coeffs(g,t)
-    return t->L(a(t))
-end
-```
-
 ## Known size of range and domain?
 Is there any reason to use a trait to differentiate between fixed size and unknown size?
 
@@ -135,19 +118,10 @@ When do we need to know the size of the range and domain?
  Maybe if we should have dynamic sizing it could be only for the range. `domain_size` would not be implemented. And the `range_size` would be a function of a vector that the LazyTensor is applied to.
 
 ## Reasearch and thinking
- - [ ] Use a trait to indicate that a LazyTensor har the same range and domain?
  - [ ] Check how the native julia doc generator works
     - [ ] Check if Vidars design docs fit in there
  - [ ] Create a macro @lazy which replaces a binary op (+,-) by its lazy equivalent? Would be a neat way to indicate which evaluations are lazy without cluttering/confusing with special characters.
- - [ ] Dispatch on Lower() instead of the type Lower so `::Lower` instead of `::Type{Lower}` ???
- 	Seems better unless there is some specific reason to use the type instead of the value.
  - [ ] Can we have a trait to tell if a LazyTensor is transposable?
- - [ ] Is it ok to have "Constructors" for abstract types which create subtypes? For example a Grids() functions that gives different kind of grids based on input?
- - [ ] Figure out how to treat the borrowing parameters of operators. Include in into the struct? Expose via function dispatched on the operator type and grid?
-
-## Identifiers for regions
-The identifiers (`Upper`, `Lower`, `Interior`) used for region indecies should probably be included in the grid module. This allows new grid types to come with their own regions.
-We implement this by refactoring RegionIndices to be agnostic to the region types and then moving the actual types to Grids.
 
 ## Regions and tensormappings
 - [ ] Use a trait to indicate if a LazyTensor uses indices with regions.
@@ -199,15 +173,14 @@ This would mean no bounds checking in applys, however any indexing that they do 
 Preferably dimensions and sizes should be checked when lazy objects are created, for example TensorApplication, TensorComposition and so on. If dimension checks decreases performance we can make them skippable later.
 
 ## Changes to `eval_on`
-There are reasons to replace `eval_on` with regular `map` from Base, and implement a kind of lazy map perhaps `lmap` that work on indexable collections.
+There are reasons to replace `eval_on` with regular `map` from Base, and
+implement a kind of lazy map perhaps `lmap` that work on indexable
+collections.
 
-The benefit of doing this is that we can treat grids as gridfunctions for the coordinate function, and get a more flexible tool. For example `map`/`lmap` can then be used both to evaluate a function on the grid but also get a component of a vector valued grid function or similar.
-
-A question is how and if we should implement `map`/`lmap` for functions like `(x,y)->x*y` or stick to just using vector inputs. There are a few options.
-
-* use `Base.splat((x,y)->x*y)` with the single argument `map`/`lmap`.
-* implement a kind of `unzip` function to get iterators for each component, which can then be used with the multiple-iterators-version of `map`/`lmap`.
-* Inspect the function in the `map`/`lmap` function to determine which matches.
+The benefit of doing this is that we can treat grids as gridfunctions for the
+coordinate function, and get a more flexible tool. For example `map`/`lmap`
+can then be used both to evaluate a function on the grid but also get a
+component of a vector valued grid function or similar.
 
 Below is a partial implementation of `lmap` with some ideas
 ```julia
@@ -237,20 +210,46 @@ _lazy_mapping_iterate(lm, (next, state)) = lm.f(next), state
 lmap(f,  I) = LazyIndexableMap(f,I)
 ```
 
-The interaction of the map methods with the probable design of multiblock functions involving nested indecies complicate the picture slightly. It's clear at the time of writing how this would work with `Base.map`. Perhaps we want to implement our own versions of both eager and lazy map.
+The interaction of the map methods with the probable design of multiblock
+functions involving nested indecies complicate the picture slightly. It's
+unclear at the time of writing how this would work with `Base.map`. Perhaps we
+want to implement our own versions of both eager and lazy map.
+
+
+### 2024-04
+MappedArrays.jl provides a simple array type and function like the description
+of LazyMapping above. One option is to remove `eval_on` completely and rely on
+destructuring arguments if handling the function input as a vector is
+undesirable.
+
+If we can let multi-block grids be iterators over grid points we could even
+handle those by specialized implementation of `map` and `mappedarray`.
 
 ## Multiblock implementation
 We want multiblock things to work very similarly to regular one block things.
 
 ### Grid functions
-Should probably support a nested indexing so that we first have an index for subgrid and then an index for nodes on that grid. E.g `g[1,2][2,3]` or `g[3][43,21]`.
+Should probably support a nested indexing so that we first have an index for
+subgrid and then an index for nodes on that grid. E.g `g[1,2][2,3]` or
+`g[3][43,21]`.
 
-We could also possibly provide a combined indexing style `g[1,2,3,4]` where the first group of indices are for the subgrid and the remaining are for the nodes.
+We could also possibly provide a combined indexing style `g[1,2,3,4]` where
+the first group of indices are for the subgrid and the remaining are for the
+nodes.
 
-We should make sure the underlying buffer for gridfunctions are continuously stored and are easy to convert to, so that interaction with for example DifferentialEquations is simple and without much boilerplate.
+We should make sure the underlying buffer for grid functions are continuously
+stored and are easy to convert to, so that interaction with for example
+DifferentialEquations is simple and without much boilerplate.
 
 #### `map` and `collect` and nested indexing
-We need to make sure `collect`, `map` and a potential lazy map work correctly through the nested indexing.
+We need to make sure `collect`, `map` and a potential lazy map work correctly
+through the nested indexing. Also see notes on `eval_on` above.
+
+Possibly this can be achieved by providing special nested indexing but not
+adhering to an array interface at the top level, instead being implemented as
+an iterator over the grid points. A custom trait can let map and other methods
+know the shape (or structure) of the nesting so that they can efficiently
+allocate result arrays.
 
 ### Tensor applications
 Should behave as grid functions
@@ -285,16 +284,6 @@ Kan vi implementera `⋅`(\cdot) så att de fungerar som man vill för både ten
 Grid-funktioner har typen `AbstractArray{T,2} where T`.
 `T` kan vara lite vad som helst, tillexemel en SVector eller Array, eller Tuple. Tensoroperatorerna bryr sig inte om exakt vad det är, mer än att typen måste stödja de operationer som operatorn använder.
 
-En nackdel kan vara hur man ska få ut gridfunktionen för tex andra komponenten.
-
-Syntax:
-```
-f(x̄) = x̄
-gf = evalOn(g, f)
-gf[2,3] # x̄ för en viss gridpunkt
-gf[2,3][2] # x̄[2] för en viss gridpunkt
-```
-
 ### Tensor operatorer
 Vi kan ha tensor-operatorer som agerar på ett skalärt fält och ger ett vektorfält eller tensorfält.
 Vi kan också ha tensor-operatorer som agerar på ett vektorfält eller tensorfält och ger ett skalärt fält.
@@ -309,16 +298,6 @@ Man kan implementera `∇` som en tensormapping som agerar på T och returnerar 
 Skulle kunna ha en funktion `range_type(::LazyTensor, ::Type{domain_type})`
 
 Kanske kan man implementera `⋅(tm::LazyTensor{R,D}, v::AbstractArray{T,D})` där T är en AbstractArray, tm på något sätt har komponenter, lika många som T har element.
-
-### Komponenter som gridfunktioner
-En viktig operation för vektorfält är att kunna få ut komponenter som grid-funktioner. Detta behöver antagligen kunna ske lazy.
-Det finns ett par olika lösningar:
-* Använda map eller en lazy map (se diskussion om eval_on)
-* Implementera en egen typ av view som tar hand om detta. Eller Accessors.jl?
-* Använda en LazyTensor
-* Någon typ av lazy-broadcast
-* En lazy array som applicerar en funktion för varje element.
-
 
 ### Prestanda-aspekter
 [Vidar, Discord, 2023-03-03]
@@ -366,3 +345,58 @@ It seems that the name is too general. The name of the method `volume_operator` 
 Could the implementation of LazyOuterProduct be simplified by making it a
 struct containing two or more LazyTensors? (using split_tuple in a similar way
 as TensorGrid)
+
+## Implementation of boundary_indices for more complex grids
+To represent boundaries of for example tet-elements we can use a type `IndexCollection` to index a grid function directly.
+
+```julia
+I = IndexCollection(...)
+v[I]
+```
+
+* This would impact how tensor grid works.
+* To make things homogenous maybe these index collections should be used for the more simple grids too.
+* The function `to_indices` from Base could be useful to implement for `IndexCollection`
+
+
+## Stencil application pipeline
+We should make sure that `@inbounds` and `Base.@propagate_inbounds` are
+applied correctly throughout the stack. When testing the performance of
+stencil application on the bugfix/sbp_operators/stencil_return_type branch
+there seemed to be some strange results where such errors could be the
+culprit.
+
+
+## Tiled loops and regions in apply
+There should be easy ways to use functionalty splitting the application of a lazy array into regions and using tiled iteration. This could make the application more efficient by reducing branching and improving cache usage in the tight loop. On commit f215ac2a5c66 and before there were some early tests regarding this in a DiffOp submodule.
+
+The main ideas were:
+```julia
+function apply_region!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}) where T
+    apply_region!(D, u, v, Lower, Lower)
+    apply_region!(D, u, v, Lower, Interior)
+    apply_region!(D, u, v, Lower, Upper)
+    apply_region!(D, u, v, Interior, Lower)
+    apply_region!(D, u, v, Interior, Interior)
+    apply_region!(D, u, v, Interior, Upper)
+    apply_region!(D, u, v, Upper, Lower)
+    apply_region!(D, u, v, Upper, Interior)
+    apply_region!(D, u, v, Upper, Upper)
+    return nothing
+end
+```
+
+```julia
+using TiledIteration
+function apply_region_tiled!(D::DiffOpCartesian{2}, u::AbstractArray{T,2}, v::AbstractArray{T,2}, r1::Type{<:Region}, r2::Type{<:Region}) where T
+    ri = regionindices(D.grid.size, closuresize(D.op), (r1,r2))
+    # TODO: Pass Tilesize to function
+    for tileaxs ∈ TileIterator(axes(ri), padded_tilesize(T, (5,5), 2))
+        for j ∈ tileaxs[2], i ∈ tileaxs[1]
+            I = ri[i,j]
+            u[I] = apply(D, v, (Index{r1}(I[1]), Index{r2}(I[2])))
+        end
+    end
+    return nothing
+end
+```

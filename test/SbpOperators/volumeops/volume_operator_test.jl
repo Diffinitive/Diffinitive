@@ -1,23 +1,23 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.RegionIndices
-using Sbplib.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.RegionIndices
+using Diffinitive.LazyTensors
 
-import Sbplib.SbpOperators.Stencil
-import Sbplib.SbpOperators.VolumeOperator
-import Sbplib.SbpOperators.odd
-import Sbplib.SbpOperators.even
+import Diffinitive.SbpOperators.Stencil
+import Diffinitive.SbpOperators.VolumeOperator
+import Diffinitive.SbpOperators.odd
+import Diffinitive.SbpOperators.even
 
 
 @testset "VolumeOperator" begin
     inner_stencil = CenteredStencil(1/4, 2/4, 1/4)
     closure_stencils = (Stencil(1/2, 1/2; center=1), Stencil(2.,1.; center=2))
-    g = equidistant_grid(11,0.,1.)
+    g = equidistant_grid(0.,1., 11)
 
     @testset "Constructors" begin
-        op = VolumeOperator(inner_stencil,closure_stencils,(11,),even)
+        op = VolumeOperator(inner_stencil, closure_stencils, 11, even)
         @test op == VolumeOperator(g,inner_stencil,closure_stencils,even)
         @test op isa LazyTensor{T,1,1} where T
     end

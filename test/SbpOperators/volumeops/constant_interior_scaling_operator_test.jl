@@ -1,9 +1,9 @@
 using Test
 
-using Sbplib.LazyTensors
-using Sbplib.SbpOperators
-import Sbplib.SbpOperators: ConstantInteriorScalingOperator
-using Sbplib.Grids
+using Diffinitive.LazyTensors
+using Diffinitive.SbpOperators
+import Diffinitive.SbpOperators: ConstantInteriorScalingOperator
+using Diffinitive.Grids
 
 @testset "ConstantInteriorScalingOperator" begin
     @test ConstantInteriorScalingOperator(1, (2,3), 10) isa ConstantInteriorScalingOperator{Int,2}
@@ -33,7 +33,7 @@ using Sbplib.Grids
     @test_throws DomainError ConstantInteriorScalingOperator(4,(2,3), 3)
 
     @testset "Grid constructor" begin
-        g = equidistant_grid(11, 0., 2.)
+        g = equidistant_grid(0., 2., 11)
         @test ConstantInteriorScalingOperator(g, 3., (.1,.2)) isa ConstantInteriorScalingOperator{Float64}
     end
 end

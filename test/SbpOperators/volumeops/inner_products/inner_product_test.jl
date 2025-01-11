@@ -1,18 +1,18 @@
 using Test
 
-using Sbplib.SbpOperators
-using Sbplib.Grids
-using Sbplib.LazyTensors
+using Diffinitive.SbpOperators
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
 
-import Sbplib.SbpOperators.ConstantInteriorScalingOperator
+import Diffinitive.SbpOperators.ConstantInteriorScalingOperator
 
 @testset "Diagonal-stencil inner_product" begin
     Lx = π/2.
     Ly = Float64(π)
     Lz = 1.
-    g_1D = equidistant_grid(77, 0.0, Lx)
-    g_2D = equidistant_grid((77,66), (0.0, 0.0), (Lx,Ly))
-    g_3D = equidistant_grid((10,10, 10), (0.0, 0.0, 0.0), (Lx,Ly,Lz))
+    g_1D = equidistant_grid(0.0, Lx, 77)
+    g_2D = equidistant_grid((0.0, 0.0), (Lx,Ly), 77, 66)
+    g_3D = equidistant_grid((0.0, 0.0, 0.0), (Lx,Ly,Lz), 10, 10, 10)
     @testset "inner_product" begin
         stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "0D" begin

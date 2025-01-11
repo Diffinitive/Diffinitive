@@ -5,7 +5,7 @@ Struct for lazy application of a LazyTensor. Created using `*`.
 
 Allows the result of a `LazyTensor` applied to a vector to be treated as an `AbstractArray`.
 With a mapping `m` and a vector `v` the TensorApplication object can be created by `m*v`.
-The actual result will be calcualted when indexing into `m*v`.
+The actual result will be calculated when indexing into `m*v`.
 """
 struct TensorApplication{T,R,D, TM<:LazyTensor{<:Any,R,D}, AA<:AbstractArray{<:Any,D}} <: LazyArray{T,R}
     t::TM
@@ -52,7 +52,7 @@ range_size(tmt::TensorTranspose) = domain_size(tmt.tm)
 domain_size(tmt::TensorTranspose) = range_size(tmt.tm)
 
 
-struct ElementwiseTensorOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
+struct ElementwiseTensorOperation{Op,T,R,D,T1<:LazyTensor{T,R,D},T2<:LazyTensor{T,R,D}} <: LazyTensor{T,R,D}
     tm1::T1
     tm2::T2
 
@@ -102,7 +102,7 @@ end
     TensorComposition(tm, tmi::IdentityTensor)
     TensorComposition(tmi::IdentityTensor, tm)
 
-Composes a `Tensormapping` `tm` with an `IdentityTensor` `tmi`, by returning `tm`
+Composes a `LazyTensor` `tm` with an `IdentityTensor` `tmi`, by returning `tm`
 """
 function TensorComposition(tm::LazyTensor{T,R,D}, tmi::IdentityTensor{T,D}) where {T,R,D}
     @boundscheck check_domain_size(tm, range_size(tmi))
@@ -121,11 +121,12 @@ end
 
 Base.:*(a::T, tm::LazyTensor{T}) where T = TensorComposition(ScalingTensor{T,range_dim(tm)}(a,range_size(tm)), tm)
 Base.:*(tm::LazyTensor{T}, a::T) where T = a*tm
+Base.:-(tm::LazyTensor) = (-one(eltype(tm)))*tm
 
 """
     InflatedTensor{T,R,D} <: LazyTensor{T,R,D}
 
-An inflated `LazyTensor` with dimensions added before and afer its actual dimensions.
+An inflated `LazyTensor` with dimensions added before and after its actual dimensions.
 """
 struct InflatedTensor{T,R,D,D_before,R_middle,D_middle,D_after, TM<:LazyTensor{T,R_middle,D_middle}} <: LazyTensor{T,R,D}
     before::IdentityTensor{T,D_before}
@@ -168,10 +169,10 @@ function InflatedTensor(before, itm::InflatedTensor, after)
     )
 end
 
-InflatedTensor(before::IdentityTensor, tm::LazyTensor{T}) where T = InflatedTensor(before,tm,IdentityTensor{T}())
-InflatedTensor(tm::LazyTensor{T}, after::IdentityTensor) where T = InflatedTensor(IdentityTensor{T}(),tm,after)
+InflatedTensor(before::IdentityTensor, tm::LazyTensor) = InflatedTensor(before,tm,IdentityTensor{eltype(tm)}())
+InflatedTensor(tm::LazyTensor, after::IdentityTensor) = InflatedTensor(IdentityTensor{eltype(tm)}(),tm,after)
 # Resolve ambiguity between the two previous methods
-InflatedTensor(I1::IdentityTensor{T}, I2::IdentityTensor{T}) where T = InflatedTensor(I1,I2,IdentityTensor{T}())
+InflatedTensor(I1::IdentityTensor, I2::IdentityTensor) = InflatedTensor(I1,I2,IdentityTensor{promote_type(eltype(I1), eltype(I2))}())
 
 # TODO: Implement some pretty printing in terms of ⊗. E.g InflatedTensor(I(3),B,I(2)) -> I(3)⊗B⊗I(2)
 
@@ -219,7 +220,7 @@ end
 @doc raw"""
     LazyOuterProduct(tms...)
 
-Creates a `TensorComposition` for the outerproduct of `tms...`.
+Creates a `TensorComposition` for the outer product of `tms...`.
 This is done by separating the outer product into regular products of outer products involving only identity mappings and one non-identity mapping.
 
 First let
@@ -262,7 +263,7 @@ function LazyOuterProduct(tm1::LazyTensor{T}, tm2::LazyTensor{T}) where T
     return itm1∘itm2
 end
 
-LazyOuterProduct(t1::IdentityTensor{T}, t2::IdentityTensor{T}) where T = IdentityTensor{T}(t1.size...,t2.size...)
+LazyOuterProduct(t1::IdentityTensor, t2::IdentityTensor) = IdentityTensor{promote_type(eltype(t1),eltype(t2))}(t1.size...,t2.size...)
 LazyOuterProduct(t1::LazyTensor, t2::IdentityTensor) = InflatedTensor(t1, t2)
 LazyOuterProduct(t1::IdentityTensor, t2::LazyTensor) = InflatedTensor(t1, t2)
 
@@ -278,7 +279,7 @@ Here `sz[dir]` is ignored and replaced with the range and domains size of
 `tm`.
 
 An example of when this operation is useful is when extending a one
-dimensional difference operator `D` to a 2D grid of a ceratin size. In that
+dimensional difference operator `D` to a 2D grid of a certain size. In that
 case we could have
 
 ```julia

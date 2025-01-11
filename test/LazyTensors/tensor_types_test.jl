@@ -1,5 +1,5 @@
 using Test
-using Sbplib.LazyTensors
+using Diffinitive.LazyTensors
 using BenchmarkTools
 
 @testset "IdentityTensor" begin

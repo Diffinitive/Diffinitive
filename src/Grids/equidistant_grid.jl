@@ -15,10 +15,12 @@ struct EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1}
 end
 
 # Indexing interface
-Base.getindex(g::EquidistantGrid, i) = g.points[i]
+Base.getindex(g::EquidistantGrid, i::Int) = g.points[i]
 Base.eachindex(g::EquidistantGrid) = eachindex(g.points)
 Base.firstindex(g::EquidistantGrid) = firstindex(g.points)
 Base.lastindex(g::EquidistantGrid) = lastindex(g.points)
+
+Base.axes(g::EquidistantGrid, d) = axes(g.points, d)
 
 # Iteration interface
 Base.iterate(g::EquidistantGrid) = iterate(g.points)
@@ -27,6 +29,7 @@ Base.iterate(g::EquidistantGrid, state) = iterate(g.points, state)
 Base.IteratorSize(::Type{<:EquidistantGrid}) = Base.HasShape{1}()
 Base.length(g::EquidistantGrid) = length(g.points)
 Base.size(g::EquidistantGrid) = size(g.points)
+Base.size(g::EquidistantGrid, d) = size(g.points)[d]
 
 
 """
@@ -44,11 +47,32 @@ The reciprocal of the spacing between grid points.
 """
 inverse_spacing(g::EquidistantGrid) = 1/step(g.points)
 
+min_spacing(g::EquidistantGrid) = spacing(g)
 
-boundary_identifiers(::EquidistantGrid) = (Lower(), Upper())
-boundary_grid(g::EquidistantGrid, id::Lower) = ZeroDimGrid(g[begin])
-boundary_grid(g::EquidistantGrid, id::Upper) = ZeroDimGrid(g[end])
+"""
+    LowerBoundary <: BoundaryIdentifier
 
+Boundary identifier for the the lower (left) boundary of a one-dimensional grid.
+
+See also: [`BoundaryIdentifier`](@ref)
+"""
+struct LowerBoundary <: BoundaryIdentifier end
+
+"""
+    UpperBoundary <: BoundaryIdentifier
+
+Boundary identifier for the the upper (right)  boundary of a one-dimensional grid.
+
+See also: [`BoundaryIdentifier`](@ref)
+"""
+struct UpperBoundary <: BoundaryIdentifier end
+
+
+boundary_identifiers(::EquidistantGrid) = (LowerBoundary(), UpperBoundary())
+boundary_grid(g::EquidistantGrid, id::LowerBoundary) = ZeroDimGrid(g[begin])
+boundary_grid(g::EquidistantGrid, id::UpperBoundary) = ZeroDimGrid(g[end])
+boundary_indices(g::EquidistantGrid, id::LowerBoundary) = (firstindex(g),)
+boundary_indices(g::EquidistantGrid, id::UpperBoundary) = (lastindex(g),)
 
 """
     refine(g::EquidistantGrid, r::Int)
@@ -84,7 +108,7 @@ end
 
 
 """
-    equidistant_grid(size::Dims, limit_lower, limit_upper)
+    equidistant_grid(limit_lower, limit_upper, dims...)
 
 Construct an equidistant grid with corners at the coordinates `limit_lower` and
 `limit_upper`.
@@ -95,24 +119,27 @@ The length of the domain sides are given by the components of
 of the grid are not allowed to be negative.
 
 The number of equispaced points in each coordinate direction are given
-by the tuple `size`.
+by the tuple `dims`.
 
-Note: If `limit_lower` and `limit_upper` are integers and `size` would allow a
+Note: If `limit_lower` and `limit_upper` are integers and `dims` would allow a
 completely integer grid, `equidistant_grid` will still return a floating point
-grid. This simlifies the implementation and avoids certain surprise
-behaviours.
+grid. This simplifies the implementation and avoids certain surprise
+behaviors.
 """
-function equidistant_grid(size::Dims, limit_lower, limit_upper)
-    gs = map(equidistant_grid, size, limit_lower, limit_upper)
+function equidistant_grid(limit_lower, limit_upper, dims::Vararg{Int})
+    if !(length(limit_lower) == length(limit_upper) == length(dims))
+        throw(ArgumentError("All arguments must be of the same length"))
+    end
+    gs = map(equidistant_grid, limit_lower, limit_upper, dims)
     return TensorGrid(gs...)
 end
 
 """
-    equidistant_grid(size::Int, limit_lower::T, limit_upper::T)
+    equidistant_grid(limit_lower::T, limit_upper::T, size::Int)
 
 Constructs a 1D equidistant grid.
 """
-function equidistant_grid(size::Int, limit_lower::T, limit_upper::T) where T
+function equidistant_grid(limit_lower::Number, limit_upper::Number, size::Int)
     if any(size .<= 0)
         throw(DomainError("size must be postive"))
     end

@@ -17,7 +17,7 @@ struct TensorGrid{T,D,GT<:NTuple{N,Grid} where N} <: Grid{T,D}
 end
 
 # Indexing interface
-function Base.getindex(g::TensorGrid, I...)
+function Base.getindex(g::TensorGrid, I::Vararg{Int})
     szs = ndims.(g.grids)
 
     Is = LazyTensors.split_tuple(I, szs)
@@ -26,11 +26,14 @@ function Base.getindex(g::TensorGrid, I...)
     return vcat(ps...)
 end
 
-Base.getindex(g::TensorGrid, I::CartesianIndex) = g[Tuple(I)...]
-
 function Base.eachindex(g::TensorGrid)
     szs = LazyTensors.concatenate_tuples(size.(g.grids)...)
     return CartesianIndices(szs)
+end
+
+function Base.axes(g::TensorGrid, d)
+    i, ld = grid_and_local_dim_index(ndims.(g.grids), d)
+    return axes(g.grids[i], ld)
 end
 
 # Iteration interface
@@ -40,10 +43,20 @@ _iterate_combine_coords(::Nothing) = nothing
 _iterate_combine_coords((next,state)) = combine_coordinates(next...), state
 
 Base.IteratorSize(::Type{<:TensorGrid{<:Any, D}}) where D = Base.HasShape{D}()
-Base.eltype(::Type{<:TensorGrid{T}}) where T = T
-Base.length(g::TensorGrid) = sum(length, g.grids)
+Base.length(g::TensorGrid) = prod(length, g.grids)
 Base.size(g::TensorGrid) = LazyTensors.concatenate_tuples(size.(g.grids)...)
+Base.size(g::TensorGrid, d) = size(g)[d]
 
+function spacing(g::TensorGrid)
+    relevant_grids = filter(g->!isa(g,ZeroDimGrid),g.grids)
+    return spacing.(relevant_grids)
+end
+
+function min_spacing(g::TensorGrid)
+    relevant_grids = filter(g->!isa(g,ZeroDimGrid),g.grids)
+    d = min_spacing.(relevant_grids)
+    return minimum(d)
+end
 
 refine(g::TensorGrid, r::Int) = mapreduce(g->refine(g,r), TensorGrid, g.grids)
 coarsen(g::TensorGrid, r::Int) = mapreduce(g->coarsen(g,r), TensorGrid, g.grids)
@@ -70,7 +83,6 @@ function boundary_identifiers(g::TensorGrid)
     return LazyTensors.concatenate_tuples(per_grid...)
 end
 
-
 """
     boundary_grid(g::TensorGrid, id::TensorGridBoundary)
 
@@ -82,6 +94,16 @@ function boundary_grid(g::TensorGrid, id::TensorGridBoundary)
     return TensorGrid(new_grids...)
 end
 
+function boundary_indices(g::TensorGrid, id::TensorGridBoundary)
+    per_grid_ind = map(g.grids) do g
+        ntuple(i->:, ndims(g))
+    end
+
+    local_b_ind = boundary_indices(g.grids[grid_id(id)], boundary_id(id))
+    b_ind = Base.setindex(per_grid_ind, local_b_ind, grid_id(id))
+
+    return LazyTensors.concatenate_tuples(b_ind...)
+end
 
 function combined_coordinate_vector_type(coordinate_types...)
     combined_coord_length = mapreduce(_ncomponents, +, coordinate_types)
@@ -96,4 +118,28 @@ end
 
 function combine_coordinates(coords...)
     return mapreduce(SVector, vcat, coords)
+end
+
+"""
+    grid_and_local_dim_index(nds, d)
+
+Given a tuple of number of dimensions `nds`, and a global dimension index `d`,
+calculate which grid index, and local dimension, `d` corresponds to.
+
+`nds` would come from broadcasting `ndims` on the grids tuple of a
+`TensorGrid`. If you are interested in a dimension `d` of a tensor grid `g`
+```julia
+gi, ldi = grid_and_local_dim_index(ndims.(g.grids), d)
+```
+tells you which grid it belongs to (`gi`) and which index it is at within that
+grid (`ldi`).
+"""
+function grid_and_local_dim_index(nds, d)
+    I = findfirst(>=(d), cumsum(nds))
+
+    if I == 1
+        return (1, d)
+    else
+        return (I, d-cumsum(nds)[I-1])
+    end
 end
