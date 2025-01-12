@@ -1,34 +1,52 @@
 """
-    inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
+    inner_product(grid, ...)
 
-Creates the discrete inner product operator `H` as a `TensorMapping` on an
-equidistant grid, defined as `(u,v)  = u'Hv` for grid functions `u,v`.
-
-`inner_product` creates `H` on `grid` using the `interior_weight` for the
-interior points and the `closure_weights` for the points close to the
-boundary.
-
-On a 1-dimensional grid, `H` is a `ConstantInteriorScalingOperator`. On a
-N-dimensional grid, `H` is the outer product of the 1-dimensional inner
-product operators for each coordinate direction. Also see the documentation of
-On a 0-dimensional grid, `H` is a 0-dimensional `IdentityMapping`.
+The inner product on a given grid with weights from a stencils set or given
+explicitly.
 """
-function inner_product(grid::EquidistantGrid, interior_weight, closure_weights)
-    Hs = ()
+function inner_product end
 
-    for i ∈ 1:dimension(grid)
-        Hs = (Hs..., inner_product(restrict(grid, i), interior_weight, closure_weights))
-    end
+"""
+    inner_product(tg::TensorGrid, stencil_set::StencilSet)
 
-    return foldl(⊗, Hs)
-end
-export inner_product
-
-function inner_product(grid::EquidistantGrid{1}, interior_weight, closure_weights)
-    h = spacing(grid)[1]
-
-    H = SbpOperators.ConstantInteriorScalingOperator(grid, h*interior_weight, h.*closure_weights)
-    return H
+The inner product on `tg`, i.e., the tensor product of the
+individual grids' inner products, using weights `H` from `stencil_set`.
+"""
+function inner_product(tg::TensorGrid, stencil_set::StencilSet)
+    return mapreduce(g->inner_product(g,stencil_set), ⊗, tg.grids)
 end
 
-inner_product(grid::EquidistantGrid{0}, interior_weight, closure_weights) = IdentityMapping{eltype(grid)}()
+"""
+    inner_product(g::EquidistantGrid, stencil_set::StencilSet)
+
+The inner product on `g` using weights `H` from `stencil_set`.
+
+See also: [`ConstantInteriorScalingOperator`](@ref).
+"""
+function inner_product(g::EquidistantGrid, stencil_set::StencilSet)
+    interior_weight = parse_scalar(stencil_set["H"]["inner"])
+    closure_weights = parse_tuple(stencil_set["H"]["closure"])
+    return inner_product(g, interior_weight, closure_weights)
+end
+
+"""
+    inner_product(g::EquidistantGrid, interior_weight, closure_weights)
+
+The inner product on `g` with explicit weights.
+
+See also: [`ConstantInteriorScalingOperator`](@ref).
+"""
+function inner_product(g::EquidistantGrid, interior_weight, closure_weights)
+    h = spacing(g)
+    return SbpOperators.ConstantInteriorScalingOperator(g, h*interior_weight, h.*closure_weights)
+end
+
+"""
+    inner_product(g::ZeroDimGrid, stencil_set::StencilSet)
+
+The identity tensor with the correct type parameters.
+
+Implemented to simplify 1D code for SBP operators.
+"""
+inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor{component_type(g)}()
+

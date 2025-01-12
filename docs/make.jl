@@ -1,14 +1,16 @@
 using Documenter
-using Sbplib
+using Diffinitive
 
-using Sbplib.DiffOps
-using Sbplib.Grids
-using Sbplib.LazyTensors
-using Sbplib.RegionIndices
-using Sbplib.SbpOperators
-using Sbplib.StaticDicts
+using Diffinitive.Grids
+using Diffinitive.LazyTensors
+using Diffinitive.RegionIndices
+using Diffinitive.SbpOperators
 
-sitename = "Sbplib.jl"
+sitename = "Diffinitive.jl"
+
+remotes = nothing
+edit_link = nothing
+repolink = nothing
 
 if "--prettyurls" ∈ ARGS
     prettyurls = true
@@ -26,17 +28,18 @@ end
 pages = [
     "Home" => "index.md",
     "operator_file_format.md",
+    "grids_and_grid_functions.md",
+    "matrix_and_tensor_representations.md",
     "Submodules" => [
         "submodules/grids.md",
-        "submodules/diff_ops.md",
         "submodules/lazy_tensors.md",
         "submodules/region_indices.md",
         "submodules/sbp_operators.md",
-        "submodules/static_dicts.md",
     ],
     "doc_index.md",
 ]
 # This ordering is not respected by @contents. See https://github.com/JuliaDocs/Documenter.jl/issues/936
 
-format=Documenter.HTML(;prettyurls)
-makedocs(;sitename, pages, format, build)
+format=Documenter.HTML(;prettyurls, edit_link, repolink)
+
+makedocs(;sitename, pages, format, build, remotes)

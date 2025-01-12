@@ -1,18 +1,30 @@
 """
-    normal_derivative(grid::EquidistantGrid, closure_stencil::Stencil, boundary::CartesianBoundary)
-    normal_derivative(grid::EquidistantGrid{1}, closure_stencil::Stencil, region::Region)
+    normal_derivative(g, stencil_set::StencilSet, boundary)
+    normal_derivative(g::TensorGrid, stencil_set::StencilSet, boundary::TensorGridBoundary)
+    normal_derivative(g::EquidistantGrid, stencil_set::StencilSet, boundary)
 
-Creates the normal derivative boundary operator `d` as a `TensorMapping`
+Creates the normal derivative boundary operator `d` as a `LazyTensor`
 
-`d` is the normal derivative of a grid function at the boundary specified by `boundary` or `region` using some `closure_stencil`.
-`d'` is the prolongation of the normal derivative of a grid function to the whole grid using the same `closure_stencil`.
-On a one-dimensional `grid`, `d` is a `BoundaryOperator`. On a multi-dimensional `grid`, `d` is the inflation of
-a `BoundaryOperator`. Also see the documentation of `SbpOperators.boundary_operator(...)` for more details.
+`d` computes the normal derivative at `boundary` of a grid function on `g` using the
+'d1' stencil in `stencil_set`. `d'` is the prolongation of the normal
+derivative of a grid function to the whole of `g` using the same stencil. On a
+one-dimensional grid, `d` is a `BoundaryOperator`. On a multi-dimensional
+grid, `d` is the inflation of a `BoundaryOperator`.
+
+See also: [`BoundaryOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
-function normal_derivative(grid::EquidistantGrid, closure_stencil, boundary::CartesianBoundary)
-    direction = dim(boundary)
-    h_inv = inverse_spacing(grid)[direction]
-    return SbpOperators.boundary_operator(grid, scale(closure_stencil,h_inv), boundary)
+function normal_derivative end
+
+
+function normal_derivative(g::TensorGrid, stencil_set::StencilSet, boundary::TensorGridBoundary)
+    op = normal_derivative(g.grids[grid_id(boundary)], stencil_set, boundary_id(boundary))
+    return LazyTensors.inflate(op, size(g), grid_id(boundary))
 end
-normal_derivative(grid::EquidistantGrid{1}, closure_stencil, region::Region) = normal_derivative(grid, closure_stencil, CartesianBoundary{1,typeof(region)}())
-export normal_derivative
+
+function normal_derivative(g::EquidistantGrid, stencil_set::StencilSet, boundary)
+    closure_stencil = parse_stencil(stencil_set["d1"]["closure"])
+    h_inv = inverse_spacing(g)
+
+    scaled_stencil = scale(closure_stencil,h_inv)
+    return BoundaryOperator(g, scaled_stencil, boundary)
+end

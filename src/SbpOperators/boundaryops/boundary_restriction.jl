@@ -1,18 +1,27 @@
 """
-    boundary_restriction(grid::EquidistantGrid, closure_stencil::Stencil, boundary::CartesianBoundary)
-    boundary_restriction(grid::EquidistantGrid{1}, closure_stencil::Stencil, region::Region)
+    boundary_restriction(g, stencil_set::StencilSet, boundary)
+    boundary_restriction(g::TensorGrid, stencil_set::StencilSet, boundary::TensorGridBoundary)
+    boundary_restriction(g::EquidistantGrid, stencil_set::StencilSet, boundary)
 
-Creates the boundary restriction operator `e` as a `TensorMapping`
+Creates boundary restriction operators `e` as `LazyTensor`s on `boundary`
 
-`e` is the restriction of a grid function to the boundary specified by `boundary` or `region` using some `closure_stencil`.
-`e'` is the prolongation of a grid function on the boundary to the whole grid using the same `closure_stencil`.
-On a one-dimensional `grid`, `e` is a `BoundaryOperator`. On a multi-dimensional `grid`, `e` is the inflation of
-a `BoundaryOperator`. Also see the documentation of `SbpOperators.boundary_operator(...)` for more details.
+`e` restricts a grid function on `g` to `boundary` using the 'e' stencil
+in `stencil_set`. `e'` prolongates a grid function on
+`boundary` to the whole grid using the same stencil. On a one-dimensional
+grid, `e` is a `BoundaryOperator`. On a multi-dimensional grid, `e` is the
+inflation of a `BoundaryOperator`.
+
+See also: [`BoundaryOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
-function boundary_restriction(grid::EquidistantGrid, closure_stencil, boundary::CartesianBoundary)
-    converted_stencil = convert(Stencil{eltype(grid)}, closure_stencil)
-    return SbpOperators.boundary_operator(grid, converted_stencil, boundary)
-end
-boundary_restriction(grid::EquidistantGrid{1}, closure_stencil, region::Region) = boundary_restriction(grid, closure_stencil, CartesianBoundary{1,typeof(region)}())
+function boundary_restriction end
 
-export boundary_restriction
+function boundary_restriction(g::TensorGrid, stencil_set::StencilSet, boundary::TensorGridBoundary)
+    op = boundary_restriction(g.grids[grid_id(boundary)], stencil_set, boundary_id(boundary))
+    return LazyTensors.inflate(op, size(g), grid_id(boundary))
+end
+
+function boundary_restriction(g::EquidistantGrid, stencil_set::StencilSet, boundary)
+    closure_stencil = parse_stencil(stencil_set["e"]["closure"])
+    converted_stencil = convert(Stencil{eltype(g)}, closure_stencil)
+    return BoundaryOperator(g, converted_stencil, boundary)
+end

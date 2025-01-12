@@ -1,6 +1,6 @@
 # Operator file format
 
-The intention is that Sbplib.jl should be a general and extensible framework
+The intention is that Diffinitive.jl should be a general and extensible framework
 for working with finite difference methods. It therefore includes a set of
 tools for storing and sharing operator definitions as well as a set of widely
 used operators.
