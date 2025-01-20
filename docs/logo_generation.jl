@@ -136,7 +136,7 @@ logo_figure(;debug=false, transparent=false)
 # logo_figure(;debug=true, transparent=false)
 
 # ╔═╡ 38ed8b50-de68-4df3-affe-c09382fd2ec3
-save("logo.svg",logo_figure(); backend=CairoMakie)
+save("src/assets/logo.svg",logo_figure(); backend=CairoMakie)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
