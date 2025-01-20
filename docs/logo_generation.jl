@@ -4,15 +4,38 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    #! format: off
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+    #! format: on
+end
+
 # ╔═╡ e2c959c4-d2b7-11ef-0138-9761d4b6a434
 begin
 	using CairoMakie
 	using WGLMakie
 	using Colors
+	using PlutoUI
 
 	WGLMakie.activate!()
-	# CairoMakie.activate!()
 end
+
+# ╔═╡ 61d6e5d8-ced5-4fe9-a375-bda329304a43
+md"""
+# Logo generation
+This notebook generates the .svg containing the logo for the documentation of Diffinitive.jl.
+"""
+
+# ╔═╡ 86bde2a1-8d55-47a7-bd8a-69d74e6a2958
+md"""
+## Parameters
+"""
 
 # ╔═╡ 8cb161ab-8b04-4744-86f6-b61f169e1368
 begin
@@ -23,11 +46,59 @@ begin
 	const strokewidth = 12
 end;
 
+# ╔═╡ 17e62a16-580b-4ec5-88f8-9b73049f6ff9
+logocolors = Colors.JULIA_LOGO_COLORS
+
+# ╔═╡ 24b4144b-4ee4-4285-9926-217964084fcf
+md"""
+## The logo
+"""
+
+# ╔═╡ 292bb633-8409-4bb9-be69-fa2a5c34f441
+begin
+	debug_checkbox = @bind debug CheckBox()
+
+
+	md"""
+	Debug mode: $debug_checkbox
+	"""
+end
+
+# ╔═╡ 4821f7a0-d4fd-4b28-88cb-fa6745aeccc3
+md"""
+### Saving to file
+"""
+
 # ╔═╡ ddb3dc44-5e7b-4b36-878b-cfc7eba8f18b
 pwd()
 
-# ╔═╡ 17e62a16-580b-4ec5-88f8-9b73049f6ff9
-logocolors = Colors.JULIA_LOGO_COLORS
+# ╔═╡ e7ae1f66-06bd-4cc6-be23-2932383dd579
+md"""
+## Specification
+"""
+
+# ╔═╡ d6077592-27b7-48ab-bb76-c0d9b5244253
+md"""
+### Figure setup
+"""
+
+# ╔═╡ 8c50ead2-0fd1-4190-9776-d233bef513e0
+function deactivate_all_interaction!(ax)
+	deactivate_interaction!(ax, :dragpan)
+	deactivate_interaction!(ax, :scrollzoom)
+	deactivate_interaction!(ax, :rectanglezoom)
+end
+
+# ╔═╡ 3c620b15-7342-458f-a175-a060976b1ceb
+function hide_coordinate_system!(ax)
+	hidespines!(ax)
+	hidedecorations!(ax)
+end
+
+# ╔═╡ 376b5f3c-508e-4677-8b96-3c75b8cd3443
+md"""
+## Misc. functions
+"""
 
 # ╔═╡ d810c823-b111-46ab-84fe-83e5b738d18d
 polar(r,θ) = (r*cos(θ), r*sin(θ))
@@ -44,22 +115,9 @@ function limits(R,d)
 	return (xlim, ylim)
 end
 
-# ╔═╡ 8c50ead2-0fd1-4190-9776-d233bef513e0
-function deactivate_all_interaction!(ax)
-	deactivate_interaction!(ax, :dragpan)
-	deactivate_interaction!(ax, :scrollzoom)
-	deactivate_interaction!(ax, :rectanglezoom)
-end
-
-# ╔═╡ 3c620b15-7342-458f-a175-a060976b1ceb
-function hide_coordinate_system!(ax)
-	hidespines!(ax)
-	hidedecorations!(ax)
-end
-
 # ╔═╡ 7a580af5-a466-4d6e-bdb3-b0ebcecac802
 function draw_ball!(ax, p; color, d, strokewidth)
-	scatter!(ax, p;        
+	scatter!(ax, p;
 		markersize = d,
 		color,
 		markerspace = :data,
@@ -70,7 +128,6 @@ end
 
 # ╔═╡ 50aff181-0513-4b47-a501-1bcd9614dea6
 function draw_logo!(ax;R,d,strokewidth, spokewidth)
-	
 	origo = (0,0);
 	θs = π/2 .+ 2π/3*(0:2)
 	## Spokes
@@ -90,7 +147,7 @@ function draw_logo!(ax;R,d,strokewidth, spokewidth)
 
 	## Non-center
 	colors = [logocolors.green, logocolors.red, logocolors.purple]
-	
+
 	for (i,θ) ∈ enumerate(θs)
 		draw_ball!(ax, polar(R,θ);
 			color = colors[i],
@@ -102,16 +159,15 @@ end
 
 # ╔═╡ 57811601-acf2-475d-bbe2-bbed4e9f46ba
 function logo_figure(; debug = false, transparent = true)
-
 	# A bug in WGSLMakie makes it not work with transparent background
 	if transparent
 		bgspec = (;backgroundcolor=:transparent)
 	else
 		bgspec = (;)
 	end
-	
+
 	fig = Figure(;bgspec...)
-	
+
 	ax = Axis(fig[1,1];
 		aspect=DataAspect(),
 		limits =  limits(R,d),
@@ -122,32 +178,39 @@ function logo_figure(; debug = false, transparent = true)
 		hide_coordinate_system!(ax)
 		deactivate_all_interaction!(ax)
 	end
-	
+
 	draw_logo!(ax; R,d,strokewidth, spokewidth)
 
-
-	# resize_to_layout!(fig)
-	
 	fig
 end
 
 # ╔═╡ 4d78323f-7126-46a7-b8d7-760bd2d06ab3
-logo_figure(;debug=false, transparent=false)
+logo_figure(;debug, transparent=false)
 # logo_figure(;debug=true, transparent=false)
 
 # ╔═╡ 38ed8b50-de68-4df3-affe-c09382fd2ec3
 save("src/assets/logo.svg",logo_figure(); backend=CairoMakie)
+
+# ╔═╡ 798aa3a9-3ef5-48ed-9e8f-eb23403bfc49
+md"""
+## Appendix
+"""
+
+# ╔═╡ fca0bd98-c9cb-4423-89b0-9d988ffb105d
+PlutoUI.TableOfContents()
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
+PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
 
 [compat]
 CairoMakie = "~0.12.18"
 Colors = "~0.12.11"
+PlutoUI = "~0.7.60"
 WGLMakie = "~0.10.18"
 """
 
@@ -157,7 +220,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.2"
 manifest_format = "2.0"
-project_hash = "c15f6ed1839600325b489dfc544af7640c934918"
+project_hash = "a086985124f354d2bdad8066fd4f55286038c1ef"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -169,6 +232,12 @@ weakdeps = ["ChainRulesCore", "Test"]
     [deps.AbstractFFTs.extensions]
     AbstractFFTsChainRulesCoreExt = "ChainRulesCore"
     AbstractFFTsTestExt = "Test"
+
+[[deps.AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "6e1d2a35f2f90a4bc7c2ed98079b2ba09c35b83a"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.3.2"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
@@ -652,6 +721,18 @@ git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
 uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
 version = "0.0.5"
 
+[[deps.HypertextLiteral]]
+deps = ["Tricks"]
+git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.5"
+
+[[deps.IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "0.2.5"
+
 [[deps.ImageAxes]]
 deps = ["AxisArrays", "ImageBase", "ImageCore", "Reexport", "SimpleTraits"]
 git-tree-sha1 = "e12629406c6c4442539436581041d372d69c55ba"
@@ -956,6 +1037,11 @@ git-tree-sha1 = "f02b56007b064fbfddb4c9cd60161b6dd0f40df3"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 version = "1.1.0"
 
+[[deps.MIMEs]]
+git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
+uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
+version = "0.1.4"
+
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "oneTBB_jll"]
 git-tree-sha1 = "f046ccd0c6db2832a9f639e2c669c6fe867e5f4f"
@@ -1186,6 +1272,12 @@ deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random"
 git-tree-sha1 = "3ca9a356cd2e113c420f2c13bea19f8d3fb1cb18"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.4.3"
+
+[[deps.PlutoUI]]
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
+git-tree-sha1 = "eba4810d5e6a01f612b948c9fa94f905b49087b0"
+uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+version = "0.7.60"
 
 [[deps.PolygonOps]]
 git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
@@ -1533,6 +1625,11 @@ git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.11.3"
 
+[[deps.Tricks]]
+git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
+uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
+version = "0.1.9"
+
 [[deps.TriplotBase]]
 git-tree-sha1 = "4d4ed7f294cda19382ff7de4c137d24d16adc89b"
 uuid = "981d1d27-644d-49a2-9326-4793e63143c3"
@@ -1753,18 +1850,28 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═e2c959c4-d2b7-11ef-0138-9761d4b6a434
+# ╟─61d6e5d8-ced5-4fe9-a375-bda329304a43
+# ╟─86bde2a1-8d55-47a7-bd8a-69d74e6a2958
 # ╠═8cb161ab-8b04-4744-86f6-b61f169e1368
-# ╠═4d78323f-7126-46a7-b8d7-760bd2d06ab3
-# ╠═57811601-acf2-475d-bbe2-bbed4e9f46ba
-# ╠═50aff181-0513-4b47-a501-1bcd9614dea6
+# ╠═17e62a16-580b-4ec5-88f8-9b73049f6ff9
+# ╟─24b4144b-4ee4-4285-9926-217964084fcf
+# ╟─292bb633-8409-4bb9-be69-fa2a5c34f441
+# ╟─4d78323f-7126-46a7-b8d7-760bd2d06ab3
+# ╟─4821f7a0-d4fd-4b28-88cb-fa6745aeccc3
 # ╠═ddb3dc44-5e7b-4b36-878b-cfc7eba8f18b
 # ╠═38ed8b50-de68-4df3-affe-c09382fd2ec3
-# ╠═17e62a16-580b-4ec5-88f8-9b73049f6ff9
-# ╠═d810c823-b111-46ab-84fe-83e5b738d18d
-# ╠═233d0556-1cae-4156-8239-2f7e01ac32c6
+# ╟─e7ae1f66-06bd-4cc6-be23-2932383dd579
+# ╠═50aff181-0513-4b47-a501-1bcd9614dea6
+# ╟─d6077592-27b7-48ab-bb76-c0d9b5244253
+# ╠═57811601-acf2-475d-bbe2-bbed4e9f46ba
 # ╠═8c50ead2-0fd1-4190-9776-d233bef513e0
 # ╠═3c620b15-7342-458f-a175-a060976b1ceb
+# ╟─376b5f3c-508e-4677-8b96-3c75b8cd3443
+# ╠═d810c823-b111-46ab-84fe-83e5b738d18d
+# ╠═233d0556-1cae-4156-8239-2f7e01ac32c6
 # ╠═7a580af5-a466-4d6e-bdb3-b0ebcecac802
+# ╟─798aa3a9-3ef5-48ed-9e8f-eb23403bfc49
+# ╠═e2c959c4-d2b7-11ef-0138-9761d4b6a434
+# ╠═fca0bd98-c9cb-4423-89b0-9d988ffb105d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
