@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="80" height="72" viewBox="-0.39782375 -0.4433175 0.7956475 0.71685125">
-    <polyline points="0,0 0,-0.3395675"           stroke="#cccccc" stroke-width="0.02" stroke-opacity="1" />
-    <polyline points="0,0 -0.29407375,0.16978375" stroke="#cccccc" stroke-width="0.02" stroke-opacity="1" />
-    <polyline points="0,0 0.29407375,0.16978375"  stroke="#cccccc" stroke-width="0.02" stroke-opacity="1" />
-
-    <circle cx="0"           cy="0"     r="0.1" fill="#4063d8" stroke="#333333" stroke-width="0.0075"/>
-    <circle cx="0"           cy="-0.3395675" r="0.1" fill="#389826" stroke="#333333" stroke-width="0.0075"/>
-    <circle cx="-0.29407375" cy="0.16978375" r="0.1" fill="#cb3c33" stroke="#333333" stroke-width="0.0075"/>
-    <circle cx="0.29407375"  cy="0.16978375" r="0.1" fill="#9558b2" stroke="#333333" stroke-width="0.0075"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="250" height="250" viewBox="0 0 1000 1000">
+<defs>
+  <clipPath id="clip390">
+    <rect x="47" y="47" width="907" height="907"/>
+  </clipPath>
+</defs>
+<polyline clip-path="url(#clip390)" style="stroke:#cccccc; stroke-linecap:round; stroke-linejoin:round; stroke-width:16; stroke-opacity:1; fill:none" points="500,500 500,228.346 "/>
+<polyline clip-path="url(#clip390)" style="stroke:#cccccc; stroke-linecap:round; stroke-linejoin:round; stroke-width:16; stroke-opacity:1; fill:none" points="500,500 264.741,635.827 "/>
+<polyline clip-path="url(#clip390)" style="stroke:#cccccc; stroke-linecap:round; stroke-linejoin:round; stroke-width:16; stroke-opacity:1; fill:none" points="500,500 735.259,635.827 "/>
+<circle clip-path="url(#clip390)" cx="500" cy="500" r="86.4" fill="#4063d8" fill-rule="evenodd" fill-opacity="1" stroke="#333333" stroke-opacity="1" stroke-width="12"/>
+<circle clip-path="url(#clip390)" cx="500" cy="228.346" r="86.4" fill="#389826" fill-rule="evenodd" fill-opacity="1" stroke="#333333" stroke-opacity="1" stroke-width="12"/>
+<circle clip-path="url(#clip390)" cx="264.741" cy="635.827" r="86.4" fill="#cb3c33" fill-rule="evenodd" fill-opacity="1" stroke="#333333" stroke-opacity="1" stroke-width="12"/>
+<circle clip-path="url(#clip390)" cx="735.259" cy="635.827" r="86.4" fill="#9558b2" fill-rule="evenodd" fill-opacity="1" stroke="#333333" stroke-opacity="1" stroke-width="12"/>
 </svg>
