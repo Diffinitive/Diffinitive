@@ -2,14 +2,16 @@ struct Stencil{T,N}
     range::UnitRange{Int64}
     weights::NTuple{N,T}
 
-    function Stencil(range::UnitRange,weights::NTuple{N,T}) where {T, N}
+    function Stencil(range::UnitRange,weights::NTuple{N,Any}) where N
+        T = eltype(weights)
+
         @assert length(range) == N
         new{T,N}(range,weights)
     end
 end
 
 """
-    Stencil(weights::NTuple; center::Int)
+    Stencil(weights...; center::Int)
 
 Create a stencil with the given weights with element `center` as the center of the stencil.
 """
@@ -109,20 +111,23 @@ struct NestedStencil{T,N,M}
     s::Stencil{Stencil{T,N},M}
 end
 
+NestedStencil(;center) = NestedStencil(Stencil(;center))
+CenteredNestedStencil() = NestedStencil(CenteredStencil())
+
 # Stencil input
 NestedStencil(s::Vararg{Stencil}; center) = NestedStencil(Stencil(s... ; center))
 CenteredNestedStencil(s::Vararg{Stencil}) = NestedStencil(CenteredStencil(s...))
 
 # Tuple input
-function NestedStencil(weights::Vararg{NTuple{N,Any}}; center) where N
+function NestedStencil(weights::Vararg{NTuple{N,Any} where N}; center)
     inner_stencils = map(w -> Stencil(w...; center), weights)
     return NestedStencil(Stencil(inner_stencils... ; center))
 end
-function CenteredNestedStencil(weights::Vararg{NTuple{N,Any}}) where N
+
+function CenteredNestedStencil(weights::Vararg{NTuple{N,Any} where N})
     inner_stencils = map(w->CenteredStencil(w...), weights)
     return CenteredNestedStencil(inner_stencils...)
 end
-
 
 # Conversion
 function NestedStencil{T,N,M}(ns::NestedStencil{S,N,M}) where {T,S,N,M}
@@ -136,7 +141,7 @@ end
 function Base.convert(::Type{NestedStencil{T,N,M}}, s::NestedStencil{S,N,M}) where {T,S,N,M}
     return NestedStencil{T,N,M}(s)
 end
-Base.convert(::Type{NestedStencil{T}}, stencil) where T = NestedStencil{T}(stencil)
+Base.convert(::Type{NestedStencil{T}}, stencil::NestedStencil) where T = NestedStencil{T}(stencil)
 
 function Base.promote_rule(::Type{NestedStencil{T,N,M}}, ::Type{NestedStencil{S,N,M}}) where {T,S,N,M}
     return NestedStencil{promote_type(T,S),N,M}

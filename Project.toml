@@ -21,3 +21,10 @@ DiffinitiveSparseArraysExt = ["SparseArrays", "Tokens"]
 
 [compat]
 julia = "1.5"
+StaticArrays = "1.0"
+TOML = "1.0"
+Makie = "0.21"
+SparseArrayKit = "0.3"
+Tokens = "0.1.1"
+SparseArrays = "1.10"
+LinearAlgebra = "1.5"
