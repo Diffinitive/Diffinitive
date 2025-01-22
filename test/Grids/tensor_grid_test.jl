@@ -213,8 +213,8 @@ using StaticArrays
         gf = rand(11)
         @test gf[boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, LowerBoundary}())] == gf[1]
         @test gf[boundary_indices(TensorGrid(g₁, g₄), TensorGridBoundary{1, UpperBoundary}())] == gf[11]
-        @test gf[boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, LowerBoundary}())]== gf[1]
-        @test gf[boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, UpperBoundary}())]== gf[11]
+        @test gf[boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, LowerBoundary}())] == gf[1]
+        @test gf[boundary_indices(TensorGrid(g₄,g₁), TensorGridBoundary{2, UpperBoundary}())] == gf[11]
 
         @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, LowerBoundary}())) == [CartesianIndex(1,i) for i ∈ 1:6]
         @test collect(boundary_indices(TensorGrid(g₁, g₂), TensorGridBoundary{1, UpperBoundary}())) == [CartesianIndex(11,i) for i ∈ 1:6]
