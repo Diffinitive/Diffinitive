@@ -47,6 +47,10 @@ Base.length(g::TensorGrid) = prod(length, g.grids)
 Base.size(g::TensorGrid) = LazyTensors.concatenate_tuples(size.(g.grids)...)
 Base.size(g::TensorGrid, d) = size(g)[d]
 
+function spacing(g::TensorGrid)
+    relevant_grids = filter(g->!isa(g,ZeroDimGrid),g.grids)
+    return spacing.(relevant_grids)
+end
 
 function min_spacing(g::TensorGrid)
     relevant_grids = filter(g->!isa(g,ZeroDimGrid),g.grids)

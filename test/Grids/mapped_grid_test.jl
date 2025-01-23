@@ -282,7 +282,7 @@ end
     @test logical_grid(mg) == lg
     @test collect(mg) == map(x̄, lg)
 
-    @test mapped_grid(lg, x̄, J) == mg
+    @test mapped_grid(x̄, J, lg) == mg
 
     @test mapped_grid(x̄, J, unitsquare(), 10, 11) == mg
 end

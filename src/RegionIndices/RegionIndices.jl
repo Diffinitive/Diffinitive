@@ -25,18 +25,17 @@ export Index
 Index(R::Type{<:Region}, T::Type{<:Integer}) = Index{R,T}
 IndexTupleType(T::Type{<:Integer},R::NTuple{N, DataType} where N) = Tuple{Index.(R, T)...}
 
-Base.convert(::Type{T}, i::Index{R,T} where R) where T = i.i
+Base.convert(::Type{T}, i::Index{R,T} where R) where T <: Integer = i.i
 Base.convert(::Type{CartesianIndex}, I::NTuple{N,Index} where N) = CartesianIndex(convert.(Int, I))
 
 Base.Int(I::Index) = I.i
 Base.to_index(I::Index) = Int(I) #How to get this to work for all cases??
-Base.getindex(A::AbstractArray{T,N}, I::NTuple{N,Index}) where {T,N} = A[I...] #Is this ok??
 
 function Index(i::Integer, boundary_width::Integer, dim_size::Integer)
     return Index{getregion(i,boundary_width,dim_size)}(i)
 end
 
-IndexTuple(t::Vararg{Tuple{T, DataType}}) where T<:Integer = Index.(t)
+IndexTuple(t::Vararg{Tuple{Integer, DataType}}) = Index.(t)
 export IndexTuple
 
 # TODO: Use the values of the region structs, e.g. Lower(), for the region parameter instead of the types.
