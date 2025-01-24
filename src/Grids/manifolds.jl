@@ -60,6 +60,9 @@ unithyperbox(D) = unithyperbox(Float64,D)
 
 struct Simplex{T,D,NV} <: ParameterSpace{D}
     verticies::NTuple{NV,SVector{D,T}}
+
+    Simplex(verticies::Tuple{SVector{D,T}, Vararg{SVector{D,T},N}}) where {T,D,N} = new{T,D,N+1}(verticies)
+    Simplex(::Tuple{}) = throw(ArgumentError("Must provide at least one vertex."))
 end
 
 function Simplex(verticies::Vararg{AbstractArray})
@@ -191,7 +194,7 @@ end
 
 function polygon_edges(ps...)
     n = length(ps)
-    return [LineSegment(ps[i], ps[mod1(i+1,n)]) for i ∈ eachindex(Ps)]
+    return [LineSegment(ps[i], ps[mod1(i+1,n)]) for i ∈ eachindex(ps)]
 end
 
 struct Circle{T,PT} <: Curve
@@ -199,7 +202,10 @@ struct Circle{T,PT} <: Curve
     r::T
 end
 
-(c::Circle)(θ) = c.c + r*@SVector[cos(Θ), sin(Θ)]
+function (C::Circle)(θ)
+    (;c, r) = C
+    c + r*@SVector[cos(θ), sin(θ)]
+end
 
 struct TransfiniteInterpolationSurface{T1,T2,T3,T4} <: Surface
     c₁::T1
