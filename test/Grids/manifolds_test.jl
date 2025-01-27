@@ -70,6 +70,8 @@ end
     @test c([3,2]) == [6,4]
     @test parameterspace(c) == unitsquare()
     @test ndims(c) == 2
+
+    @test_broken jacobian(c, [3,2])
 end
 
 @testset "CartesianAtlas" begin
@@ -107,6 +109,14 @@ end
 end
 
 @testset "LineSegment" begin
+    @test_broken false
+end
+
+@testset "linesegments" begin
+    @test_broken false
+end
+
+@testset "polygon_edges" begin
     @test_broken false
 end
 
