@@ -15,7 +15,7 @@ struct EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1}
 end
 
 # Indexing interface
-Base.getindex(g::EquidistantGrid, i) = g.points[i]
+Base.getindex(g::EquidistantGrid, i::Int) = g.points[i]
 Base.eachindex(g::EquidistantGrid) = eachindex(g.points)
 Base.firstindex(g::EquidistantGrid) = firstindex(g.points)
 Base.lastindex(g::EquidistantGrid) = lastindex(g.points)
@@ -71,8 +71,8 @@ struct UpperBoundary <: BoundaryIdentifier end
 boundary_identifiers(::EquidistantGrid) = (LowerBoundary(), UpperBoundary())
 boundary_grid(g::EquidistantGrid, id::LowerBoundary) = ZeroDimGrid(g[begin])
 boundary_grid(g::EquidistantGrid, id::UpperBoundary) = ZeroDimGrid(g[end])
-boundary_indices(g::EquidistantGrid, id::LowerBoundary) = (firstindex(g),)
-boundary_indices(g::EquidistantGrid, id::UpperBoundary) = (lastindex(g),)
+boundary_indices(g::EquidistantGrid, id::LowerBoundary) = firstindex(g)
+boundary_indices(g::EquidistantGrid, id::UpperBoundary) = lastindex(g)
 
 """
     refine(g::EquidistantGrid, r::Int)
