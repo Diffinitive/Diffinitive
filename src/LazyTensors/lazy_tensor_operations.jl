@@ -71,7 +71,7 @@ domain_size(tm::TensorNegation) = domain_size(tm.tm)
 """
     TensorSum{T,R,D,...} <: LazyTensor{T,R,D}
 
-The sum of 2 or more lazy tensors.
+The lazy sum of 2 or more lazy tensors.
 """
 struct TensorSum{T,R,D,TT<:NTuple{N, LazyTensor{T,R,D}} where N} <: LazyTensor{T,R,D}
     tms::TT
@@ -86,6 +86,11 @@ struct TensorSum{T,R,D,TT<:NTuple{N, LazyTensor{T,R,D}} where N} <: LazyTensor{T
     end
 end
 
+"""
+    TensorSum(ts::Vararg{LazyTensor})
+
+The lazy sum of the tensors `ts`.
+"""
 function TensorSum(ts::Vararg{LazyTensor})
     T = eltype(ts[1])
     R = range_dim(ts[1])
