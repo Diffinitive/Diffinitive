@@ -95,7 +95,7 @@ function boundary_grid(g::TensorGrid, id::TensorGridBoundary)
 end
 
 
-function boundary_indices(g::TensorGrid{T,1} where T, id::TensorGridBoundary)
+function boundary_indices(g::TensorGrid{<:Any, 1}, id::TensorGridBoundary)
     return boundary_indices(g.grids[grid_id(id)], boundary_id(id))
 end
 function boundary_indices(g::TensorGrid, id::TensorGridBoundary)
