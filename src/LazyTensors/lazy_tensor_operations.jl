@@ -67,6 +67,7 @@ apply_transpose(tm::TensorNegation, v, I...) = -apply_transpose(tm.tm, v, I...)
 range_size(tm::TensorNegation) = range_size(tm.tm)
 domain_size(tm::TensorNegation) = domain_size(tm.tm)
 
+
 """
     TensorSum{T,R,D,...} <: LazyTensor{T,R,D}
 

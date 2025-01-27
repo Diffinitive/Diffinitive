@@ -168,6 +168,10 @@ end
         @test ((A-B)*v)[i] == 2*v[i] - 3*v[i]
     end
 
+    for i ∈ eachindex(v)
+        @test ((A+B)'*v)[i] == 2*v[i] + 3*v[i]
+    end
+
 
     @test range_size(A+B) == range_size(A) == range_size(B)
     @test domain_size(A+B) == domain_size(A) == domain_size(B)
