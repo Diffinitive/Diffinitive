@@ -94,7 +94,7 @@ end
 
 # TODO: Make sure all methods of `mapped_grid` are implemented correctly and tested.
 """
-    mapped_grid(x, J, size::Vararg{Int})
+    mapped_grid(x, J, size...)
 
 A `MappedGrid` with a default logical grid on the D-dimensional unit hyper 
 box [0,1]ᴰ. `x` and `J` are functions to be evaluated on the logical grid
@@ -121,7 +121,7 @@ function mapped_grid(x, J, lg::Grid)
 end
 
 """
-    mapped_grid(x, J, parameterspace, size)
+    mapped_grid(x, J, ps::ParameterSpace, size...)
 
 A `MappedGrid` with logical grid `lg`. Physical coordinates and Jacobian are
 determined by the functions `x` and `J`.

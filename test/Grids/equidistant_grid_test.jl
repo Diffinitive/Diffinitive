@@ -155,7 +155,6 @@ end
         end
     end
 
-
     @testset "equidistant_grid(::ParameterSpace)" begin
         ps = HyperBox((0,0),(2,1))
 

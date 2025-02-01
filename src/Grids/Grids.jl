@@ -72,6 +72,7 @@ export logical_grid
 export mapped_grid
 export metric_tensor
 
+include("parameter_space.jl")
 include("manifolds.jl")
 include("grid.jl")
 include("tensor_grid.jl")
