@@ -75,13 +75,16 @@ using StaticArrays
 
     @testset "boundary_indices" begin
         g = EquidistantGrid(0:0.1:1)
-        @test boundary_indices(g, LowerBoundary()) == (1,)
-        @test boundary_indices(g, UpperBoundary()) == (11,)
+        @test boundary_indices(g, LowerBoundary()) == 1
+        @test boundary_indices(g, UpperBoundary()) == 11
+
+        gf = collect(g)
+        @test gf[boundary_indices(g, LowerBoundary())] == gf[1]
+        @test gf[boundary_indices(g, UpperBoundary())] == gf[11]
 
         g = EquidistantGrid(2:0.1:10)
-        @test boundary_indices(g, LowerBoundary()) == (1,)
-        @test boundary_indices(g, UpperBoundary()) == (81,)
-
+        @test boundary_indices(g, LowerBoundary()) == 1
+        @test boundary_indices(g, UpperBoundary()) == 81
     end
 
     @testset "refine" begin

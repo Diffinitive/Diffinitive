@@ -10,7 +10,7 @@ const results_dir = mkpath(joinpath(diffinitive_root, "benchmark/results"))
 const template_path = joinpath(diffinitive_root, "benchmark/result.tmpl")
 
 """
-    mainmain(;rev=nothing, target=nothing, baseline=nothing , kwargs...)
+    main(;rev=nothing, target=nothing, baseline=nothing , kwargs...)
 
 Calls `run_benchmark(args...; kwargs...)` and writes the results as an HTML
 file in `benchmark/results`.
@@ -82,7 +82,7 @@ are keyword arguments passed to `judge`.
 
 Returns a `PkgBenchmark.BenchmarkJudgement`
 """
-function compare_benchmarks(target, baseline, f=minimum; judgekwargs=Dict(), kwargs...)
+function compare_benchmarks(target, baseline; f=minimum, judgekwargs=Dict(), kwargs...)
     t = run_benchmark(target; kwargs...)
     b = run_benchmark(baseline; kwargs...)
 
@@ -97,7 +97,7 @@ specified in `baseline`.
 
 Accepts the same arguments as the two revision version.
 """
-function compare_benchmark(baseline, f=minimum; judgekwargs=Dict(), kwargs...)
+function compare_benchmarks(baseline; f=minimum, judgekwargs=Dict(), kwargs...)
     t = run_benchmark(;kwargs...)
     b = run_benchmark(baseline; kwargs...)
 
