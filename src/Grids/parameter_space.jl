@@ -12,9 +12,8 @@ Common parameter spaces are created using functions for unit sized spaces
 * [`unittetrahedron`](@ref)
 * [`unitsimplex`](@ref)
 
-See also: [`Interval`](@ref), [`Rectangle`](@ref), [`Box`](@ref),
-[`Triangle`](@ref), [`Tetrahedron`](@ref), [`HyperBox`](@ref),
-[`Simplex`](@ref),
+See also: [`Interval`](@ref), [`HyperBox`](@ref),
+[`Simplex`](@ref).
 """
 abstract type ParameterSpace{D} end
 Base.ndims(::ParameterSpace{D}) where D = D
@@ -152,7 +151,7 @@ Tetrahedron{T} = Simplex{T,3}
 """
     unittriangle(T=Float64)
 
-The simplex with verticies ``(0,0)``, ``(1,0)``, and ``(0,1).
+The simplex with verticies ``(0,0)``, ``(1,0)``, and ``(0,1)``.
 """
 unittriangle(T=Float64) = unitsimplex(T,2)
 
@@ -166,7 +165,7 @@ unittetrahedron(T=Float64) = unitsimplex(T,3)
 """
     unitsimplex(T=Float64,D)
 
-The unit simplex in dimension ``D`` with verticies ``(0,0,0,...)``, ``(1,0,0,...)``, ``(0,1,0,...)``, ``(0,0,1,...)``...
+The unit simplex in dimension `D` with verticies ``(0,0,0,...)``, ``(1,0,0,...)``, ``(0,1,0,...)``, ``(0,0,1,...)``...
 """
 function unitsimplex(T,D)
     z = @SVector zeros(T,D)
