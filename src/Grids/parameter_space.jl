@@ -1,17 +1,16 @@
 """
     ParameterSpace{D}
 
-A space of parameters of dimension `D`. Used with `Chart` to indicate which
-parameters are valid for that chart.
+A space of parameters of dimension `D`.
 
-Common parameter spaces are created using the functions unit sized spaces
-* `unitinterval`
-* `unitrectangle`
-* `unitbox`
-* `unittriangle`
-* `unittetrahedron`
-* `unithyperbox`
-* `unitsimplex`
+Common parameter spaces are created using functions for unit sized spaces
+* [`unitinterval`](@ref)
+* [`unitsquare`](@ref)
+* [`unitcube`](@ref)
+* [`unithyperbox`](@ref)
+* [`unittriangle`](@ref)
+* [`unittetrahedron`](@ref)
+* [`unitsimplex`](@ref)
 
 See also: [`Interval`](@ref), [`Rectangle`](@ref), [`Box`](@ref),
 [`Triangle`](@ref), [`Tetrahedron`](@ref), [`HyperBox`](@ref),
