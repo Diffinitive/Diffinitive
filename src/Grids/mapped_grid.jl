@@ -92,7 +92,6 @@ function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
     )
 end
 
-# TODO: Make sure all methods of `mapped_grid` are implemented correctly and tested.
 """
     mapped_grid(x, J, size...)
 
@@ -102,8 +101,7 @@ and `size` determines the size of the logical grid.
 """
 function mapped_grid(x, J, size::Vararg{Int})
     D = length(size)
-        lg = equidistant_grid(ntuple(i->0., D), ntuple(i->1., D), size...) # TODO: Clean this up with ParamaterSpace once feature/grids/manifolds is merged
-    return mapped_grid(x, J, lg)
+    return mapped_grid(x, J, unithyperbox(D), size...)
 end
 
 """
