@@ -27,11 +27,16 @@ A `ParameterSpace` representing an interval.
 struct Interval{T} <: ParameterSpace{1}
     a::T
     b::T
+end
 
-    function Interval(a,b)
-        a, b = promote(a, b)
-        new{typeof(a)}(a,b)
-    end
+"""
+    Interval(a,b)
+
+An interval with limits `a` and `b`.
+"""
+function Interval(a,b)
+    a, b = promote(a, b)
+    Interval{typeof(a)}(a,b)
 end
 
 """
