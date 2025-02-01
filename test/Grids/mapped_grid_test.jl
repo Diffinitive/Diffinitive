@@ -278,11 +278,13 @@ end
     mg = mapped_grid(x̄, J, 10, 11)
     @test mg isa MappedGrid{SVector{2,Float64}, 2}
 
-    lg = equidistant_grid((0,0), (1,1), 10, 11)
+    lg = equidistant_grid(unitsquare(), 10, 11)
     @test logical_grid(mg) == lg
     @test collect(mg) == map(x̄, lg)
 
     @test mapped_grid(x̄, J, lg) == mg
+
+    @test mapped_grid(x̄, J, unitsquare(), 10, 11) == mg
 end
 
 @testset "metric_tensor" begin
