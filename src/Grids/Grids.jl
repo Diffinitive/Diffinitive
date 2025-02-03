@@ -79,5 +79,6 @@ include("tensor_grid.jl")
 include("equidistant_grid.jl")
 include("zero_dim_grid.jl")
 include("mapped_grid.jl")
+include("geometry.jl")
 
 end # module
