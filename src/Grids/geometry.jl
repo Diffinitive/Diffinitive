@@ -1,12 +1,4 @@
-###
-# Geometry
-###
-
-abstract type Curve end
-abstract type Surface end
-
-
-struct Line{PT} <: Curve
+struct Line{PT}
     p::PT
     tangent::PT
 end
@@ -14,7 +6,7 @@ end
 (c::Line)(s) = c.p + s*c.tangent
 
 
-struct LineSegment{PT} <: Curve
+struct LineSegment{PT}
     a::PT
     b::PT
 end
@@ -32,7 +24,7 @@ function polygon_edges(ps...)
     return [LineSegment(ps[i], ps[mod1(i+1,n)]) for i ∈ eachindex(ps)]
 end
 
-struct Circle{T,PT} <: Curve
+struct Circle{T,PT}
     c::PT
     r::T
 end
@@ -42,7 +34,7 @@ function (C::Circle)(θ)
     c + r*@SVector[cos(θ), sin(θ)]
 end
 
-struct TransfiniteInterpolationSurface{T1,T2,T3,T4} <: Surface
+struct TransfiniteInterpolationSurface{T1,T2,T3,T4}
     c₁::T1
     c₂::T2
     c₃::T3
