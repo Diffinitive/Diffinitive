@@ -64,6 +64,8 @@ end
 
 charts(a::CartesianAtlas) = a.charts
 connections(a::CartesianAtlas) = nothing
+Base.size(a::CartesianAtlas) = size(a.charts)
+
 
 struct UnstructuredAtlas <: Atlas
     charts::Vector{Chart}

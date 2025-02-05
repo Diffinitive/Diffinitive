@@ -21,6 +21,13 @@ end
     @test a isa Atlas
     @test charts(a) == [c c; c c]
 
+
+    @testset "size" begin
+        @test size(CartesianAtlas([c c; c c])) == (2,2)
+        @test size(CartesianAtlas([c c c; c c c])) == (2,3)
+        @test size(CartesianAtlas([c c; c c; c c])) == (3,2)
+    end
+
     west = CartesianBoundary{1,LowerBoundary}
     east = CartesianBoundary{1,UpperBoundary}
     south = CartesianBoundary{2,LowerBoundary}
