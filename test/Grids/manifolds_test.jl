@@ -33,11 +33,11 @@ end
     south = CartesianBoundary{2,LowerBoundary}
     north = CartesianBoundary{2,UpperBoundary}
 
-    @test_broken Set(connections(a)) == Set([
-        (MultiBlockBoundary{(1,1), east}, MultiBlockBoundary{(2,1), west}),
-        (MultiBlockBoundary{(1,2), east}, MultiBlockBoundary{(2,2), west}),
-        (MultiBlockBoundary{(1,1), north}, MultiBlockBoundary{(1,2), south}),
-        (MultiBlockBoundary{(1,2), north}, MultiBlockBoundary{(2,2), south}),
+    @test Set(connections(a)) == Set([
+        (MultiBlockBoundary{(1,1), east}(), MultiBlockBoundary{(2,1), west}()),
+        (MultiBlockBoundary{(1,2), east}(), MultiBlockBoundary{(2,2), west}()),
+        (MultiBlockBoundary{(1,1), north}(), MultiBlockBoundary{(1,2), south}()),
+        (MultiBlockBoundary{(2,1), north}(), MultiBlockBoundary{(2,2), south}()),
     ])
 end
 

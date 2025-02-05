@@ -63,9 +63,32 @@ struct CartesianAtlas <: Atlas
 end
 
 charts(a::CartesianAtlas) = a.charts
-connections(a::CartesianAtlas) = nothing
 Base.size(a::CartesianAtlas) = size(a.charts)
 
+function connections(a::CartesianAtlas)
+    c = Tuple{MultiBlockBoundary, MultiBlockBoundary}[]
+
+    N,M = size(a.charts)
+    for j ∈ 1:M, i ∈ 1:N-1
+        push!(c,
+            (
+                MultiBlockBoundary{(i,j), CartesianBoundary{1,UpperBoundary}}(),
+                MultiBlockBoundary{(i+1,j), CartesianBoundary{1,LowerBoundary}}(),
+            ),
+        )
+    end
+
+    for i ∈ 1:N, j ∈ 1:M-1
+        push!(c,
+            (
+                MultiBlockBoundary{(i,j), CartesianBoundary{2,UpperBoundary}}(),
+                MultiBlockBoundary{(i,j+1), CartesianBoundary{2,LowerBoundary}}(),
+            ),
+        )
+    end
+
+    return c
+end
 
 struct UnstructuredAtlas <: Atlas
     charts::Vector{Chart}
