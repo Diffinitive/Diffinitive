@@ -30,6 +30,7 @@ pages = [
     "operator_file_format.md",
     "grids_and_grid_functions.md",
     "matrix_and_tensor_representations.md",
+    "manifolds_charts_atlases.md"
     "Submodules" => [
         "submodules/grids.md",
         "submodules/lazy_tensors.md",
