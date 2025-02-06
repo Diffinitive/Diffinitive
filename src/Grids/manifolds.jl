@@ -92,7 +92,7 @@ end
 
 struct UnstructuredAtlas <: Atlas
     charts::Vector{Chart}
-    connections
+    connections::Vector{Tuple{MultiBlockBoundary, MultiBlockBoundary}}
 end
 
 charts(a::UnstructuredAtlas) = a.charts
