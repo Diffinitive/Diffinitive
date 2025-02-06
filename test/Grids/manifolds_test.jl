@@ -4,14 +4,18 @@ using Diffinitive.Grids
 using Diffinitive.RegionIndices
 using Diffinitive.LazyTensors
 
+using StaticArrays
+
 @testset "Chart" begin
-    c = Chart(x->2x, unitsquare())
+    X(ξ) = 2ξ
+    Grids.jacobian(::typeof(X), ξ) = @SVector[2,2]
+    c = Chart(X, unitsquare())
     @test c isa Chart{2}
     @test c([3,2]) == [6,4]
     @test parameterspace(c) == unitsquare()
     @test ndims(c) == 2
 
-    @test_broken jacobian(c, [3,2])
+    @test jacobian(c, [3,2]) == [2,2]
 end
 
 @testset "CartesianAtlas" begin
