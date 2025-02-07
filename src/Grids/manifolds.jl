@@ -33,8 +33,8 @@ which will both allow calling `jacobian(c,ξ)`.
 jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
 # TBD: Can we register a error hint for when jacobian is called with a function that doesn't have a registered jacobian?
 
+boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
-# TBD: Should Charts, parameterspaces, Atlases, have boundary names?
 
 """
     Atlas
@@ -54,21 +54,99 @@ function charts end
 """
     connections(::Atlas)
 
-TBD: What exactly should this return?
+Collection of pairs of multiblock boundary identifiers.
 """
 function connections end
 
-struct CartesianAtlas <: Atlas
-    charts::Matrix{Chart}
+
+"""
+    CartesianAtlas{D,C<:Chart,AT<:AbstractArray{C,D}} <: Atlas
+
+An atlas where the charts are arranged and connected like an array.
+"""
+struct CartesianAtlas{D,C<:Chart,AT<:AbstractArray{C,D}} <: Atlas
+    charts::AT
 end
 
 charts(a::CartesianAtlas) = a.charts
-connections(a::CartesianAtlas) = nothing
 
-struct UnstructuredAtlas <: Atlas
-    charts::Vector{Chart}
-    connections
+function connections(a::CartesianAtlas)
+    c = Tuple{MultiBlockBoundary, MultiBlockBoundary}[]
+
+    for d ∈ 1:ndims(charts(a))
+        Is = eachslice(CartesianIndices(charts(a)); dims=d)
+        for i ∈ 1:length(Is)-1 # For each interface between slices
+            for jk ∈ eachindex(Is[i]) # For each block in slice
+                Iᵢⱼₖ = Tuple(Is[i][jk])
+                Iᵢ₊₁ⱼₖ = Tuple(Is[i+1][jk])
+                push!(c,
+                    (
+                        MultiBlockBoundary{Iᵢⱼₖ,   CartesianBoundary{d,UpperBoundary}}(),
+                        MultiBlockBoundary{Iᵢ₊₁ⱼₖ, CartesianBoundary{d,LowerBoundary}}(),
+                    )
+                )
+            end
+        end
+    end
+
+    return c
+end
+
+"""
+    boundary_identifiers(a::CartesianAtlas)
+
+All non-connected boundaries of the charts of `a`.
+"""
+function boundary_identifiers(a::CartesianAtlas)
+    bs = MultiBlockBoundary[]
+
+    for d ∈ 1:ndims(charts(a))
+        Is = eachslice(CartesianIndices(charts(a)); dims=d)
+
+        for (i,b) ∈ ((1,LowerBoundary),(length(Is),UpperBoundary)) # For first and last slice
+            for jk ∈ eachindex(Is[i]) # For each block in slice
+                Iᵢⱼₖ = Tuple(Is[i][jk])
+                push!(bs,
+                    MultiBlockBoundary{Iᵢⱼₖ,   CartesianBoundary{d,b}}(),
+                )
+            end
+        end
+    end
+
+    return bs
+end
+
+
+"""
+    UnstructuredAtlas{C<:Chart, CN<:Tuple{MultiBlockBoundary,MultiBlockBoundary}, ...} <: Atlas
+
+An atlas with connections determined by a vector `MultiBlockBoundary` pairs.
+"""
+struct UnstructuredAtlas{C<:Chart, CN<:Tuple{MultiBlockBoundary,MultiBlockBoundary}, CV<:AbstractVector{C}, CNV<:AbstractVector{CN}} <: Atlas
+    charts::CV
+    connections::CNV
 end
 
 charts(a::UnstructuredAtlas) = a.charts
-connections(a::UnstructuredAtlas) = nothing
+connections(a::UnstructuredAtlas) = a.connections
+
+"""
+    boundary_identifiers(a::UnstructuredAtlas)
+
+All non-connected boundaries of the charts of `a`.
+"""
+function boundary_identifiers(a::UnstructuredAtlas)
+    bs = MultiBlockBoundary[]
+
+    for (i,c) ∈ enumerate(charts(a))
+        for b ∈ boundary_identifiers(c)
+            mbb = MultiBlockBoundary{i,typeof(b)}()
+
+            if !any(cn->mbb∈cn, connections(a))
+                push!(bs, mbb)
+            end
+        end
+    end
+
+    return bs
+end
