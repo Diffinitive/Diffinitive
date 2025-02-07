@@ -20,6 +20,8 @@ end
     @test unitinterval(Int) isa Interval{Int}
     @test unitinterval(Int) == Interval(0,1)
     @test limits(unitinterval(Int)) == (0,1)
+
+    @test boundary_identifiers(unitinterval()) == (LowerBoundary(), UpperBoundary())
 end
 
 @testset "HyperBox" begin
@@ -40,6 +42,23 @@ end
 
     @test unithyperbox(4) isa HyperBox{Float64,4}
     @test limits(unithyperbox(4)) == ([0,0,0,0],[1,1,1,1])
+
+
+    @test boundary_identifiers(unitsquare()) == [
+        CartesianBoundary{1,LowerBoundary}(),
+        CartesianBoundary{1,UpperBoundary}(),
+        CartesianBoundary{2,LowerBoundary}(),
+        CartesianBoundary{2,UpperBoundary}(),
+    ]
+
+    @test boundary_identifiers(unitcube()) == [
+        CartesianBoundary{1,LowerBoundary}(),
+        CartesianBoundary{1,UpperBoundary}(),
+        CartesianBoundary{2,LowerBoundary}(),
+        CartesianBoundary{2,UpperBoundary}(),
+        CartesianBoundary{3,LowerBoundary}(),
+        CartesianBoundary{3,UpperBoundary}(),
+    ]
 end
 
 @testset "Simplex" begin
