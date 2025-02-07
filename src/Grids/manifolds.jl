@@ -63,7 +63,6 @@ struct CartesianAtlas{D,C<:Chart} <: Atlas
 end
 
 charts(a::CartesianAtlas) = a.charts
-Base.size(a::CartesianAtlas) = size(a.charts)
 
 function connections(a::CartesianAtlas)
     c = Tuple{MultiBlockBoundary, MultiBlockBoundary}[]

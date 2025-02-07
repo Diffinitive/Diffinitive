@@ -28,11 +28,6 @@ end
     c2 = Chart(x->2x, unitsquare())
     @test CartesianAtlas([c c2; c2 c]) isa CartesianAtlas
 
-    @testset "size" begin
-        @test size(CartesianAtlas([c c; c c])) == (2,2)
-        @test size(CartesianAtlas([c c c; c c c])) == (2,3)
-        @test size(CartesianAtlas([c c; c c; c c])) == (3,2)
-    end
 
     @testset "connections" begin
         a = CartesianAtlas(fill(c, 2,3))
