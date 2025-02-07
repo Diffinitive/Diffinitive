@@ -23,6 +23,8 @@ top = CartesianBoundary{3, UpperBoundary}
     @test ndims(c) == 2
 
     @test jacobian(c, [3,2]) == [2,2]
+
+    @test_broken Set(boundaries(X,unitsquare())) == Set([east,west,south,north])
 end
 
 @testset "CartesianAtlas" begin

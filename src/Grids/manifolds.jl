@@ -33,8 +33,8 @@ which will both allow calling `jacobian(c,ξ)`.
 jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
 # TBD: Can we register a error hint for when jacobian is called with a function that doesn't have a registered jacobian?
 
+boundaries(c::Chart) = boundaries(parameterspace(c))
 
-# TBD: Should Charts, parameterspaces, Atlases, have boundary names?
 
 """
     Atlas
