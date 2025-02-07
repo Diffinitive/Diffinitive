@@ -147,6 +147,42 @@ end
 end
 
 @testset "UnstructuredAtlas" begin
+    @testset "Constructors" begin
+        c1 = Chart(identity, unitsquare())
+        c2 = Chart(x->2x, unitsquare())
+        cn = [
+            (MultiBlockBoundary{1, south}(), MultiBlockBoundary{2, south}()),
+            (MultiBlockBoundary{2, south}(), MultiBlockBoundary{3, south}()),
+            (MultiBlockBoundary{3, east}(),  MultiBlockBoundary{1, east}()),
+        ]
+
+        @test UnstructuredAtlas([c1, c1, c1], cn) isa UnstructuredAtlas
+        @test UnstructuredAtlas([c1, c2, c1, c2], cn) isa UnstructuredAtlas
+
+
+        cn = @SVector[
+            (MultiBlockBoundary{1, south}(), MultiBlockBoundary{2, south}()),
+            (MultiBlockBoundary{2, south}(), MultiBlockBoundary{3, south}()),
+            (MultiBlockBoundary{3, east}(),  MultiBlockBoundary{1, east}()),
+        ]
+        @test UnstructuredAtlas(@SVector[c1, c1, c1], cn) isa UnstructuredAtlas
+        @test UnstructuredAtlas(@SVector[c1, c2, c1, c2], cn) isa UnstructuredAtlas
+    end
+
+    @testset "Getters" begin
+        c = Chart(identity, unitsquare())
+        cn = [
+            (MultiBlockBoundary{1, south}(), MultiBlockBoundary{2, south}()),
+            (MultiBlockBoundary{2, south}(), MultiBlockBoundary{3, south}()),
+            (MultiBlockBoundary{3, east}(),  MultiBlockBoundary{1, east}()),
+        ]
+
+        a = UnstructuredAtlas([c, c, c], cn)
+
+        @test charts(a) == [c,c,c]
+        @test connections(a) == cn
+    end
+
     @testset "boundaries" begin
         @test_broken false
     end

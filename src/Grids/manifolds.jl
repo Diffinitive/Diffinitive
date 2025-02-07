@@ -106,9 +106,9 @@ function boundaries(a::CartesianAtlas)
 end
 
 
-struct UnstructuredAtlas <: Atlas
-    charts::Vector{Chart}
-    connections::Vector{Tuple{MultiBlockBoundary, MultiBlockBoundary}}
+struct UnstructuredAtlas{C<:Chart, CN<:Tuple{MultiBlockBoundary,MultiBlockBoundary}, CV<:AbstractVector{C}, CNV<:AbstractVector{CN}} <: Atlas
+    charts::CV
+    connections::CNV
 end
 
 charts(a::UnstructuredAtlas) = a.charts
