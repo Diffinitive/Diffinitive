@@ -19,16 +19,21 @@ using StaticArrays
 end
 
 @testset "CartesianAtlas" begin
-    c = Chart(identity, unitsquare())
+    @testset "Constructors" begin
+        c = Chart(identity, unitsquare())
+        @test CartesianAtlas([c c; c c]) isa Atlas
 
-    a = CartesianAtlas([c c; c c])
-    @test a isa Atlas
-    @test charts(a) == [c c; c c]
+        c2 = Chart(x->2x, unitsquare())
+        @test CartesianAtlas([c c2; c2 c]) isa CartesianAtlas
+        @test CartesianAtlas(@SMatrix[c c; c c]) isa CartesianAtlas
+        @test CartesianAtlas(@SMatrix[c c2; c2 c]) isa CartesianAtlas
+    end
 
-    c2 = Chart(x->2x, unitsquare())
-    @test CartesianAtlas([c c2; c2 c]) isa CartesianAtlas
-    @test CartesianAtlas(@SMatrix[c c; c c]) isa CartesianAtlas
-    @test CartesianAtlas(@SMatrix[c c2; c2 c]) isa CartesianAtlas
+    @testset "Getters" begin
+        c = Chart(identity, unitsquare())
+        a = CartesianAtlas([c c; c c])
+        @test charts(a) == [c c; c c]
+    end
 
     @testset "connections" begin
         # 2D
