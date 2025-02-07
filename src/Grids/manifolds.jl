@@ -92,4 +92,4 @@ struct UnstructuredAtlas <: Atlas
 end
 
 charts(a::UnstructuredAtlas) = a.charts
-connections(a::UnstructuredAtlas) = nothing
+connections(a::UnstructuredAtlas) = a.connections
