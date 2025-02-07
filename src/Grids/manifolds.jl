@@ -54,10 +54,16 @@ function charts end
 """
     connections(::Atlas)
 
-TBD: What exactly should this return?
+Collection of pairs of multiblock boundary identifiers.
 """
 function connections end
 
+
+"""
+    CartesianAtlas{D,C<:Chart,AT<:AbstractArray{C,D}} <: Atlas
+
+An atlas where the charts are arranged and connected like an array.
+"""
 struct CartesianAtlas{D,C<:Chart,AT<:AbstractArray{C,D}} <: Atlas
     charts::AT
 end
@@ -86,6 +92,11 @@ function connections(a::CartesianAtlas)
     return c
 end
 
+"""
+    boundary_identifiers(a::CartesianAtlas)
+
+All non-connected boundaries of the charts of `a`.
+"""
 function boundary_identifiers(a::CartesianAtlas)
     bs = MultiBlockBoundary[]
 
@@ -106,6 +117,11 @@ function boundary_identifiers(a::CartesianAtlas)
 end
 
 
+"""
+    UnstructuredAtlas{C<:Chart, CN<:Tuple{MultiBlockBoundary,MultiBlockBoundary}, ...} <: Atlas
+
+An atlas with connections determined by a vector `MultiBlockBoundary` pairs.
+"""
 struct UnstructuredAtlas{C<:Chart, CN<:Tuple{MultiBlockBoundary,MultiBlockBoundary}, CV<:AbstractVector{C}, CNV<:AbstractVector{CN}} <: Atlas
     charts::CV
     connections::CNV
@@ -114,6 +130,11 @@ end
 charts(a::UnstructuredAtlas) = a.charts
 connections(a::UnstructuredAtlas) = a.connections
 
+"""
+    boundary_identifiers(a::UnstructuredAtlas)
+
+All non-connected boundaries of the charts of `a`.
+"""
 function boundary_identifiers(a::UnstructuredAtlas)
     bs = MultiBlockBoundary[]
 
