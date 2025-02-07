@@ -45,6 +45,8 @@ The limits of the interval.
 """
 limits(i::Interval) = (i.a, i.b)
 
+boundary_identifiers(::Interval) = (LowerBoundary(), UpperBoundary())
+
 """
     unitinterval(T=Float64)
 
@@ -90,6 +92,16 @@ limits(box::HyperBox, d) = (box.a[d], box.b[d])
 The lower and upper limits of `box` as tuples.
 """
 limits(box::HyperBox) = (box.a, box.b)
+
+function boundary_identifiers(box::HyperBox)
+    mapreduce(vcat, 1:ndims(box)) do d
+        [
+            CartesianBoundary{d, LowerBoundary}(),
+            CartesianBoundary{d, UpperBoundary}(),
+        ]
+    end
+end
+
 
 """
     unitsquare(T=Float64)
