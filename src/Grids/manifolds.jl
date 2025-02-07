@@ -113,3 +113,7 @@ end
 
 charts(a::UnstructuredAtlas) = a.charts
 connections(a::UnstructuredAtlas) = a.connections
+
+function boundaries(a::UnstructuredAtlas)
+    return nothing
+end

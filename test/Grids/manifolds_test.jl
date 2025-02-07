@@ -147,5 +147,7 @@ end
 end
 
 @testset "UnstructuredAtlas" begin
-    @test_broken false
+    @testset "boundaries" begin
+        @test_broken false
+    end
 end
