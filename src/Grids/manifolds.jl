@@ -33,7 +33,7 @@ which will both allow calling `jacobian(c,ξ)`.
 jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
 # TBD: Can we register a error hint for when jacobian is called with a function that doesn't have a registered jacobian?
 
-boundaries(c::Chart) = boundary_identifiers(parameterspace(c))
+boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
 
 """
@@ -86,7 +86,7 @@ function connections(a::CartesianAtlas)
     return c
 end
 
-function boundaries(a::CartesianAtlas)
+function boundary_identifiers(a::CartesianAtlas)
     bs = MultiBlockBoundary[]
 
     for d ∈ 1:ndims(charts(a))
@@ -114,11 +114,11 @@ end
 charts(a::UnstructuredAtlas) = a.charts
 connections(a::UnstructuredAtlas) = a.connections
 
-function boundaries(a::UnstructuredAtlas)
+function boundary_identifiers(a::UnstructuredAtlas)
     bs = MultiBlockBoundary[]
 
     for (i,c) ∈ enumerate(charts(a))
-        for b ∈ boundaries(c)
+        for b ∈ boundary_identifiers(c)
             mbb = MultiBlockBoundary{i,typeof(b)}()
 
             if !any(cn->mbb∈cn, connections(a))

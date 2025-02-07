@@ -24,7 +24,7 @@ top = CartesianBoundary{3, UpperBoundary}
 
     @test jacobian(c, [3,2]) == [2,2]
 
-    @test Set(boundaries(Chart(X,unitsquare()))) == Set([east(),west(),south(),north()])
+    @test Set(boundary_identifiers(Chart(X,unitsquare()))) == Set([east(),west(),south(),north()])
 end
 
 @testset "CartesianAtlas" begin
@@ -88,10 +88,10 @@ end
         ])
     end
 
-    @testset "boundaries" begin
+    @testset "boundary_identifiers" begin
         # 2D
         a = CartesianAtlas(fill(Chart(identity, unitcube()), 2,3))
-        @test Set(boundaries(a)) == Set([
+        @test Set(boundary_identifiers(a)) == Set([
             MultiBlockBoundary{(1,1), south}(),
             MultiBlockBoundary{(2,1), south}(),
             MultiBlockBoundary{(2,1), east}(),
@@ -106,7 +106,7 @@ end
 
         # 3D
         a = CartesianAtlas(fill(Chart(identity, unitsquare()), 2,2,3))
-        @test Set(boundaries(a)) == Set([
+        @test Set(boundary_identifiers(a)) == Set([
             MultiBlockBoundary{(1,1,1), bottom}(),
             MultiBlockBoundary{(2,1,1), bottom}(),
             MultiBlockBoundary{(1,2,1), bottom}(),
@@ -185,7 +185,7 @@ end
         @test connections(a) == cn
     end
 
-    @testset "boundaries" begin
+    @testset "boundary_identifiers" begin
         c = Chart(identity, unitsquare())
         cn = [
             (MultiBlockBoundary{1, east}(), MultiBlockBoundary{2, west}()),
@@ -195,7 +195,7 @@ end
 
         a = UnstructuredAtlas([c, c, c], cn)
 
-        @test Set(boundaries(a)) == Set([
+        @test Set(boundary_identifiers(a)) == Set([
             MultiBlockBoundary{1, west}(),
             MultiBlockBoundary{1, south}(),
             MultiBlockBoundary{2, south}(),
