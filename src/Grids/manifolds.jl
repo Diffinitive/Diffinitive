@@ -86,6 +86,26 @@ function connections(a::CartesianAtlas)
     return c
 end
 
+function boundaries(a::CartesianAtlas)
+    c = MultiBlockBoundary[]
+
+    for d ∈ 1:ndims(charts(a))
+        Is = eachslice(CartesianIndices(charts(a)); dims=d)
+
+        for (i,b) ∈ ((1,LowerBoundary),(length(Is),UpperBoundary)) # For first and last slice
+            for jk ∈ eachindex(Is[i]) # For each block in slice
+                Iᵢⱼₖ = Tuple(Is[i][jk])
+                push!(c,
+                    MultiBlockBoundary{Iᵢⱼₖ,   CartesianBoundary{d,b}}(),
+                )
+            end
+        end
+    end
+
+    return c
+end
+
+
 struct UnstructuredAtlas <: Atlas
     charts::Vector{Chart}
     connections::Vector{Tuple{MultiBlockBoundary, MultiBlockBoundary}}

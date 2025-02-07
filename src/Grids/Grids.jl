@@ -29,6 +29,7 @@ export Chart
 export Atlas
 export charts
 export connections
+export boundaries
 export CartesianAtlas
 
 export parameterspace
