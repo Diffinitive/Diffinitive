@@ -87,7 +87,7 @@ function connections(a::CartesianAtlas)
 end
 
 function boundaries(a::CartesianAtlas)
-    c = MultiBlockBoundary[]
+    bs = MultiBlockBoundary[]
 
     for d ∈ 1:ndims(charts(a))
         Is = eachslice(CartesianIndices(charts(a)); dims=d)
@@ -95,14 +95,14 @@ function boundaries(a::CartesianAtlas)
         for (i,b) ∈ ((1,LowerBoundary),(length(Is),UpperBoundary)) # For first and last slice
             for jk ∈ eachindex(Is[i]) # For each block in slice
                 Iᵢⱼₖ = Tuple(Is[i][jk])
-                push!(c,
+                push!(bs,
                     MultiBlockBoundary{Iᵢⱼₖ,   CartesianBoundary{d,b}}(),
                 )
             end
         end
     end
 
-    return c
+    return bs
 end
 
 
