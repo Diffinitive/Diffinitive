@@ -58,8 +58,8 @@ TBD: What exactly should this return?
 """
 function connections end
 
-struct CartesianAtlas{D,C<:Chart} <: Atlas
-    charts::AbstractArray{C,D}
+struct CartesianAtlas{D,C<:Chart,AT<:AbstractArray{C,D}} <: Atlas
+    charts::AT
 end
 
 charts(a::CartesianAtlas) = a.charts

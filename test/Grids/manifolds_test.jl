@@ -27,7 +27,8 @@ end
 
     c2 = Chart(x->2x, unitsquare())
     @test CartesianAtlas([c c2; c2 c]) isa CartesianAtlas
-
+    @test CartesianAtlas(@SMatrix[c c; c c]) isa CartesianAtlas
+    @test CartesianAtlas(@SMatrix[c c2; c2 c]) isa CartesianAtlas
 
     @testset "connections" begin
         # 2D
