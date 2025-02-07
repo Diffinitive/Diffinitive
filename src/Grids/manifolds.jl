@@ -68,23 +68,20 @@ Base.size(a::CartesianAtlas) = size(a.charts)
 function connections(a::CartesianAtlas)
     c = Tuple{MultiBlockBoundary, MultiBlockBoundary}[]
 
-    N,M = size(a.charts)
-    for j ∈ 1:M, i ∈ 1:N-1
-        push!(c,
-            (
-                MultiBlockBoundary{(i,j), CartesianBoundary{1,UpperBoundary}}(),
-                MultiBlockBoundary{(i+1,j), CartesianBoundary{1,LowerBoundary}}(),
-            ),
-        )
-    end
-
-    for i ∈ 1:N, j ∈ 1:M-1
-        push!(c,
-            (
-                MultiBlockBoundary{(i,j), CartesianBoundary{2,UpperBoundary}}(),
-                MultiBlockBoundary{(i,j+1), CartesianBoundary{2,LowerBoundary}}(),
-            ),
-        )
+    for d ∈ 1:ndims(charts(a))
+        Is = eachslice(CartesianIndices(charts(a)); dims=d)
+        for i ∈ 1:length(Is)-1 # For each interface between slices
+            for jk ∈ eachindex(Is[i]) # For each block in slice
+                Iᵢⱼₖ = Tuple(Is[i][jk])
+                Iᵢ₊₁ⱼₖ = Tuple(Is[i+1][jk])
+                push!(c,
+                    (
+                        MultiBlockBoundary{Iᵢⱼₖ,   CartesianBoundary{d,UpperBoundary}}(),
+                        MultiBlockBoundary{Iᵢ₊₁ⱼₖ, CartesianBoundary{d,LowerBoundary}}(),
+                    )
+                )
+            end
+        end
     end
 
     return c
