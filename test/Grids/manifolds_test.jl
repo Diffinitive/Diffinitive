@@ -184,6 +184,23 @@ end
     end
 
     @testset "boundaries" begin
-        @test_broken false
+        c = Chart(identity, unitsquare())
+        cn = [
+            (MultiBlockBoundary{1, east}(), MultiBlockBoundary{2, west}()),
+            (MultiBlockBoundary{1, north}(), MultiBlockBoundary{3, west}()),
+            (MultiBlockBoundary{2, north}(),  MultiBlockBoundary{3, south}()),
+        ]
+
+        a = UnstructuredAtlas([c, c, c], cn)
+
+        @test_broken Set(boundaries(a)) == Set([
+            MultiBlockBoundary{1, west}(),
+            MultiBlockBoundary{1, south}(),
+            MultiBlockBoundary{2, south}(),
+            MultiBlockBoundary{2, east}(),
+            MultiBlockBoundary{3, north}(),
+            MultiBlockBoundary{3, east}(),
+        ])
+
     end
 end

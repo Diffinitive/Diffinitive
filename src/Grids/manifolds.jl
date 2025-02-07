@@ -115,5 +115,13 @@ charts(a::UnstructuredAtlas) = a.charts
 connections(a::UnstructuredAtlas) = a.connections
 
 function boundaries(a::UnstructuredAtlas)
-    return nothing
+    bs = MultiBlockBoundary[]
+
+    for c ∈ charts(a)
+        for b ∈ boundaries(c)
+            if !any(cn->b∈cn, connections(a))
+                push!(bs, b)
+            end
+        end
+    end
 end
