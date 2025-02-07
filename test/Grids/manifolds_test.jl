@@ -151,9 +151,9 @@ end
         c1 = Chart(identity, unitsquare())
         c2 = Chart(x->2x, unitsquare())
         cn = [
-            (MultiBlockBoundary{1, south}(), MultiBlockBoundary{2, south}()),
-            (MultiBlockBoundary{2, south}(), MultiBlockBoundary{3, south}()),
-            (MultiBlockBoundary{3, east}(),  MultiBlockBoundary{1, east}()),
+            (MultiBlockBoundary{1, east}(), MultiBlockBoundary{2, west}()),
+            (MultiBlockBoundary{1, north}(), MultiBlockBoundary{3, west}()),
+            (MultiBlockBoundary{2, north}(),  MultiBlockBoundary{3, south}()),
         ]
 
         @test UnstructuredAtlas([c1, c1, c1], cn) isa UnstructuredAtlas
@@ -161,9 +161,9 @@ end
 
 
         cn = @SVector[
-            (MultiBlockBoundary{1, south}(), MultiBlockBoundary{2, south}()),
-            (MultiBlockBoundary{2, south}(), MultiBlockBoundary{3, south}()),
-            (MultiBlockBoundary{3, east}(),  MultiBlockBoundary{1, east}()),
+            (MultiBlockBoundary{1, east}(), MultiBlockBoundary{2, west}()),
+            (MultiBlockBoundary{1, north}(), MultiBlockBoundary{3, west}()),
+            (MultiBlockBoundary{2, north}(),  MultiBlockBoundary{3, south}()),
         ]
         @test UnstructuredAtlas(@SVector[c1, c1, c1], cn) isa UnstructuredAtlas
         @test UnstructuredAtlas(@SVector[c1, c2, c1, c2], cn) isa UnstructuredAtlas
@@ -172,9 +172,9 @@ end
     @testset "Getters" begin
         c = Chart(identity, unitsquare())
         cn = [
-            (MultiBlockBoundary{1, south}(), MultiBlockBoundary{2, south}()),
-            (MultiBlockBoundary{2, south}(), MultiBlockBoundary{3, south}()),
-            (MultiBlockBoundary{3, east}(),  MultiBlockBoundary{1, east}()),
+            (MultiBlockBoundary{1, east}(), MultiBlockBoundary{2, west}()),
+            (MultiBlockBoundary{1, north}(), MultiBlockBoundary{3, west}()),
+            (MultiBlockBoundary{2, north}(),  MultiBlockBoundary{3, south}()),
         ]
 
         a = UnstructuredAtlas([c, c, c], cn)
