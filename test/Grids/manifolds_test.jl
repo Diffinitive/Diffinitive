@@ -57,7 +57,7 @@ end
         ])
 
         # 3D
-        a = CartesianAtlas(fill(Chart(identity, unitsquare()), 2,2,3))
+        a = CartesianAtlas(fill(Chart(identity, unitcube()), 2,2,3))
         @test Set(connections(a)) == Set([
             (MultiBlockBoundary{(1,1,1), east}(),  MultiBlockBoundary{(2,1,1), west}()),
             (MultiBlockBoundary{(1,1,1), north}(), MultiBlockBoundary{(1,2,1), south}()),
@@ -88,7 +88,7 @@ end
 
     @testset "boundaries" begin
         # 2D
-        a = CartesianAtlas(fill(Chart(identity, unitsquare()), 2,3))
+        a = CartesianAtlas(fill(Chart(identity, unitcube()), 2,3))
         @test Set(boundaries(a)) == Set([
             MultiBlockBoundary{(1,1), south}(),
             MultiBlockBoundary{(2,1), south}(),
