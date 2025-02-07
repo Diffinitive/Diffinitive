@@ -6,6 +6,13 @@ using Diffinitive.LazyTensors
 
 using StaticArrays
 
+west = CartesianBoundary{1,LowerBoundary}
+east = CartesianBoundary{1,UpperBoundary}
+south = CartesianBoundary{2,LowerBoundary}
+north = CartesianBoundary{2,UpperBoundary}
+bottom = CartesianBoundary{3, LowerBoundary}
+top = CartesianBoundary{3, UpperBoundary}
+
 @testset "Chart" begin
     X(ξ) = 2ξ
     Grids.jacobian(::typeof(X), ξ) = @SVector[2,2]
@@ -36,13 +43,6 @@ end
     end
 
     @testset "connections" begin
-        west = CartesianBoundary{1,LowerBoundary}
-        east = CartesianBoundary{1,UpperBoundary}
-        south = CartesianBoundary{2,LowerBoundary}
-        north = CartesianBoundary{2,UpperBoundary}
-        bottom = CartesianBoundary{3, LowerBoundary}
-        top = CartesianBoundary{3, UpperBoundary}
-
         # 2D
         a = CartesianAtlas(fill(Chart(identity, unitsquare()), 2,3))
 
@@ -87,13 +87,6 @@ end
     end
 
     @testset "boundaries" begin
-        west = CartesianBoundary{1,LowerBoundary}
-        east = CartesianBoundary{1,UpperBoundary}
-        south = CartesianBoundary{2,LowerBoundary}
-        north = CartesianBoundary{2,UpperBoundary}
-        bottom = CartesianBoundary{3, LowerBoundary}
-        top = CartesianBoundary{3, UpperBoundary}
-
         # 2D
         a = CartesianAtlas(fill(Chart(identity, unitsquare()), 2,3))
         @test Set(boundaries(a)) == Set([
