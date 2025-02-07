@@ -117,11 +117,15 @@ connections(a::UnstructuredAtlas) = a.connections
 function boundaries(a::UnstructuredAtlas)
     bs = MultiBlockBoundary[]
 
-    for c ∈ charts(a)
+    for (i,c) ∈ enumerate(charts(a))
         for b ∈ boundaries(c)
-            if !any(cn->b∈cn, connections(a))
-                push!(bs, b)
+            mbb = MultiBlockBoundary{i,typeof(b)}()
+
+            if !any(cn->mbb∈cn, connections(a))
+                push!(bs, mbb)
             end
         end
     end
+
+    return bs
 end

@@ -195,7 +195,7 @@ end
 
         a = UnstructuredAtlas([c, c, c], cn)
 
-        @test_broken Set(boundaries(a)) == Set([
+        @test Set(boundaries(a)) == Set([
             MultiBlockBoundary{1, west}(),
             MultiBlockBoundary{1, south}(),
             MultiBlockBoundary{2, south}(),
