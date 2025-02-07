@@ -1,5 +1,7 @@
 using Test
 
+using Diffinitive.Grids
+
 @testset "ParameterSpace" begin
     @test ndims(HyperBox([1,1], [2,2])) == 2
     @test ndims(unittetrahedron()) == 3
