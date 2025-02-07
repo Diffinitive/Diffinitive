@@ -30,8 +30,8 @@ end
 
 
     @testset "connections" begin
-        a = CartesianAtlas(fill(c, 2,3))
         # 2D
+        a = CartesianAtlas(fill(Chart(identity, unitsquare()), 2,3))
         west = CartesianBoundary{1,LowerBoundary}
         east = CartesianBoundary{1,UpperBoundary}
         south = CartesianBoundary{2,LowerBoundary}
@@ -48,7 +48,7 @@ end
         ])
 
         # 3D
-        a = CartesianAtlas(fill(c, 2,2,3))
+        a = CartesianAtlas(fill(Chart(identity, unitsquare()), 2,2,3))
         bottom = CartesianBoundary{3, LowerBoundary}
         top = CartesianBoundary{3, UpperBoundary}
         @test Set(connections(a)) == Set([
