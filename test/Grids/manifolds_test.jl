@@ -25,6 +25,8 @@ end
     @test a isa Atlas
     @test charts(a) == [c c; c c]
 
+    c2 = Chart(x->2x, unitsquare())
+    @test CartesianAtlas([c c2; c2 c]) isa CartesianAtlas
 
     @testset "size" begin
         @test size(CartesianAtlas([c c; c c])) == (2,2)
