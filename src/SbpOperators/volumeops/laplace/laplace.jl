@@ -58,7 +58,10 @@ function laplace(grid::MappedGrid, stencil_set)
     J = map(det,jacobian(grid))
     J⁻¹ = DiagonalTensor(map(inv, J))
 
-    Jg = map(*, J, metric_tensor_inverse(grid))
+    Jg = map(J, metric_tensor(grid)) do Jₓ, gₓ
+        Jₓ*inv(gₓ)
+    end
+
     lg = logical_grid(grid)
 
     return mapreduce(+, CartesianIndices(first(Jg))) do I
