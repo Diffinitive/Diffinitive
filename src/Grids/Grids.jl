@@ -25,7 +25,13 @@ export unittetrahedron
 export unitsimplex
 
 export Chart
-export ConcreteChart
+
+export Atlas
+export charts
+export connections
+export CartesianAtlas
+export UnstructuredAtlas
+
 export parameterspace
 
 # Grid
@@ -59,6 +65,7 @@ export inverse_spacing
 export spacing
 export equidistant_grid
 
+export MultiBlockBoundary
 
 # MappedGrid
 export MappedGrid
@@ -67,13 +74,14 @@ export logical_grid
 export mapped_grid
 export metric_tensor
 
-abstract type BoundaryIdentifier end
-
-include("manifolds.jl")
+include("parameter_space.jl")
 include("grid.jl")
+include("multiblockgrids.jl")
+include("manifolds.jl")
 include("tensor_grid.jl")
 include("equidistant_grid.jl")
 include("zero_dim_grid.jl")
 include("mapped_grid.jl")
+include("geometry.jl")
 
 end # module

@@ -22,7 +22,6 @@ LazyTensors.range_size(m::SizeDoublingMapping) = 2 .* m.domain_size
 LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
 
 
-
 @testset "Mapping transpose" begin
     m = TransposableDummyMapping{Float64,2,3}()
     @test m' isa LazyTensor{Float64, 3,2}
@@ -128,8 +127,35 @@ end
     end
 end
 
+@testset "TensorNegation" begin
+    A = rand(2,3)
+    B = rand(3,4)
 
-@testset "LazyTensor binary operations" begin
+    Ã = DenseTensor(A, (1,), (2,))
+    B̃ = DenseTensor(B, (1,), (2,))
+
+    @test -Ã isa TensorNegation
+
+    v = rand(3)
+    @test (-Ã)*v == -(Ã*v)
+
+    v = rand(4)
+    @test (-B̃)*v == -(B̃*v)
+
+    v = rand(2)
+    @test (-Ã)'*v == -(Ã'*v)
+
+    v = rand(3)
+    @test (-B̃)'*v == -(B̃'*v)
+
+    @test domain_size(-Ã) == (3,)
+    @test domain_size(-B̃) == (4,)
+
+    @test range_size(-Ã) == (2,)
+    @test range_size(-B̃) == (3,)
+end
+
+@testset "TensorSum" begin
     A = ScalingTensor(2.0, (3,))
     B = ScalingTensor(3.0, (3,))
 
@@ -140,6 +166,10 @@ end
 
     for i ∈ eachindex(v)
         @test ((A-B)*v)[i] == 2*v[i] - 3*v[i]
+    end
+
+    for i ∈ eachindex(v)
+        @test ((A+B)'*v)[i] == 2*v[i] + 3*v[i]
     end
 
 
@@ -155,6 +185,30 @@ end
         @test_throws DomainSizeMismatch SizeDoublingMapping{Float64,1,1}((2,)) + ScalingTensor(2.0, (4,))
         @test_throws RangeSizeMismatch ScalingTensor(2.0, (2,)) + SizeDoublingMapping{Float64,1,1}((2,))
         @test_throws RangeSizeMismatch SizeDoublingMapping{Float64,1,1}((2,)) + ScalingTensor(2.0, (2,))
+    end
+
+    @testset "Chained operators" begin
+        A = ScalingTensor(1.0, (3,))
+        B = ScalingTensor(2.0, (3,))
+        C = ScalingTensor(3.0, (3,))
+        D = ScalingTensor(4.0, (3,))
+
+        @test A+B+C+D isa TensorSum
+        @test length((A+B+C+D).tms) == 4
+
+
+        @test A+B-C+D isa TensorSum
+        @test length((A+B-C+D).tms) == 4
+
+        v = rand(3)
+        @test (A+B-C+D)*v == 1v + 2v - 3v + 4v
+
+
+        @test -A-B-C-D isa TensorSum
+        @test length((-A-B-C-D).tms) == 4
+
+        v = rand(3)
+        @test (-A-B-C-D)*v == -1v - 2v - 3v - 4v
     end
 end
 

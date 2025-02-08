@@ -17,7 +17,7 @@ import Diffinitive.SbpOperators.even
     g = equidistant_grid(0.,1., 11)
 
     @testset "Constructors" begin
-        op = VolumeOperator(inner_stencil,closure_stencils,(11,),even)
+        op = VolumeOperator(inner_stencil, closure_stencils, 11, even)
         @test op == VolumeOperator(g,inner_stencil,closure_stencils,even)
         @test op isa LazyTensor{T,1,1} where T
     end

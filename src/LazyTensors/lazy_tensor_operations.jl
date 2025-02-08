@@ -52,60 +52,66 @@ range_size(tmt::TensorTranspose) = domain_size(tmt.tm)
 domain_size(tmt::TensorTranspose) = range_size(tmt.tm)
 
 
-struct ElementwiseTensorOperation{Op,T,R,D,TT<:NTuple{N, LazyTensor{T,R,D}} where N} <: LazyTensor{T,R,D}
+"""
+    TensorNegation{T,R,D,...} <: LazyTensor{T,R,D}
+
+The negation of a LazyTensor.
+"""
+struct TensorNegation{T,R,D,TM<:LazyTensor{T,R,D}} <: LazyTensor{T,R,D}
+    tm::TM
+end
+
+apply(tm::TensorNegation, v, I...) = -apply(tm.tm, v, I...)
+apply_transpose(tm::TensorNegation, v, I...) = -apply_transpose(tm.tm, v, I...)
+
+range_size(tm::TensorNegation) = range_size(tm.tm)
+domain_size(tm::TensorNegation) = domain_size(tm.tm)
+
+
+"""
+    TensorSum{T,R,D,...} <: LazyTensor{T,R,D}
+
+The lazy sum of 2 or more lazy tensors.
+"""
+struct TensorSum{T,R,D,TT<:NTuple{N, LazyTensor{T,R,D}} where N} <: LazyTensor{T,R,D}
     tms::TT
 
-    function ElementwiseTensorOperation{Op,T,R,D}(tms::TT) where {Op,T,R,D, TT<:NTuple{N, LazyTensor{T,R,D}} where N}
+    function TensorSum{T,R,D}(tms::TT) where {T,R,D, TT<:NTuple{N, LazyTensor{T,R,D}} where N}
         @boundscheck map(tms) do tm
             check_domain_size(tm, domain_size(tms[1]))
             check_range_size(tm, range_size(tms[1]))
         end
 
-        return new{Op,T,R,D,TT}(tms)
+        return new{T,R,D,TT}(tms)
     end
 end
-# TBD: Can we introduce negation of LazyTensors? It could be done generically
-# with a ScalingTensor but also using specializations for specific tensor
-# types. This would allow simplification of ElementwiseTensorOperation to
-# TensorSum. The implementation of `-` can be done using negation and the
-# TensorSum type. We should make sure this doesn't impact the efficiency of
-# for example SATs.
 
+"""
+    TensorSum(ts::Vararg{LazyTensor})
 
-function ElementwiseTensorOperation{:+}(ts::Vararg{LazyTensor})
-    return ElementwiseTensorOperation{:+,eltype(ts[1]), range_dim(ts[1]), domain_dim(ts[1])}(ts)
+The lazy sum of the tensors `ts`.
+"""
+function TensorSum(ts::Vararg{LazyTensor})
+    T = eltype(ts[1])
+    R = range_dim(ts[1])
+    D = domain_dim(ts[1])
+    return TensorSum{T,R,D}(ts)
 end
 
-# The following methods for :+ are intended to reduce the depth of the tree of operations in some caes
-function ElementwiseTensorOperation{:+}(t1::ElementwiseTensorOperation{:+}, t2::ElementwiseTensorOperation{:+})
-    ElementwiseTensorOperation{:+}(t1.tms..., t2.tms...)
-end
-
-function ElementwiseTensorOperation{:+}(t1::ElementwiseTensorOperation{:+}, t2::LazyTensor)
-    ElementwiseTensorOperation{:+}(t1.tms..., t2)
-end
-
-function ElementwiseTensorOperation{:+}(t1::LazyTensor, t2::ElementwiseTensorOperation{:+})
-    ElementwiseTensorOperation{:+}(t1, t2.tms...)
-end
-
-function ElementwiseTensorOperation{:-}(t1::LazyTensor, t2::LazyTensor)
-    return ElementwiseTensorOperation{:-,eltype(t1), range_dim(t1), domain_dim(t1)}((t1,t2))
-end
-
-function apply(tmBinOp::ElementwiseTensorOperation{:+,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
-    vs = map(tmBinOp.tms) do tm
+function apply(tmBinOp::TensorSum{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
+    return sum(tmBinOp.tms) do tm
         apply(tm,v,I...)
     end
-
-    return +(vs...)
-end
-function apply(tmBinOp::ElementwiseTensorOperation{:-,T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
-    apply(tmBinOp.tms[1], v, I...) - apply(tmBinOp.tms[2], v, I...)
 end
 
-range_size(tmBinOp::ElementwiseTensorOperation) = range_size(tmBinOp.tms[1])
-domain_size(tmBinOp::ElementwiseTensorOperation) = domain_size(tmBinOp.tms[1])
+function apply_transpose(tmBinOp::TensorSum{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
+    return sum(tmBinOp.tms) do tm
+        apply_transpose(tm,v,I...)
+    end
+end
+
+range_size(tmBinOp::TensorSum) = range_size(tmBinOp.tms[1])
+domain_size(tmBinOp::TensorSum) = domain_size(tmBinOp.tms[1])
 
 
 """
@@ -157,7 +163,6 @@ end
 
 Base.:*(a::T, tm::LazyTensor{T}) where T = TensorComposition(ScalingTensor{T,range_dim(tm)}(a,range_size(tm)), tm)
 Base.:*(tm::LazyTensor{T}, a::T) where T = a*tm
-Base.:-(tm::LazyTensor) = (-one(eltype(tm)))*tm
 
 """
     InflatedTensor{T,R,D} <: LazyTensor{T,R,D}
@@ -205,10 +210,10 @@ function InflatedTensor(before, itm::InflatedTensor, after)
     )
 end
 
-InflatedTensor(before::IdentityTensor, tm::LazyTensor{T}) where T = InflatedTensor(before,tm,IdentityTensor{T}())
-InflatedTensor(tm::LazyTensor{T}, after::IdentityTensor) where T = InflatedTensor(IdentityTensor{T}(),tm,after)
+InflatedTensor(before::IdentityTensor, tm::LazyTensor) = InflatedTensor(before,tm,IdentityTensor{eltype(tm)}())
+InflatedTensor(tm::LazyTensor, after::IdentityTensor) = InflatedTensor(IdentityTensor{eltype(tm)}(),tm,after)
 # Resolve ambiguity between the two previous methods
-InflatedTensor(I1::IdentityTensor{T}, I2::IdentityTensor{T}) where T = InflatedTensor(I1,I2,IdentityTensor{T}())
+InflatedTensor(I1::IdentityTensor, I2::IdentityTensor) = InflatedTensor(I1,I2,IdentityTensor{promote_type(eltype(I1), eltype(I2))}())
 
 # TODO: Implement some pretty printing in terms of ⊗. E.g InflatedTensor(I(3),B,I(2)) -> I(3)⊗B⊗I(2)
 
@@ -299,7 +304,7 @@ function LazyOuterProduct(tm1::LazyTensor{T}, tm2::LazyTensor{T}) where T
     return itm1∘itm2
 end
 
-LazyOuterProduct(t1::IdentityTensor{T}, t2::IdentityTensor{T}) where T = IdentityTensor{T}(t1.size...,t2.size...)
+LazyOuterProduct(t1::IdentityTensor, t2::IdentityTensor) = IdentityTensor{promote_type(eltype(t1),eltype(t2))}(t1.size...,t2.size...)
 LazyOuterProduct(t1::LazyTensor, t2::IdentityTensor) = InflatedTensor(t1, t2)
 LazyOuterProduct(t1::IdentityTensor, t2::LazyTensor) = InflatedTensor(t1, t2)
 

@@ -1,90 +1,4 @@
 """
-    ParameterSpace{D}
-
-A space of parameters of dimension `D`. Used with `Chart` to indicate which
-parameters are valid for that chart.
-
-Common parameter spaces are created using the functions unit sized spaces
-* `unitinterval`
-* `unitrectangle`
-* `unitbox`
-* `unittriangle`
-* `unittetrahedron`
-* `unithyperbox`
-* `unitsimplex`
-
-See also: [`Interval`](@ref), [`Rectangle`](@ref), [`Box`](@ref),
-[`Triangle`](@ref), [`Tetrahedron`](@ref), [`HyperBox`](@ref),
-[`Simplex`](@ref),
-"""
-abstract type ParameterSpace{D} end
-Base.ndims(::ParameterSpace{D}) where D = D
-
-struct Interval{T} <: ParameterSpace{1}
-    a::T
-    b::T
-
-    function Interval(a,b)
-        a, b = promote(a, b)
-        new{typeof(a)}(a,b)
-    end
-end
-
-limits(i::Interval) = (i.a, i.b)
-
-unitinterval(T=Float64) = Interval(zero(T), one(T))
-
-
-struct HyperBox{T,D} <: ParameterSpace{D}
-    a::SVector{D,T}
-    b::SVector{D,T}
-end
-
-function HyperBox(a,b)
-    ET = promote_type(eltype(a),eltype(b))
-    T = SVector{length(a),ET}
-    HyperBox(convert(T,a), convert(T,b))
-end
-
-Rectangle{T} = HyperBox{T,2}
-Box{T} = HyperBox{T,3}
-
-limits(box::HyperBox, d) = (box.a[d], box.b[d])
-limits(box::HyperBox) = (box.a, box.b)
-
-unitsquare(T=Float64) = unithyperbox(T,2)
-unitcube(T=Float64) = unithyperbox(T,3)
-unithyperbox(T, D) = HyperBox((@SVector zeros(T,D)), (@SVector ones(T,D)))
-unithyperbox(D) = unithyperbox(Float64,D)
-
-
-struct Simplex{T,D,NV} <: ParameterSpace{D}
-    verticies::NTuple{NV,SVector{D,T}}
-end
-
-function Simplex(verticies::Vararg{AbstractArray})
-    ET = mapreduce(eltype,promote_type,verticies)
-    T = SVector{length(verticies[1]),ET}
-
-    return Simplex(Tuple(convert(T,v) for v ∈ verticies))
-end
-
-verticies(s::Simplex) = s.verticies
-
-Triangle{T} = Simplex{T,2}
-Tetrahedron{T} = Simplex{T,3}
-
-unittriangle(T=Float64) = unitsimplex(T,2)
-unittetrahedron(T=Float64) = unitsimplex(T,3)
-function unitsimplex(T,D)
-    z = @SVector zeros(T,D)
-    unitelement = one(eltype(z))
-    verticies = ntuple(i->setindex(z, unitelement, i), D)
-    return Simplex((z,verticies...))
-end
-unitsimplex(D) = unitsimplex(Float64, D)
-
-"""
     Chart{D}
 
 A parametrized description of a manifold or part of a manifold.
@@ -119,14 +33,14 @@ which will both allow calling `jacobian(c,ξ)`.
 jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
 # TBD: Can we register a error hint for when jacobian is called with a function that doesn't have a registered jacobian?
 
+boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
-# TBD: Should Charts, parameterspaces have boundary names?
 
 """
     Atlas
 
 A collection of charts and their connections.
-Should implement methods for `charts` and
+Should implement methods for `charts` and `connections`.
 """
 abstract type Atlas end
 
@@ -138,90 +52,101 @@ The colloction of charts in the atlas.
 function charts end
 
 """
-    connections
+    connections(::Atlas)
 
-TBD: What exactly should this return?
+Collection of pairs of multiblock boundary identifiers.
+"""
+function connections end
+
 
 """
+    CartesianAtlas{D,C<:Chart,AT<:AbstractArray{C,D}} <: Atlas
 
-struct CartesianAtlas <: Atlas
-    charts::Matrix{Chart}
+An atlas where the charts are arranged and connected like an array.
+"""
+struct CartesianAtlas{D,C<:Chart,AT<:AbstractArray{C,D}} <: Atlas
+    charts::AT
 end
 
 charts(a::CartesianAtlas) = a.charts
-connections(a::CartesianAtlas) = nothing
 
-struct UnstructuredAtlas <: Atlas
-    charts::Vector{Chart}
-    connections
+function connections(a::CartesianAtlas)
+    c = Tuple{MultiBlockBoundary, MultiBlockBoundary}[]
+
+    for d ∈ 1:ndims(charts(a))
+        Is = eachslice(CartesianIndices(charts(a)); dims=d)
+        for i ∈ 1:length(Is)-1 # For each interface between slices
+            for jk ∈ eachindex(Is[i]) # For each block in slice
+                Iᵢⱼₖ = Tuple(Is[i][jk])
+                Iᵢ₊₁ⱼₖ = Tuple(Is[i+1][jk])
+                push!(c,
+                    (
+                        MultiBlockBoundary{Iᵢⱼₖ,   CartesianBoundary{d,UpperBoundary}}(),
+                        MultiBlockBoundary{Iᵢ₊₁ⱼₖ, CartesianBoundary{d,LowerBoundary}}(),
+                    )
+                )
+            end
+        end
+    end
+
+    return c
+end
+
+"""
+    boundary_identifiers(a::CartesianAtlas)
+
+All non-connected boundaries of the charts of `a`.
+"""
+function boundary_identifiers(a::CartesianAtlas)
+    bs = MultiBlockBoundary[]
+
+    for d ∈ 1:ndims(charts(a))
+        Is = eachslice(CartesianIndices(charts(a)); dims=d)
+
+        for (i,b) ∈ ((1,LowerBoundary),(length(Is),UpperBoundary)) # For first and last slice
+            for jk ∈ eachindex(Is[i]) # For each block in slice
+                Iᵢⱼₖ = Tuple(Is[i][jk])
+                push!(bs,
+                    MultiBlockBoundary{Iᵢⱼₖ,   CartesianBoundary{d,b}}(),
+                )
+            end
+        end
+    end
+
+    return bs
+end
+
+
+"""
+    UnstructuredAtlas{C<:Chart, CN<:Tuple{MultiBlockBoundary,MultiBlockBoundary}, ...} <: Atlas
+
+An atlas with connections determined by a vector `MultiBlockBoundary` pairs.
+"""
+struct UnstructuredAtlas{C<:Chart, CN<:Tuple{MultiBlockBoundary,MultiBlockBoundary}, CV<:AbstractVector{C}, CNV<:AbstractVector{CN}} <: Atlas
+    charts::CV
+    connections::CNV
 end
 
 charts(a::UnstructuredAtlas) = a.charts
-connections(a::UnstructuredAtlas) = nothing
+connections(a::UnstructuredAtlas) = a.connections
 
+"""
+    boundary_identifiers(a::UnstructuredAtlas)
 
-###
-# Geometry
-###
+All non-connected boundaries of the charts of `a`.
+"""
+function boundary_identifiers(a::UnstructuredAtlas)
+    bs = MultiBlockBoundary[]
 
-abstract type Curve end
-abstract type Surface end
+    for (i,c) ∈ enumerate(charts(a))
+        for b ∈ boundary_identifiers(c)
+            mbb = MultiBlockBoundary{i,typeof(b)}()
 
+            if !any(cn->mbb∈cn, connections(a))
+                push!(bs, mbb)
+            end
+        end
+    end
 
-struct Line{PT} <: Curve
-    p::PT
-    tangent::PT
+    return bs
 end
-
-(c::Line)(s) = c.p + s*c.tangent
-
-
-struct LineSegment{PT} <: Curve
-    a::PT
-    b::PT
-end
-
-(c::LineSegment)(s) = (1-s)*c.a + s*c.b
-
-
-function linesegments(ps...)
-    return [LineSegment(ps[i], ps[i+1]) for i ∈ 1:length(ps)-1]
-end
-
-
-function polygon_edges(ps...)
-    n = length(ps)
-    return [LineSegment(ps[i], ps[mod1(i+1,n)]) for i ∈ eachindex(Ps)]
-end
-
-struct Circle{T,PT} <: Curve
-    c::PT
-    r::T
-end
-
-(c::Circle)(θ) = c.c + r*@SVector[cos(Θ), sin(Θ)]
-
-struct TransfiniteInterpolationSurface{T1,T2,T3,T4} <: Surface
-    c₁::T1
-    c₂::T2
-    c₃::T3
-    c₄::T4
-end
-
-function (s::TransfiniteInterpolationSurface)(u,v)
-    c₁, c₂, c₃, c₄ = s.c₁, s.c₂, s.c₃, s.c₄
-    P₀₀ = c₁(0)
-    P₁₀ = c₂(0)
-    P₁₁ = c₃(0)
-    P₀₁ = c₄(0)
-    return (1-v)*c₁(u) + u*c₂(v) + v*c₃(1-u) + (1-u)*c₄(1-v) - (
-        (1-u)*(1-v)*P₀₀ + u*(1-v)*P₁₀ + u*v*P₁₁ + (1-u)*v*P₀₁
-    )
-end
-
-function (s::TransfiniteInterpolationSurface)(ξ̄::AbstractArray)
-    s(ξ̄...)
-end
-
-# TODO: Implement jacobian() for the different mapping helpers
-

@@ -9,6 +9,8 @@ export range_size, domain_size
 export TensorApplication
 export TensorTranspose
 export TensorComposition
+export TensorNegation
+export TensorSum
 export IdentityTensor
 export ScalingTensor
 export DiagonalTensor
@@ -35,8 +37,13 @@ Base.:*(a::LazyTensor, b::LazyTensor) = throw(MethodError(Base.:*,(a,b)))
 Base.:*(a::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*,(a,args...))
 
 # Addition and subtraction of lazy tensors
-Base.:+(ts::LazyTensor...) = ElementwiseTensorOperation{:+}(ts...)
-Base.:-(s::LazyTensor, t::LazyTensor) = ElementwiseTensorOperation{:-}(s,t)
+Base.:+(ts::LazyTensor...) = TensorSum(ts...)
+Base.:-(t::LazyTensor) = TensorNegation(t)
+Base.:-(s::LazyTensor, t::LazyTensor) = s + (-t)
+## Specializations to flatten the nesting of tensors. This helps Julia during inference.
+Base.:+(t::TensorSum, s::TensorSum) = TensorSum(t.tms..., s.tms...)
+Base.:+(t::TensorSum, s::LazyTensor) = TensorSum(t.tms..., s)
+Base.:+(t::LazyTensor, s::TensorSum) = TensorSum(t, s.tms...)
 
 # Composing lazy tensors
 Base.:∘(s::LazyTensor, t::LazyTensor) = TensorComposition(s,t)

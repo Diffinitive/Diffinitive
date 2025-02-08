@@ -15,7 +15,7 @@ struct EquidistantGrid{T,R<:AbstractRange{T}} <: Grid{T,1}
 end
 
 # Indexing interface
-Base.getindex(g::EquidistantGrid, i) = g.points[i]
+Base.getindex(g::EquidistantGrid, i::Int) = g.points[i]
 Base.eachindex(g::EquidistantGrid) = eachindex(g.points)
 Base.firstindex(g::EquidistantGrid) = firstindex(g.points)
 Base.lastindex(g::EquidistantGrid) = lastindex(g.points)
@@ -71,8 +71,8 @@ struct UpperBoundary <: BoundaryIdentifier end
 boundary_identifiers(::EquidistantGrid) = (LowerBoundary(), UpperBoundary())
 boundary_grid(g::EquidistantGrid, id::LowerBoundary) = ZeroDimGrid(g[begin])
 boundary_grid(g::EquidistantGrid, id::UpperBoundary) = ZeroDimGrid(g[end])
-boundary_indices(g::EquidistantGrid, id::LowerBoundary) = (firstindex(g),)
-boundary_indices(g::EquidistantGrid, id::UpperBoundary) = (lastindex(g),)
+boundary_indices(g::EquidistantGrid, id::LowerBoundary) = firstindex(g)
+boundary_indices(g::EquidistantGrid, id::UpperBoundary) = lastindex(g)
 
 """
     refine(g::EquidistantGrid, r::Int)
@@ -155,12 +155,7 @@ equidistant_grid(d::Interval, size::Int) = equidistant_grid(limits(d)..., size)
 equidistant_grid(hb::HyperBox, dims::Vararg{Int}) = equidistant_grid(limits(hb)..., dims...)
 
 function equidistant_grid(c::Chart, dims::Vararg{Int})
-    lg = equidistant_grid(parameterspace(c), dims...)
-    return MappedGrid(
-        lg,
-        map(c,lg),
-        map(ξ->jacobian(c, ξ), lg),
-    )
+    mapped_grid(c, ξ->jacobian(c,ξ), parameterspace(c), dims...)
 end
 
 
