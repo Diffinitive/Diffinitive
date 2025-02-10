@@ -35,7 +35,7 @@ function normal_derivative(g::MappedGrid, stencil_set::StencilSet, boundary)
 
     # Compute the weights for the logical derivatives
     g⁻¹ = map(inv, metric_tensor(g))
-    α = map(CartesianIndices(g⁻¹)[b_indices...]) do I # TODO: Fix iterator here
+    α = map(b_indices) do I
         gᵏⁱ = g⁻¹[I][k,:]
         gᵏᵏ = g⁻¹[I][k,k]
 
