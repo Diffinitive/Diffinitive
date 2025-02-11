@@ -83,4 +83,17 @@ include("equidistant_grid.jl")
 include("zero_dim_grid.jl")
 include("mapped_grid.jl")
 
+function __init__()
+    if !isdefined(Base.Experimental, :register_error_hint)
+        return
+    end
+
+    Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
+        if exc.f == Grids.jacobian
+            print(io, "\nThis possibly means that a function used to define a coordinate mapping is missing a method for `Grids.jacobian`.\n")
+            print(io, "Provide one by for exmple implementing `Grids.jacobian(::$(typeof(exc.args[1])), x) = ...` or `Grids.jacobian(f, x) = ForwardDiff.jacobian(f,x)`")
+        end
+    end
+end
+
 end # module
