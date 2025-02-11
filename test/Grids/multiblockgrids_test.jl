@@ -6,5 +6,4 @@ using Diffinitive.Grids
     @test grid_id(MultiBlockBoundary{1,UpperBoundary}()) == 1
 
     @test boundary_id(MultiBlockBoundary{1,UpperBoundary}()) == UpperBoundary()
-
 end
