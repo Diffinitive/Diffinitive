@@ -4,6 +4,26 @@ using Diffinitive.LazyTensors
 using StaticArrays
 using LinearAlgebra
 
+export ParameterSpace
+export HyperBox
+export Simplex
+export Interval
+export Rectangle
+export Box
+export Triangle
+export Tetrahedron
+
+export limits
+export unitinterval
+export unitsquare
+export unitcube
+export unithyperbox
+
+export verticies
+export unittriangle
+export unittetrahedron
+export unitsimplex
+
 # Grid
 export Grid
 export coordinate_size
@@ -45,6 +65,7 @@ export logical_grid
 export mapped_grid
 export metric_tensor
 
+include("parameter_space.jl")
 include("grid.jl")
 include("tensor_grid.jl")
 include("equidistant_grid.jl")
