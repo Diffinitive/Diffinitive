@@ -1,6 +1,7 @@
 using Diffinitive.Grids
 using Test
 using Diffinitive.LazyTensors
+using StaticArrays
 
 
 @testset "EquidistantGrid" begin
@@ -152,6 +153,15 @@ end
         for i ∈ eachindex(gp)
             @test [gp[i]...] ≈ [p[i]...] atol=5e-13
         end
+    end
+
+    @testset "equidistant_grid(::ParameterSpace)" begin
+        ps = HyperBox((0,0),(2,1))
+
+        @test equidistant_grid(ps, 3,4) == equidistant_grid((0,0), (2,1), 3,4)
+
+        @test equidistant_grid(unitinterval(),3) == equidistant_grid(0,1,3)
+        @test equidistant_grid(HyperBox((0,),(2,)),4) == equidistant_grid(@SVector[0], @SVector[2], 4)
     end
 end
 

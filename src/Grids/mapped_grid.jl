@@ -92,9 +92,8 @@ function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
     )
 end
 
-# TODO: Make sure all methods of `mapped_grid` are implemented correctly and tested.
 """
-    mapped_grid(x, J, size::Vararg{Int})
+    mapped_grid(x, J, size...)
 
 A `MappedGrid` with a default logical grid on the D-dimensional unit hyper 
 box [0,1]ᴰ. `x` and `J` are functions to be evaluated on the logical grid
@@ -102,8 +101,7 @@ and `size` determines the size of the logical grid.
 """
 function mapped_grid(x, J, size::Vararg{Int})
     D = length(size)
-        lg = equidistant_grid(ntuple(i->0., D), ntuple(i->1., D), size...) # TODO: Clean this up with ParamaterSpace once feature/grids/manifolds is merged
-    return mapped_grid(x, J, lg)
+    return mapped_grid(x, J, unithyperbox(D), size...)
 end
 
 """
@@ -121,13 +119,13 @@ function mapped_grid(x, J, lg::Grid)
 end
 
 """
-    mapped_grid(x, J, parameterspace, size)
+    mapped_grid(x, J, ps::ParameterSpace, size...)
 
 A `MappedGrid` with logical grid `lg`. Physical coordinates and Jacobian are
 determined by the functions `x` and `J`.
 """
-function mapped_grid(x, J, parameterspace, size::Vararg{Int})
-    lg = equidistant_grid(parameterspace, size...)
+function mapped_grid(x, J, ps::ParameterSpace, size::Vararg{Int})
+    lg = equidistant_grid(ps, size...)
     return mapped_grid(x, J, lg)
 end
 
