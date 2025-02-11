@@ -106,21 +106,21 @@ end
 """
     unitsquare(T=Float64)
 
-The square starting at ``(0,0)`` with side length 1.
+The square limited by 0 and 1 in each dimension.
 """
 unitsquare(T=Float64) = unithyperbox(T,2)
 
 """
     unitcube(T=Float64)
 
-The cube starting at ``(0,0,0)`` with side length 1.
+The cube limited by 0 and 1 in each dimension.
 """
 unitcube(T=Float64) = unithyperbox(T,3)
 
 """
     unithyperbox(T=Float64, D)
 
-The hypercube in dimension `D` starting at ``(0,0,0,...)`` with side length 1.
+The hypercube limited by 0 and 1 in each dimension.
 """
 unithyperbox(T, D) = HyperBox((@SVector zeros(T,D)), (@SVector ones(T,D)))
 unithyperbox(D) = unithyperbox(Float64,D)
@@ -141,7 +141,7 @@ end
 """
     Simplex(verticies...)
 
-A simplex with the given vierticies.
+A simplex with the given verticies.
 """
 function Simplex(verticies::Vararg{AbstractArray})
     ET = mapreduce(eltype,promote_type,verticies)
