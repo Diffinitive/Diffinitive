@@ -55,6 +55,7 @@ export inverse_spacing
 export spacing
 export equidistant_grid
 
+export MultiBlockBoundary
 
 # MappedGrid
 export MappedGrid
@@ -69,5 +70,6 @@ include("tensor_grid.jl")
 include("equidistant_grid.jl")
 include("zero_dim_grid.jl")
 include("mapped_grid.jl")
+include("multiblockgrids.jl")
 
 end # module
