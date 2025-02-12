@@ -1,6 +1,26 @@
 struct Line{PT}
     p::PT
     tangent::PT
+
+    Line{PT}(p::PT, tangent::PT) where PT = new{PT}(p,tangent)
+end
+
+function Line(p, t)
+    S = length(p)
+    T = promote_type(eltype(p), eltype(t))
+
+    PT = SVector{S,T}
+    return Line{PT}(
+        convert(PT, p),
+        convert(PT, t),
+    )
+end
+
+function Line(p::Tuple, t::Tuple)
+    p = promote(p...)
+    t = promote(t...)
+
+    return Line(SVector(p), SVector(t))
 end
 
 (c::Line)(s) = c.p + s*c.tangent
