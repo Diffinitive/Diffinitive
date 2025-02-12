@@ -29,6 +29,26 @@ end
 struct LineSegment{PT}
     a::PT
     b::PT
+
+    LineSegment{PT}(p::PT, tangent::PT) where PT = new{PT}(p,tangent)
+end
+
+function LineSegment(a, b)
+    S = length(a)
+    T = promote_type(eltype(a), eltype(b))
+
+    PT = SVector{S,T}
+    return LineSegment{PT}(
+        convert(PT, a),
+        convert(PT, b),
+    )
+end
+
+function LineSegment(a::Tuple, b::Tuple)
+    a = promote(a...)
+    b = promote(b...)
+
+    return LineSegment(SVector(a), SVector(b))
 end
 
 (c::LineSegment)(s) = (1-s)*c.a + s*c.b
