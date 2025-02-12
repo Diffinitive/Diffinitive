@@ -1,5 +1,5 @@
 using Diffinitive.Grids
-using Diffinitive.Grids: Line, LineSegment
+using Diffinitive.Grids: Line, LineSegment, linesegments, polygon_edges
 using StaticArrays
 
 @testset "Line" begin
@@ -45,17 +45,42 @@ end
 end
 
 @testset "linesegments" begin
-    @testset "Constructors" begin
-    end
+    a,b,c,d = [1,1],[2,2],[3,3],[4,4]
+    @test linesegments(a,b) == [
+        LineSegment(a,b),
+    ]
 
-    @test_broken false
+    @test linesegments(a,b,c) == [
+        LineSegment(a,b),
+        LineSegment(b,c),
+    ]
+
+    @test linesegments(a,b,c,d) == [
+        LineSegment(a,b),
+        LineSegment(b,c),
+        LineSegment(c,d),
+    ]
 end
 
 @testset "polygon_edges" begin
-    @testset "Constructors" begin
-    end
+    a,b,c,d = [1,1],[2,2],[3,3],[4,4]
+    @test polygon_edges(a,b) == [
+        LineSegment(a,b),
+        LineSegment(b,a),
+    ]
 
-    @test_broken false
+    @test polygon_edges(a,b,c) == [
+        LineSegment(a,b),
+        LineSegment(b,c),
+        LineSegment(c,a),
+    ]
+
+    @test polygon_edges(a,b,c,d) == [
+        LineSegment(a,b),
+        LineSegment(b,c),
+        LineSegment(c,d),
+        LineSegment(d,a),
+    ]
 end
 
 @testset "Circle" begin
