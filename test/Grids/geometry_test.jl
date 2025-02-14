@@ -1,5 +1,5 @@
 using Diffinitive.Grids
-using Diffinitive.Grids: Line, LineSegment, linesegments, polygon_edges, Circle
+using Diffinitive.Grids: Line, LineSegment, linesegments, polygon_edges, Circle, TransfiniteInterpolationSurface, check_transfiniteinterpolation
 using StaticArrays
 
 @testset "Line" begin
@@ -116,7 +116,76 @@ end
 
 @testset "TransfiniteInterpolationSurface" begin
     @testset "Constructors" begin
+        @test TransfiniteInterpolationSurface(t->[1,2], t->[2,1], t->[0,0], t->[1,1]) isa TransfiniteInterpolationSurface
+
+        cs = polygon_edges([0,0],[1,0],[1,1],[0,1])
+        @test TransfiniteInterpolationSurface(cs...) isa TransfiniteInterpolationSurface
     end
 
-    @test_broken false
+    @testset "Evaluation" begin
+        a, b, c, d = [1,0],[2,1/4],[2.5,1],[-1/3,1]
+        cs = polygon_edges([0,0],[1,0],[1,1],[0,1])
+        ti = TransfiniteInterpolationSurface(cs...)
+
+        @test ti(0,0) == [0,0]
+        @test ti([0,0]) == [0,0]
+        @test ti(1,0) == [1,0]
+        @test ti([1,0]) == [1,0]
+        @test ti(1,1) == [1,1]
+        @test ti([1,1]) == [1,1]
+        @test ti(0,1) == [0,1]
+        @test ti([0,1]) == [0,1]
+
+        @test ti(1/2, 0) == [1/2, 0]
+        @test ti(1/2, 1) == [1/2, 1]
+        @test ti(0,1/2) == [0,1/2]
+        @test ti(1,1/2) == [1,1/2]
+
+
+        a, b, c, d = [1,0],[2,1/4],[2.5,1],[-1/3,1]
+        cs = polygon_edges(a,b,c,d)
+        ti = TransfiniteInterpolationSurface(cs...)
+
+        @test ti(0,0) == a
+        @test ti(1,0) == b
+        @test ti(1,1) == c
+        @test ti(0,1) == d
+
+        @test ti(1/2, 0) == (a+b)/2
+        @test ti(1/2, 1) == (c+d)/2
+        @test ti(0, 1/2) == (a+d)/2
+        @test ti(1, 1/2) == (b+c)/2
+
+        # TODO: Some test with curved edges?
+    end
+
+    @testset "check_transfiniteinterpolation" begin
+        cs = polygon_edges([0,0],[1,0],[1,1],[0,1])
+        ti = TransfiniteInterpolationSurface(cs...)
+
+        @test check_transfiniteinterpolation(ti) == nothing
+        @test check_transfiniteinterpolation(Bool, ti) == true
+
+        bad_sides = [
+            LineSegment([0,0],[1/2,0]),
+            LineSegment([1,0],[1,1/2]),
+            LineSegment([1,1],[0,1/2]),
+            LineSegment([0,1],[0,1/2]),
+        ]
+
+        s1 = TransfiniteInterpolationSurface(bad_sides[1],cs[2],cs[3],cs[4])
+        s2 = TransfiniteInterpolationSurface(cs[1],bad_sides[2],cs[3],cs[4])
+        s3 = TransfiniteInterpolationSurface(cs[1],cs[2],bad_sides[3],cs[4])
+        s4 = TransfiniteInterpolationSurface(cs[1],cs[2],cs[3],bad_sides[4])
+
+        @test check_transfiniteinterpolation(Bool, s1) == false
+        @test check_transfiniteinterpolation(Bool, s2) == false
+        @test check_transfiniteinterpolation(Bool, s3) == false
+        @test check_transfiniteinterpolation(Bool, s4) == false
+
+        @test_throws Exception check_transfiniteinterpolation(s1)
+        @test_throws Exception check_transfiniteinterpolation(s2)
+        @test_throws Exception check_transfiniteinterpolation(s3)
+        @test_throws Exception check_transfiniteinterpolation(s4)
+    end
 end

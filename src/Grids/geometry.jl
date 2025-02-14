@@ -83,6 +83,33 @@ function (s::TransfiniteInterpolationSurface)(ξ̄::AbstractArray)
     s(ξ̄...)
 end
 
+function check_transfiniteinterpolation(s::TransfiniteInterpolationSurface)
+    if check_transfiniteinterpolation(Bool, s)
+        return nothing
+    else
+        error("The end of each curve in the transfinite interpolation should be the same as the beginning of the next curve.")
+    end
+end
+
+function check_transfiniteinterpolation(::Type{Bool}, s::TransfiniteInterpolationSurface)
+    if !isapprox(s.c₁(1), s.c₂(0))
+        return false
+    end
+
+    if !isapprox(s.c₂(1), s.c₃(0))
+        return false
+    end
+
+    if !isapprox(s.c₃(1), s.c₄(0))
+        return false
+    end
+
+    if !isapprox(s.c₄(1), s.c₁(0))
+        return false
+    end
+
+    return true
+end
+
 # TODO: Implement jacobian() for the different mapping helpers
-# TODO: Implement a check function for transfinite interpolations
 # TODO: Add doc strings
