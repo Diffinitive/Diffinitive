@@ -1,5 +1,5 @@
 using Diffinitive.Grids
-using Diffinitive.Grids: Line, LineSegment, linesegments, polygon_edges
+using Diffinitive.Grids: Line, LineSegment, linesegments, polygon_edges, Circle
 using StaticArrays
 
 @testset "Line" begin
@@ -85,9 +85,33 @@ end
 
 @testset "Circle" begin
     @testset "Constructors" begin
+        @test Circle([1,2], 1) isa Circle{SVector{2,Int},Int}
+        @test Circle([1,2], 1.) isa Circle{SVector{2,Int},Float64}
+        @test Circle([1,2.], 1.) isa Circle{SVector{2,Float64},Float64}
+        @test Circle([1,2.], 1) isa Circle{SVector{2,Float64},Int}
+        @test Circle((1,2.), 1.) isa Circle{SVector{2,Float64},Float64}
+        @test Circle((1,2), 1.) isa Circle{SVector{2,Int},Float64}
+        @test Circle((1.,2), 1) isa Circle{SVector{2,Float64},Int}
+        @test Circle((1,2), 1) isa Circle{SVector{2,Int},Int}
+        @test Circle(@SVector[1,2], 1.) isa Circle{SVector{2,Int},Float64}
+        @test Circle(@SVector[1,2.], 1.) isa Circle{SVector{2,Float64},Float64}
     end
 
-    @test_broken false
+    @testset "Evaluation" begin
+        c = Circle([0,0], 1)
+        @test c(0) ≈ [1,0]
+        @test c(π/2) ≈ [0,1]
+        @test c(π) ≈ [-1,0]
+        @test c(3π/2) ≈ [0,-1]
+        @test c(π/4) ≈ [1/√(2),1/√(2)]
+
+        c = Circle([0,0], 2)
+        @test c(0) ≈ [2,0]
+        @test c(π/2) ≈ [0,2]
+        @test c(π) ≈ [-2,0]
+        @test c(3π/2) ≈ [0,-2]
+        @test c(π/4) ≈ [√(2),√(2)]
+    end
 end
 
 @testset "TransfiniteInterpolationSurface" begin

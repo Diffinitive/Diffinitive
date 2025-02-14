@@ -64,9 +64,16 @@ function polygon_edges(ps...)
     return [LineSegment(ps[i], ps[mod1(i+1,n)]) for i ∈ eachindex(ps)]
 end
 
-struct Circle{T,PT}
+struct Circle{PT,T}
     c::PT
     r::T
+
+    Circle{PT,T}(c,r) where {PT,T} = new{PT,T}(c,r)
+end
+
+function Circle(c,r)
+    c = SVector{2}(c)
+    return Circle{typeof(c), typeof(r)}(c,r)
 end
 
 function (C::Circle)(θ)
