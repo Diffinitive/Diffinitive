@@ -84,3 +84,5 @@ function (s::TransfiniteInterpolationSurface)(ξ̄::AbstractArray)
 end
 
 # TODO: Implement jacobian() for the different mapping helpers
+# TODO: Implement a check function for transfinite interpolations
+# TODO: Add doc strings
