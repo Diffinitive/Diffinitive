@@ -6,21 +6,11 @@ struct Line{PT}
 end
 
 function Line(p, t)
-    S = length(p)
-    T = promote_type(eltype(p), eltype(t))
+    p = SVector{length(p)}(p)
+    t = SVector{length(t)}(t)
+    p, t = promote(p, t)
 
-    PT = SVector{S,T}
-    return Line{PT}(
-        convert(PT, p),
-        convert(PT, t),
-    )
-end
-
-function Line(p::Tuple, t::Tuple)
-    p = promote(p...)
-    t = promote(t...)
-
-    return Line(SVector(p), SVector(t))
+    return Line{typeof(p)}(p,t)
 end
 
 (c::Line)(s) = c.p + s*c.tangent
@@ -34,21 +24,11 @@ struct LineSegment{PT}
 end
 
 function LineSegment(a, b)
-    S = length(a)
-    T = promote_type(eltype(a), eltype(b))
+    a = SVector{length(a)}(a)
+    b = SVector{length(b)}(b)
+    a, b = promote(a, b)
 
-    PT = SVector{S,T}
-    return LineSegment{PT}(
-        convert(PT, a),
-        convert(PT, b),
-    )
-end
-
-function LineSegment(a::Tuple, b::Tuple)
-    a = promote(a...)
-    b = promote(b...)
-
-    return LineSegment(SVector(a), SVector(b))
+    return LineSegment{typeof(a)}(a,b)
 end
 
 (c::LineSegment)(s) = (1-s)*c.a + s*c.b
