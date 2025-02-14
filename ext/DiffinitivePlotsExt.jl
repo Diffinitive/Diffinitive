@@ -57,6 +57,7 @@ function adapted_curve_grid(g, minmax)
     return x, y
 end
 
+# REVIEW: Remove?
 # get_axis_limits(plt, :x)
 
 
