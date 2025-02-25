@@ -171,7 +171,6 @@ end
     end
 
     @testset "Evaluation" begin
-        a, b, c, d = [1,0],[2,1/4],[2.5,1],[-1/3,1]
         cs = polygon_edges([0,0],[1,0],[1,1],[0,1])
         ti = TransfiniteInterpolationSurface(cs...)
 
@@ -235,5 +234,41 @@ end
         @test_throws Exception check_transfiniteinterpolation(s2)
         @test_throws Exception check_transfiniteinterpolation(s3)
         @test_throws Exception check_transfiniteinterpolation(s4)
+    end
+
+    @testset "Grids.jacobian" begin
+        cs = polygon_edges([0,0],[1,0],[1,1],[0,1])
+        ti = TransfiniteInterpolationSurface(cs...)
+
+        @test Grids.jacobian(ti, [0,0]) isa SMatrix
+
+        @test Grids.jacobian(ti, [0,0]) == [1 0; 0 1]
+        @test Grids.jacobian(ti, [1,0]) == [1 0; 0 1]
+        @test Grids.jacobian(ti, [1,1]) == [1 0; 0 1]
+        @test Grids.jacobian(ti, [0,1]) == [1 0; 0 1]
+
+        @test Grids.jacobian(ti, [1/2, 0]) == [1 0; 0 1]
+        @test Grids.jacobian(ti, [1/2, 1]) == [1 0; 0 1]
+        @test Grids.jacobian(ti, [0,1/2]) == [1 0; 0 1]
+        @test Grids.jacobian(ti, [1,1/2]) == [1 0; 0 1]
+
+
+        a, b, c, d = [1,0],[2,1/4],[2.5,1],[-1/3,1]
+        cs = polygon_edges(a,b,c,d)
+        ti = TransfiniteInterpolationSurface(cs...)
+
+        @test Grids.jacobian(ti, [0,0]) == [b-a d-a]
+        @test Grids.jacobian(ti, [1,0]) == [b-a c-b]
+        @test Grids.jacobian(ti, [1,1]) == [c-d c-b]
+        @test Grids.jacobian(ti, [0,1]) == [c-d d-a]
+
+
+        mid(x,y) = (x+y)/2
+        @test Grids.jacobian(ti, [1/2, 0]) ≈ [b-a mid(c,d)-mid(a,b)]
+        @test Grids.jacobian(ti, [1/2, 1]) ≈ [c-d mid(c,d)-mid(a,b)]
+        @test Grids.jacobian(ti, [0, 1/2]) ≈ [mid(b,c)-mid(a,d) d-a]
+        @test Grids.jacobian(ti, [1, 1/2]) ≈ [mid(b,c)-mid(a,d) c-b]
+
+        # TODO: Some test with curved edges?
     end
 end

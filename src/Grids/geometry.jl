@@ -118,5 +118,31 @@ function check_transfiniteinterpolation(::Type{Bool}, s::TransfiniteInterpolatio
     return true
 end
 
+function Grids.jacobian(s::TransfiniteInterpolationSurface, ξ̄)
+    u, v = ξ̄
+
+    c₁, c₂, c₃, c₄ = s.c₁, s.c₂, s.c₃, s.c₄
+    P₀₀ = c₁(0)
+    P₁₀ = c₂(0)
+    P₁₁ = c₃(0)
+    P₀₁ = c₄(0)
+
+    ∂x̄∂ξ₁ = (1-v)*jacobian(c₁,u) + c₂(v) - v*jacobian(c₃,1-u) -c₄(1-v) - (
+        -(1-v)*P₀₀ + (1-v)*P₁₀ + v*P₁₁ - v*P₀₁
+    )
+
+
+    (1-v)*c₁(u) + u*c₂(v) + v*c₃(1-u) + (1-u)*c₄(1-v) - (
+        (1-u)*(1-v)*P₀₀ + u*(1-v)*P₁₀ + u*v*P₁₁ + (1-u)*v*P₀₁
+    )
+
+
+    ∂x̄∂ξ₂ = -c₁(u) + u*jacobian(c₂,v) + c₃(1-u) - (1-u)*jacobian(c₄,1-v) - (
+        -(1-u)*P₀₀ - u*P₁₀ + u*P₁₁ + (1-u)*P₀₁
+    )
+
+    return [∂x̄∂ξ₁ ∂x̄∂ξ₂]
+end
+
 # TODO: Implement jacobian() for the different mapping helpers
 # TODO: Add doc strings
