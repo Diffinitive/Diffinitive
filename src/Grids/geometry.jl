@@ -15,6 +15,7 @@ end
 
 (c::Line)(s) = c.p + s*c.tangent
 
+Grids.jacobian(l::Line, t) = l.tangent
 
 struct LineSegment{PT}
     a::PT

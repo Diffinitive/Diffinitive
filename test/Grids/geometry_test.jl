@@ -21,6 +21,14 @@ using StaticArrays
         @test l(1) == [1,2] + [2,3]
         @test l(1/2) == [1,2] + [2,3]/2
     end
+
+    @testset "Grids.jacobian" begin
+        l = Line([1,2],[2,3])
+
+        @test Grids.jacobian(l,0) == [2,3]
+        @test Grids.jacobian(l,1) == [2,3]
+        @test Grids.jacobian(l,1/2) == [2,3]
+    end
 end
 
 @testset "LineSegment" begin
