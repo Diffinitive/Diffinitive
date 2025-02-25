@@ -50,6 +50,16 @@ end
         @test l(1) == [2,3]
         @test l(1/2) == [1,2]/2 + [2,3]/2
     end
+
+    @testset "Grids.jacobian" begin
+        a, b = [1,2], [2,3]
+        l = LineSegment(a,b)
+        d = b-a
+
+        @test Grids.jacobian(l,0) == d
+        @test Grids.jacobian(l,1) == d
+        @test Grids.jacobian(l,1/2) == d
+    end
 end
 
 @testset "linesegments" begin

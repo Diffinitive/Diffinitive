@@ -34,6 +34,7 @@ end
 
 (c::LineSegment)(s) = (1-s)*c.a + s*c.b
 
+Grids.jacobian(c::LineSegment, s) = c.b - c.a
 
 function linesegments(ps...)
     return [LineSegment(ps[i], ps[i+1]) for i ∈ 1:length(ps)-1]
