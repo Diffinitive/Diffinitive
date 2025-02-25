@@ -130,6 +130,36 @@ end
         @test c(3π/2) ≈ [0,-2]
         @test c(π/4) ≈ [√(2),√(2)]
     end
+
+    @testset "Grids.jacobian" begin
+        c = Circle([0,0], 1)
+        @test Grids.jacobian(c, 0) ≈ [0,1]
+        @test Grids.jacobian(c, π/2) ≈ [-1,0]
+        @test Grids.jacobian(c, π) ≈ [0,-1]
+        @test Grids.jacobian(c, 3π/2) ≈ [1,0]
+        @test Grids.jacobian(c, π/4) ≈ [-1/√(2),1/√(2)]
+
+        c = Circle([0,0], 2)
+        @test Grids.jacobian(c, 0) ≈ [0,2]
+        @test Grids.jacobian(c, π/2) ≈ [-2,0]
+        @test Grids.jacobian(c, π) ≈ [0,-2]
+        @test Grids.jacobian(c, 3π/2) ≈ [2,0]
+        @test Grids.jacobian(c, π/4) ≈ [-√(2),√(2)]
+
+        c = Circle([-1,1], 1)
+        @test Grids.jacobian(c, 0) ≈ [0,1]
+        @test Grids.jacobian(c, π/2) ≈ [-1,0]
+        @test Grids.jacobian(c, π) ≈ [0,-1]
+        @test Grids.jacobian(c, 3π/2) ≈ [1,0]
+        @test Grids.jacobian(c, π/4) ≈ [-1/√(2),1/√(2)]
+
+        c = Circle([-1,1], 2)
+        @test Grids.jacobian(c, 0) ≈ [0,2]
+        @test Grids.jacobian(c, π/2) ≈ [-2,0]
+        @test Grids.jacobian(c, π) ≈ [0,-2]
+        @test Grids.jacobian(c, 3π/2) ≈ [2,0]
+        @test Grids.jacobian(c, π/4) ≈ [-√(2),√(2)]
+    end
 end
 
 @testset "TransfiniteInterpolationSurface" begin

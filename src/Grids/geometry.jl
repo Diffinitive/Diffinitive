@@ -63,6 +63,11 @@ function (C::Circle)(θ)
     c + r*@SVector[cos(θ), sin(θ)]
 end
 
+function Grids.jacobian(C::Circle, θ)
+    (;r) = C
+    r*@SVector[-sin(θ), cos(θ)]
+end
+
 struct TransfiniteInterpolationSurface{T1,T2,T3,T4}
     c₁::T1
     c₂::T2
