@@ -196,7 +196,7 @@ function check_transfiniteinterpolation(s::TransfiniteInterpolationSurface)
 end
 
 """
-    check_transfiniteinterpolation(::Type{Bool}, s::TransfiniteInterpolationSurface)
+    check_transfiniteinterpolation(Bool, s::TransfiniteInterpolationSurface)
 
 Return true if the ends of the curves in the transfinite interpolation match.
 """
