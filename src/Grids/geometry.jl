@@ -5,6 +5,29 @@ struct Line{PT}
     Line{PT}(p::PT, tangent::PT) where PT = new{PT}(p,tangent)
 end
 
+"""
+    Line(p,t)
+
+A line, as a callable object, starting at `p` with tangent `t`.
+
+# Example
+```julia-repl
+julia> l = Grids.Line([1,1],[2,1])
+Diffinitive.Grids.Line{StaticArraysCore.SVector{2, Int64}}([1, 1], [2, 1])
+
+julia> l(0)
+2-element StaticArraysCore.SVector{2, Int64} with indices SOneTo(2):
+ 1
+ 1
+
+julia> l(1)
+2-element StaticArraysCore.SVector{2, Int64} with indices SOneTo(2):
+ 3
+ 2
+```
+
+See also: [`LineSegment`](@ref).
+"""
 function Line(p, t)
     p = SVector{length(p)}(p)
     t = SVector{length(t)}(t)
@@ -24,6 +47,34 @@ struct LineSegment{PT}
     LineSegment{PT}(p::PT, tangent::PT) where PT = new{PT}(p,tangent)
 end
 
+"""
+    LineSegment(a,b)
+
+A line segment, as a callable object, from `a` to `b`.
+
+# Example
+```julia-repl
+julia> l = Grids.LineSegment([1,1],[2,1])
+Diffinitive.Grids.LineSegment{StaticArraysCore.SVector{2, Int64}}([1, 1], [2, 1])
+
+julia> l(0)
+2-element StaticArraysCore.SVector{2, Int64} with indices SOneTo(2):
+ 1
+ 1
+
+julia> l(0.5)
+2-element StaticArraysCore.SVector{2, Float64} with indices SOneTo(2):
+ 1.5
+ 1.0
+
+julia> l(1)
+2-element StaticArraysCore.SVector{2, Int64} with indices SOneTo(2):
+ 2
+ 1
+```
+
+See also: [`Line`](@ref).
+"""
 function LineSegment(a, b)
     a = SVector{length(a)}(a)
     b = SVector{length(b)}(b)
@@ -36,11 +87,26 @@ end
 
 Grids.jacobian(c::LineSegment, s) = c.b - c.a
 
+"""
+    linesegments(ps...)
+
+An array of line segments between the points `ps[1]`, `ps[2]`, and so on.
+
+See also: [`polygon_edges`](@ref).
+"""
 function linesegments(ps...)
     return [LineSegment(ps[i], ps[i+1]) for i ∈ 1:length(ps)-1]
 end
 
 
+"""
+    polygon_edges(ps...)
+
+An array of line segments between the points `ps[1]`, `ps[2]`, and so on
+including the segment between `ps[end]` and `ps[1]`.
+
+See also: [`linesegments`](@ref).
+"""
 function polygon_edges(ps...)
     n = length(ps)
     return [LineSegment(ps[i], ps[mod1(i+1,n)]) for i ∈ eachindex(ps)]
@@ -53,6 +119,27 @@ struct Circle{PT,T}
     Circle{PT,T}(c,r) where {PT,T} = new{PT,T}(c,r)
 end
 
+"""
+    Circle(c,r)
+
+A circle with center `c` and radius `r` paramatrized with the angle to the x-axis.
+
+# Example
+```julia-repl
+julia> c = Grids.Circle([1,1], 2)
+Diffinitive.Grids.Circle{StaticArraysCore.SVector{2, Int64}, Int64}([1, 1], 2)
+
+julia> c(0)
+2-element StaticArraysCore.SVector{2, Float64} with indices SOneTo(2):
+ 3.0
+ 1.0
+
+julia> c(π/2)
+2-element StaticArraysCore.SVector{2, Float64} with indices SOneTo(2):
+ 1.0000000000000002
+ 3.0
+```
+"""
 function Circle(c,r)
     c = SVector{2}(c)
     return Circle{typeof(c), typeof(r)}(c,r)
@@ -68,6 +155,11 @@ function Grids.jacobian(C::Circle, θ)
     r*@SVector[-sin(θ), cos(θ)]
 end
 
+"""
+    TransfiniteInterpolationSurface(c₁, c₂, c₃, c₄)
+
+A surface defined by the transfinite interpolation of the curves `c₁`, `c₂`, `c₃`, and  `c₄`.
+"""
 struct TransfiniteInterpolationSurface{T1,T2,T3,T4}
     c₁::T1
     c₂::T2
@@ -90,6 +182,11 @@ function (s::TransfiniteInterpolationSurface)(ξ̄::AbstractArray)
     s(ξ̄...)
 end
 
+"""
+    check_transfiniteinterpolation(s::TransfiniteInterpolationSurface)
+
+Throw an error if the ends of the curves in the transfinite interpolation do not match.
+"""
 function check_transfiniteinterpolation(s::TransfiniteInterpolationSurface)
     if check_transfiniteinterpolation(Bool, s)
         return nothing
@@ -98,6 +195,11 @@ function check_transfiniteinterpolation(s::TransfiniteInterpolationSurface)
     end
 end
 
+"""
+    check_transfiniteinterpolation(::Type{Bool}, s::TransfiniteInterpolationSurface)
+
+Return true if the ends of the curves in the transfinite interpolation match.
+"""
 function check_transfiniteinterpolation(::Type{Bool}, s::TransfiniteInterpolationSurface)
     if !isapprox(s.c₁(1), s.c₂(0))
         return false
@@ -143,6 +245,3 @@ function Grids.jacobian(s::TransfiniteInterpolationSurface, ξ̄)
 
     return [∂x̄∂ξ₁ ∂x̄∂ξ₂]
 end
-
-# TODO: Implement jacobian() for the different mapping helpers
-# TODO: Add doc strings
