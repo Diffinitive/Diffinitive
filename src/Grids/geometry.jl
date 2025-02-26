@@ -233,12 +233,6 @@ function Grids.jacobian(s::TransfiniteInterpolationSurface, ξ̄)
         -(1-v)*P₀₀ + (1-v)*P₁₀ + v*P₁₁ - v*P₀₁
     )
 
-
-    (1-v)*c₁(u) + u*c₂(v) + v*c₃(1-u) + (1-u)*c₄(1-v) - (
-        (1-u)*(1-v)*P₀₀ + u*(1-v)*P₁₀ + u*v*P₁₁ + (1-u)*v*P₀₁
-    )
-
-
     ∂x̄∂ξ₂ = -c₁(u) + u*jacobian(c₂,v) + c₃(1-u) - (1-u)*jacobian(c₄,1-v) - (
         -(1-u)*P₀₀ - u*P₁₀ + u*P₁₁ + (1-u)*P₀₁
     )
