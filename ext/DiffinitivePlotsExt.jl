@@ -57,16 +57,4 @@ function adapted_curve_grid(g, minmax)
     return x, y
 end
 
-# get_axis_limits(plt, :x)
-
-
-# ReicpesPipline/src/user_recipe.jl
-# @recipe function f(f::FuncOrFuncs{F}) where {F<:Function}
-
-# @recipe function f(f::Function, xmin::Number, xmax::Number)
-
-# _scaled_adapted_grid(f, xscale, yscale, xmin, xmax)
-
 end
-
-

@@ -1,10 +1,10 @@
 # Manifolds, Charts, and Atlases
 
 To construct grids on more complicated geometries we use manifolds described
-by one or more charts. The charts describe a mapping from some parameter space
+by one or more charts. The charts describe a mapping from a logical parameter space
 to the geometry that we are interested in. If there are more than one chart
 for a given geometry this collection of charts and their connection is
-described by and atlas.
+described by an atlas.
 
 For the construction of differential and difference operators on a manifold
 with a chart the library needs to know the Jacobian of the mapping as a
