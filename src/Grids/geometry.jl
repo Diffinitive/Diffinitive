@@ -191,7 +191,7 @@ function check_transfiniteinterpolation(s::TransfiniteInterpolationSurface)
     if check_transfiniteinterpolation(Bool, s)
         return nothing
     else
-        error("The end of each curve in the transfinite interpolation should be the same as the beginning of the next curve.")
+        throw(ArgumentError("The end of each curve in the transfinite interpolation should be the same as the beginning of the next curve."))
     end
 end
 

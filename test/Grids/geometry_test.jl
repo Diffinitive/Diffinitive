@@ -230,10 +230,10 @@ end
         @test check_transfiniteinterpolation(Bool, s3) == false
         @test check_transfiniteinterpolation(Bool, s4) == false
 
-        @test_throws Exception check_transfiniteinterpolation(s1)
-        @test_throws Exception check_transfiniteinterpolation(s2)
-        @test_throws Exception check_transfiniteinterpolation(s3)
-        @test_throws Exception check_transfiniteinterpolation(s4)
+        @test_throws ArgumentError check_transfiniteinterpolation(s1)
+        @test_throws ArgumentError check_transfiniteinterpolation(s2)
+        @test_throws ArgumentError check_transfiniteinterpolation(s3)
+        @test_throws ArgumentError check_transfiniteinterpolation(s4)
     end
 
     @testset "Grids.jacobian" begin
