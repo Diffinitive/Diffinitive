@@ -53,7 +53,7 @@ function charts end
 """
     connections(::Atlas)
 
-Collection of pairs of multiblock boundary identifiers.
+Collection of 2-tuples of multiblock boundary identifiers.
 """
 function connections end
 
