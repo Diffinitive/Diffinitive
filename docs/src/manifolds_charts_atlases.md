@@ -3,7 +3,7 @@
 To construct grids on more complicated geometries we use manifolds described
 by one or more charts. The charts describe a mapping from a logical parameter space
 to the geometry that we are interested in. If there are more than one chart
-for a given geometry this collection of charts and their connection is
+for a given geometry this collection of charts and how they are connected is
 described by an atlas.
 
 For the construction of differential and difference operators on a manifold
@@ -32,5 +32,3 @@ differentiation packages, for example
 using ForwardDiff
 Grids.jacobian(f,x) = ForwardDiff.jacobian(f,x)
 ```
-
-<!-- What more needs to be said here? --/>
