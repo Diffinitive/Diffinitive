@@ -22,6 +22,13 @@ end
     @test limits(unitinterval(Int)) == (0,1)
 
     @test boundary_identifiers(unitinterval()) == (LowerBoundary(), UpperBoundary())
+
+    @test 0 ∈ Interval(0,1)
+    @test 0. ∈ Interval(0,1)
+    @test 1. ∈ Interval(0,1)
+    @test 2 ∉ Interval(0,1)
+    @test -1 ∉ Interval(0,1)
+    @test -1. ∉ Interval(0,1)
 end
 
 @testset "HyperBox" begin

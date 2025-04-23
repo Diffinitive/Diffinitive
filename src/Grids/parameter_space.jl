@@ -47,6 +47,8 @@ limits(i::Interval) = (i.a, i.b)
 
 boundary_identifiers(::Interval) = (LowerBoundary(), UpperBoundary())
 
+Base.in(x, i::Interval) = i.a <= x <= i.b
+
 """
     unitinterval(T=Float64)
 
