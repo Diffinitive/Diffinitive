@@ -104,6 +104,11 @@ function boundary_identifiers(box::HyperBox)
     end
 end
 
+function Base.in(x, box::HyperBox)
+    return all(eachindex(x)) do i
+        box.a[i] <= x[i] <= box.b[i]
+    end
+end
 
 """
     unitsquare(T=Float64)

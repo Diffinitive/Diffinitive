@@ -1,6 +1,7 @@
 using Test
 
 using Diffinitive.Grids
+using StaticArrays
 
 @testset "ParameterSpace" begin
     @test ndims(HyperBox([1,1], [2,2])) == 2
@@ -66,6 +67,13 @@ end
         CartesianBoundary{3,LowerBoundary}(),
         CartesianBoundary{3,UpperBoundary}(),
     ]
+
+    @test @SVector[1.5, 3.5] ∈ HyperBox([1,2], [3,4])
+    @test @SVector[1, 2] ∈ HyperBox([1,2], [3,4])
+    @test @SVector[3, 4] ∈ HyperBox([1,2], [3,4])
+
+    @test @SVector[0.5, 3.5] ∉ HyperBox([1,2], [3,4])
+    @test @SVector[1.5, 4.5] ∉ HyperBox([1,2], [3,4])
 end
 
 @testset "Simplex" begin
