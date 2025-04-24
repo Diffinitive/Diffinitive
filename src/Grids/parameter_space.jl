@@ -165,6 +165,26 @@ function Simplex(verticies::Vararg{AbstractArray})
     return Simplex(Tuple(convert(T,v) for v ∈ verticies))
 end
 
+
+function Base.in(x, s::Simplex)
+    v₁ = s.verticies[1]
+    V = map(s.verticies) do v
+        v - v₁
+    end
+
+    A = hcat(V[2:end]...) # matrix with edge vectors as columns
+    b = x - v₁
+
+    # Solve Aλ = b
+    λ = A \ b
+
+    # Compute full barycentric coordinates: first is 1 - sum(λ), then λ
+    λ_full = (1 - sum(λ), λ...)  # Tuple of length NV
+
+    all(λᵢ -> zero(λᵢ) ≤ λᵢ ≤ one(λᵢ), λ_full)
+end
+
+
 """
     verticies(s::Simplex)
 

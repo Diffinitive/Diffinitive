@@ -92,4 +92,32 @@ end
     @test verticies(unittetrahedron()) == ([0,0,0], [1,0,0], [0,1,0],[0,0,1])
 
     @test unitsimplex(4) isa Simplex{Float64,4}
+
+    @testset "Base.in" begin
+        @testset "2D" begin
+            T₂ = Simplex([0.0, 0.0], [1.0, 0.0], [0.0, 1.0])
+            @test [0.1, 0.1] ∈ T₂
+            @test [0.3, 0.3] ∈ T₂
+            @test [1.0, 0.0] ∈ T₂
+            @test [0.0, 0.0] ∈ T₂
+            @test [0.0, 1.0] ∈ T₂
+            @test [0.5, 0.5] ∈ T₂
+
+            @test [0.6, 0.6] ∉ T₂
+            @test [-0.1, 0.1] ∉ T₂
+        end
+
+        @testset "3D" begin
+            tetrahedron = Simplex([0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0])
+            @test [0.1, 0.1, 0.1] ∈ tetrahedron
+            @test [0.0, 0.0, 0.0] ∈ tetrahedron
+            @test [1.0, 0.0, 0.0] ∈ tetrahedron
+            @test [0.25, 0.25, 0.25] ∈ tetrahedron
+            @test [0.5, 0.5, 0.0] ∈ tetrahedron
+            @test [0.3, 0.3, 0.3] ∈ tetrahedron
+
+            @test [0.5, 0.5, 1.0] ∉ tetrahedron
+            @test [0.3, 0.3, 0.5] ∉ tetrahedron
+        end
+    end
 end
