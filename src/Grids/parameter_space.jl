@@ -18,6 +18,14 @@ See also: [`Interval`](@ref), [`HyperBox`](@ref),
 abstract type ParameterSpace{D} end
 Base.ndims(::ParameterSpace{D}) where D = D
 
+
+@doc """
+    in(x, S::ParameterSpace)
+    ∈(x, S::ParameterSpace)
+
+# TODO
+""" Base.in(x,::ParameterSpace)
+
 """
     Interval{T} <: ParameterSpace{1}
 
