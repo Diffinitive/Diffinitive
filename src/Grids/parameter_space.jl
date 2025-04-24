@@ -23,7 +23,7 @@ Base.ndims(::ParameterSpace{D}) where D = D
     in(x, S::ParameterSpace)
     ∈(x, S::ParameterSpace)
 
-# TODO
+Test if the point `x` is in the parameter space `S`.
 """ Base.in(x,::ParameterSpace)
 
 """
