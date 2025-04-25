@@ -108,16 +108,16 @@ end
         end
 
         @testset "3D" begin
-            tetrahedron = Simplex([0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0])
-            @test [0.1, 0.1, 0.1] ∈ tetrahedron
-            @test [0.0, 0.0, 0.0] ∈ tetrahedron
-            @test [1.0, 0.0, 0.0] ∈ tetrahedron
-            @test [0.25, 0.25, 0.25] ∈ tetrahedron
-            @test [0.5, 0.5, 0.0] ∈ tetrahedron
-            @test [0.3, 0.3, 0.3] ∈ tetrahedron
+            T₃ = Simplex([0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0])
+            @test [0.1, 0.1, 0.1] ∈ T₃
+            @test [0.0, 0.0, 0.0] ∈ T₃
+            @test [1.0, 0.0, 0.0] ∈ T₃
+            @test [0.25, 0.25, 0.25] ∈ T₃
+            @test [0.5, 0.5, 0.0] ∈ T₃
+            @test [0.3, 0.3, 0.3] ∈ T₃
 
-            @test [0.5, 0.5, 1.0] ∉ tetrahedron
-            @test [0.3, 0.3, 0.5] ∉ tetrahedron
+            @test [0.5, 0.5, 1.0] ∉ T₃
+            @test [0.3, 0.3, 0.5] ∉ T₃
         end
     end
 end
