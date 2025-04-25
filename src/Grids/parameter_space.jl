@@ -18,7 +18,6 @@ See also: [`Interval`](@ref), [`HyperBox`](@ref),
 abstract type ParameterSpace{D} end
 Base.ndims(::ParameterSpace{D}) where D = D
 
-
 @doc """
     in(x, S::ParameterSpace)
     ∈(x, S::ParameterSpace)
@@ -165,7 +164,6 @@ function Simplex(verticies::Vararg{AbstractArray})
     return Simplex(Tuple(convert(T,v) for v ∈ verticies))
 end
 
-
 function Base.in(x, s::Simplex)
     v₁ = s.verticies[1]
     V = map(s.verticies) do v
@@ -183,7 +181,6 @@ function Base.in(x, s::Simplex)
 
     all(λᵢ -> zero(λᵢ) ≤ λᵢ ≤ one(λᵢ), λ_full)
 end
-
 
 """
     verticies(s::Simplex)
