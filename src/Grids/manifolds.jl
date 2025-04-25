@@ -9,8 +9,14 @@ struct Chart{D, PST<:ParameterSpace{D}, MT}
 end
 
 Base.ndims(::Chart{D}) where D = D
-(c::Chart)(ξ) = c.mapping(ξ)
 parameterspace(c::Chart) = c.parameterspace
+
+function (c::Chart)(ξ)
+    if ξ ∉ parameterspace(c)
+        throw(DomainError(ξ, "chart was called logical coordinates outside the parameterspace. If this was inteded, use the `mapping` field from the Chart struct instead."))
+    end
+    return c.mapping(ξ)
+end
 
 """
     jacobian(c::Chart, ξ)

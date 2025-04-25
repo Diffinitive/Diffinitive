@@ -18,9 +18,14 @@ top = CartesianBoundary{3, UpperBoundary}
     Grids.jacobian(::typeof(X), ξ) = @SVector[2,2]
     c = Chart(X, unitsquare())
     @test c isa Chart{2}
-    @test c([3,2]) == [6,4]
     @test parameterspace(c) == unitsquare()
     @test ndims(c) == 2
+
+    @testset "Calling" begin
+        c = Chart(X, unitsquare())
+        @test c([.3,.2]) == [.6,.4]
+        @test_throws DomainError c([3,2])
+    end
 
     @test jacobian(c, [3,2]) == [2,2]
 
