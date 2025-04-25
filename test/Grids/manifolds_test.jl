@@ -15,7 +15,7 @@ top = CartesianBoundary{3, UpperBoundary}
 
 @testset "Chart" begin
     X(ξ) = 2ξ
-    Grids.jacobian(::typeof(X), ξ) = @SVector[2,2]
+    Grids.jacobian(::typeof(X), ξ) = @SMatrix[2 0; 0 2]
     c = Chart(X, unitsquare())
     @test c isa Chart{2}
     @test parameterspace(c) == unitsquare()
@@ -27,7 +27,11 @@ top = CartesianBoundary{3, UpperBoundary}
         @test_throws DomainError c([3,2])
     end
 
-    @test jacobian(c, [3,2]) == [2,2]
+    @testset "jacobian(::Chart, ⋅)" begin
+        c = Chart(X, unitsquare())
+        @test_throws DomainError jacobian(c, [3,2])
+        @test jacobian(c, [.3,.2]) == [2 0; 0 2]
+    end
 
     @test Set(boundary_identifiers(Chart(X,unitsquare()))) == Set([east(),west(),south(),north()])
 end

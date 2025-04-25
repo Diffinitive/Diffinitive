@@ -36,7 +36,12 @@ jacobian(c::typeof(c),ξ) = f′(ξ)
 ```
 which will both allow calling `jacobian(c,ξ)`.
 """
-jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
+function jacobian(c::Chart, ξ)
+    if ξ ∉ parameterspace(c)
+        throw(DomainError(ξ, "jacobian was called with logical coordinates outside the parameterspace of the chart. If this was inteded, use the `mapping` field from the Chart struct instead."))
+    end
+    return jacobian(c.mapping, ξ)
+end
 
 boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
