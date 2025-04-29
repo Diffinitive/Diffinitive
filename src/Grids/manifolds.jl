@@ -9,8 +9,14 @@ struct Chart{D, PST<:ParameterSpace{D}, MT}
 end
 
 Base.ndims(::Chart{D}) where D = D
-(c::Chart)(ξ) = c.mapping(ξ)
 parameterspace(c::Chart) = c.parameterspace
+
+function (c::Chart)(ξ)
+    if ξ ∉ parameterspace(c)
+        throw(DomainError(ξ, "chart was called logical coordinates outside the parameterspace. If this was inteded, use the `mapping` field from the Chart struct instead."))
+    end
+    return c.mapping(ξ)
+end
 
 """
     jacobian(c::Chart, ξ)
@@ -30,7 +36,12 @@ jacobian(c::typeof(c),ξ) = f′(ξ)
 ```
 which will both allow calling `jacobian(c,ξ)`.
 """
-jacobian(c::Chart, ξ) = jacobian(c.mapping, ξ)
+function jacobian(c::Chart, ξ)
+    if ξ ∉ parameterspace(c)
+        throw(DomainError(ξ, "jacobian was called with logical coordinates outside the parameterspace of the chart. If this was inteded, use the `mapping` field from the Chart struct instead."))
+    end
+    return jacobian(c.mapping, ξ)
+end
 
 boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
@@ -53,7 +64,7 @@ function charts end
 """
     connections(::Atlas)
 
-Collection of pairs of multiblock boundary identifiers.
+Collection of 2-tuples of multiblock boundary identifiers.
 """
 function connections end
 
