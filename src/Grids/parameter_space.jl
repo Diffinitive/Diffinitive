@@ -170,16 +170,12 @@ function Base.in(x, s::Simplex)
         v - v₁
     end
 
-    A = hcat(V[2:end]...) # matrix with edge vectors as columns
-    b = x - v₁
+    A = hcat(V[2:end]...) # Matrix with edge vectors as columns
+    λ = A \ (x - v₁)
 
-    # Solve Aλ = b
-    λ = A \ b
+    λ_full = (1 - sum(λ), λ...) # Full barycentric coordinates
 
-    # Compute full barycentric coordinates: first is 1 - sum(λ), then λ
-    λ_full = (1 - sum(λ), λ...)  # Tuple of length NV
-
-    all(λᵢ -> zero(λᵢ) ≤ λᵢ ≤ one(λᵢ), λ_full)
+    return all(λᵢ -> zero(λᵢ) ≤ λᵢ ≤ one(λᵢ), λ_full)
 end
 
 """
