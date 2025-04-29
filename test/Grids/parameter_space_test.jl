@@ -1,6 +1,7 @@
 using Test
 
 using Diffinitive.Grids
+using StaticArrays
 
 @testset "ParameterSpace" begin
     @test ndims(HyperBox([1,1], [2,2])) == 2
@@ -22,6 +23,13 @@ end
     @test limits(unitinterval(Int)) == (0,1)
 
     @test boundary_identifiers(unitinterval()) == (LowerBoundary(), UpperBoundary())
+
+    @test 0 ∈ Interval(0,1)
+    @test 0. ∈ Interval(0,1)
+    @test 1. ∈ Interval(0,1)
+    @test 2 ∉ Interval(0,1)
+    @test -1 ∉ Interval(0,1)
+    @test -1. ∉ Interval(0,1)
 end
 
 @testset "HyperBox" begin
@@ -59,6 +67,13 @@ end
         CartesianBoundary{3,LowerBoundary}(),
         CartesianBoundary{3,UpperBoundary}(),
     ]
+
+    @test @SVector[1.5, 3.5] ∈ HyperBox([1,2], [3,4])
+    @test @SVector[1, 2] ∈ HyperBox([1,2], [3,4])
+    @test @SVector[3, 4] ∈ HyperBox([1,2], [3,4])
+
+    @test @SVector[0.5, 3.5] ∉ HyperBox([1,2], [3,4])
+    @test @SVector[1.5, 4.5] ∉ HyperBox([1,2], [3,4])
 end
 
 @testset "Simplex" begin
@@ -77,4 +92,32 @@ end
     @test verticies(unittetrahedron()) == ([0,0,0], [1,0,0], [0,1,0],[0,0,1])
 
     @test unitsimplex(4) isa Simplex{Float64,4}
+
+    @testset "Base.in" begin
+        @testset "2D" begin
+            T₂ = Simplex([0.0, 0.0], [1.0, 0.0], [0.0, 1.0])
+            @test [0.1, 0.1] ∈ T₂
+            @test [0.3, 0.3] ∈ T₂
+            @test [1.0, 0.0] ∈ T₂
+            @test [0.0, 0.0] ∈ T₂
+            @test [0.0, 1.0] ∈ T₂
+            @test [0.5, 0.5] ∈ T₂
+
+            @test [0.6, 0.6] ∉ T₂
+            @test [-0.1, 0.1] ∉ T₂
+        end
+
+        @testset "3D" begin
+            T₃ = Simplex([0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0])
+            @test [0.1, 0.1, 0.1] ∈ T₃
+            @test [0.0, 0.0, 0.0] ∈ T₃
+            @test [1.0, 0.0, 0.0] ∈ T₃
+            @test [0.25, 0.25, 0.25] ∈ T₃
+            @test [0.5, 0.5, 0.0] ∈ T₃
+            @test [0.3, 0.3, 0.3] ∈ T₃
+
+            @test [0.5, 0.5, 1.0] ∉ T₃
+            @test [0.3, 0.3, 0.5] ∉ T₃
+        end
+    end
 end

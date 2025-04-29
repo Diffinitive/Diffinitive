@@ -164,7 +164,6 @@ end
         @test equidistant_grid(HyperBox((0,),(2,)),4) == equidistant_grid(@SVector[0], @SVector[2], 4)
     end
 
-
     @testset "equidistant_grid(::Chart)" begin
         c = Chart(unitsquare()) do (ξ,η)
             @SVector[2ξ, 3η]

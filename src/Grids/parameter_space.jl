@@ -18,6 +18,13 @@ See also: [`Interval`](@ref), [`HyperBox`](@ref),
 abstract type ParameterSpace{D} end
 Base.ndims(::ParameterSpace{D}) where D = D
 
+@doc """
+    in(x, S::ParameterSpace)
+    ∈(x, S::ParameterSpace)
+
+Test if the point `x` is in the parameter space `S`.
+""" Base.in(x,::ParameterSpace)
+
 """
     Interval{T} <: ParameterSpace{1}
 
@@ -46,6 +53,8 @@ The limits of the interval.
 limits(i::Interval) = (i.a, i.b)
 
 boundary_identifiers(::Interval) = (LowerBoundary(), UpperBoundary())
+
+Base.in(x, i::Interval) = i.a <= x <= i.b
 
 """
     unitinterval(T=Float64)
@@ -102,6 +111,11 @@ function boundary_identifiers(box::HyperBox)
     end
 end
 
+function Base.in(x, box::HyperBox)
+    return all(eachindex(x)) do i
+        box.a[i] <= x[i] <= box.b[i]
+    end
+end
 
 """
     unitsquare(T=Float64)
@@ -148,6 +162,20 @@ function Simplex(verticies::Vararg{AbstractArray})
     T = SVector{length(verticies[1]),ET}
 
     return Simplex(Tuple(convert(T,v) for v ∈ verticies))
+end
+
+function Base.in(x, s::Simplex)
+    v₁ = s.verticies[1]
+    V = map(s.verticies) do v
+        v - v₁
+    end
+
+    A = hcat(V[2:end]...) # Matrix with edge vectors as columns
+    λ = A \ (x - v₁)
+
+    λ_full = (1 - sum(λ), λ...) # Full barycentric coordinates
+
+    return all(λᵢ -> zero(λᵢ) ≤ λᵢ ≤ one(λᵢ), λ_full)
 end
 
 """
