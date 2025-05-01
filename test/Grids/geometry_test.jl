@@ -203,7 +203,23 @@ end
         @test ti(0, 1/2) == (a+d)/2
         @test ti(1, 1/2) == (b+c)/2
 
-        # TODO: Some test with curved edges?
+        a, b, c, d = [0,0],[1,1/2],[1,3/2],[0,1]
+        ti = TransfiniteInterpolationSurface(
+            t->@SVector[t, t^2/2],
+            LineSegment(b,c),
+            LineSegment(c,d),
+            LineSegment(d,a),
+        )
+
+        @test ti(0,0) == a
+        @test ti(1,0) == b
+        @test ti(1,1) == c
+        @test ti(0,1) == d
+
+        @test ti(1/2, 0) == [1/2, 1/8]
+        @test ti(1/2, 1) == (c+d)/2
+        @test ti(0, 1/2) == (a+d)/2
+        @test ti(1, 1/2) == (b+c)/2
     end
 
     @testset "check_transfiniteinterpolation" begin
@@ -268,7 +284,5 @@ end
         @test Grids.jacobian(ti, [1/2, 1]) ≈ [c-d mid(c,d)-mid(a,b)]
         @test Grids.jacobian(ti, [0, 1/2]) ≈ [mid(b,c)-mid(a,d) d-a]
         @test Grids.jacobian(ti, [1, 1/2]) ≈ [mid(b,c)-mid(a,d) c-b]
-
-        # TODO: Some test with curved edges?
     end
 end
