@@ -9,6 +9,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [weakdeps]
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 SparseArrayKit = "a9a3c162-d163-4c15-8926-b8794fbefed2"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
@@ -16,6 +17,7 @@ Tokens = "040c2ec2-8d69-4aca-bf03-7d3a7092f2f6"
 
 [extensions]
 DiffinitiveMakieExt = "Makie"
+DiffinitivePlotsExt = "Plots"
 DiffinitiveSparseArrayKitExt = ["SparseArrayKit", "Tokens"]
 DiffinitiveSparseArraysExt = ["SparseArrays", "Tokens"]
 
@@ -24,6 +26,7 @@ julia = "1.5"
 StaticArrays = "1.0"
 TOML = "1.0"
 Makie = "0.21"
+Plots = "1.40"
 SparseArrayKit = "0.4"
 Tokens = "0.1.1"
 SparseArrays = "1.10"

@@ -154,6 +154,10 @@ end
 equidistant_grid(d::Interval, size::Int) = equidistant_grid(limits(d)..., size)
 equidistant_grid(hb::HyperBox, dims::Vararg{Int}) = equidistant_grid(limits(hb)..., dims...)
 
+function equidistant_grid(c::Chart, dims::Vararg{Int})
+    mapped_grid(c, ξ->jacobian(c,ξ), parameterspace(c), dims...)
+end
+
 
 CartesianBoundary{D,BID} = TensorGridBoundary{D,BID} # TBD: What should we do about the naming of this boundary?
 

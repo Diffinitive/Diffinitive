@@ -163,6 +163,15 @@ end
         @test equidistant_grid(unitinterval(),3) == equidistant_grid(0,1,3)
         @test equidistant_grid(HyperBox((0,),(2,)),4) == equidistant_grid(@SVector[0], @SVector[2], 4)
     end
+
+    @testset "equidistant_grid(::Chart)" begin
+        c = Chart(unitsquare()) do (ξ,η)
+            @SVector[2ξ, 3η]
+        end
+        Grids.jacobian(c::typeof(c), ξ̄) = @SMatrix[2 0; 0 3]
+
+        @test equidistant_grid(c, 5, 4) isa Grid
+    end
 end
 
 
