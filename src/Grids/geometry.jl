@@ -181,6 +181,40 @@ function Grids.jacobian(a::Arc, t)
     return nothing
 end
 
+
+"""
+    arc(a,b,r)
+
+# TODO
+"""
+function arc(a,b,r)
+    if abs(r) < norm(b-a)/2
+        throw(DomainError(r, "arc was called with radius r = $r smaller than half the distance between the points."))
+    end
+
+    R̂ = @SMatrix[0 -1; 1 0]
+
+    α = sign(r)*√(r^2 - norm((b-a)/2)^2)
+    t̂ = R̂*(b-a)/norm(b-a)
+
+    c = (a+b)/2 + α*t̂
+
+    ca = a-c
+    cb = b-c
+    θₐ = atan(ca[2],ca[1])
+    θᵦ = atan(cb[2],cb[1])
+
+    Δθ = mod(θᵦ-θₐ+π, 2π)-π # Δθ in the interval (-π,π)
+
+    if r > 0
+        Δθ = abs(Δθ)
+    else
+        Δθ = -abs(Δθ)
+    end
+
+    return Arc(Circle(c,abs(r)), θₐ, θₐ+Δθ)
+end
+
 """
     TransfiniteInterpolationSurface(c₁, c₂, c₃, c₄)
 
