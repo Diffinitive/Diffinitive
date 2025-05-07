@@ -177,7 +177,28 @@ end
     @test a(1) ≈ [0,1]
 
     @testset "Grids.jacobian" begin
-        @test_broken false
+        c = Circle([0,0], 1)
+
+        @testset "Matched to circle" begin
+            a = Arc(c, 0, 1)
+            @testset for t ∈ range(0,1,8)
+                @test jacobian(a,t) ≈ jacobian(c,t)
+            end
+        end
+
+        @testset "Full circle" begin
+            a = Arc(c, 0, 2π)
+            @testset for t ∈ range(0,1,8)
+                @test jacobian(a,t) ≈ 2π*jacobian(c,t)
+            end
+        end
+
+        @testset "Other" begin
+            a = Arc(c, π/3, 5π/4)
+            @testset for t ∈ range(0,1,8)
+                @test jacobian(a,t) ≈ 11π/12*jacobian(c,t)
+            end
+        end
     end
 end
 

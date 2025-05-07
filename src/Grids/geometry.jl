@@ -177,8 +177,9 @@ function (A::Arc)(t)
     return A.c((1-t)*θ₀ + t*θ₁)
 end
 
-function Grids.jacobian(a::Arc, t)
-    return nothing
+function Grids.jacobian(A::Arc, t)
+    (;c, θ₀, θ₁) = A
+    return (θ₁-θ₀)*jacobian(c, t)
 end
 
 
