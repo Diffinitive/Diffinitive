@@ -1,5 +1,5 @@
 using Diffinitive.Grids
-using Diffinitive.Grids: Line, LineSegment, linesegments, polygon_edges, Circle, TransfiniteInterpolationSurface, check_transfiniteinterpolation
+using Diffinitive.Grids: Line, LineSegment, linesegments, polygon_edges, Circle, TransfiniteInterpolationSurface, check_transfiniteinterpolation, arc, Arc
 using StaticArrays
 
 @testset "Line" begin
@@ -159,6 +159,25 @@ end
         @test Grids.jacobian(c, π) ≈ [0,-2]
         @test Grids.jacobian(c, 3π/2) ≈ [2,0]
         @test Grids.jacobian(c, π/4) ≈ [-√(2),√(2)]
+    end
+end
+
+@testset "Arc" begin
+    @test Arc(Circle([0,0], 1), 0, 1) isa Arc{SVector{2,Int}, Int}
+    @test Arc(Circle([0,0], 1.), 0, 1) isa Arc{SVector{2,Int}, Float64}
+    @test Arc(Circle([1., 1.], 1), 0., 1.) isa Arc{SVector{2,Float64}, Float64}
+    @test Arc(Circle([1., 1.], 1), 0, 1) isa Arc{SVector{2,Float64}, Int}
+    @test Arc(Circle([1., 1.], 1), 0, 1.) isa Arc{SVector{2,Float64}, Float64}
+
+    a = Arc(Circle([0,0], 1), 0, π/2)
+    @test a(0) ≈ [1,0]
+    @test a(1/3) ≈ [√(3)/2,1/2]
+    @test a(1/2) ≈ [1/√(2),1/√(2)]
+    @test a(2/3) ≈ [1/2, √(3)/2]
+    @test a(1) ≈ [0,1]
+
+    @testset "Grids.jacobian" begin
+        @test_broken false
     end
 end
 

@@ -155,6 +155,32 @@ function Grids.jacobian(C::Circle, θ)
     r*@SVector[-sin(θ), cos(θ)]
 end
 
+struct Arc{PT,T}
+    c::Circle{PT,T}
+    θ₀::T
+    θ₁::T
+end
+
+"""
+    Arc(C::Circle, θ₀, θ₁)
+
+# TODO
+"""
+function Arc(C, θ₀, θ₁)
+    r, θ₀, θ₁ = promote(C.r, θ₀, θ₁)
+
+    return Arc(Circle(C.c, r), θ₀, θ₁)
+end
+
+function (A::Arc)(t)
+    (; θ₀, θ₁) = A
+    return A.c((1-t)*θ₀ + t*θ₁)
+end
+
+function Grids.jacobian(a::Arc, t)
+    return nothing
+end
+
 """
     TransfiniteInterpolationSurface(c₁, c₂, c₃, c₄)
 
