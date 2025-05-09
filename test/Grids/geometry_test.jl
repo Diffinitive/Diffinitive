@@ -203,17 +203,20 @@ end
 end
 
 @testset "arc" begin
-    a = [0,0]
-    b = [1,0]
-    A = arc(a,b,1/2)
-    @test A(0) ≈ a atol=1e-15
-    @test A(1) ≈ b
-    @test A(0.5) ≈ [0.5, -0.5]
+    @testset "Half circles around [0.5, 0.0]" begin
+        a = [0,0]
+        b = [1,0]
 
-    A = arc(a,b,-1/2)
-    @test A(0) ≈ a atol=1e-15
-    @test A(1) ≈ b
-    @test A(0.5) ≈ [0.5, 0.5]
+        A = arc(a,b,1/2)
+        @test A(0) ≈ a atol=1e-15
+        @test A(1) ≈ b
+        @test A(0.5) ≈ [0.5, -0.5]
+
+        A = arc(a,b,-1/2)
+        @test A(0) ≈ a atol=1e-15
+        @test A(1) ≈ b
+        @test A(0.5) ≈ [0.5, 0.5]
+    end
 
     @testset "Unit arc" begin
         A = arc([1,0],[0,1],1)
