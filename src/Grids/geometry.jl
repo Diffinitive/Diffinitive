@@ -164,7 +164,10 @@ end
 """
     Arc(C::Circle, θ₀, θ₁)
 
-# TODO
+A circular arc as a callable object. The arc is around the circle `C` between
+angles `θ₀` and `θ₁` and is paramatrized between 0 and 1.
+
+See also: [`arc`](@ref), [`Circle`](@ref).
 """
 function Arc(C, θ₀, θ₁)
     r, θ₀, θ₁ = promote(C.r, θ₀, θ₁)
@@ -186,7 +189,12 @@ end
 """
     arc(a,b,r)
 
-# TODO
+A circular arc between the points `a` and `b` with radius `abs(r)`. If `r > 0`
+the arc goes counter clockwise and if `r<0` the arc goes clockwise. The arc is
+parametrized such that if `A = arc(a,b,r)` then `A(0)` corresponds to `a` and
+`A(1)` to `b`.
+
+See also: [`Arc`](@ref), [`Circle`](@ref).
 """
 function arc(a,b,r)
     if abs(r) < norm(b-a)/2
