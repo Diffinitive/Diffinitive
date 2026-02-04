@@ -155,6 +155,75 @@ function Grids.jacobian(C::Circle, θ)
     r*@SVector[-sin(θ), cos(θ)]
 end
 
+struct Arc{PT,T}
+    c::Circle{PT,T}
+    θ₀::T
+    θ₁::T
+end
+
+"""
+    Arc(C::Circle, θ₀, θ₁)
+
+A circular arc as a callable object. The arc is around the circle `C` between
+angles `θ₀` and `θ₁` and is paramatrized between 0 and 1.
+
+See also: [`arc`](@ref), [`Circle`](@ref).
+"""
+function Arc(C, θ₀, θ₁)
+    r, θ₀, θ₁ = promote(C.r, θ₀, θ₁)
+
+    return Arc(Circle(C.c, r), θ₀, θ₁)
+end
+
+function (A::Arc)(t)
+    (; θ₀, θ₁) = A
+    return A.c((1-t)*θ₀ + t*θ₁)
+end
+
+function Grids.jacobian(A::Arc, t)
+    (;c, θ₀, θ₁) = A
+    return (θ₁-θ₀)*jacobian(c, t)
+end
+
+
+"""
+    arc(a,b,r)
+
+A circular arc between the points `a` and `b` with radius `abs(r)`. If `r > 0`
+the arc goes counter clockwise and if `r<0` the arc goes clockwise. The arc is
+parametrized such that if `A = arc(a,b,r)` then `A(0)` corresponds to `a` and
+`A(1)` to `b`.
+
+See also: [`Arc`](@ref), [`Circle`](@ref).
+"""
+function arc(a,b,r)
+    if abs(r) < norm(b-a)/2
+        throw(DomainError(r, "arc was called with radius r = $r smaller than half the distance between the points."))
+    end
+
+    R̂ = @SMatrix[0 -1; 1 0]
+
+    α = sign(r)*√(r^2 - norm((b-a)/2)^2)
+    t̂ = R̂*(b-a)/norm(b-a)
+
+    c = (a+b)/2 + α*t̂
+
+    ca = a-c
+    cb = b-c
+    θₐ = atan(ca[2],ca[1])
+    θᵦ = atan(cb[2],cb[1])
+
+    Δθ = mod(θᵦ-θₐ+π, 2π)-π # Δθ in the interval (-π,π)
+
+    if r > 0
+        Δθ = abs(Δθ)
+    else
+        Δθ = -abs(Δθ)
+    end
+
+    return Arc(Circle(c,abs(r)), θₐ, θₐ+Δθ)
+end
+
 """
     TransfiniteInterpolationSurface(c₁, c₂, c₃, c₄)
 

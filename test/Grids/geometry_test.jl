@@ -1,5 +1,5 @@
 using Diffinitive.Grids
-using Diffinitive.Grids: Line, LineSegment, linesegments, polygon_edges, Circle, TransfiniteInterpolationSurface, check_transfiniteinterpolation
+using Diffinitive.Grids: Line, LineSegment, linesegments, polygon_edges, Circle, TransfiniteInterpolationSurface, check_transfiniteinterpolation, arc, Arc
 using StaticArrays
 
 @testset "Line" begin
@@ -162,6 +162,107 @@ end
     end
 end
 
+@testset "Arc" begin
+    @test Arc(Circle([0,0], 1), 0, 1) isa Arc{SVector{2,Int}, Int}
+    @test Arc(Circle([0,0], 1.), 0, 1) isa Arc{SVector{2,Int}, Float64}
+    @test Arc(Circle([1., 1.], 1), 0., 1.) isa Arc{SVector{2,Float64}, Float64}
+    @test Arc(Circle([1., 1.], 1), 0, 1) isa Arc{SVector{2,Float64}, Int}
+    @test Arc(Circle([1., 1.], 1), 0, 1.) isa Arc{SVector{2,Float64}, Float64}
+
+    a = Arc(Circle([0,0], 1), 0, π/2)
+    @test a(0) ≈ [1,0]
+    @test a(1/3) ≈ [√(3)/2,1/2]
+    @test a(1/2) ≈ [1/√(2),1/√(2)]
+    @test a(2/3) ≈ [1/2, √(3)/2]
+    @test a(1) ≈ [0,1]
+
+    @testset "Grids.jacobian" begin
+        c = Circle([0,0], 1)
+
+        @testset "Matched to circle" begin
+            a = Arc(c, 0, 1)
+            @testset for t ∈ range(0,1,8)
+                @test jacobian(a,t) ≈ jacobian(c,t)
+            end
+        end
+
+        @testset "Full circle" begin
+            a = Arc(c, 0, 2π)
+            @testset for t ∈ range(0,1,8)
+                @test jacobian(a,t) ≈ 2π*jacobian(c,t)
+            end
+        end
+
+        @testset "Other" begin
+            a = Arc(c, π/3, 5π/4)
+            @testset for t ∈ range(0,1,8)
+                @test jacobian(a,t) ≈ 11π/12*jacobian(c,t)
+            end
+        end
+    end
+end
+
+@testset "arc" begin
+    @testset "Half circles around [0.5, 0.0]" begin
+        a = [0,0]
+        b = [1,0]
+
+        A = arc(a,b,1/2)
+        @test A(0) ≈ a atol=1e-15
+        @test A(1) ≈ b
+        @test A(0.5) ≈ [0.5, -0.5]
+
+        A = arc(a,b,-1/2)
+        @test A(0) ≈ a atol=1e-15
+        @test A(1) ≈ b
+        @test A(0.5) ≈ [0.5, 0.5]
+    end
+
+    @testset "Unit arc" begin
+        A = arc([1,0],[0,1],1)
+        @test A(0) ≈ [1,0]
+        @test A(1) ≈ [0,1]
+        @testset for t ∈ range(0,1,13)
+            @test A(t) ≈ [cos(t*π/2), sin(t*π/2)]
+        end
+    end
+
+    @testset "Inverted unit arc" begin
+        A = arc([1,0],[0,1],-1)
+        @test A(0) ≈ [1,0]
+        @test A(1) ≈ [0,1]
+        @testset "Inverted unit arc t=$t" for t ∈ range(0,1,13)
+            @test A(t) ≈ [1+cos(-π/2 - t*π/2), 1+sin(-π/2 - t*π/2)]
+        end
+    end
+
+    @testset "Quarters of unit circle" begin
+        unitvec(θ) = [cos(θ), sin(θ)]
+        @testset "θ ∈ ($(i)π/4, $(i+2)π/4)" for i ∈ range(0, step=1, length=8)
+            θ = i*π/4
+            @testset let θ₀ = θ, θ₁ = θ+π/2, r = 1
+                A = arc(unitvec(θ₀), unitvec(θ₁), r)
+                @test A(0) ≈ unitvec(θ)
+                @test A(1/3) ≈ unitvec(θ+π/6)
+                @test A(1/2) ≈ unitvec(θ+π/4)
+                @test A(2/3) ≈ unitvec(θ+π/3)
+                @test A(1) ≈ unitvec(θ+π/2)
+            end
+
+            @testset let θ₀ = θ+π/2, θ₁ = θ, r = -1
+                A = arc(unitvec(θ₀), unitvec(θ₁), r)
+                @test A(0) ≈ unitvec(θ+π/2)
+                @test A(1/3) ≈ unitvec(θ+π/3)
+                @test A(1/2) ≈ unitvec(θ+π/4)
+                @test A(2/3) ≈ unitvec(θ+π/6)
+                @test A(1) ≈ unitvec(θ)
+            end
+        end
+    end
+
+    @test_throws DomainError arc([-1,0], [1,0], 0.7)
+end
+
 @testset "TransfiniteInterpolationSurface" begin
     @testset "Constructors" begin
         @test TransfiniteInterpolationSurface(t->[1,2], t->[2,1], t->[0,0], t->[1,1]) isa TransfiniteInterpolationSurface
@@ -203,7 +304,23 @@ end
         @test ti(0, 1/2) == (a+d)/2
         @test ti(1, 1/2) == (b+c)/2
 
-        # TODO: Some test with curved edges?
+        a, b, c, d = [0,0],[1,1/2],[1,3/2],[0,1]
+        ti = TransfiniteInterpolationSurface(
+            t->@SVector[t, t^2/2],
+            LineSegment(b,c),
+            LineSegment(c,d),
+            LineSegment(d,a),
+        )
+
+        @test ti(0,0) == a
+        @test ti(1,0) == b
+        @test ti(1,1) == c
+        @test ti(0,1) == d
+
+        @test ti(1/2, 0) == [1/2, 1/8]
+        @test ti(1/2, 1) == (c+d)/2
+        @test ti(0, 1/2) == (a+d)/2
+        @test ti(1, 1/2) == (b+c)/2
     end
 
     @testset "check_transfiniteinterpolation" begin
@@ -268,7 +385,5 @@ end
         @test Grids.jacobian(ti, [1/2, 1]) ≈ [c-d mid(c,d)-mid(a,b)]
         @test Grids.jacobian(ti, [0, 1/2]) ≈ [mid(b,c)-mid(a,d) d-a]
         @test Grids.jacobian(ti, [1, 1/2]) ≈ [mid(b,c)-mid(a,d) c-b]
-
-        # TODO: Some test with curved edges?
     end
 end
