@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "61a90fa78fd559dad52e99df644cc23afa4fcfb8"
+project_hash = "b34dd02a79a0ac02863ec0bc982b7a29ded57ff3"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -100,7 +100,7 @@ version = "1.15.1"
 deps = ["LinearAlgebra", "StaticArrays", "TOML"]
 path = "."
 uuid = "5a373a26-915f-4769-bcab-bf03835de17b"
-version = "0.1.4"
+version = "0.1.5"
 
     [deps.Diffinitive.extensions]
     DiffinitiveMakieExt = "Makie"
@@ -616,19 +616,23 @@ version = "1.10.0"
 
 [[deps.TensorOperations]]
 deps = ["LRUCache", "LinearAlgebra", "PackageExtensionCompat", "PrecompileTools", "Preferences", "PtrArrays", "Strided", "StridedViews", "TupleTools", "VectorInterface"]
-git-tree-sha1 = "b1e835ba4d9c073169a63a0ff459577088aea4e6"
+git-tree-sha1 = "53a6e991a7b8090a8bba2aeaa63fd7e07becb934"
 uuid = "6aa20fa7-93e2-5fca-9bc0-fbd0db3c71a2"
-version = "5.4.0"
+version = "5.5.0"
 
     [deps.TensorOperations.extensions]
     TensorOperationsBumperExt = "Bumper"
     TensorOperationsChainRulesCoreExt = "ChainRulesCore"
+    TensorOperationsEnzymeExt = ["Enzyme", "ChainRulesCore"]
+    TensorOperationsMooncakeExt = "Mooncake"
     TensorOperationscuTENSORExt = ["cuTENSOR", "CUDA"]
 
     [deps.TensorOperations.weakdeps]
     Bumper = "8ce10254-0962-460f-a3d8-1f77fea1446e"
     CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
     ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+    Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
     cuTENSOR = "011b41b2-24ef-40a8-b3eb-fa098493e9e1"
 
 [[deps.TerminalLoggers]]
