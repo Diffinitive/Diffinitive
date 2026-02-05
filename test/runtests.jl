@@ -65,7 +65,7 @@ testsetname = isempty(ARGS) ? "Diffinitive.jl" : "["*join(ARGS, ", ")*"]"
 
         log_and_time("code linting using JET.jl") do
             @testset "Code linting (JET.jl)" begin
-                JET.test_package(Diffinitive; target_defined_modules = true)
+                JET.test_package(Diffinitive; target_modules = (Diffinitive,))
             end
         end
     end
