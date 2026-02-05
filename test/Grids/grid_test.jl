@@ -114,6 +114,27 @@ end
         @test ArrayComponentView(v, (1:2, 1:2)) == [@SMatrix[1 4;2 5] .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
         @test ArrayComponentView(v, (2:3, 1:2)) == [@SMatrix[2 5;3 6] .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
     end
+
+    @testset "size" begin
+        v = [@SMatrix[1 3; 2 4] .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
+        cv = ArrayComponentView(v, (1, 1))
+
+        @test size(cv) == (3,4)
+    end
+
+    @testset "IndexStyle" begin
+        v = [@SMatrix[1 3; 2 4] .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
+        cv = ArrayComponentView(v, (1, 1))
+
+        @test IndexStyle(cv) == IndexStyle(v)
+    end
+
+    @testset "_array_type" begin
+        v = [@SMatrix[1 3; 2 4] .+ 100*i .+ 10*j for i ∈ 1:3, j∈ 1:4]
+        cv = ArrayComponentView(v, (1, 1))
+
+        @test Grids._array_type(cv) == typeof(v)
+    end
 end
 
 @testset "_ncomponents" begin
