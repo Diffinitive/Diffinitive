@@ -74,13 +74,13 @@ struct ArrayComponentView{CT,T,D,AT <: AbstractArray{T,D}, IT} <: AbstractArray{
     end
 end
 
-_array_type(v::ArrayComponentView) = typeof(v)
+_array_type(v::ArrayComponentView) = _array_type(typeof(v))
 _array_type(::Type{ArrayComponentView{CT,T,D,AT,IT}}) where {CT,T,D,AT,IT} = AT
 
 Base.size(cv::ArrayComponentView) = size(cv.v)
 Base.getindex(cv::ArrayComponentView, i::Int) = cv.v[i][cv.component_index...]
 Base.getindex(cv::ArrayComponentView, I::Vararg{Int}) = cv.v[I...][cv.component_index...]
-IndexStyle(ACT::Type{ArrayComponentView}) = IndexStyle(_array_type(ACT))
+Base.IndexStyle(ACT::Type{<:ArrayComponentView}) = IndexStyle(_array_type(ACT))
 
 # TODO: Implement `setindex!`?
 # TODO: Implement a more general ComponentView that can handle non-AbstractArrays.
