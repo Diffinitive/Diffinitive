@@ -60,6 +60,11 @@ using LinearAlgebra
                 @test d_n*v ≈ v∂y[:,end] atol = 1e-13
             end
         end
+
+        @testset "0D" begin
+            g = ZeroDimGrid(1)
+            @test_throws ArgumentError("ZeroDimGrid has no boundaries") normal_derivative(g, stencil_set, ())
+        end
     end
 
     @testset "MappedGrid" begin

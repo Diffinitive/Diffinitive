@@ -29,6 +29,8 @@ function normal_derivative(g::EquidistantGrid, stencil_set::StencilSet, boundary
     return BoundaryOperator(g, scaled_stencil, boundary)
 end
 
+normal_derivative(::ZeroDimGrid, stencil_set::StencilSet, boundary) = throw(ArgumentError("ZeroDimGrid has no boundaries"))
+
 function normal_derivative(g::MappedGrid, stencil_set::StencilSet, boundary)
     k = grid_id(boundary)
     b_indices = boundary_indices(g, boundary)

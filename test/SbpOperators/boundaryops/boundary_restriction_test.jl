@@ -32,6 +32,11 @@ using StaticArrays
             @test e_w isa InflatedTensor
             @test e_w isa LazyTensor{T,1,2} where T
         end
+
+        @testset "0D" begin
+            g = ZeroDimGrid(1)
+            @test_throws ArgumentError("ZeroDimGrid has no boundaries") boundary_restriction(g, stencil_set, ())
+        end
     end
 
     @testset "Application" begin
