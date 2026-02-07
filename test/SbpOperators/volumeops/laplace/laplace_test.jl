@@ -5,6 +5,9 @@ using Diffinitive.Grids
 using Diffinitive.LazyTensors
 
 using StaticArrays
+using SparseArrays
+using Tokens
+using LinearAlgebra
 
 @testset "Laplace" begin
     # Default stencils (4th order)
@@ -107,6 +110,36 @@ end
 
         @test collect(Δ*gf) isa Array{<:Any,2}
         @test Δ*gf ≈ map(Δf, g) rtol=2e-2
+
+
+        @testset "SBP property" begin
+            g = equidistant_grid(c, 20,20)
+            Δ = laplace(g, stencil_set)
+            H = inner_product(g, stencil_set)
+            es = map(boundary_identifiers(g)) do id
+                boundary_restriction(g, stencil_set, id)
+            end
+            ds = map(boundary_identifiers(g)) do id
+                normal_derivative(g, stencil_set, id)
+            end
+            Hᵧs = map(boundary_identifiers(g)) do id
+                inner_product(boundary_grid(g, id), stencil_set)
+            end
+
+            BT = mapreduce(+, es, ds,Hᵧs) do e, d, Hᵧ
+                e'∘Hᵧ∘d
+            end
+            M = -H∘Δ + BT
+
+            M = sparse(M)
+            @test M ≈ M'
+
+            function issemiposdef(A, tol=1e-8)
+                return isposdef(A+tol*I)
+            end
+
+            @test issemiposdef(Symmetric(M))
+        end
     end
 end
 
