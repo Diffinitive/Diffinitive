@@ -5,6 +5,11 @@ struct Line{PT}
     Line{PT}(p::PT, tangent::PT) where PT = new{PT}(p,tangent)
 end
 
+
+# REVIEW:
+# 1.    Explain the parametrization, i.e., l(1) = p + s*t
+# 2.    Now, if p and t are ints, l(1) returns an int
+#       while l(0.5) returns a float. Is this intended/desirable?  
 """
     Line(p,t)
 
@@ -47,6 +52,13 @@ struct LineSegment{PT}
     LineSegment{PT}(p::PT, tangent::PT) where PT = new{PT}(p,tangent)
 end
 
+
+# REVIEW:
+# 1.    Explain the parametrization.
+# 2.    Now, if a and b are ints, l(1) returns an int
+#       while l(0.5) returns a float. Is this intended/desirable?  
+# 3.    Do we want s in [0, 1]? Currently the line segment
+#       can return values "outside" of the interval [a,b].
 """
     LineSegment(a,b)
 
@@ -87,6 +99,7 @@ end
 
 Grids.jacobian(c::LineSegment, s) = c.b - c.a
 
+
 """
     linesegments(ps...)
 
@@ -111,6 +124,7 @@ function polygon_edges(ps...)
     n = length(ps)
     return [LineSegment(ps[i], ps[mod1(i+1,n)]) for i ∈ eachindex(ps)]
 end
+
 
 struct Circle{PT,T}
     c::PT
@@ -154,6 +168,7 @@ function Grids.jacobian(C::Circle, θ)
     (;r) = C
     r*@SVector[-sin(θ), cos(θ)]
 end
+
 
 struct Arc{PT,T}
     c::Circle{PT,T}
@@ -224,6 +239,9 @@ function arc(a,b,r)
     return Arc(Circle(c,abs(r)), θₐ, θₐ+Δθ)
 end
 
+# REVIEW:
+# 1.    Explain parametrisation
+# 2.    Boundscheck for the parametrisation argumetns, i.e. within [0,1]?
 """
     TransfiniteInterpolationSurface(c₁, c₂, c₃, c₄)
 
