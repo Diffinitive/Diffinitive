@@ -19,6 +19,12 @@ apply(tmi::IdentityTensor{T,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) whe
 apply_transpose(tmi::IdentityTensor{T,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {T,D} = v[I...]
 
 
+struct ZeroTensor{T,R,D} <: LazyTensor{T,R,D}
+end
+
+Base.zero(::LazyTensor{T,R,D}) where {T,R,D} = ZeroTensor{T,R,D}()
+Base.zero(::Type{<:LazyTensor{T,R,D}}) where {T,R,D} = ZeroTensor{T,R,D}()
+
 """
     ScalingTensor{T,D} <: LazyTensor{T,D,D}
 
