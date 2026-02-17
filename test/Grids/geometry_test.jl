@@ -321,6 +321,14 @@ end
         @test ti(1/2, 1) == (c+d)/2
         @test ti(0, 1/2) == (a+d)/2
         @test ti(1, 1/2) == (b+c)/2
+
+        @testset "Out of domain error" begin
+            @test_throws DomainError ti(-0.1, 0)
+            @test_throws DomainError ti(1.1, 0)
+            @test_throws DomainError ti(0, -0.1)
+            @test_throws DomainError ti(0, 1.1)
+            @test_throws DomainError ti(1.1, -0.1)
+        end
     end
 
     @testset "check_transfiniteinterpolation" begin
@@ -385,5 +393,13 @@ end
         @test Grids.jacobian(ti, [1/2, 1]) ≈ [c-d mid(c,d)-mid(a,b)]
         @test Grids.jacobian(ti, [0, 1/2]) ≈ [mid(b,c)-mid(a,d) d-a]
         @test Grids.jacobian(ti, [1, 1/2]) ≈ [mid(b,c)-mid(a,d) c-b]
+
+        @testset "Out of domain error" begin
+            @test_throws DomainError Grids.jacobian(ti, [-0.1, 0])
+            @test_throws DomainError Grids.jacobian(ti, [1.1, 0])
+            @test_throws DomainError Grids.jacobian(ti, [0, -0.1])
+            @test_throws DomainError Grids.jacobian(ti, [0, 1.1])
+            @test_throws DomainError Grids.jacobian(ti, [1.1, -0.1])
+        end
     end
 end

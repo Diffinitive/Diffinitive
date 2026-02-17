@@ -5,10 +5,12 @@ struct Line{PT}
     Line{PT}(p::PT, tangent::PT) where PT = new{PT}(p,tangent)
 end
 
+
 """
     Line(p,t)
 
 A line, as a callable object, starting at `p` with tangent `t`.
+The parametrization is ``l(s) = p + st``.
 
 # Example
 ```julia-repl
@@ -47,10 +49,12 @@ struct LineSegment{PT}
     LineSegment{PT}(p::PT, tangent::PT) where PT = new{PT}(p,tangent)
 end
 
+
 """
     LineSegment(a,b)
 
 A line segment, as a callable object, from `a` to `b`.
+The parametrization is ``l(s) = (1-s)a + s*b`` where ``s∈(0,1)``.
 
 # Example
 ```julia-repl
@@ -87,6 +91,7 @@ end
 
 Grids.jacobian(c::LineSegment, s) = c.b - c.a
 
+
 """
     linesegments(ps...)
 
@@ -111,6 +116,7 @@ function polygon_edges(ps...)
     n = length(ps)
     return [LineSegment(ps[i], ps[mod1(i+1,n)]) for i ∈ eachindex(ps)]
 end
+
 
 struct Circle{PT,T}
     c::PT
@@ -154,6 +160,7 @@ function Grids.jacobian(C::Circle, θ)
     (;r) = C
     r*@SVector[-sin(θ), cos(θ)]
 end
+
 
 struct Arc{PT,T}
     c::Circle{PT,T}
@@ -228,6 +235,10 @@ end
     TransfiniteInterpolationSurface(c₁, c₂, c₃, c₄)
 
 A surface defined by the transfinite interpolation of the curves `c₁`, `c₂`, `c₃`, and  `c₄`.
+The transfinite interpolation maps the unit square ([0,1]⊗[0,1]) to the patch delimited by the given curves.
+The curves should encircle the patch counterclockwise.
+
+See https://en.wikipedia.org/wiki/Transfinite_interpolation for more information on transfinite interpolation.
 """
 struct TransfiniteInterpolationSurface{T1,T2,T3,T4}
     c₁::T1
@@ -237,6 +248,9 @@ struct TransfiniteInterpolationSurface{T1,T2,T3,T4}
 end
 
 function (s::TransfiniteInterpolationSurface)(u,v)
+    if (u,v) ∉ unitsquare()
+        throw(DomainError((u,v), "Transfinite interpolation was called with parameters outside the unit square."))
+    end
     c₁, c₂, c₃, c₄ = s.c₁, s.c₂, s.c₃, s.c₄
     P₀₀ = c₁(0)
     P₁₀ = c₂(0)
@@ -290,6 +304,9 @@ function check_transfiniteinterpolation(::Type{Bool}, s::TransfiniteInterpolatio
 end
 
 function Grids.jacobian(s::TransfiniteInterpolationSurface, ξ̄)
+    if ξ̄ ∉ unitsquare()
+        throw(DomainError(ξ̄, "Transfinite interpolation was called with parameters outside the unit square."))
+    end
     u, v = ξ̄
 
     c₁, c₂, c₃, c₄ = s.c₁, s.c₂, s.c₃, s.c₄
