@@ -74,6 +74,14 @@ md"""
 # ╔═╡ 08f493ed-189c-43f3-86f2-95fc475ec0e7
 Interval(1,2) |> repl_show
 
+# ╔═╡ e2dc581f-0949-4be7-8e4b-74deeaffc68d
+md"""
+## Stencil Set
+"""
+
+# ╔═╡ 272e564f-bd21-4ba2-8d6e-ae4714dc30bc
+read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2) |> repl_show
+
 # ╔═╡ f7244bf7-8266-469f-b07f-30c203d9af48
 md"""
 ## Grids
@@ -314,6 +322,8 @@ PlutoUI.TableOfContents()
 # ╠═c46a278e-a102-4544-82d8-7df816440410
 # ╟─5aa7079c-8005-47f1-bb82-c35f3aa54b42
 # ╠═08f493ed-189c-43f3-86f2-95fc475ec0e7
+# ╟─e2dc581f-0949-4be7-8e4b-74deeaffc68d
+# ╠═272e564f-bd21-4ba2-8d6e-ae4714dc30bc
 # ╟─f7244bf7-8266-469f-b07f-30c203d9af48
 # ╠═0e14bd28-5dd1-44c4-abf4-23b70546bd49
 # ╠═fcb74341-6b03-4ada-8f5d-bc245c23679b
