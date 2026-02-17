@@ -306,6 +306,9 @@ function check_transfiniteinterpolation(::Type{Bool}, s::TransfiniteInterpolatio
 end
 
 function Grids.jacobian(s::TransfiniteInterpolationSurface, ξ̄)
+    if ξ̄ ∉ unitsquare()
+        throw(DomainError(ξ̄, "Transfinite interpolation was called with parameters outside the unit square."))
+    end
     u, v = ξ̄
 
     c₁, c₂, c₃, c₄ = s.c₁, s.c₂, s.c₃, s.c₄
