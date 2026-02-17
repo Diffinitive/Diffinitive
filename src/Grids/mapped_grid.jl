@@ -70,9 +70,9 @@ Base.size(g::MappedGrid) = size(g.logical_grid)
 Base.size(g::MappedGrid, d) = size(g.logical_grid, d)
 
 boundary_identifiers(g::MappedGrid) = boundary_identifiers(g.logical_grid)
-boundary_indices(g::MappedGrid, id::TensorGridBoundary) = boundary_indices(g.logical_grid, id)
+boundary_indices(g::MappedGrid, id::BoundaryIdentifier) = boundary_indices(g.logical_grid, id)
 
-function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
+function boundary_grid(g::MappedGrid, id::BoundaryIdentifier)
     b_indices = boundary_indices(g.logical_grid, id)
 
     # Calculate indices of needed jacobian components
