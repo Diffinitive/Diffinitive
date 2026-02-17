@@ -54,7 +54,7 @@ end
     LineSegment(a,b)
 
 A line segment, as a callable object, from `a` to `b`.
-The parametrization is ``l(s) = (1-s)a + s*b`` where ``s\in(0,1)``.
+The parametrization is ``l(s) = (1-s)a + s*b`` where ``s∈(0,1)``.
 
 # Example
 ```julia-repl
@@ -250,6 +250,9 @@ struct TransfiniteInterpolationSurface{T1,T2,T3,T4}
 end
 
 function (s::TransfiniteInterpolationSurface)(u,v)
+    if (u,v) ∉ unitsquare()
+        throw(DomainError((u,v), "Transfinite interpolation was called with parameters outside the unit square."))
+    end
     c₁, c₂, c₃, c₄ = s.c₁, s.c₂, s.c₃, s.c₄
     P₀₀ = c₁(0)
     P₁₀ = c₂(0)
