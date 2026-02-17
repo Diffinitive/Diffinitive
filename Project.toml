@@ -1,7 +1,7 @@
 name = "Diffinitive"
 uuid = "5a373a26-915f-4769-bcab-bf03835de17b"
 authors = ["Jonatan Werpers <jonatan@werpers.com>", "Vidar Stiernström <vidar.stiernstrom@gmail.com>, and contributors"]
-version = "0.1.5"
+version = "0.1.6"
 
 [workspace]
 projects = ["test", "docs", "benchmark", "notebooks"]
