@@ -8,8 +8,6 @@ end
 
 # REVIEW:
 # 1.    Explain the parametrization, i.e., l(1) = p + s*t
-# 2.    Now, if p and t are ints, l(1) returns an int
-#       while l(0.5) returns a float. Is this intended/desirable?  
 """
     Line(p,t)
 
@@ -55,8 +53,6 @@ end
 
 # REVIEW:
 # 1.    Explain the parametrization.
-# 2.    Now, if a and b are ints, l(1) returns an int
-#       while l(0.5) returns a float. Is this intended/desirable?  
 # 3.    Do we want s in [0, 1]? Currently the line segment
 #       can return values "outside" of the interval [a,b].
 """
