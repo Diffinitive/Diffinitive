@@ -4,7 +4,7 @@ authors = ["Jonatan Werpers <jonatan@werpers.com>", "Vidar Stiernström <vidar.s
 version = "0.1.5"
 
 [workspace]
-projects = ["test", "docs", "benchmark"]
+projects = ["test", "docs", "benchmark", "notebooks"]
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
