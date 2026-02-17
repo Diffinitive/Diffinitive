@@ -6,12 +6,11 @@ struct Line{PT}
 end
 
 
-# REVIEW:
-# 1.    Explain the parametrization, i.e., l(1) = p + s*t
 """
     Line(p,t)
 
 A line, as a callable object, starting at `p` with tangent `t`.
+The parametrization is ``l(s) = p + st``.
 
 # Example
 ```julia-repl
@@ -51,14 +50,11 @@ struct LineSegment{PT}
 end
 
 
-# REVIEW:
-# 1.    Explain the parametrization.
-# 3.    Do we want s in [0, 1]? Currently the line segment
-#       can return values "outside" of the interval [a,b].
 """
     LineSegment(a,b)
 
 A line segment, as a callable object, from `a` to `b`.
+The parametrization is ``l(s) = (1-s)a + s*b`` where ``s\in(0,1)``.
 
 # Example
 ```julia-repl
@@ -236,12 +232,15 @@ function arc(a,b,r)
 end
 
 # REVIEW:
-# 1.    Explain parametrisation
 # 2.    Boundscheck for the parametrisation argumetns, i.e. within [0,1]?
 """
     TransfiniteInterpolationSurface(c₁, c₂, c₃, c₄)
 
 A surface defined by the transfinite interpolation of the curves `c₁`, `c₂`, `c₃`, and  `c₄`.
+The transfinite interpolation maps the unit square ([0,1]⊗[0,1]) to the patch delimited by the given curves.
+The curves should encircle the patch counterclockwise.
+
+See https://en.wikipedia.org/wiki/Transfinite_interpolation for more information on transfinite interpolation.
 """
 struct TransfiniteInterpolationSurface{T1,T2,T3,T4}
     c₁::T1
