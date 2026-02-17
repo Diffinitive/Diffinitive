@@ -30,6 +30,11 @@ import Diffinitive.SbpOperators.BoundaryOperator
             @test d_w isa LazyTensor{T,1,2} where T
             @test d_n isa LazyTensor{T,1,2} where T
         end
+
+        @testset "0D" begin
+            g = ZeroDimGrid(1)
+            @test_throws ArgumentError("ZeroDimGrid has no boundaries") normal_derivative(g, stencil_set, ())
+        end
     end
     @testset "Accuracy" begin
         v = eval_on(g_2D, (x,y)-> x^2 + (y-1)^2 + x*y)

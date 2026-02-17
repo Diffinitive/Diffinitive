@@ -6,6 +6,7 @@ using Diffinitive.LazyTensors
 using Diffinitive.RegionIndices
 using Diffinitive.SbpOperators: BoundaryOperator, Stencil
 
+
 @testset "boundary_restriction" begin
 	stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order = 4)
 	e_closure = parse_stencil(stencil_set["e"]["closure"])
@@ -29,6 +30,11 @@ using Diffinitive.SbpOperators: BoundaryOperator, Stencil
             e_w = boundary_restriction(g_2D,stencil_set,CartesianBoundary{1,UpperBoundary}())
             @test e_w isa InflatedTensor
             @test e_w isa LazyTensor{T,1,2} where T
+        end
+
+        @testset "0D" begin
+            g = ZeroDimGrid(1)
+            @test_throws ArgumentError("ZeroDimGrid has no boundaries") boundary_restriction(g, stencil_set, ())
         end
     end
 

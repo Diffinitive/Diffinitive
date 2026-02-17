@@ -25,3 +25,5 @@ function boundary_restriction(g::EquidistantGrid, stencil_set::StencilSet, bound
     converted_stencil = convert(Stencil{eltype(g)}, closure_stencil)
     return BoundaryOperator(g, converted_stencil, boundary)
 end
+
+boundary_restriction(::ZeroDimGrid, stencil_set::StencilSet, boundary) = throw(ArgumentError("ZeroDimGrid has no boundaries"))
