@@ -231,8 +231,6 @@ function arc(a,b,r)
     return Arc(Circle(c,abs(r)), θₐ, θₐ+Δθ)
 end
 
-# REVIEW:
-# 2.    Boundscheck for the parametrisation argumetns, i.e. within [0,1]?
 """
     TransfiniteInterpolationSurface(c₁, c₂, c₃, c₄)
 
