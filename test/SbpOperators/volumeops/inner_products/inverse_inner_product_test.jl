@@ -7,6 +7,9 @@ using Diffinitive.LazyTensors
 import Diffinitive.SbpOperators.ConstantInteriorScalingOperator
 
 using StaticArrays
+using SparseArrays
+using Tokens
+using LinearAlgebra
 
 @testset "Diagonal-stencil inverse_inner_product" begin
     Lx = π/2.
@@ -95,6 +98,10 @@ using StaticArrays
         mg = equidistant_grid(c, 10,13)
 
         @test inverse_inner_product(mg, stencil_set) isa LazyTensor{<:Any, 2,2}
-        @test_broken false # Test that it calculates the right thing
+
+
+        H = inner_product(mg, stencil_set)
+        H⁻¹ = inverse_inner_product(mg, stencil_set)
+        @test Matrix(sparse(H⁻¹)) ≈ inv(Matrix(sparse(H)))
     end
 end
