@@ -54,7 +54,7 @@ end
     LineSegment(a,b)
 
 A line segment, as a callable object, from `a` to `b`.
-The parametrization is ``l(s) = (1-s)a + s*b`` where ``s∈(0,1)``.
+The parametrization is ``l(s) = (1-s)a + s*b``.
 
 # Example
 ```julia-repl
