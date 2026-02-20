@@ -41,6 +41,12 @@ using LinearAlgebra
             @test apply_to_functions(v=x->x,   c=x-> -x ) == -ones(11)
             @test apply_to_functions(v=x->x^2, c=x->  1.) == 2ones(11)
         end
+
+        @testset "checking direction" begin
+            c = rand(size(g)...)
+            second_derivative_variable(g, c, stencil_set, 1) == second_derivative_variable(g, c, stencil_set)
+            @test_throws DomainError(2, "Direction must be inside [0, 1].") second_derivative_variable(g, c, stencil_set, 2)
+        end
     end
 
     @testset "2D" begin

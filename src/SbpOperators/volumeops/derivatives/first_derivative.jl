@@ -14,8 +14,15 @@ function first_derivative end
 See also: [`VolumeOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
 function first_derivative(g::TensorGrid, stencil_set, direction)
+    if direction ∉ Interval(0, ndims(g))
+        throw(DomainError(direction, "Direction must be inside [0, $(ndims(g))]."))
+    end
     D₁ = first_derivative(g.grids[direction], stencil_set)
     return LazyTensors.inflate(D₁, size(g), direction)
+end
+
+function first_derivative(g::EquidistantGrid, stencil_set, direction)
+    return first_derivative(TensorGrid(g), stencil_set, direction)
 end
 
 """

@@ -16,6 +16,9 @@ using Diffinitive.SbpOperators: closure_size, Stencil, VolumeOperator
         
         @test first_derivative(g₁, stencil_set) isa LazyTensor{Float64,1,1}
         @test first_derivative(g₂, stencil_set, 2) isa LazyTensor{Float64,2,2}
+        
+        @test first_derivative(g₁, stencil_set) == first_derivative(g₁, stencil_set, 1)
+        @test_throws DomainError(3, "Direction must be inside [0, 1].") first_derivative(g₁, stencil_set, 3)
 
         interior_stencil = CenteredStencil(-1,0,1)
         closure_stencils = [Stencil(-1,1, center=1)]
