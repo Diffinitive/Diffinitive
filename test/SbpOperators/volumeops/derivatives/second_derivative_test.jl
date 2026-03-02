@@ -25,7 +25,7 @@ import Diffinitive.SbpOperators.VolumeOperator
             @test Dₓₓ == second_derivative(g_1D, inner_stencil, closure_stencils)
             @test Dₓₓ isa LazyTensor{Float64,1,1}
 
-            @test_throws DomainError(3, "Direction must be inside [0, 1].") second_derivative(g_1D, stencil_set, 3)
+            @test_throws DomainError(3, "Derivative direction must be in 1:1.") second_derivative(g_1D, stencil_set, 3)
         end
         @testset "2D" begin
             Dₓₓ = second_derivative(g_2D,stencil_set,1)

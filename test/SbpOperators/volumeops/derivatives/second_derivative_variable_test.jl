@@ -45,7 +45,7 @@ using LinearAlgebra
         @testset "checking direction" begin
             c = rand(size(g)...)
             second_derivative_variable(g, c, stencil_set, 1) == second_derivative_variable(g, c, stencil_set)
-            @test_throws DomainError(2, "Direction must be inside [0, 1].") second_derivative_variable(g, c, stencil_set, 2)
+            @test_throws DomainError(2, "Derivative direction must be in 1:1.") second_derivative_variable(g, c, stencil_set, 2)
         end
     end
 
