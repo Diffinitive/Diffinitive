@@ -1,28 +1,28 @@
 """
-    first_derivative(g, ..., [direction])
+    first_derivative(g, ..., [dim])
 
 The first derivative operator `D1` as a `LazyTensor` on the given grid.
 
 `D1` approximates the first-derivative d/dξ on `g` along the coordinate
-dimension specified by `direction`.
+dimension specified by `dim`.
 """
 function first_derivative end
 
 """
-    first_derivative(g::TensorGrid, stencil_set, direction)
+    first_derivative(g::TensorGrid, stencil_set, dim)
 
 See also: [`VolumeOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
-function first_derivative(g::TensorGrid, stencil_set, direction)
-    if direction ∉ 1:ndims(g)
-        throw(DomainError(direction, "Direction must be inside [0, $(ndims(g))]."))
+function first_derivative(g::TensorGrid, stencil_set, dim)
+    if dim ∉ 1:ndims(g)
+        throw(DomainError(dim, "Direction must be inside [0, $(ndims(g))]."))
     end
-    D₁ = first_derivative(g.grids[direction], stencil_set)
-    return LazyTensors.inflate(D₁, size(g), direction)
+    D₁ = first_derivative(g.grids[dim], stencil_set)
+    return LazyTensors.inflate(D₁, size(g), dim)
 end
 
-function first_derivative(g::EquidistantGrid, stencil_set, direction)
-    return first_derivative(TensorGrid(g), stencil_set, direction)
+function first_derivative(g::EquidistantGrid, stencil_set, dim)
+    return first_derivative(TensorGrid(g), stencil_set, dim)
 end
 
 """

@@ -1,39 +1,39 @@
 """
-    second_derivative_variable(g, coeff ..., [direction])
+    second_derivative_variable(g, coeff ..., [dim])
 
 The variable second derivative operator as a `LazyTensor` on the given grid.
 `coeff` is a grid function of the variable coefficient.
 
 Approximates the d/dξ c d/dξ on `g` along the coordinate dimension specified
-by `direction`.
+by `dim`.
 """
 function second_derivative_variable end
 
-function second_derivative_variable(g::TensorGrid, coeff, stencil_set, direction::Int)
-    if direction ∉ 1:ndims(g)
-        throw(DomainError(direction, "Direction must be inside [0, $(ndims(g))]."))
+function second_derivative_variable(g::TensorGrid, coeff, stencil_set, dim::Int)
+    if dim ∉ 1:ndims(g)
+        throw(DomainError(dim, "Direction must be inside [0, $(ndims(g))]."))
     end
     inner_stencil    = parse_nested_stencil(eltype(coeff), stencil_set["D2variable"]["inner_stencil"])
     closure_stencils = parse_nested_stencil.(eltype(coeff), stencil_set["D2variable"]["closure_stencils"])
 
-    return second_derivative_variable(g, coeff, inner_stencil, closure_stencils, direction)
+    return second_derivative_variable(g, coeff, inner_stencil, closure_stencils, dim)
 end
 
-function second_derivative_variable(g::EquidistantGrid, coeff, stencil_set, direction)
-    return second_derivative_variable(TensorGrid(g), coeff, stencil_set, direction)
+function second_derivative_variable(g::EquidistantGrid, coeff, stencil_set, dim)
+    return second_derivative_variable(TensorGrid(g), coeff, stencil_set, dim)
 end
 
 function second_derivative_variable(g::EquidistantGrid, coeff, stencil_set)
     return second_derivative_variable(g::EquidistantGrid, coeff, stencil_set, 1)
 end
 
-function second_derivative_variable(g::TensorGrid, coeff, inner_stencil::NestedStencil, closure_stencils, direction)
+function second_derivative_variable(g::TensorGrid, coeff, inner_stencil::NestedStencil, closure_stencils, dim)
     check_coefficient(g, coeff)
 
-    Δxᵢ = spacing(g.grids[direction])
+    Δxᵢ = spacing(g.grids[dim])
     scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
     scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
-    return SecondDerivativeVariable(coeff, scaled_inner_stencil, scaled_closure_stencils, direction)
+    return SecondDerivativeVariable(coeff, scaled_inner_stencil, scaled_closure_stencils, dim)
 end
 
 function check_coefficient(g, coeff)
