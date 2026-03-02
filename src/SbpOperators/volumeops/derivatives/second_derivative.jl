@@ -10,7 +10,7 @@ dimension specified by `direction`.
 See also: [`VolumeOperator`](@ref), [`LazyTensors.inflate`](@ref).
 """
 function second_derivative(g::TensorGrid, stencil_set, direction)
-    if direction ∉ Interval(0, ndims(g))
+    if direction ∉ 1:ndims(g)
         throw(DomainError(direction, "Direction must be inside [0, $(ndims(g))]."))
     end
     D₂ = second_derivative(g.grids[direction], stencil_set)

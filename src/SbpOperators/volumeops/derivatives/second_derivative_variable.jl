@@ -10,7 +10,7 @@ by `direction`.
 function second_derivative_variable end
 
 function second_derivative_variable(g::TensorGrid, coeff, stencil_set, direction::Int)
-    if direction ∉ Interval(0, ndims(g))
+    if direction ∉ 1:ndims(g)
         throw(DomainError(direction, "Direction must be inside [0, $(ndims(g))]."))
     end
     inner_stencil    = parse_nested_stencil(eltype(coeff), stencil_set["D2variable"]["inner_stencil"])
