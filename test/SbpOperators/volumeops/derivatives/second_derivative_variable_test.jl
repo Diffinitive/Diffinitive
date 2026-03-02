@@ -41,11 +41,21 @@ using LinearAlgebra
             @test apply_to_functions(v=x->x,   c=x-> -x ) == -ones(11)
             @test apply_to_functions(v=x->x^2, c=x->  1.) == 2ones(11)
         end
+
+        @testset "checking direction" begin
+            c = rand(size(g)...)
+            @test second_derivative_variable(g, c, stencil_set, 1) == second_derivative_variable(g, c, stencil_set)
+            @test_throws DomainError(2, "Derivative direction must be 1.") second_derivative_variable(g, c, stencil_set, 2)
+        end
     end
 
     @testset "2D" begin
         g = equidistant_grid((0.,0.), (10.,8.), 11, 9) # h = 1
         c = eval_on(g, (x,y)->x+y)
+
+        @testset "checking direction" begin
+            @test_throws DomainError(3, "Derivative direction must be in 1:2.") second_derivative_variable(g, c, stencil_set, 3)
+        end
 
         @testset "application" begin
             function apply_to_functions(dir; v, c)
