@@ -1,5 +1,5 @@
 """
-    second_derivative_variable(g, coeff ..., [dim])
+    second_derivative_variable(g, coeff, ..., [dim])
 
 The variable second derivative operator as a `LazyTensor` on the given grid.
 `coeff` is a grid function of the variable coefficient.
@@ -19,12 +19,15 @@ function second_derivative_variable(g::TensorGrid, coeff, stencil_set, dim::Int)
     return second_derivative_variable(g, coeff, inner_stencil, closure_stencils, dim)
 end
 
-function second_derivative_variable(g::EquidistantGrid, coeff, stencil_set, dim)
-    return second_derivative_variable(TensorGrid(g), coeff, stencil_set, dim)
+function second_derivative_variable(g::EquidistantGrid, coeff, stencil_set)
+    return second_derivative_variable(TensorGrid(g), coeff, stencil_set, 1)
 end
 
-function second_derivative_variable(g::EquidistantGrid, coeff, stencil_set)
-    return second_derivative_variable(g::EquidistantGrid, coeff, stencil_set, 1)
+function second_derivative_variable(g::EquidistantGrid, coeff, stencil_set, dim)
+    if dim != 1
+        throw(DomainError(dim, "Derivative direction must be 1."))
+    end
+    return second_derivative_variable(g, coeff, stencil_set)
 end
 
 function second_derivative_variable(g::TensorGrid, coeff, inner_stencil::NestedStencil, closure_stencils, dim)

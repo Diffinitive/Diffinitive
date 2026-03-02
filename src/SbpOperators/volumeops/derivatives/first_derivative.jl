@@ -21,9 +21,6 @@ function first_derivative(g::TensorGrid, stencil_set, dim)
     return LazyTensors.inflate(D₁, size(g), dim)
 end
 
-function first_derivative(g::EquidistantGrid, stencil_set, dim)
-    return first_derivative(TensorGrid(g), stencil_set, dim)
-end
 
 """
     first_derivative(g::EquidistantGrid, stencil_set::StencilSet)
@@ -35,6 +32,13 @@ function first_derivative(g::EquidistantGrid, stencil_set::StencilSet)
     inner_stencil = parse_stencil(stencil_set["D1"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D1"]["closure_stencils"])
     return first_derivative(g, inner_stencil, closure_stencils);
+end
+
+function first_derivative(g::EquidistantGrid, stencil_set, dim)
+    if dim != 1
+        throw(DomainError(dim, "Derivative direction must be 1."))
+    end
+    return first_derivative(g, stencil_set)
 end
 
 """

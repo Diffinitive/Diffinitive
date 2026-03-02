@@ -1,6 +1,5 @@
 """
-second_derivative(g::TensorGrid, stencil_set, dim)
-second_derivative(g::EquidistantGrid, stencil_set, dim)
+    second_derivative(g::TensorGrid, stencil_set, dim)
 
 Creates the second derivative operator `D2` as a `LazyTensor`
 
@@ -17,10 +16,6 @@ function second_derivative(g::TensorGrid, stencil_set, dim)
     return LazyTensors.inflate(D₂, size(g), dim)
 end
 
-function second_derivative(g::EquidistantGrid, stencil_set::StencilSet, dim)
-    return second_derivative(TensorGrid(g), stencil_set, dim)
-end
-
 """
     second_derivative(g::EquidistantGrid, stencil_set::::StencilSet)
 
@@ -31,6 +26,13 @@ function second_derivative(g::EquidistantGrid, stencil_set::StencilSet)
     inner_stencil = parse_stencil(stencil_set["D2"]["inner_stencil"])
     closure_stencils = parse_stencil.(stencil_set["D2"]["closure_stencils"])
     return second_derivative(g, inner_stencil, closure_stencils)
+end
+
+function second_derivative(g::EquidistantGrid, stencil_set::StencilSet, dim)
+    if dim != 1
+        throw(DomainError(dim, "Derivative direction must be 1."))
+    end
+    return second_derivative(g, stencil_set)
 end
 
 """

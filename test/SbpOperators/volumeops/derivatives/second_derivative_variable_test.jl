@@ -44,14 +44,18 @@ using LinearAlgebra
 
         @testset "checking direction" begin
             c = rand(size(g)...)
-            second_derivative_variable(g, c, stencil_set, 1) == second_derivative_variable(g, c, stencil_set)
-            @test_throws DomainError(2, "Derivative direction must be in 1:1.") second_derivative_variable(g, c, stencil_set, 2)
+            @test second_derivative_variable(g, c, stencil_set, 1) == second_derivative_variable(g, c, stencil_set)
+            @test_throws DomainError(2, "Derivative direction must be 1.") second_derivative_variable(g, c, stencil_set, 2)
         end
     end
 
     @testset "2D" begin
         g = equidistant_grid((0.,0.), (10.,8.), 11, 9) # h = 1
         c = eval_on(g, (x,y)->x+y)
+
+        @testset "checking direction" begin
+            @test_throws DomainError(3, "Derivative direction must be in 1:2.") second_derivative_variable(g, c, stencil_set, 3)
+        end
 
         @testset "application" begin
             function apply_to_functions(dir; v, c)
