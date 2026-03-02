@@ -92,3 +92,28 @@ end
 function apply_transpose(llm::DenseTensor{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D}
     apply(DenseTensor(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
 end
+
+
+struct VectorValuedTensor{N,M¬}
+    D::T # Matrix of Tensors
+end
+
+function apply(t::VectorValuedTensor, v, I...)
+    return ntuple(size(t.D,1)) do i
+        sum(1:size(t.D,2)) do j # Should use axes?
+            vⱼ = componentview(v,j)
+            (D[i,j]*vⱼ)[I...]
+        end
+    end |> SVector
+end
+
+
+struct TupleTable{N,M, T <: NTuple{N,NTuple{M, Any}}}
+    table::T
+end
+# Is this type really needed?
+
+size(::Type{<:TupleTable{N,M}}) where {N,M} = (N,M)
+size(t::TupleTable) = size(typeof(t))
+
+Base.getindex(t::TupleTable, i, j) = t.table[i][j]
