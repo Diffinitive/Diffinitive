@@ -190,6 +190,9 @@ end
         @test tt[1,3] == 3
         @test_throws BoundsError tt[2,2]
 
+        @test tt[1,:] == (1,2,3)
+        @test_throws BoundsError tt[2,:]
+
         tt = TupleTable((1,2),(3,4))
         @test tt[1,1] == 1
         @test tt[1,2] == 2
@@ -197,6 +200,10 @@ end
         @test tt[2,2] == 4
         @test_throws BoundsError tt[3,2]
         @test_throws BoundsError tt[2,3]
+
+        @test tt[1,:] == (1,2)
+        @test tt[2,:] == (3,4)
+        @test_throws BoundsError tt[3,:]
 
         tt = TupleTable((1,2,3),(3,4,5))
         @test tt[1,3] == 3
