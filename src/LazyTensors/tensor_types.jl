@@ -172,4 +172,5 @@ function apply(t::MatrixTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Va
     end |> SVector
 end
 
+Base.adjoint(t::MatrixTensor) = MatrixTensor(adjoint(t.D))
 tuple_range(n) = ntuple(identity, n)
