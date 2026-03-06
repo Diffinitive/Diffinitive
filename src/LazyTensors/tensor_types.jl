@@ -147,7 +147,7 @@ VectorDotTensor(Ds::Vararg{LazyTensor}) = VectorDotTensor(Ds)
 
 function apply(t::VectorDotTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
     Dᵢvᵢs = map(tuple_range(N), t.D) do i, Dᵢ
-        vᵢ = component_view(v, i)
+        vᵢ = componentview(v, i)
         apply(Dᵢ, vᵢ, I...)
     end
 
@@ -164,7 +164,7 @@ end
 function apply(t::MatrixTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N,M}
     return map(tuple_range(N)) do i
         Dᵢⱼvⱼs = map(tuple_range(M), t.D[i,:]) do j, Dᵢⱼ
-            vⱼ = component_view(v, j)
+            vⱼ = componentview(v, j)
             apply(Dᵢⱼ, vⱼ, I...)
         end
 
