@@ -94,15 +94,17 @@ function apply_transpose(llm::DenseTensor{T,R,D}, v::AbstractArray{<:Any,R}, I::
 end
 
 
-struct VectorValuedTensor{N,M¬}
-    D::T # Matrix of Tensors
 end
 
-function apply(t::VectorValuedTensor, v, I...)
-    return ntuple(size(t.D,1)) do i
-        sum(1:size(t.D,2)) do j # Should use axes?
-            vⱼ = componentview(v,j)
-            (D[i,j]*vⱼ)[I...]
+struct VectorValuedTensor{T,R,D,N,M,TT<:TupleTable{N,M,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{SVector{N,T},R,D}
+    D::TT # Matrix of Tensors
+end
+
+function apply(t::VectorValuedTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N,M}
+    return map(tuple_range(N)) do i
+        map(tuple_range(M), t.D[i]) do j, Dⱼ
+            vⱼ = component_view(v, j)
+            apply(Dⱼ, vⱼ, I...)
         end
     end |> SVector
 end
@@ -117,3 +119,4 @@ size(::Type{<:TupleTable{N,M}}) where {N,M} = (N,M)
 size(t::TupleTable) = size(typeof(t))
 
 Base.getindex(t::TupleTable, i, j) = t.table[i][j]
+tuple_range(n) = ntuple(identity, n)

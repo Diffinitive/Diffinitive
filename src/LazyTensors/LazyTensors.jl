@@ -1,5 +1,7 @@
 module LazyTensors
 
+using StaticArrays
+
 export LazyTensor
 export apply
 export apply_transpose
