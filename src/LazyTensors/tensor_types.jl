@@ -122,7 +122,7 @@ function Base.adjoint(tt::TupleTable)
 end
 
 ## "Vector of tensors ∘ scalar -> scalar"
-struct VectorTensor{T,R,D,N,NT<:NTuple{N,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{T,R,D}
+struct VectorTensor{T,R,D,N,NT<:NTuple{N,LazyTensor{T,R,D}}} <: LazyTensor{T,R,D}
     D::NT
     ## TODO: add constructor with tests for checking domain and range size
 end
@@ -136,7 +136,7 @@ end
 Base.adjoint(t::VectorTensor) = VectorDotTensor(map(adjoint, t.D))
 
 ## "Vector of tensors ∘ vector -> scalar"
-struct VectorDotTensor{T,R,D,N,NT<:NTuple{N,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{T,R,D}
+struct VectorDotTensor{T,R,D,N,NT<:NTuple{N,LazyTensor{T,R,D}}} <: LazyTensor{T,R,D}
     D::NT
     ## TODO: add constructor with tests for checking domain and range size   (allequal(domain_size), tms)
 end
@@ -153,7 +153,7 @@ end
 Base.adjoint(t::VectorDotTensor) = VectorTensor(map(adjoint, t.D))
 
 ## "Matrix of tensors ∘ vector -> vector"
-struct MatrixTensor{T,R,D,N,M,TT<:TupleTable{N,M,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{SVector{N,T},R,D}
+struct MatrixTensor{T,R,D,N,M,TT<:TupleTable{N,M,LazyTensor{T,R,D}}} <: LazyTensor{SVector{N,T},R,D}
     D::TT # Matrix of Tensors
 end
 
