@@ -127,6 +127,8 @@ struct VectorTensor{T,R,D,N,NT<:NTuple{N,LazyTensor{T,R,D}}} <: LazyTensor{T,R,D
     ## TODO: add constructor with tests for checking domain and range size
 end
 
+VectorTensor(Ds::Vararg{LazyTensor}) = VectorTensor(Ds)
+
 function apply(t::VectorTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
     return map(t.D) do Dᵢ
         apply(Dᵢ, v, I...)
@@ -140,6 +142,8 @@ struct VectorDotTensor{T,R,D,N,NT<:NTuple{N,LazyTensor{T,R,D}}} <: LazyTensor{T,
     D::NT
     ## TODO: add constructor with tests for checking domain and range size   (allequal(domain_size), tms)
 end
+
+VectorDotTensor(Ds::Vararg{LazyTensor}) = VectorDotTensor(Ds)
 
 function apply(t::VectorDotTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
     Dᵢvᵢs = map(tuple_range(N), t.D) do i, Dᵢ
