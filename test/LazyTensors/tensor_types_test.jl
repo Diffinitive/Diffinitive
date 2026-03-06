@@ -233,7 +233,22 @@ end
 end
 
 @testset "MatrixTensor" begin
+    s1 = [4., 6., 5., 6., 7.]
+    s2 = [6., 9., 3., 5., 7.]
+    t = MatrixTensor(
+        (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+        (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+    )
+    v = reinterpret(SVector{2,Float64}, rand(1.:20., 10))
 
+    expected = map(s1,s2,v) do s1ᵢ, s2ᵢ, vᵢ
+        @SVector[
+            s1ᵢ*vᵢ[1] + 3*vᵢ[2],
+            6*vᵢ[1] + s2ᵢ*vᵢ[2],
+        ]
+    end
+
+    @test t*v == expected
 end
 
 @testset "tuple_range()" begin
