@@ -99,15 +99,19 @@ function TensorSum(ts::Vararg{LazyTensor})
 end
 
 function apply(tmBinOp::TensorSum{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
-    return sum(tmBinOp.tms) do tm
+    vs = map(tmBinOp.tms) do tm
         apply(tm,v,I...)
     end
+
+    return +(vs...)
 end
 
 function apply_transpose(tmBinOp::TensorSum{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
-    return sum(tmBinOp.tms) do tm
+    vs = map(tmBinOp.tms) do tm
         apply_transpose(tm,v,I...)
     end
+
+    return +(vs...)
 end
 
 range_size(tmBinOp::TensorSum) = range_size(tmBinOp.tms[1])
