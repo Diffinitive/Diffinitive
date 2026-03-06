@@ -214,11 +214,19 @@ end
 end
 
 @testset "VectorTensor" begin
-
+    s = [4., 6, 5, 6, 7]
+    t = VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+    v = rand(5)
+    expected = map((sᵢ, vᵢ)-> sᵢ*vᵢ+3vᵢ, s,v)
+    @test t*v == expected
 end
 
 @testset "VectorDotTensor" begin
-
+    s = [4., 6, 5, 6, 7]
+    t = VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+    v = rand(SVector{2,Float64}, 5)
+    expected = map((sᵢ, vᵢ)-> sᵢ*vᵢ[1]+3vᵢ[2], s,v)
+    @test t*v == expected
 end
 
 @testset "MatrixTensor" begin
