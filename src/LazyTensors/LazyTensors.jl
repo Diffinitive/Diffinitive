@@ -18,6 +18,9 @@ export ScalingTensor
 export DiagonalTensor
 export DenseTensor
 export InflatedTensor
+export VectorTensor
+export VectorDotTensor
+export MatrixTensor
 export LazyOuterProduct
 export ⊗
 export DomainSizeMismatch
