@@ -215,4 +215,10 @@ end
         @test tt[2,2] == 4
         @test tt[3,1] == 5
     end
+
+    @testset "Base.adjoint" begin
+        tt = TupleTable((1+1im,2+2im,3+3im),(4+4im,5+5im,6+6im))
+        expected = TupleTable((1-1im, 4-4im),(2-2im, 5-5im),(3-3im, 6-6im))
+        @test adjoint(tt) == expected
+    end
 end

@@ -110,6 +110,15 @@ Base.size(t::TupleTable) = size(typeof(t))
 
 Base.getindex(t::TupleTable, i, j) = t.table[i][j]
 
+function Base.adjoint(tt::TupleTable)
+    N, M = size(tt)
+
+    return map(tuple_range(M)) do j
+        map(tuple_range(N)) do i
+            adjoint(tt[i,j])
+        end
+    end |> TupleTable
+end
 
 ## "Vector of tensors ∘ scalar -> scalar"
 struct VectorTensor{T,R,D,N,NT<:NTuple{N,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{T,R,D}
