@@ -177,7 +177,7 @@ function apply(t::MatrixTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Va
             apply(Dᵢⱼ, vⱼ, I...)
         end
 
-        +(Dⱼvⱼs...)
+        +(Dᵢⱼvⱼs...)
     end |> SVector
 end
 
