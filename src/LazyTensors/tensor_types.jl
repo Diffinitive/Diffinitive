@@ -124,6 +124,7 @@ end
 ## "Vector of tensors ∘ scalar -> scalar"
 struct VectorTensor{T,R,D,N,NT<:NTuple{N,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{T,R,D}
     D::NT
+    ## TODO: add constructor with tests for checking domain and range size
 end
 
 function apply(t::VectorTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
@@ -137,6 +138,7 @@ Base.adjoint(t::VectorTensor) = VectorDotTensor(map(adjoint, t.D))
 ## "Vector of tensors ∘ vector -> scalar"
 struct VectorDotTensor{T,R,D,N,NT<:NTuple{N,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{T,R,D}
     D::NT
+    ## TODO: add constructor with tests for checking domain and range size   (allequal(domain_size), tms)
 end
 
 function apply(t::VectorDotTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
