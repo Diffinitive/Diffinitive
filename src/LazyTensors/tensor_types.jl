@@ -94,7 +94,6 @@ function apply_transpose(llm::DenseTensor{T,R,D}, v::AbstractArray{<:Any,R}, I::
 end
 
 
-
 struct TupleTable{N,M, T <: NTuple{N,NTuple{M, Any}}}
     table::T
 end
@@ -112,17 +111,48 @@ Base.size(t::TupleTable) = size(typeof(t))
 Base.getindex(t::TupleTable, i, j) = t.table[i][j]
 
 
+## "Vector of tensors ∘ scalar -> scalar"
+struct VectorTensor{T,R,D,N,NT<:NTuple{N,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{T,R,D}
+    D::NT
+end
 
-struct VectorValuedTensor{T,R,D,N,M,TT<:TupleTable{N,M,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{SVector{N,T},R,D}
+function apply(t::VectorTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
+    return map(t.D) do Dᵢ
+        apply(Dᵢ, v, I...)
+    end |> SVector
+end
+
+Base.adjoint(t::VectorTensor) = VectorDotTensor(map(adjoint, t.D))
+
+## "Vector of tensors ∘ vector -> scalar"
+struct VectorDotTensor{T,R,D,N,NT<:NTuple{N,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{T,R,D}
+    D::NT
+end
+
+function apply(t::VectorDotTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
+    Dᵢvᵢs = map(tuple_range(N), t.D) do i, Dᵢ
+        vᵢ = component_view(v, i)
+        apply(Dᵢ, vᵢ, I...)
+    end
+
+    return +(Dᵢvᵢs...)
+end
+
+Base.adjoint(t::VectorDotTensor) = VectorTensor(map(adjoint, t.D))
+
+## "Matrix of tensors ∘ vector -> vector"
+struct MatrixTensor{T,R,D,N,M,TT<:TupleTable{N,M,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{SVector{N,T},R,D}
     D::TT # Matrix of Tensors
 end
 
-function apply(t::VectorValuedTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N,M}
+function apply(t::MatrixTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N,M}
     return map(tuple_range(N)) do i
-        map(tuple_range(M), t.D[i]) do j, Dⱼ
+        Dᵢⱼvⱼs = map(tuple_range(M), t.D[i,:]) do j, Dᵢⱼ
             vⱼ = component_view(v, j)
-            apply(Dⱼ, vⱼ, I...)
+            apply(Dᵢⱼ, vⱼ, I...)
         end
+
+        +(Dⱼvⱼs...)
     end |> SVector
 end
 
