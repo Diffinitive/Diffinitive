@@ -1,5 +1,6 @@
 using Test
 using Diffinitive.LazyTensors
+using Diffinitive.LazyTensors: TupleTable, tuple_range
 using BenchmarkTools
 
 @testset "IdentityTensor" begin
@@ -148,4 +149,63 @@ end
 
     # TODO:
     # @inferred (B̃*v)[2]
+end
+
+@testset "tuple_range()" begin
+    @test tuple_range(1) == (1,)
+    @test tuple_range(2) == (1,2)
+    @test tuple_range(5) == (1,2,3,4,5)
+
+    @test tuple_range(Val(1)) == (1,)
+    @test tuple_range(Val(2)) == (1,2)
+    @test tuple_range(Val(5)) == (1,2,3,4,5)
+end
+
+@testset "TupleTable" begin
+    @testset "Constructors" begin
+        @test TupleTable((1,2,3)) isa TupleTable{1,3}
+        @test TupleTable((1,2),(3,4)) isa TupleTable{2,2}
+        @test TupleTable((1,2,3),(3,4,5)) isa TupleTable{2,3}
+        @test TupleTable((1,2),(3,4),(5,6)) isa TupleTable{3,2}
+
+        @test_throws DimensionMismatch("All rows must have the same length") TupleTable((1,2),(1,2,3))
+    end
+
+    @testset "size" begin
+        @test size(TupleTable((1,2,3))) == (1,3)
+        @test size(TupleTable((1,2),(3,4))) == (2,2)
+        @test size(TupleTable((1,2,3),(3,4,5))) == (2,3)
+        @test size(TupleTable((1,2),(3,4),(5,6))) == (3,2)
+
+        @test size(TupleTable{1,3}) == (1,3)
+        @test size(TupleTable{2,2}) == (2,2)
+        @test size(TupleTable{2,3}) == (2,3)
+        @test size(TupleTable{3,2}) == (3,2)
+    end
+
+    @testset "getindex" begin
+        tt = TupleTable((1,2,3))
+        @test tt[1,1] == 1
+        @test tt[1,2] == 2
+        @test tt[1,3] == 3
+        @test_throws BoundsError tt[2,2]
+
+        tt = TupleTable((1,2),(3,4))
+        @test tt[1,1] == 1
+        @test tt[1,2] == 2
+        @test tt[2,1] == 3
+        @test tt[2,2] == 4
+        @test_throws BoundsError tt[3,2]
+        @test_throws BoundsError tt[2,3]
+
+        tt = TupleTable((1,2,3),(3,4,5))
+        @test tt[1,3] == 3
+        @test tt[2,1] == 3
+        @test tt[2,3] == 5
+
+        tt = TupleTable((1,2),(3,4),(5,6))
+        @test tt[1,1] == 1
+        @test tt[2,2] == 4
+        @test tt[3,1] == 5
+    end
 end

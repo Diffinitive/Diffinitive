@@ -94,7 +94,24 @@ function apply_transpose(llm::DenseTensor{T,R,D}, v::AbstractArray{<:Any,R}, I::
 end
 
 
+
+struct TupleTable{N,M, T <: NTuple{N,NTuple{M, Any}}}
+    table::T
 end
+
+function TupleTable(rows...)
+    if !allequal(length, rows)
+        throw(DimensionMismatch("All rows must have the same length"))
+    end
+    TupleTable(rows)
+end
+
+Base.size(::Type{<:TupleTable{N,M}}) where {N,M} = (N,M)
+Base.size(t::TupleTable) = size(typeof(t))
+
+Base.getindex(t::TupleTable, i, j) = t.table[i][j]
+
+
 
 struct VectorValuedTensor{T,R,D,N,M,TT<:TupleTable{N,M,<:LazyTensor{<:Any,R,D}}} <: LazyTensor{SVector{N,T},R,D}
     D::TT # Matrix of Tensors
@@ -109,14 +126,4 @@ function apply(t::VectorValuedTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D},
     end |> SVector
 end
 
-
-struct TupleTable{N,M, T <: NTuple{N,NTuple{M, Any}}}
-    table::T
-end
-# Is this type really needed?
-
-size(::Type{<:TupleTable{N,M}}) where {N,M} = (N,M)
-size(t::TupleTable) = size(typeof(t))
-
-Base.getindex(t::TupleTable, i, j) = t.table[i][j]
 tuple_range(n) = ntuple(identity, n)
