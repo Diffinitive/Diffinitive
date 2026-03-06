@@ -151,6 +151,18 @@ end
     # @inferred (B̃*v)[2]
 end
 
+@testset "VectorTensor" begin
+
+end
+
+@testset "VectorDotTensor" begin
+
+end
+
+@testset "MatrixTensor" begin
+
+end
+
 @testset "tuple_range()" begin
     @test tuple_range(1) == (1,)
     @test tuple_range(2) == (1,2)

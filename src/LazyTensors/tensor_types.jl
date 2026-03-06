@@ -94,6 +94,7 @@ function apply_transpose(llm::DenseTensor{T,R,D}, v::AbstractArray{<:Any,R}, I::
 end
 
 
+# Different from SMatrix because the elements can differ in type
 struct TupleTable{N,M, T <: NTuple{N,NTuple{M, Any}}}
     table::T
 end
