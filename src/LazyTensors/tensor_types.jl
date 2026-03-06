@@ -136,6 +136,8 @@ function apply(t::VectorTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::Vara
 end
 
 Base.adjoint(t::VectorTensor) = VectorDotTensor(map(adjoint, t.D))
+Base.domain_size(t::VectorTensor) = domain_size(t.D[1])
+Base.range_size(t::VectorTensor) = range_size(t.D[1])
 
 ## "Vector of tensors ∘ vector -> scalar"
 struct VectorDotTensor{T,R,D,N,NT<:NTuple{N,LazyTensor{T,R,D}}} <: LazyTensor{T,R,D}
@@ -155,6 +157,9 @@ function apply(t::VectorDotTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::V
 end
 
 Base.adjoint(t::VectorDotTensor) = VectorTensor(map(adjoint, t.D))
+Base.domain_size(t::VectorDotTensor) = domain_size(t.D[1])
+Base.range_size(t::VectorDotTensor) = range_size(t.D[1])
+
 
 ## "Matrix of tensors ∘ vector -> vector"
 struct MatrixTensor{T,R,D,N,M,TT<:TupleTable{N,M,LazyTensor{T,R,D}}} <: LazyTensor{SVector{N,T},R,D}
@@ -173,4 +178,7 @@ function apply(t::MatrixTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Va
 end
 
 Base.adjoint(t::MatrixTensor) = MatrixTensor(adjoint(t.D))
+Base.domain_size(t::MatrixTensor) = domain_size(t.D[1,1])
+Base.range_size(t::MatrixTensor) = range_size(t.D[1,1])
+
 tuple_range(n) = ntuple(identity, n)
