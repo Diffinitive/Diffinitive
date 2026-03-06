@@ -2,6 +2,7 @@ using Test
 using Diffinitive.LazyTensors
 using Diffinitive.LazyTensors: TupleTable, tuple_range
 using BenchmarkTools
+using StaticArrays
 
 @testset "IdentityTensor" begin
     @test IdentityTensor{Float64}((4,5)) isa IdentityTensor{T,2} where T
