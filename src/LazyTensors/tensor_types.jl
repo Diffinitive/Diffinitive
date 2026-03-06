@@ -166,6 +166,10 @@ struct MatrixTensor{T,R,D,N,M,TT<:TupleTable{N,M,LazyTensor{T,R,D}}} <: LazyTens
     D::TT # Matrix of Tensors
 end
 
+function MatrixTensor(Ds::Vararg{NTuple{N, LazyTensor} where N})
+    return MatrixTensor(TupleTable(Ds))
+end
+
 function apply(t::MatrixTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N,M}
     return map(tuple_range(N)) do i
         Dᵢⱼvⱼs = map(tuple_range(M), t.D[i,:]) do j, Dᵢⱼ
