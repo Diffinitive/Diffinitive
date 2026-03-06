@@ -151,28 +151,6 @@ end
     # @inferred (B̃*v)[2]
 end
 
-@testset "VectorTensor" begin
-
-end
-
-@testset "VectorDotTensor" begin
-
-end
-
-@testset "MatrixTensor" begin
-
-end
-
-@testset "tuple_range()" begin
-    @test tuple_range(1) == (1,)
-    @test tuple_range(2) == (1,2)
-    @test tuple_range(5) == (1,2,3,4,5)
-
-    @test tuple_range(Val(1)) == (1,)
-    @test tuple_range(Val(2)) == (1,2)
-    @test tuple_range(Val(5)) == (1,2,3,4,5)
-end
-
 @testset "TupleTable" begin
     @testset "Constructors" begin
         @test TupleTable((1,2,3)) isa TupleTable{1,3}
@@ -233,4 +211,26 @@ end
         expected = TupleTable((1-1im, 4-4im),(2-2im, 5-5im),(3-3im, 6-6im))
         @test adjoint(tt) == expected
     end
+end
+
+@testset "VectorTensor" begin
+
+end
+
+@testset "VectorDotTensor" begin
+
+end
+
+@testset "MatrixTensor" begin
+
+end
+
+@testset "tuple_range()" begin
+    @test tuple_range(1) == (1,)
+    @test tuple_range(2) == (1,2)
+    @test tuple_range(5) == (1,2,3,4,5)
+
+    @test tuple_range(Val(1)) == (1,)
+    @test tuple_range(Val(2)) == (1,2)
+    @test tuple_range(Val(5)) == (1,2,3,4,5)
 end
