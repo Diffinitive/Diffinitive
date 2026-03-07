@@ -93,9 +93,9 @@ function apply_transpose(llm::DenseTensor{T,R,D}, v::AbstractArray{<:Any,R}, I::
     apply(DenseTensor(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
 end
 
-
+NMTuple{N,M,T} = NTuple{N,NTuple{M, T}}
 # Different from SMatrix because the elements can differ in type
-struct TupleTable{N,M, T <: NTuple{N,NTuple{M, Any}}}
+struct TupleTable{N,M, T <: NMTuple{N,M,Any}}
     table::T
 end
 
