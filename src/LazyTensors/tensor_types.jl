@@ -172,6 +172,7 @@ end
 
 function apply(t::MatrixTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N,M}
     return map(tuple_range(N)) do i
+        @inline
         Dᵢⱼvⱼs = map(tuple_range(M), t.D[i,:]) do j, Dᵢⱼ
             vⱼ = componentview(v, j)
             apply(Dᵢⱼ, vⱼ, I...)
