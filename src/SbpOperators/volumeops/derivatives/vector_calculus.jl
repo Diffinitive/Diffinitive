@@ -3,7 +3,7 @@ function divergence(g::TensorGrid, stencil_set)
         first_derivative(g, stencil_set, i)
     end
 
-    return VectorDotTensor(Ds)
+    return VectorDotTensor(Ds...)
 end
 
 function gradient(g::TensorGrid, stencil_set)
@@ -11,5 +11,5 @@ function gradient(g::TensorGrid, stencil_set)
         first_derivative(g, stencil_set, i)
     end
 
-    return VectorTensor(Ds)
+    return VectorTensor(Ds...)
 end
