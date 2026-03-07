@@ -215,40 +215,67 @@ end
 end
 
 @testset "VectorTensor" begin
-    s = [4., 6., 5., 6., 7.]
-    t = VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
-    v = [10., 11., 12., 14., 15.]
-    expected = map((sᵢ, vᵢ)-> @SVector[sᵢ*vᵢ, 3vᵢ], s,v)
-    @test t*v == expected
-    @test collect(t*v) isa Vector{SVector{2,Float64}}
+    @testset "Constructors" begin
+        s = [4., 6., 5., 6., 7.]
+        @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{SVector{2,Float64}, 1, 1}
+    end
+
+    @testset "apply" begin
+        s = [4., 6., 5., 6., 7.]
+        t = VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        v = [10., 11., 12., 14., 15.]
+        expected = map((sᵢ, vᵢ)-> @SVector[sᵢ*vᵢ, 3vᵢ], s,v)
+        @test t*v == expected
+        @test collect(t*v) isa Vector{SVector{2,Float64}}
+    end
 end
 
 @testset "VectorDotTensor" begin
-    s = [4., 6., 5., 6., 7.]
-    t = VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
-    v = rand(SVector{2,Float64}, 5)
-    expected = map((sᵢ, vᵢ)-> sᵢ*vᵢ[1]+3vᵢ[2], s,v)
-    @test t*v == expected
-    @test collect(t*v) isa Vector{Float64}
+    @testset "Constructors" begin
+        s = [4., 6., 5., 6., 7.]
+        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{Float64, 1, 1}
+    end
+
+    @testset "apply" begin
+        s = [4., 6., 5., 6., 7.]
+        t = VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        v = rand(SVector{2,Float64}, 5)
+        expected = map((sᵢ, vᵢ)-> sᵢ*vᵢ[1]+3vᵢ[2], s,v)
+        @test t*v == expected
+        @test collect(t*v) isa Vector{Float64}
+    end
 end
 
 @testset "MatrixTensor" begin
-    s1 = [4., 6., 5., 6., 7.]
-    s2 = [6., 9., 3., 5., 7.]
-    t = MatrixTensor(
-        (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
-        (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
-    )
-    v = reinterpret(SVector{2,Float64}, rand(1.:20., 10))
+    @testset "Constructors" begin
+        s1 = [4., 6., 5., 6., 7.]
+        s2 = [6., 9., 3., 5., 7.]
+        t = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
 
-    expected = map(s1,s2,v) do s1ᵢ, s2ᵢ, vᵢ
-        @SVector[
-            s1ᵢ*vᵢ[1] + 3*vᵢ[2],
-            6*vᵢ[1] + s2ᵢ*vᵢ[2],
-        ]
+        @test t isa LazyTensor{SVector{2,Float64}, 1, 1}
     end
 
-    @test t*v == expected
+    @testset "apply" begin
+        s1 = [4., 6., 5., 6., 7.]
+        s2 = [6., 9., 3., 5., 7.]
+        t = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        v = reinterpret(SVector{2,Float64}, rand(1.:20., 10))
+
+        expected = map(s1,s2,v) do s1ᵢ, s2ᵢ, vᵢ
+            @SVector[
+                s1ᵢ*vᵢ[1] + 3*vᵢ[2],
+                6*vᵢ[1] + s2ᵢ*vᵢ[2],
+            ]
+        end
+
+        @test t*v == expected
+    end
 end
 
 @testset "tuple_range()" begin
