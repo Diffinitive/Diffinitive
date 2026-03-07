@@ -28,6 +28,8 @@ export second_derivative
 export second_derivative_variable
 export undivided_skewed04
 export closure_size
+export divergence
+export gradient
 
 @enum Parity begin
     odd = -1
@@ -68,5 +70,6 @@ include("volumeops/inner_products/inverse_inner_product.jl")
 include("boundaryops/boundary_operator.jl")
 include("boundaryops/boundary_restriction.jl")
 include("boundaryops/normal_derivative.jl")
+include("volumeops/derivatives/vector_calculus.jl")
 
 end # module
