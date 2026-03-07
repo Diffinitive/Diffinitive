@@ -36,15 +36,15 @@ end
         ∇ = gradient(g, stencil_set)
 
         v = map(x->x[1], g)
-        @test ∇̇*v ≈ map(x->@SVector[1.,0], g)
+        @test ∇*v ≈ map(x->@SVector[1.,0], g)
 
         v = map(x->x[2], g)
-        @test ∇̇*v ≈ map(x->@SVector[0,1.], g)
+        @test ∇*v ≈ map(x->@SVector[0,1.], g)
 
         v = map(x->x[1]*x[2], g)
-        @test ∇̇*v ≈ map(x->@SVector[x[2],x[1]], g)
+        @test ∇*v ≈ map(x->@SVector[x[2],x[1]], g)
 
         v = map(x->sin(x[1]^2+x[2]^2), g)
-        @test ∇̇*v ≈ map(x->cos(x[1]^2+x[2]^2)*@SVector[2x[1],2x[2]], g)
+        @test ∇*v ≈ map(x->cos(x[1]^2+x[2]^2)*@SVector[2x[1],2x[2]], g)
     end
 end
