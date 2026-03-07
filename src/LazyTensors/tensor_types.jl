@@ -121,8 +121,8 @@ function Base.adjoint(tt::TupleTable)
     end |> TupleTable
 end
 
-## "Vector of tensors ∘ scalar -> scalar"
-struct VectorTensor{T,R,D,N,NT<:NTuple{N,LazyTensor{T,R,D}}} <: LazyTensor{T,R,D}
+## "Vector of tensors ∘ scalar -> vector"
+struct VectorTensor{T,R,D,N,NT<:NTuple{N,LazyTensor{T,R,D}}} <: LazyTensor{SVector{N,T},R,D}
     D::NT
     ## TODO: add constructor with tests for checking domain and range size
 end
