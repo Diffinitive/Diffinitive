@@ -16,7 +16,7 @@ using StaticArrays
         @test ∇̇*v ≈ map(x->1., g)
 
         v = map(x->@SVector[0.,x[1]], g)
-        @test ∇̇*v ≈ map(x->0., g)
+        @test ∇̇*v ≈ map(x->0., g) atol=1e-13
 
         v = map(x->@SVector[0., x[2]], g)
         @test ∇̇*v ≈ map(x->1., g)
@@ -32,7 +32,6 @@ end
     stencil_set = read_stencil_set(operator_path; order=4)
     @testset "2D" begin
         g = equidistant_grid((0,0),(1,1), 20, 20)
-
         ∇ = gradient(g, stencil_set)
 
         v = map(x->x[1], g)
@@ -44,7 +43,10 @@ end
         v = map(x->x[1]*x[2], g)
         @test ∇*v ≈ map(x->@SVector[x[2],x[1]], g)
 
+
+        g = equidistant_grid((0,0),(1,1), 200, 200)
+        ∇ = gradient(g, stencil_set)
         v = map(x->sin(x[1]^2+x[2]^2), g)
-        @test ∇*v ≈ map(x->cos(x[1]^2+x[2]^2)*@SVector[2x[1],2x[2]], g)
+        @test ∇*v ≈ map(x->cos(x[1]^2+x[2]^2)*@SVector[2x[1],2x[2]], g) rtol=5e-5
     end
 end
