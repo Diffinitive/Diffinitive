@@ -162,7 +162,7 @@ LazyTensors.range_size(t::VectorDotTensor) = range_size(t.D[1])
 
 
 ## "Matrix of tensors ∘ vector -> vector"
-struct MatrixTensor{T,R,D,N,M,TT<:TupleTable{N,M,LazyTensor{T,R,D}}} <: LazyTensor{SVector{N,T},R,D}
+struct MatrixTensor{T,R,D,N,M,TT<:TupleTable{N,M,<:NMTuple{N,M,LazyTensor{T,R,D}}}} <: LazyTensor{SVector{N,T},R,D}
     D::TT # Matrix of Tensors
 end
 
