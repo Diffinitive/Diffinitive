@@ -273,3 +273,17 @@ end
         @test Grids.grid_and_local_dim_index(args...) == expected
     end
 end
+
+@testset "Grids._boundary_sign" begin
+    @test Grids._boundary_sign(Float64, TensorGridBoundary{1,LowerBoundary}()) isa Float64
+    @test Grids._boundary_sign(Float64, TensorGridBoundary{1,LowerBoundary}()) == -1
+
+    @test Grids._boundary_sign(Float64, TensorGridBoundary{2,UpperBoundary}()) isa Float64
+    @test Grids._boundary_sign(Float64, TensorGridBoundary{2,UpperBoundary}()) == 1
+
+    @test Grids._boundary_sign(Int64, TensorGridBoundary{3,LowerBoundary}()) isa Int64
+    @test Grids._boundary_sign(Int64, TensorGridBoundary{3,LowerBoundary}()) == -1
+
+    @test Grids._boundary_sign(Int64, TensorGridBoundary{1,UpperBoundary}()) isa Int64
+    @test Grids._boundary_sign(Int64, TensorGridBoundary{1,UpperBoundary}()) == 1
+end
