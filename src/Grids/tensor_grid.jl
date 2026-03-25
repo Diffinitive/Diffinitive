@@ -144,3 +144,13 @@ function grid_and_local_dim_index(nds, d)
         return (I, d-cumsum(nds)[I-1])
     end
 end
+
+function _boundary_sign(T, boundary::TensorGridBoundary)
+    if boundary_id(boundary) == UpperBoundary()
+        return one(T)
+    elseif boundary_id(boundary) == LowerBoundary()
+        return -one(T)
+    else
+        throw(ArgumentError("The boundary identifier must be either `LowerBoundary()` or `UpperBoundary()`"))
+    end
+end

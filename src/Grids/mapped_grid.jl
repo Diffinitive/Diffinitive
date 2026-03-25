@@ -197,14 +197,3 @@ function normal(g::MappedGrid, boundary, i...)
     k = grid_id(boundary)
     return σ*∂ξ∂x[k,:]/norm(∂ξ∂x[k,:])
 end
-
-
-function _boundary_sign(T, boundary)
-    if boundary_id(boundary) == UpperBoundary()
-        return one(T)
-    elseif boundary_id(boundary) == LowerBoundary()
-        return -one(T)
-    else
-        throw(ArgumentError("The boundary identifier must be either `LowerBoundary()` or `UpperBoundary()`"))
-    end
-end
