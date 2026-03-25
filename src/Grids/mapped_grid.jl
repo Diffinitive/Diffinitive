@@ -175,17 +175,6 @@ function min_spacing(g::MappedGrid{T,2} where T)
 end
 
 """
-    normal(g::MappedGrid, boundary)
-
-The outward pointing normal as a grid function on the corresponding boundary grid.
-"""
-function normal(g::MappedGrid, boundary)
-    return map(boundary_indices(g, boundary)) do I
-        normal(g, boundary, Tuple(I)...)
-    end
-end
-
-"""
     normal(g::MappedGrid, boundary, i...)
 
 The outward pointing normal to the specified boundary in grid point `i`.
