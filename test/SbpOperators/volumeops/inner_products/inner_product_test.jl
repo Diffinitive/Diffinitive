@@ -6,6 +6,9 @@ using Diffinitive.LazyTensors
 
 import Diffinitive.SbpOperators.ConstantInteriorScalingOperator
 
+using StaticArrays
+using LinearAlgebra
+
 @testset "Diagonal-stencil inner_product" begin
     Lx = π/2.
     Ly = Float64(π)
@@ -93,5 +96,44 @@ import Diffinitive.SbpOperators.ConstantInteriorScalingOperator
                 @test sum(H*u) ≈ π rtol = 1e-8
             end
         end
+    end
+
+    @testset "MappedGrid" begin
+        stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+        c = Chart(unitsquare()) do (ξ,η)
+            @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
+        end
+        Grids.jacobian(c::typeof(c), (ξ,η)) = @SMatrix[2 1-2η; (2+η)*ξ 3+ξ^2/2]
+
+        mg = equidistant_grid(c, 10,13)
+
+        @test inner_product(mg, stencil_set) isa LazyTensor{<:Any, 2,2}
+
+        @testset "Accuracy" begin
+            v = function(x̄)
+                log(norm(x̄-@SVector[.5, .5]))/2π + log(norm(x̄-@SVector[1.5, 3]))/2π
+            end
+            ∇v = function(x̄)
+                ∇log(ȳ) = ȳ/(ȳ⋅ȳ)
+                ∇log(x̄-@SVector[.5, .5])/2π + ∇log(x̄-@SVector[1.5, 3])/2π
+            end
+
+            mg = equidistant_grid(c, 80,80)
+            v̄ = map(v, mg)
+
+            @testset for (order, atol) ∈ [(2,1e-3),(4,1e-7)]
+                stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=order)
+
+                @test sum(boundary_identifiers(mg)) do bId
+                    ∂ₙv = map(boundary_grid(mg,bId),normal(mg,bId)) do x̄,n̂
+                        n̂⋅∇v(x̄)
+                    end
+                    Hᵧ = inner_product(boundary_grid(mg,bId), stencil_set)
+                    sum(Hᵧ*∂ₙv)
+                end ≈ 2 atol=atol
+
+            end
+        end
+        @test_broken false # Test that it calculates the right thing
     end
 end

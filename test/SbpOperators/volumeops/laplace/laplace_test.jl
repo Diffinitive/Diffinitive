@@ -4,6 +4,11 @@ using Diffinitive.SbpOperators
 using Diffinitive.Grids
 using Diffinitive.LazyTensors
 
+using StaticArrays
+using SparseArrays
+using Tokens
+using LinearAlgebra
+
 @testset "Laplace" begin
     # Default stencils (4th order)
     operator_path = sbp_operators_path()*"standard_diagonal.toml"
@@ -72,12 +77,12 @@ end
     g_1D = equidistant_grid(0.0, 1., 101)
     g_3D = equidistant_grid((0.0, -1.0, 0.0), (1., 1., 1.), 51, 101, 52)
 
-    @testset "1D" begin
+    @testset "EquidistantGrid" begin
         Δ = laplace(g_1D, stencil_set)
         @test Δ == second_derivative(g_1D, stencil_set)
         @test Δ isa LazyTensor{Float64,1,1}
     end
-    @testset "3D" begin
+    @testset "TensorGrid" begin
         Δ = laplace(g_3D, stencil_set)
         @test Δ isa LazyTensor{Float64,3,3}
         Dxx = second_derivative(g_3D, stencil_set, 1)
@@ -85,6 +90,56 @@ end
         Dzz = second_derivative(g_3D, stencil_set, 3)
         @test Δ == Dxx + Dyy + Dzz
         @test Δ isa LazyTensor{Float64,3,3}
+    end
+
+    @testset "MappedGrid" begin
+        c = Chart(unitsquare()) do (ξ,η)
+            @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
+        end
+        Grids.jacobian(c::typeof(c), (ξ,η)) = @SMatrix[2 1-2η; (2+η)*ξ 3+ξ^2/2]
+
+        g = equidistant_grid(c, 60,60)
+
+        @test laplace(g, stencil_set) isa LazyTensor{<:Any,2,2}
+
+        f((x,y)) = sin(4(x + y))
+        Δf((x,y)) = -32sin(4(x + y))
+        gf = map(f,g)
+
+        Δ = laplace(g, stencil_set)
+
+        @test collect(Δ*gf) isa Array{<:Any,2}
+        @test Δ*gf ≈ map(Δf, g) rtol=2e-2
+
+
+        @testset "SBP property" begin
+            g = equidistant_grid(c, 20,20)
+            Δ = laplace(g, stencil_set)
+            H = inner_product(g, stencil_set)
+            es = map(boundary_identifiers(g)) do id
+                boundary_restriction(g, stencil_set, id)
+            end
+            ds = map(boundary_identifiers(g)) do id
+                normal_derivative(g, stencil_set, id)
+            end
+            Hᵧs = map(boundary_identifiers(g)) do id
+                inner_product(boundary_grid(g, id), stencil_set)
+            end
+
+            BT = mapreduce(+, es, ds,Hᵧs) do e, d, Hᵧ
+                e'∘Hᵧ∘d
+            end
+            M = -H∘Δ + BT
+
+            M = sparse(M)
+            @test M ≈ M'
+
+            function issemiposdef(A, tol=1e-8)
+                return isposdef(A+tol*I)
+            end
+
+            @test issemiposdef(Symmetric(M))
+        end
     end
 end
 

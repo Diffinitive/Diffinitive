@@ -49,6 +49,7 @@ export sat_tensors
 using Diffinitive.RegionIndices
 using Diffinitive.LazyTensors
 using Diffinitive.Grids
+using LinearAlgebra
 
 # Includes
 include("stencil.jl")
