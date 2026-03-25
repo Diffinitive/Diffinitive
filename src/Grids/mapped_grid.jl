@@ -179,7 +179,7 @@ end
 
 The outward pointing normal to the specified boundary in grid point `i`.
 """
-function normal(g::MappedGrid, boundary, i...)
+function normal(g::MappedGrid{T,D}, boundary, i::Vararg{Int, D}) where {T,D}
     σ = _boundary_sign(component_type(g), boundary)
     ∂ξ∂x = inv(jacobian(g)[i...])
 
