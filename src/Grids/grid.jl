@@ -176,3 +176,13 @@ _ncomponents(::Type{<:Number}) = 1
 _ncomponents(T::Type{<:SVector}) = length(T)
 
 
+"""
+    normal(g::Grid, boundary)
+
+The outward pointing normal as a grid function on the corresponding boundary grid.
+"""
+function normal(g::Grid, boundary)
+    return map(boundary_indices(g, boundary)) do I
+        normal(g, boundary, Tuple(I)...)
+    end
+end
