@@ -283,8 +283,8 @@ end
       @test normal(g, TensorGridBoundary{2,LowerBoundary}()) == fill(@SVector[0,-1,0], 4,6)
       @test normal(g, TensorGridBoundary{2,UpperBoundary}()) == fill(@SVector[0, 1,0], 4,6)
 
-      @test normal(g, TensorGridBoundary{2,LowerBoundary}()) == fill(@SVector[0,0,-1], 4,5)
-      @test normal(g, TensorGridBoundary{2,UpperBoundary}()) == fill(@SVector[0,0, 1], 4,5)
+      @test normal(g, TensorGridBoundary{3,LowerBoundary}()) == fill(@SVector[0,0,-1], 4,5)
+      @test normal(g, TensorGridBoundary{3,UpperBoundary}()) == fill(@SVector[0,0, 1], 4,5)
 end
 
 

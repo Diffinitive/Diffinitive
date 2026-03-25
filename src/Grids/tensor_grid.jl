@@ -145,6 +145,20 @@ function grid_and_local_dim_index(nds, d)
     end
 end
 
+
+"""
+    normal(g::TensorGrid, boundary, i...)
+
+The outward pointing normal to the specified boundary in grid point `i`.
+"""
+function normal(g::TensorGrid{T,D}, boundary, i::Vararg{Int, D}) where {T,D}
+    n = @SVector zeros(ndims(g))
+    σ = _boundary_sign(component_type(g), boundary)
+    n = setindex(n, σ, grid_id(boundary))
+
+    return n
+end
+
 function _boundary_sign(T, boundary::TensorGridBoundary)
     if boundary_id(boundary) == UpperBoundary()
         return one(T)
