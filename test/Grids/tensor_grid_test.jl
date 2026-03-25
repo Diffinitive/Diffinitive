@@ -273,3 +273,36 @@ end
         @test Grids.grid_and_local_dim_index(args...) == expected
     end
 end
+
+@testset "normal" begin
+      g = equidistant_grid((0,0,0),(1,1,1), 4, 5, 6)
+
+      @test normal(g, TensorGridBoundary{1,LowerBoundary}()) == fill(@SVector[-1,0,0], 5,6)
+      @test normal(g, TensorGridBoundary{1,UpperBoundary}()) == fill(@SVector[ 1,0,0], 5,6)
+
+      @test normal(g, TensorGridBoundary{2,LowerBoundary}()) == fill(@SVector[0,-1,0], 4,6)
+      @test normal(g, TensorGridBoundary{2,UpperBoundary}()) == fill(@SVector[0, 1,0], 4,6)
+
+      @test normal(g, TensorGridBoundary{3,LowerBoundary}()) == fill(@SVector[0,0,-1], 4,5)
+      @test normal(g, TensorGridBoundary{3,UpperBoundary}()) == fill(@SVector[0,0, 1], 4,5)
+
+
+      g = equidistant_grid((0,0,0),(1//1,1//1,1//1), 4, 5, 6)
+      @test normal(g, TensorGridBoundary{1,UpperBoundary}()) isa AbstractMatrix{<:SVector{3, <:Rational}}
+      @test normal(g, TensorGridBoundary{1,UpperBoundary}()) == fill(@SVector[ 1//1,0,0], 5,6)
+end
+
+
+@testset "Grids._boundary_sign" begin
+    @test Grids._boundary_sign(Float64, TensorGridBoundary{1,LowerBoundary}()) isa Float64
+    @test Grids._boundary_sign(Float64, TensorGridBoundary{1,LowerBoundary}()) == -1
+
+    @test Grids._boundary_sign(Float64, TensorGridBoundary{2,UpperBoundary}()) isa Float64
+    @test Grids._boundary_sign(Float64, TensorGridBoundary{2,UpperBoundary}()) == 1
+
+    @test Grids._boundary_sign(Int64, TensorGridBoundary{3,LowerBoundary}()) isa Int64
+    @test Grids._boundary_sign(Int64, TensorGridBoundary{3,LowerBoundary}()) == -1
+
+    @test Grids._boundary_sign(Int64, TensorGridBoundary{1,UpperBoundary}()) isa Int64
+    @test Grids._boundary_sign(Int64, TensorGridBoundary{1,UpperBoundary}()) == 1
+end
