@@ -152,7 +152,7 @@ end
 The outward pointing normal to the specified boundary in grid point `i`.
 """
 function normal(g::TensorGrid{T,D}, boundary, i::Vararg{Int, D}) where {T,D}
-    n = @SVector zeros(ndims(g))
+    n = zero(eltype(g))
     σ = _boundary_sign(component_type(g), boundary)
     n = setindex(n, σ, grid_id(boundary))
 

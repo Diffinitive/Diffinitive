@@ -285,6 +285,11 @@ end
 
       @test normal(g, TensorGridBoundary{3,LowerBoundary}()) == fill(@SVector[0,0,-1], 4,5)
       @test normal(g, TensorGridBoundary{3,UpperBoundary}()) == fill(@SVector[0,0, 1], 4,5)
+
+
+      g = equidistant_grid((0,0,0),(1//1,1//1,1//1), 4, 5, 6)
+      @test normal(g, TensorGridBoundary{1,UpperBoundary}()) isa AbstractMatrix{<:SVector{3, <:Rational}}
+      @test normal(g, TensorGridBoundary{1,UpperBoundary}()) == fill(@SVector[ 1//1,0,0], 5,6)
 end
 
 
