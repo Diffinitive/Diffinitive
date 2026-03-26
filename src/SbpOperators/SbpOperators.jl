@@ -31,6 +31,7 @@ export closure_size
 export divergence
 export gradient
 export elastic_isotropic
+export traction_isotropic
 
 @enum Parity begin
     odd = -1
