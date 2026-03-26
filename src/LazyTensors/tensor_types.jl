@@ -106,6 +106,16 @@ function TupleTable(rows...)
     TupleTable(rows)
 end
 
+function TupleTable(A::Matrix)
+    N, M = size(A)
+
+    return map(tuple_range(N)) do i
+        map(tuple_range(M)) do j
+            A[i,j]
+        end
+    end |> TupleTable
+end
+
 Base.size(::Type{<:TupleTable{N,M}}) where {N,M} = (N,M)
 Base.size(t::TupleTable) = size(typeof(t))
 

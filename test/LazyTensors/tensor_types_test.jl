@@ -159,6 +159,9 @@ end
         @test TupleTable((1,2,3),(3,4,5)) isa TupleTable{2,3}
         @test TupleTable((1,2),(3,4),(5,6)) isa TupleTable{3,2}
 
+        @test TupleTable([1 2; 3 4]) isa TupleTable{2,2}
+        @test TupleTable([1 2 3; 3 4 5]) isa TupleTable{2,3}
+
         @test_throws DimensionMismatch("All rows must have the same length") TupleTable((1,2),(1,2,3))
     end
 
