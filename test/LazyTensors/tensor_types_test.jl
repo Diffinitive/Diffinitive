@@ -259,6 +259,18 @@ end
         )
 
         @test t isa LazyTensor{SVector{2,Float64}, 1, 1}
+
+
+        A = [
+            DiagonalTensor(s1) ScalingTensor(3.,(5,));
+            ScalingTensor(6., (5,)) DiagonalTensor(s2);
+        ]
+
+        @test MatrixTensor(A) == t
+
+        TT = TupleTable(A)
+
+        @test MatrixTensor(TT) == t
     end
 
     @testset "apply" begin

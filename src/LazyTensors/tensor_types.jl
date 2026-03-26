@@ -180,6 +180,10 @@ function MatrixTensor(Ds::Vararg{NTuple{N, LazyTensor} where N})
     return MatrixTensor(TupleTable(Ds))
 end
 
+function MatrixTensor(Ds::Matrix)
+    return MatrixTensor(TupleTable(Ds))
+end
+
 function apply(t::MatrixTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N,M}
     return map(tuple_range(N)) do i
         @inline
