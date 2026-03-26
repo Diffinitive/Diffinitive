@@ -53,7 +53,7 @@ function traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
         nⱼ = DiagonalTensor(componentview(n, j))
         if i == j
             Σₖnₖμ∂ₖ = M∘normal_derivative(g, stencil_set, boundary)
-            return nᵢ∘Λ∘∇[j] + nⱼ∘M∘∇[i] + Σₖnₖμ∂ₖ
+            return nᵢ∘Λ∘e∘∂ⱼ + nⱼ∘M∘∇[i] + Σₖnₖμ∂ₖ
         else
             return nᵢ∘Λ∘e∘∂ⱼ + nⱼ∘M∘e∘∂ᵢ
         end
