@@ -6,6 +6,7 @@ using Diffinitive.SbpOperators
 using Diffinitive.LazyTensors
 
 using LinearAlgebra
+using StaticArrays
 
 const SUITE = BenchmarkGroup()
 
@@ -17,6 +18,14 @@ lu(d) = ntuple(i->1., d)
 g1 = equidistant_grid(ll(1)[1], lu(1)[1], sz(1)...)
 g2 = equidistant_grid(ll(2), lu(2), sz(2)...)
 g3 = equidistant_grid(ll(3), lu(3), sz(3)...)
+
+
+c = Chart(unitsquare()) do (ξ,η)
+    @SVector[2ξ + η*(1-η), 3η+(1+η/2)*ξ^2]
+end
+Grids.jacobian(c::typeof(c), (ξ,η)) = @SMatrix[2 1-2η; (2+η)*ξ 3+ξ^2/2]
+
+g2_curved = equidistant_grid(c, sz(2)...)
 
 v1 = rand(sz(1)...)
 v2 = rand(sz(2)...)
@@ -93,6 +102,21 @@ SUITE["derivatives"]["second_derivative_variable"]["3D"]["x"] = @benchmarkable $
 SUITE["derivatives"]["second_derivative_variable"]["3D"]["y"] = @benchmarkable $u3 .= $Dy*$v3
 SUITE["derivatives"]["second_derivative_variable"]["3D"]["z"] = @benchmarkable $u3 .= $Dz*$v3
 
+
+
+SUITE["derivatives"]["laplace"] = BenchmarkGroup()
+
+Δ = laplace(g1, stencil_set)
+SUITE["derivatives"]["laplace"]["1D"] = @benchmarkable $u1 .= $Δ*$v1
+
+Δ = laplace(g2, stencil_set)
+SUITE["derivatives"]["laplace"]["2D"] = @benchmarkable $u2 .= $Δ*$v2
+
+Δ = laplace(g2_curved, stencil_set)
+SUITE["derivatives"]["laplace"]["2D_curved"] = @benchmarkable $u2 .= $Δ*$v2
+
+Δ = laplace(g3, stencil_set)
+SUITE["derivatives"]["laplace"]["3D"] = @benchmarkable $u3 .= $Δ*$v3
 
 
 

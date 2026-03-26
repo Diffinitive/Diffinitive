@@ -150,6 +150,7 @@ end
 
 ## x-direction
 function apply_lower(op::SecondDerivativeVariable{1}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[:,j]
     c̃ = @view op.coefficient[:,j]
 
@@ -157,6 +158,7 @@ function apply_lower(op::SecondDerivativeVariable{1}, v, i, j)
 end
 
 function apply_interior(op::SecondDerivativeVariable{1}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[:,j]
     c̃ = @view op.coefficient[:,j]
 
@@ -164,6 +166,7 @@ function apply_interior(op::SecondDerivativeVariable{1}, v, i, j)
 end
 
 function apply_upper(op::SecondDerivativeVariable{1}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[:,j]
     c̃ = @view op.coefficient[:,j]
 
@@ -175,6 +178,7 @@ end
 
 ## y-direction
 function apply_lower(op::SecondDerivativeVariable{2}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[i,:]
     c̃ = @view op.coefficient[i,:]
 
@@ -182,6 +186,7 @@ function apply_lower(op::SecondDerivativeVariable{2}, v, i, j)
 end
 
 function apply_interior(op::SecondDerivativeVariable{2}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[i,:]
     c̃ = @view op.coefficient[i,:]
 
@@ -189,6 +194,7 @@ function apply_interior(op::SecondDerivativeVariable{2}, v, i, j)
 end
 
 function apply_upper(op::SecondDerivativeVariable{2}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[i,:]
     c̃ = @view op.coefficient[i,:]
 
