@@ -106,6 +106,16 @@ function TupleTable(rows...)
     TupleTable(rows)
 end
 
+function TupleTable(A::Matrix)
+    N, M = size(A)
+
+    return map(tuple_range(N)) do i
+        map(tuple_range(M)) do j
+            A[i,j]
+        end
+    end |> TupleTable
+end
+
 Base.size(::Type{<:TupleTable{N,M}}) where {N,M} = (N,M)
 Base.size(t::TupleTable) = size(typeof(t))
 
@@ -167,6 +177,10 @@ struct MatrixTensor{T,R,D,N,M,TT<:TupleTable{N,M,<:NMTuple{N,M,LazyTensor{T,R,D}
 end
 
 function MatrixTensor(Ds::Vararg{NTuple{N, LazyTensor} where N})
+    return MatrixTensor(TupleTable(Ds))
+end
+
+function MatrixTensor(Ds::Matrix)
     return MatrixTensor(TupleTable(Ds))
 end
 
