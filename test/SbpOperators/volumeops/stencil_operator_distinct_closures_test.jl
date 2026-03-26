@@ -24,7 +24,7 @@ import Diffinitive.SbpOperators.StencilOperatorDistinctClosures
     )
 
     A = StencilOperatorDistinctClosures(g, inner_stencil, lower_closure, upper_closure)
-    @test A isa LazyTensor{T,1,1} where T
+    @test A isa LazyTensor{1,1}
 
     @test SbpOperators.lower_closure_size(A) == 2
     @test SbpOperators.upper_closure_size(A) == 3

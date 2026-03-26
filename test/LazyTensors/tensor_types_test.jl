@@ -3,14 +3,14 @@ using Diffinitive.LazyTensors
 using BenchmarkTools
 
 @testset "IdentityTensor" begin
-    @test IdentityTensor{Float64}((4,5)) isa IdentityTensor{T,2} where T
-    @test IdentityTensor{Float64}((4,5)) isa LazyTensor{T,2,2} where T
-    @test IdentityTensor{Float64}((4,5)) == IdentityTensor{Float64}(4,5)
+    @test IdentityTensor((4,5)) isa IdentityTensor{2}
+    @test IdentityTensor((4,5)) isa LazyTensor{2,2}
+    @test IdentityTensor((4,5)) == IdentityTensor(4,5)
 
-    @test IdentityTensor(3,2) isa IdentityTensor{Float64,2}
+    @test IdentityTensor(3,2) isa IdentityTensor{2}
 
     for sz ∈ [(4,5),(3,),(5,6,4)]
-        I = IdentityTensor{Float64}(sz)
+        I = IdentityTensor(sz)
         v = rand(sz...)
         @test I*v == v
         @test I'*v == v
@@ -23,7 +23,7 @@ using BenchmarkTools
         @test domain_size(I) == sz
     end
 
-    I = IdentityTensor{Float64}((4,5))
+    I = IdentityTensor((4,5))
     v = rand(4,5)
     @inferred (I*v)[3,2]
     @inferred (I'*v)[3,2]
@@ -47,7 +47,7 @@ end
 
 @testset "ScalingTensor" begin
     st = ScalingTensor(2.,(3,4))
-    @test st isa LazyTensor{Float64, 2, 2}
+    @test st isa LazyTensor{2, 2}
     @test range_size(st) == (3,4)
     @test domain_size(st) == (3,4)
 
@@ -60,9 +60,9 @@ end
 end
 
 @testset "DiagonalTensor" begin
-    @test DiagonalTensor([1,2,3,4]) isa LazyTensor{Int,1,1}
-    @test DiagonalTensor([1 2 3; 4 5 6]) isa LazyTensor{Int,2,2}
-    @test DiagonalTensor([1. 2. 3.; 4. 5. 6.]) isa LazyTensor{Float64,2,2}
+    @test DiagonalTensor([1,2,3,4]) isa LazyTensor{1,1}
+    @test DiagonalTensor([1 2 3; 4 5 6]) isa LazyTensor{2,2}
+    @test DiagonalTensor([1. 2. 3.; 4. 5. 6.]) isa LazyTensor{2,2}
 
     @test range_size(DiagonalTensor([1,2,3,4])) == (4,)
     @test domain_size(DiagonalTensor([1,2,3,4])) == (4,)
@@ -109,8 +109,8 @@ end
     v = rand(4)
     w = rand(3)
 
-    @test Ã isa DenseTensor{T,1,1} where T
-    @test Ã isa LazyTensor{T,1,1} where T
+    @test Ã isa DenseTensor{1,1}
+    @test Ã isa LazyTensor{1,1}
     @test range_size(Ã) == (3,)
     @test domain_size(Ã) == (4,)
 
@@ -129,7 +129,7 @@ end
 
     @test range_size(B̃) == (3,4)
     @test domain_size(B̃) == (2,)
-    @test B̃ isa LazyTensor{T,2,1} where T
+    @test B̃ isa LazyTensor{2,1}
     @test B̃*ones(2) ≈ B[:,:,1] + B[:,:,2] atol=5e-13
     @test B̃*v ≈ B[:,:,1]*v[1] + B[:,:,2]*v[2] atol=5e-13
 
@@ -139,7 +139,7 @@ end
 
     @test range_size(B̃) == (4,)
     @test domain_size(B̃) == (3,2)
-    @test B̃ isa LazyTensor{T,1,2} where T
+    @test B̃ isa LazyTensor{1,2}
     @test B̃*ones(3,2) ≈ B[1,:,1] + B[2,:,1] + B[3,:,1] +
                         B[1,:,2] + B[2,:,2] + B[3,:,2] atol=5e-13
     @test B̃*v ≈ B[1,:,1]*v[1,1] + B[2,:,1]*v[2,1] + B[3,:,1]*v[3,1] +
