@@ -159,6 +159,9 @@ end
         @test TupleTable((1,2,3),(3,4,5)) isa TupleTable{2,3}
         @test TupleTable((1,2),(3,4),(5,6)) isa TupleTable{3,2}
 
+        @test TupleTable([1 2; 3 4]) isa TupleTable{2,2}
+        @test TupleTable([1 2 3; 3 4 5]) isa TupleTable{2,3}
+
         @test_throws DimensionMismatch("All rows must have the same length") TupleTable((1,2),(1,2,3))
     end
 
@@ -256,6 +259,18 @@ end
         )
 
         @test t isa LazyTensor{SVector{2,Float64}, 1, 1}
+
+
+        A = [
+            DiagonalTensor(s1) ScalingTensor(3.,(5,));
+            ScalingTensor(6., (5,)) DiagonalTensor(s2);
+        ]
+
+        @test MatrixTensor(A) == t
+
+        TT = TupleTable(A)
+
+        @test MatrixTensor(TT) == t
     end
 
     @testset "apply" begin
