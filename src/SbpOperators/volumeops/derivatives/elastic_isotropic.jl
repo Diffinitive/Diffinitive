@@ -18,15 +18,10 @@ function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
         ∂ⱼ = first_derivative(g, stencil_set, j)
         if i == j
             ∂ⱼμ∂ᵢ = second_derivative_variable(g,μ,stencil_set,i)
-            # Σₖ∂ₖμ∂ₖδᵢⱼ = Σₖ∂ₖμ∂ₖ
             return ∂ᵢ∘Λ∘∂ⱼ + ∂ⱼμ∂ᵢ + Σₖ∂ₖμ∂ₖ
         else
-            # ∂ⱼμ∂ᵢ = ∂ⱼ∘M∘∂ᵢ
-            # Σₖ∂ₖμ∂ₖδᵢⱼ = ZeroTensor()
             return ∂ᵢ∘Λ∘∂ⱼ + ∂ⱼ∘M∘∂ᵢ
         end
-
-        # return ∂ᵢ∘Λ∘∂ⱼ + ∂ⱼμ∂ᵢ + Σₖ∂ₖμ∂ₖδᵢⱼ
     end
 
     return MatrixTensor(Ds)
