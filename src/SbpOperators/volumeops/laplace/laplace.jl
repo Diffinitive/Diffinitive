@@ -1,10 +1,10 @@
 """
-    Laplace{T, Dim, TM} <: LazyTensor{T, Dim, Dim}
+    Laplace{Dim, TM} <: LazyTensor{Dim, Dim}
 
 The Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
 `LazyTensor`.
 """
-struct Laplace{T, Dim, TM<:LazyTensor{T, Dim, Dim}} <: LazyTensor{T, Dim, Dim}
+struct Laplace{Dim, TM<:LazyTensor{Dim, Dim}} <: LazyTensor{Dim, Dim}
     D::TM       # Difference operator
     stencil_set::StencilSet # Stencil set of the operator
 end
