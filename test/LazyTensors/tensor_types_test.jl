@@ -237,6 +237,15 @@ end
         @test t*v == expected
         @test collect(t*v) isa Vector{SVector{2,Float64}}
     end
+
+    @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+        @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) == VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) == VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,)))
+
+        @test VectorTensor(DiagonalTensor(s), ScalingTensor(2., (5,))) != VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) != VectorTensor(DiagonalTensor(3s), ScalingTensor(3., (5,)))
+    end
 end
 
 @testset "VectorDotTensor" begin

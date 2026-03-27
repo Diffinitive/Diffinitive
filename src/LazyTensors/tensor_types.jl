@@ -149,6 +149,10 @@ Base.adjoint(t::VectorTensor) = VectorDotTensor(map(adjoint, t.D))
 LazyTensors.domain_size(t::VectorTensor) = domain_size(t.D[1])
 LazyTensors.range_size(t::VectorTensor) = range_size(t.D[1])
 
+function Base.:(==)(a::VectorTensor, b::VectorTensor)
+    return a.D == b.D
+end
+
 ## "Vector of tensors ∘ vector -> scalar"
 struct VectorDotTensor{N,R,D,NT<:NTuple{N,LazyTensor{R,D}}} <: LazyTensor{R,D}
     D::NT
