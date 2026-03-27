@@ -220,7 +220,7 @@ end
 @testset "VectorTensor" begin
     @testset "Constructors" begin
         s = [4., 6., 5., 6., 7.]
-        @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{SVector{2,Float64}, 1, 1}
+        @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
     end
 
     @testset "apply" begin
@@ -236,7 +236,7 @@ end
 @testset "VectorDotTensor" begin
     @testset "Constructors" begin
         s = [4., 6., 5., 6., 7.]
-        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{Float64, 1, 1}
+        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
     end
 
     @testset "apply" begin
@@ -258,7 +258,7 @@ end
             (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
         )
 
-        @test t isa LazyTensor{SVector{2,Float64}, 1, 1}
+        @test t isa LazyTensor{1, 1}
 
 
         A = [

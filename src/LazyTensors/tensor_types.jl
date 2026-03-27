@@ -130,14 +130,14 @@ function Base.adjoint(tt::TupleTable)
 end
 
 ## "Vector of tensors ∘ scalar -> vector"
-struct VectorTensor{T,R,D,N,NT<:NTuple{N,LazyTensor{T,R,D}}} <: LazyTensor{SVector{N,T},R,D}
+struct VectorTensor{R,D,N,NT<:NTuple{N,LazyTensor{R,D}}} <: LazyTensor{R,D}
     D::NT
     ## TODO: add constructor with tests for checking domain and range size
 end
 
 VectorTensor(Ds::Vararg{LazyTensor}) = VectorTensor(Ds)
 
-function apply(t::VectorTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
+function apply(t::VectorTensor{R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
     return map(t.D) do Dᵢ
         apply(Dᵢ, v, I...)
     end |> SVector
@@ -148,14 +148,14 @@ LazyTensors.domain_size(t::VectorTensor) = domain_size(t.D[1])
 LazyTensors.range_size(t::VectorTensor) = range_size(t.D[1])
 
 ## "Vector of tensors ∘ vector -> scalar"
-struct VectorDotTensor{T,R,D,N,NT<:NTuple{N,LazyTensor{T,R,D}}} <: LazyTensor{T,R,D}
+struct VectorDotTensor{R,D,N,NT<:NTuple{N,LazyTensor{R,D}}} <: LazyTensor{R,D}
     D::NT
     ## TODO: add constructor with tests for checking domain and range size   (allequal(domain_size), tms)
 end
 
 VectorDotTensor(Ds::Vararg{LazyTensor}) = VectorDotTensor(Ds)
 
-function apply(t::VectorDotTensor{<:Any,R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
+function apply(t::VectorDotTensor{R,D,N}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N}
     Dᵢvᵢs = map(tuple_range(N), t.D) do i, Dᵢ
         vᵢ = componentview(v, i)
         apply(Dᵢ, vᵢ, I...)
@@ -170,7 +170,7 @@ LazyTensors.range_size(t::VectorDotTensor) = range_size(t.D[1])
 
 
 ## "Matrix of tensors ∘ vector -> vector"
-struct MatrixTensor{T,R,D,N,M,TT<:TupleTable{N,M,<:NMTuple{N,M,LazyTensor{T,R,D}}}} <: LazyTensor{SVector{N,T},R,D}
+struct MatrixTensor{R,D,N,M,TT<:TupleTable{N,M,<:NMTuple{N,M,LazyTensor{R,D}}}} <: LazyTensor{R,D}
     D::TT # Matrix of Tensors
 end
 
@@ -182,7 +182,7 @@ function MatrixTensor(Ds::Matrix)
     return MatrixTensor(TupleTable(Ds))
 end
 
-function apply(t::MatrixTensor{<:Any,R,D,N,M}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N,M}
+function apply(t::MatrixTensor{R,D,N,M}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {R,D,N,M}
     return map(tuple_range(N)) do i
         @inline
         Dᵢⱼvⱼs = map(tuple_range(M), t.D[i,:]) do j, Dᵢⱼ
