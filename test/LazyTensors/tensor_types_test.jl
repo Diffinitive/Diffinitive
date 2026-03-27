@@ -330,6 +330,15 @@ end
         @test t isa LazyTensor{1, 1}
 
 
+        t2 = MatrixTensor((
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        ))
+
+        @test t2 isa LazyTensor{1, 1}
+        @test t2 == t
+
+
         A = [
             DiagonalTensor(s1) ScalingTensor(3.,(5,));
             ScalingTensor(6., (5,)) DiagonalTensor(s2);

@@ -203,8 +203,12 @@ struct MatrixTensor{N,M,R,D,TT<:TupleTable{N,M,<:NMTuple{N,M,LazyTensor{R,D}}}} 
     D::TT # Matrix of Tensors
 end
 
-function MatrixTensor(Ds::Vararg{NTuple{N, LazyTensor} where N})
+function MatrixTensor(Ds::NTuple{N, NTuple{M, LazyTensor}} where {N,M})
     return MatrixTensor(TupleTable(Ds))
+end
+
+function MatrixTensor(Ds::Vararg{NTuple{N, LazyTensor} where N})
+    return MatrixTensor(Ds)
 end
 
 function MatrixTensor(Ds::Matrix)
