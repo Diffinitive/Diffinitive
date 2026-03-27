@@ -1,6 +1,6 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.12.4"
+julia_version = "1.12.5"
 manifest_format = "2.0"
 project_hash = "09ffd21aba1eada37be92d01708d2df8356cace2"
 
@@ -116,7 +116,7 @@ version = "1.15.1"
 deps = ["LinearAlgebra", "StaticArrays", "TOML"]
 path = "."
 uuid = "5a373a26-915f-4769-bcab-bf03835de17b"
-version = "0.1.5"
+version = "0.1.6"
 
     [deps.Diffinitive.extensions]
     DiffinitiveMakieExt = "Makie"
@@ -572,9 +572,9 @@ version = "2.6.1"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "PrecompileTools", "Random", "StaticArraysCore"]
-git-tree-sha1 = "eee1b9ad8b29ef0d936e3ec9838c7ec089620308"
+git-tree-sha1 = "0f529006004a8be48f1be25f3451186579392d47"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.9.16"
+version = "1.9.17"
 
     [deps.StaticArrays.extensions]
     StaticArraysChainRulesCoreExt = "ChainRulesCore"

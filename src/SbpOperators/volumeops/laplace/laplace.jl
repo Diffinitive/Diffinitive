@@ -1,10 +1,10 @@
 """
-    Laplace{T, Dim, TM} <: LazyTensor{T, Dim, Dim}
+    Laplace{Dim, TM} <: LazyTensor{Dim, Dim}
 
 The Laplace operator, approximating ∑d²/xᵢ² , i = 1,...,`Dim` as a
 `LazyTensor`.
 """
-struct Laplace{T, Dim, TM<:LazyTensor{T, Dim, Dim}} <: LazyTensor{T, Dim, Dim}
+struct Laplace{Dim, TM<:LazyTensor{Dim, Dim}} <: LazyTensor{Dim, Dim}
     D::TM       # Difference operator
     stencil_set::StencilSet # Stencil set of the operator
 end
@@ -51,7 +51,33 @@ function laplace(g::TensorGrid, stencil_set)
     end
     return Δ
 end
+
 laplace(g::EquidistantGrid, stencil_set) = second_derivative(g, stencil_set)
+
+function laplace(grid::MappedGrid, stencil_set)
+    J = map(det,jacobian(grid))
+    J⁻¹ = DiagonalTensor(map(inv, J))
+
+    Jg = map(J, metric_tensor(grid)) do Jₓ, gₓ
+        Jₓ*inv(gₓ)
+    end
+
+    lg = logical_grid(grid)
+
+    return mapreduce(+, CartesianIndices(first(Jg))) do I
+        i, j = I[1], I[2]
+        Jgⁱʲ = componentview(Jg, i, j)
+
+        if i == j
+            J⁻¹∘second_derivative_variable(lg, Jgⁱʲ, stencil_set, i)
+        else
+            Dᵢ = first_derivative(lg, stencil_set, i)
+            Dⱼ = first_derivative(lg, stencil_set, j)
+            J⁻¹∘Dᵢ∘DiagonalTensor(Jgⁱʲ)∘Dⱼ
+        end
+    end
+end
+
 
 """
     sat_tensors(Δ::Laplace, g::Grid, bc::DirichletCondition; H_tuning, R_tuning)
@@ -116,8 +142,8 @@ function positivity_limits(Δ::Laplace, g::EquidistantGrid, b::BoundaryIdentifie
     θ_H = parse_scalar(Δ.stencil_set["H"]["closure"][1])
     θ_R = parse_scalar(Δ.stencil_set["D2"]["positivity"]["theta_R"])
 
-    τ_H = one(eltype(Δ))/(h*θ_H)
-    τ_R = one(eltype(Δ))/(h*θ_R)
+    τ_H = one(h)/(h*θ_H)
+    τ_R = one(h)/(h*θ_R)
     return τ_H, τ_R
 end
 

@@ -4,27 +4,27 @@ using Diffinitive.RegionIndices
 
 using Tullio
 
-struct TransposableDummyMapping{T,R,D} <: LazyTensor{T,R,D} end
+struct TransposableDummyMapping{R,D} <: LazyTensor{R,D} end
 
-LazyTensors.apply(m::TransposableDummyMapping{T,R}, v, I::Vararg{Any,R}) where {T,R} = :apply
-LazyTensors.apply_transpose(m::TransposableDummyMapping{T,R,D}, v, I::Vararg{Any,D}) where {T,R,D} = :apply_transpose
+LazyTensors.apply(m::TransposableDummyMapping{R}, v, I::Vararg{Any,R}) where R = :apply
+LazyTensors.apply_transpose(m::TransposableDummyMapping{R,D}, v, I::Vararg{Any,D}) where {R,D} = :apply_transpose
 
 LazyTensors.range_size(m::TransposableDummyMapping) = :range_size
 LazyTensors.domain_size(m::TransposableDummyMapping) = :domain_size
 
 
-struct SizeDoublingMapping{T,R,D} <: LazyTensor{T,R,D}
+struct SizeDoublingMapping{R,D} <: LazyTensor{R,D}
     domain_size::NTuple{D,Int}
 end
 
-LazyTensors.apply(m::SizeDoublingMapping{T,R}, v, i::Vararg{Any,R}) where {T,R} = (:apply,v,i)
+LazyTensors.apply(m::SizeDoublingMapping{R}, v, i::Vararg{Any,R}) where {R} = (:apply,v,i)
 LazyTensors.range_size(m::SizeDoublingMapping) = 2 .* m.domain_size
 LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
 
 
 @testset "Mapping transpose" begin
-    m = TransposableDummyMapping{Float64,2,3}()
-    @test m' isa LazyTensor{Float64, 3,2}
+    m = TransposableDummyMapping{2,3}()
+    @test m' isa LazyTensor{3,2}
     @test m'' == m
     @test apply(m',zeros(Float64,(0,0)), 0, 0, 0) == :apply_transpose
     @test apply(m'',zeros(Float64,(0,0,0)), 0, 0) == :apply
@@ -36,8 +36,8 @@ end
 
 
 @testset "TensorApplication" begin
-    m = SizeDoublingMapping{Int, 1, 1}((3,))
-    mm = SizeDoublingMapping{Int, 1, 1}((6,))
+    m = SizeDoublingMapping{1, 1}((3,))
+    mm = SizeDoublingMapping{1, 1}((6,))
     v = [0,1,2]
     @test size(m*v) == 2 .*size(v)
     @test (m*v)[1] == (:apply,v,(1,))
@@ -49,8 +49,8 @@ end
     @test (m*v)[CartesianIndex(2)] == (:apply,v,(2,))
     @test (mm*m*v)[CartesianIndex(2)] == (:apply,m*v,(2,))
 
-    m = SizeDoublingMapping{Float64, 2, 2}((3,3))
-    mm = SizeDoublingMapping{Float64, 2, 2}((6,6))
+    m = SizeDoublingMapping{2, 2}((3,3))
+    mm = SizeDoublingMapping{2, 2}((6,6))
     v = ones(3,3)
     @test size(m*v) == 2 .*size(v)
     @test (m*v)[1,2] == (:apply,v,(1,2))
@@ -69,7 +69,7 @@ end
     @test (m*v)[2,1] == 6
 
     @testset "Error on index out of bounds" begin
-        m = SizeDoublingMapping{Int, 1, 1}((3,))
+        m = SizeDoublingMapping{1, 1}((3,))
         v = [0,1,2]
 
         @test_throws BoundsError (m*v)[0]
@@ -78,7 +78,7 @@ end
 
     @testset "Error on unmatched dimensions" begin
         v = [0,1,2]
-        m = SizeDoublingMapping{Int, 2, 1}((3,))
+        m = SizeDoublingMapping{2, 1}((3,))
         @test_throws MethodError m*ones(Int,2,2)
         @test_throws MethodError m*m*v
     end
@@ -181,10 +181,10 @@ end
     @testset "Error on unmatched sizes" begin
         @test_throws Union{DomainSizeMismatch, RangeSizeMismatch} ScalingTensor(2.0, (3,)) + ScalingTensor(2.0, (4,))
 
-        @test_throws DomainSizeMismatch ScalingTensor(2.0, (4,)) + SizeDoublingMapping{Float64,1,1}((2,))
-        @test_throws DomainSizeMismatch SizeDoublingMapping{Float64,1,1}((2,)) + ScalingTensor(2.0, (4,))
-        @test_throws RangeSizeMismatch ScalingTensor(2.0, (2,)) + SizeDoublingMapping{Float64,1,1}((2,))
-        @test_throws RangeSizeMismatch SizeDoublingMapping{Float64,1,1}((2,)) + ScalingTensor(2.0, (2,))
+        @test_throws DomainSizeMismatch ScalingTensor(2.0, (4,)) + SizeDoublingMapping{1,1}((2,))
+        @test_throws DomainSizeMismatch SizeDoublingMapping{1,1}((2,)) + ScalingTensor(2.0, (4,))
+        @test_throws RangeSizeMismatch ScalingTensor(2.0, (2,)) + SizeDoublingMapping{1,1}((2,))
+        @test_throws RangeSizeMismatch SizeDoublingMapping{1,1}((2,)) + ScalingTensor(2.0, (2,))
     end
 
     @testset "Chained operators" begin
@@ -258,12 +258,12 @@ end
     C = DenseTensor(C̃,(1,),(2,3))
 
     @testset "Constructors" begin
-        @test InflatedTensor(I(3,2), A, I(4)) isa LazyTensor{Float64, 4, 4}
-        @test InflatedTensor(I(3,2), B, I(4)) isa LazyTensor{Float64, 5, 4}
-        @test InflatedTensor(I(3), C, I(2,3)) isa LazyTensor{Float64, 4, 5}
-        @test InflatedTensor(C, I(2,3)) isa LazyTensor{Float64, 3, 4}
-        @test InflatedTensor(I(3), C) isa LazyTensor{Float64, 2, 3}
-        @test InflatedTensor(I(3), I(2,3)) isa LazyTensor{Float64, 3, 3}
+        @test InflatedTensor(I(3,2), A, I(4)) isa LazyTensor{4, 4}
+        @test InflatedTensor(I(3,2), B, I(4)) isa LazyTensor{5, 4}
+        @test InflatedTensor(I(3), C, I(2,3)) isa LazyTensor{4, 5}
+        @test InflatedTensor(C, I(2,3)) isa LazyTensor{3, 4}
+        @test InflatedTensor(I(3), C) isa LazyTensor{2, 3}
+        @test InflatedTensor(I(3), I(2,3)) isa LazyTensor{3, 3}
     end
 
     @testset "Range and domain size" begin
@@ -375,7 +375,7 @@ end
     C = ScalingTensor(5.0, (3,2))
 
     AB = LazyOuterProduct(A,B)
-    @test AB isa LazyTensor{T,2,2} where T
+    @test AB isa LazyTensor{2,2}
     @test range_size(AB) == (5,3)
     @test domain_size(AB) == (5,3)
 
@@ -384,7 +384,7 @@ end
 
     ABC = LazyOuterProduct(A,B,C)
 
-    @test ABC isa LazyTensor{T,4,4} where T
+    @test ABC isa LazyTensor{4,4}
     @test range_size(ABC) == (5,3,3,2)
     @test domain_size(ABC) == (5,3,3,2)
 
@@ -423,13 +423,13 @@ end
 
 @testset "inflate" begin
     I = LazyTensors.inflate(IdentityTensor(),(3,4,5,6), 2)
-    @test I isa LazyTensor{Float64, 3,3}
+    @test I isa LazyTensor{3,3}
     @test range_size(I) == (3,5,6)
     @test domain_size(I) == (3,5,6)
 
-    @test LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 1) == InflatedTensor(IdentityTensor{Float64}(),ScalingTensor(1., (4,)),IdentityTensor(4,5,6))
+    @test LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 1) == InflatedTensor(IdentityTensor(),ScalingTensor(1., (4,)),IdentityTensor(4,5,6))
     @test LazyTensors.inflate(ScalingTensor(2., (1,)),(3,4,5,6), 2) == InflatedTensor(IdentityTensor(3),ScalingTensor(2., (1,)),IdentityTensor(5,6))
-    @test LazyTensors.inflate(ScalingTensor(3., (6,)),(3,4,5,6), 4) == InflatedTensor(IdentityTensor(3,4,5),ScalingTensor(3., (6,)),IdentityTensor{Float64}())
+    @test LazyTensors.inflate(ScalingTensor(3., (6,)),(3,4,5,6), 4) == InflatedTensor(IdentityTensor(3,4,5),ScalingTensor(3., (6,)),IdentityTensor())
 
     @test_throws BoundsError LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 0)
     @test_throws BoundsError LazyTensors.inflate(ScalingTensor(1., (4,)),(3,4,5,6), 5)

@@ -19,7 +19,7 @@ import Diffinitive.SbpOperators.even
     @testset "Constructors" begin
         op = VolumeOperator(inner_stencil, closure_stencils, 11, even)
         @test op == VolumeOperator(g,inner_stencil,closure_stencils,even)
-        @test op isa LazyTensor{T,1,1} where T
+        @test op isa LazyTensor{1,1}
     end
 
     @testset "Sizes" begin

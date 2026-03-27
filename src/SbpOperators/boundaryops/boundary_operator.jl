@@ -1,5 +1,5 @@
 """
-    BoundaryOperator{T,B,N} <: LazyTensor{T,0,1}
+    BoundaryOperator{T,B,N} <: LazyTensor{0,1}
 
 Implements the boundary operator `op` for 1D as a `LazyTensor`
 
@@ -8,7 +8,7 @@ Implements the boundary operator `op` for 1D as a `LazyTensor`
 prolongation of a zero dimensional array to the whole grid using the same
 closure stencil.
 """
-struct BoundaryOperator{T,B<:BoundaryIdentifier,N} <: LazyTensor{T,0,1}
+struct BoundaryOperator{T,B<:BoundaryIdentifier,N} <: LazyTensor{0,1}
     stencil::Stencil{T,N}
     size::Int
 end

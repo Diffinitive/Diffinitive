@@ -1,32 +1,42 @@
 """
-    second_derivative_variable(g, coeff ..., [direction])
+    second_derivative_variable(g, coeff, ..., [dim])
 
 The variable second derivative operator as a `LazyTensor` on the given grid.
 `coeff` is a grid function of the variable coefficient.
 
 Approximates the d/dξ c d/dξ on `g` along the coordinate dimension specified
-by `direction`.
+by `dim`.
 """
 function second_derivative_variable end
 
-function second_derivative_variable(g::TensorGrid, coeff, stencil_set, dir::Int)
+function second_derivative_variable(g::TensorGrid, coeff, stencil_set, dim::Int)
+    if dim ∉ 1:ndims(g)
+        throw(DomainError(dim, "Derivative direction must be in 1:$(ndims(g))."))
+    end
     inner_stencil    = parse_nested_stencil(eltype(coeff), stencil_set["D2variable"]["inner_stencil"])
     closure_stencils = parse_nested_stencil.(eltype(coeff), stencil_set["D2variable"]["closure_stencils"])
 
-    return second_derivative_variable(g, coeff, inner_stencil, closure_stencils, dir)
+    return second_derivative_variable(g, coeff, inner_stencil, closure_stencils, dim)
 end
 
 function second_derivative_variable(g::EquidistantGrid, coeff, stencil_set)
     return second_derivative_variable(TensorGrid(g), coeff, stencil_set, 1)
 end
 
-function second_derivative_variable(g::TensorGrid, coeff, inner_stencil::NestedStencil, closure_stencils, dir)
+function second_derivative_variable(g::EquidistantGrid, coeff, stencil_set, dim)
+    if dim != 1
+        throw(DomainError(dim, "Derivative direction must be 1."))
+    end
+    return second_derivative_variable(g, coeff, stencil_set)
+end
+
+function second_derivative_variable(g::TensorGrid, coeff, inner_stencil::NestedStencil, closure_stencils, dim)
     check_coefficient(g, coeff)
 
-    Δxᵢ = spacing(g.grids[dir])
+    Δxᵢ = spacing(g.grids[dim])
     scaled_inner_stencil = scale(inner_stencil, 1/Δxᵢ^2)
     scaled_closure_stencils = scale.(Tuple(closure_stencils), 1/Δxᵢ^2)
-    return SecondDerivativeVariable(coeff, scaled_inner_stencil, scaled_closure_stencils, dir)
+    return SecondDerivativeVariable(coeff, scaled_inner_stencil, scaled_closure_stencils, dim)
 end
 
 function check_coefficient(g, coeff)
@@ -45,7 +55,7 @@ end
 
 A second derivative operator in direction `Dir` with a variable coefficient.
 """
-struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:NestedStencil{T},TArray<:AbstractArray} <: LazyTensor{T,D,D}
+struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:NestedStencil{T},TArray<:AbstractArray} <: LazyTensor{D,D}
     inner_stencil::IStencil
     closure_stencils::NTuple{M,CStencil}
     coefficient::TArray
@@ -140,6 +150,7 @@ end
 
 ## x-direction
 function apply_lower(op::SecondDerivativeVariable{1}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[:,j]
     c̃ = @view op.coefficient[:,j]
 
@@ -147,6 +158,7 @@ function apply_lower(op::SecondDerivativeVariable{1}, v, i, j)
 end
 
 function apply_interior(op::SecondDerivativeVariable{1}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[:,j]
     c̃ = @view op.coefficient[:,j]
 
@@ -154,6 +166,7 @@ function apply_interior(op::SecondDerivativeVariable{1}, v, i, j)
 end
 
 function apply_upper(op::SecondDerivativeVariable{1}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[:,j]
     c̃ = @view op.coefficient[:,j]
 
@@ -165,6 +178,7 @@ end
 
 ## y-direction
 function apply_lower(op::SecondDerivativeVariable{2}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[i,:]
     c̃ = @view op.coefficient[i,:]
 
@@ -172,6 +186,7 @@ function apply_lower(op::SecondDerivativeVariable{2}, v, i, j)
 end
 
 function apply_interior(op::SecondDerivativeVariable{2}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[i,:]
     c̃ = @view op.coefficient[i,:]
 
@@ -179,6 +194,7 @@ function apply_interior(op::SecondDerivativeVariable{2}, v, i, j)
 end
 
 function apply_upper(op::SecondDerivativeVariable{2}, v, i, j)
+    Base.@constprop :aggressive
     ṽ = @view v[i,:]
     c̃ = @view op.coefficient[i,:]
 

@@ -82,6 +82,7 @@ include("tensor_grid.jl")
 include("equidistant_grid.jl")
 include("zero_dim_grid.jl")
 include("mapped_grid.jl")
+include("geometry.jl")
 
 function __init__()
     if !isdefined(Base.Experimental, :register_error_hint)
