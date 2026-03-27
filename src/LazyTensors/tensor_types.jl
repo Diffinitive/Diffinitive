@@ -149,6 +149,10 @@ end
 
 VectorTensor(Ds::Vararg{LazyTensor}) = VectorTensor(Ds)
 
+function VectorTensor(f, n)
+    return VectorTensor(map(f, tuple_range(n)))
+end
+
 function apply(t::VectorTensor{N,R,D}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {N,R,D}
     return map(t.D) do Dᵢ
         apply(Dᵢ, v, I...)
@@ -175,6 +179,10 @@ struct VectorDotTensor{N,R,D,NT<:NTuple{N,LazyTensor{R,D}}} <: LazyTensor{R,D}
 end
 
 VectorDotTensor(Ds::Vararg{LazyTensor}) = VectorDotTensor(Ds)
+
+function VectorDotTensor(f, n)
+    return VectorDotTensor(map(f, tuple_range(n)))
+end
 
 function apply(t::VectorDotTensor{N,R,D}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {N,R,D}
     Dᵢvᵢs = map(tuple_range(N), t.D) do i, Dᵢ
@@ -213,6 +221,14 @@ end
 
 function MatrixTensor(Ds::Matrix)
     return MatrixTensor(TupleTable(Ds))
+end
+
+function MatrixTensor(f, n, m)
+    return map(tuple_range(n)) do i
+        map(tuple_range(m)) do j
+            f(i,j)
+        end
+    end |> MatrixTensor
 end
 
 function apply(t::MatrixTensor{N,M,R,D}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {N,M,R,D}

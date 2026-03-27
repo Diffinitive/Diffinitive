@@ -244,6 +244,11 @@ end
     @testset "Constructors" begin
         s = [4., 6., 5., 6., 7.]
         @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
+
+        A = VectorTensor(3) do i
+            DiagonalTensor(i*s)
+        end
+        @test A == VectorTensor(DiagonalTensor(s),DiagonalTensor(2s),DiagonalTensor(3s))
     end
 
     @testset "apply" begin
@@ -282,6 +287,11 @@ end
     @testset "Constructors" begin
         s = [4., 6., 5., 6., 7.]
         @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
+
+         A = VectorDotTensor(3) do i
+            DiagonalTensor(i*s)
+        end
+        @test A == VectorDotTensor(DiagonalTensor(s),DiagonalTensor(2s),DiagonalTensor(3s))
     end
 
     @testset "apply" begin
@@ -349,6 +359,17 @@ end
         TT = TupleTable(A)
 
         @test MatrixTensor(TT) == t
+
+
+        A = MatrixTensor(3,2) do i,j
+            DiagonalTensor(i*s1 + j*s2)
+        end
+
+        @test A == MatrixTensor(
+            (DiagonalTensor(1s1 + 1s2), DiagonalTensor(1s1 + 2s2)),
+            (DiagonalTensor(2s1 + 1s2), DiagonalTensor(2s1 + 2s2)),
+            (DiagonalTensor(3s1 + 1s2), DiagonalTensor(3s1 + 2s2)),
+        )
     end
 
     @testset "apply" begin
