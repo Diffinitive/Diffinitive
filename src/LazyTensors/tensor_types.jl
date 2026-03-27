@@ -131,6 +131,11 @@ function Base.adjoint(tt::TupleTable)
     end |> TupleTable
 end
 
+function Base.:(==)(a::TupleTable, b::TupleTable)
+    return a.table == b.table
+end
+
+
 ## "Vector of tensors ∘ scalar -> vector"
 struct VectorTensor{N,R,D,NT<:NTuple{N,LazyTensor{R,D}}} <: LazyTensor{R,D}
     D::NT

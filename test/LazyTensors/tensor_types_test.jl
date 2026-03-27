@@ -221,6 +221,14 @@ end
         expected = TupleTable((1-1im, 4-4im),(2-2im, 5-5im),(3-3im, 6-6im))
         @test adjoint(tt) == expected
     end
+
+    @testset "Base.:(==)" begin
+        @test TupleTable((1,2),(3,4)) == TupleTable((1,2),(3,4))
+        @test TupleTable(([1,2],2),(3,4)) == TupleTable(([1,2],2),(3,4))
+
+        @test TupleTable((2,2),(3,4)) != TupleTable((1,2),(3,4))
+        @test TupleTable(([2,2],2),(3,4)) != TupleTable(([1,2],2),(3,4))
+    end
 end
 
 @testset "VectorTensor" begin
