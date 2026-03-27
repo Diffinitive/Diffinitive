@@ -1,5 +1,5 @@
 """
-    StencilOperatorDistinctClosures{T,K,N,M,L} <: LazyTensor{T,1}
+    StencilOperatorDistinctClosures{T,K,N,M,L} <: LazyTensor{1,1}
 
 A one dimensional stencil operator with separate closures for the two
 boundaries.
@@ -12,7 +12,7 @@ operators.
 
 See also: [`VolumeOperator`](@ref)
 """
-struct StencilOperatorDistinctClosures{T,K,N,M,LC<:NTuple{N,Stencil{T,L}} where L, UC<:NTuple{M,Stencil{T,L}} where L} <: LazyTensor{T,1,1}
+struct StencilOperatorDistinctClosures{T,K,N,M,LC<:NTuple{N,Stencil{T,L}} where L, UC<:NTuple{M,Stencil{T,L}} where L} <: LazyTensor{1,1}
     inner_stencil::Stencil{T,K}
     lower_closure::LC
     upper_closure::UC

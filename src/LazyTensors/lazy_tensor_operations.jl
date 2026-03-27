@@ -7,11 +7,11 @@ Allows the result of a `LazyTensor` applied to a vector to be treated as an `Abs
 With a mapping `m` and a vector `v` the TensorApplication object can be created by `m*v`.
 The actual result will be calculated when indexing into `m*v`.
 """
-struct TensorApplication{T,R,D, TM<:LazyTensor{<:Any,R,D}, AA<:AbstractArray{<:Any,D}} <: LazyArray{T,R}
+struct TensorApplication{T,R,D, TM<:LazyTensor{R,D}, AA<:AbstractArray{<:Any,D}} <: LazyArray{T,R}
     t::TM
     o::AA
 
-    function TensorApplication(t::LazyTensor{<:Any,R,D}, o::AbstractArray{<:Any,D}) where {R,D}
+    function TensorApplication(t::LazyTensor{R,D}, o::AbstractArray{<:Any,D}) where {R,D}
         @boundscheck check_domain_size(t, size(o))
         I = ntuple(i->1, range_dim(t))
         T = typeof(apply(t,o,I...))
@@ -28,7 +28,7 @@ Base.size(ta::TensorApplication) = range_size(ta.t)
 
 
 """
-    TensorTranspose{T,R,D} <: LazyTensor{T,D,R}
+    TensorTranspose{R,D} <: LazyTensor{D,R}
 
 Struct for lazy transpose of a LazyTensor.
 
@@ -36,7 +36,7 @@ If a mapping implements the the `apply_transpose` method this allows working wit
 the transpose of mapping `m` by using `m'`. `m'` will work as a regular LazyTensor lazily calling
 the appropriate methods of `m`.
 """
-struct TensorTranspose{T,R,D, TM<:LazyTensor{T,R,D}} <: LazyTensor{T,D,R}
+struct TensorTranspose{R,D, TM<:LazyTensor{R,D}} <: LazyTensor{D,R}
     tm::TM
 end
 
@@ -45,19 +45,19 @@ end
 Base.adjoint(tm::LazyTensor) = TensorTranspose(tm)
 Base.adjoint(tmt::TensorTranspose) = tmt.tm
 
-apply(tmt::TensorTranspose{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D} = apply_transpose(tmt.tm, v, I...)
-apply_transpose(tmt::TensorTranspose{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D} = apply(tmt.tm, v, I...)
+apply(tmt::TensorTranspose{R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,D} = apply_transpose(tmt.tm, v, I...)
+apply_transpose(tmt::TensorTranspose{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {R,D} = apply(tmt.tm, v, I...)
 
 range_size(tmt::TensorTranspose) = domain_size(tmt.tm)
 domain_size(tmt::TensorTranspose) = range_size(tmt.tm)
 
 
 """
-    TensorNegation{T,R,D,...} <: LazyTensor{T,R,D}
+    TensorNegation{R,D} <: LazyTensor{R,D}
 
 The negation of a LazyTensor.
 """
-struct TensorNegation{T,R,D,TM<:LazyTensor{T,R,D}} <: LazyTensor{T,R,D}
+struct TensorNegation{R,D,TM<:LazyTensor{R,D}} <: LazyTensor{R,D}
     tm::TM
 end
 
@@ -69,20 +69,20 @@ domain_size(tm::TensorNegation) = domain_size(tm.tm)
 
 
 """
-    TensorSum{T,R,D,...} <: LazyTensor{T,R,D}
+    TensorSum{R,D,...} <: LazyTensor{R,D}
 
 The lazy sum of 2 or more lazy tensors.
 """
-struct TensorSum{T,R,D,TT<:NTuple{N, LazyTensor{T,R,D}} where N} <: LazyTensor{T,R,D}
+struct TensorSum{R,D,TT<:NTuple{N, LazyTensor{R,D}} where N} <: LazyTensor{R,D}
     tms::TT
 
-    function TensorSum{T,R,D}(tms::TT) where {T,R,D, TT<:NTuple{N, LazyTensor{T,R,D}} where N}
+    function TensorSum{R,D}(tms::TT) where {R,D, TT<:NTuple{N, LazyTensor{R,D}} where N}
         @boundscheck map(tms) do tm
             check_domain_size(tm, domain_size(tms[1]))
             check_range_size(tm, range_size(tms[1]))
         end
 
-        return new{T,R,D,TT}(tms)
+        return new{R,D,TT}(tms)
     end
 end
 
@@ -92,13 +92,12 @@ end
 The lazy sum of the tensors `ts`.
 """
 function TensorSum(ts::Vararg{LazyTensor})
-    T = eltype(ts[1])
     R = range_dim(ts[1])
     D = domain_dim(ts[1])
-    return TensorSum{T,R,D}(ts)
+    return TensorSum{R,D}(ts)
 end
 
-function apply(tmBinOp::TensorSum{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
+function apply(tmBinOp::TensorSum{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {R,D}
     vs = map(tmBinOp.tms) do tm
         apply(tm,v,I...)
     end
@@ -106,7 +105,7 @@ function apply(tmBinOp::TensorSum{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{A
     return +(vs...)
 end
 
-function apply_transpose(tmBinOp::TensorSum{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
+function apply_transpose(tmBinOp::TensorSum{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {R,D}
     vs = map(tmBinOp.tms) do tm
         apply_transpose(tm,v,I...)
     end
@@ -119,28 +118,28 @@ domain_size(tmBinOp::TensorSum) = domain_size(tmBinOp.tms[1])
 
 
 """
-    TensorComposition{T,R,K,D}
+    TensorComposition{R,K,D}
 
 Lazily compose two `LazyTensor`s, so that they can be handled as a single `LazyTensor`.
 """
-struct TensorComposition{T,R,K,D, TM1<:LazyTensor{T,R,K}, TM2<:LazyTensor{T,K,D}} <: LazyTensor{T,R,D}
+struct TensorComposition{R,K,D, TM1<:LazyTensor{R,K}, TM2<:LazyTensor{K,D}} <: LazyTensor{R,D}
     t1::TM1
     t2::TM2
 
-    function TensorComposition(t1::LazyTensor{T,R,K}, t2::LazyTensor{T,K,D}) where {T,R,K,D}
+    function TensorComposition(t1::LazyTensor{R,K}, t2::LazyTensor{K,D}) where {R,K,D}
         @boundscheck check_domain_size(t1, range_size(t2))
-        return new{T,R,K,D, typeof(t1), typeof(t2)}(t1,t2)
+        return new{R,K,D, typeof(t1), typeof(t2)}(t1,t2)
     end
 end
 
 range_size(tm::TensorComposition) = range_size(tm.t1)
 domain_size(tm::TensorComposition) = domain_size(tm.t2)
 
-function apply(c::TensorComposition{T,R,K,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,K,D}
+function apply(c::TensorComposition{R,K,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {R,K,D}
     apply(c.t1, c.t2*v, I...)
 end
 
-function apply_transpose(c::TensorComposition{T,R,K,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,K,D}
+function apply_transpose(c::TensorComposition{R,K,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,K,D}
     apply_transpose(c.t2, c.t1'*v, I...)
 end
 
@@ -150,35 +149,35 @@ end
 
 Composes a `LazyTensor` `tm` with an `IdentityTensor` `tmi`, by returning `tm`
 """
-function TensorComposition(tm::LazyTensor{T,R,D}, tmi::IdentityTensor{T,D}) where {T,R,D}
+function TensorComposition(tm::LazyTensor{R,D}, tmi::IdentityTensor{D}) where {R,D}
     @boundscheck check_domain_size(tm, range_size(tmi))
     return tm
 end
 
-function TensorComposition(tmi::IdentityTensor{T,R}, tm::LazyTensor{T,R,D}) where {T,R,D}
+function TensorComposition(tmi::IdentityTensor{R}, tm::LazyTensor{R,D}) where {R,D}
     @boundscheck check_domain_size(tmi, range_size(tm))
     return tm
 end
 # Specialization for the case where tm is an IdentityTensor. Required to resolve ambiguity.
-function TensorComposition(tm::IdentityTensor{T,D}, tmi::IdentityTensor{T,D}) where {T,D}
+function TensorComposition(tm::IdentityTensor{D}, tmi::IdentityTensor{D}) where {D}
     @boundscheck check_domain_size(tm, range_size(tmi))
     return tmi
 end
 
-Base.:*(a::T, tm::LazyTensor{T}) where T = TensorComposition(ScalingTensor{T,range_dim(tm)}(a,range_size(tm)), tm)
-Base.:*(tm::LazyTensor{T}, a::T) where T = a*tm
+Base.:*(a, tm::LazyTensor) = TensorComposition(ScalingTensor(a,range_size(tm)), tm)
+Base.:*(tm::LazyTensor, a) = a*tm
 
 """
-    InflatedTensor{T,R,D} <: LazyTensor{T,R,D}
+    InflatedTensor{R,D} <: LazyTensor{R,D}
 
 An inflated `LazyTensor` with dimensions added before and after its actual dimensions.
 """
-struct InflatedTensor{T,R,D,D_before,R_middle,D_middle,D_after, TM<:LazyTensor{T,R_middle,D_middle}} <: LazyTensor{T,R,D}
-    before::IdentityTensor{T,D_before}
+struct InflatedTensor{R,D,D_before,R_middle,D_middle,D_after, TM<:LazyTensor{R_middle,D_middle}} <: LazyTensor{R,D}
+    before::IdentityTensor{D_before}
     tm::TM
-    after::IdentityTensor{T,D_after}
+    after::IdentityTensor{D_after}
 
-    function InflatedTensor(before, tm::LazyTensor{T}, after) where T
+    function InflatedTensor(before, tm::LazyTensor, after)
         R_before = range_dim(before)
         R_middle = range_dim(tm)
         R_after = range_dim(after)
@@ -188,7 +187,7 @@ struct InflatedTensor{T,R,D,D_before,R_middle,D_middle,D_after, TM<:LazyTensor{T
         D_middle = domain_dim(tm)
         D_after = domain_dim(after)
         D = D_before+D_middle+D_after
-        return new{T,R,D,D_before,R_middle,D_middle,D_after, typeof(tm)}(before, tm, after)
+        return new{R,D,D_before,R_middle,D_middle,D_after, typeof(tm)}(before, tm, after)
     end
 end
 
@@ -214,10 +213,10 @@ function InflatedTensor(before, itm::InflatedTensor, after)
     )
 end
 
-InflatedTensor(before::IdentityTensor, tm::LazyTensor) = InflatedTensor(before,tm,IdentityTensor{eltype(tm)}())
-InflatedTensor(tm::LazyTensor, after::IdentityTensor) = InflatedTensor(IdentityTensor{eltype(tm)}(),tm,after)
+InflatedTensor(before::IdentityTensor, tm::LazyTensor) = InflatedTensor(before,tm,IdentityTensor())
+InflatedTensor(tm::LazyTensor, after::IdentityTensor) = InflatedTensor(IdentityTensor(),tm,after)
 # Resolve ambiguity between the two previous methods
-InflatedTensor(I1::IdentityTensor, I2::IdentityTensor) = InflatedTensor(I1,I2,IdentityTensor{promote_type(eltype(I1), eltype(I2))}())
+InflatedTensor(I1::IdentityTensor, I2::IdentityTensor) = InflatedTensor(I1,I2,IdentityTensor())
 
 # TODO: Implement some pretty printing in terms of ⊗. E.g InflatedTensor(I(3),B,I(2)) -> I(3)⊗B⊗I(2)
 
@@ -237,7 +236,7 @@ function domain_size(itm::InflatedTensor)
     )
 end
 
-function apply(itm::InflatedTensor{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {T,R,D}
+function apply(itm::InflatedTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {R,D}
     dim_before = range_dim(itm.before)
     dim_domain = domain_dim(itm.tm)
     dim_range = range_dim(itm.tm)
@@ -249,7 +248,7 @@ function apply(itm::InflatedTensor{T,R,D}, v::AbstractArray{<:Any,D}, I::Vararg{
     return apply(itm.tm, v_inner, inner_index...)
 end
 
-function apply_transpose(itm::InflatedTensor{T,R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {T,R,D}
+function apply_transpose(itm::InflatedTensor{R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,D}
     dim_before = range_dim(itm.before)
     dim_domain = domain_dim(itm.tm)
     dim_range = range_dim(itm.tm)
@@ -301,14 +300,14 @@ To apply ``A⊗B⊗C`` we evaluate
 """
 function LazyOuterProduct end
 
-function LazyOuterProduct(tm1::LazyTensor{T}, tm2::LazyTensor{T}) where T
-    itm1 = InflatedTensor(tm1, IdentityTensor{T}(range_size(tm2)))
-    itm2 = InflatedTensor(IdentityTensor{T}(domain_size(tm1)),tm2)
+function LazyOuterProduct(tm1::LazyTensor, tm2::LazyTensor)
+    itm1 = InflatedTensor(tm1, IdentityTensor(range_size(tm2)))
+    itm2 = InflatedTensor(IdentityTensor(domain_size(tm1)),tm2)
 
     return itm1∘itm2
 end
 
-LazyOuterProduct(t1::IdentityTensor, t2::IdentityTensor) = IdentityTensor{promote_type(eltype(t1),eltype(t2))}(t1.size...,t2.size...)
+LazyOuterProduct(t1::IdentityTensor, t2::IdentityTensor) = IdentityTensor(t1.size...,t2.size...)
 LazyOuterProduct(t1::LazyTensor, t2::IdentityTensor) = InflatedTensor(t1, t2)
 LazyOuterProduct(t1::IdentityTensor, t2::LazyTensor) = InflatedTensor(t1, t2)
 
@@ -333,7 +332,7 @@ Dy = inflate(D, (10,10), 2)
 ```
 """
 function inflate(tm::LazyTensor, sz, dir)
-    Is = IdentityTensor{eltype(tm)}.(sz)
+    Is = IdentityTensor.(sz)
     parts = Base.setindex(Is, tm, dir)
     return foldl(⊗, parts)
 end

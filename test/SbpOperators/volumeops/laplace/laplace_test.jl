@@ -19,11 +19,11 @@ using LinearAlgebra
     @testset "Constructors" begin
         @testset "1D" begin
             @test Laplace(g_1D, stencil_set) == Laplace(laplace(g_1D, stencil_set), stencil_set)
-            @test Laplace(g_1D, stencil_set) isa LazyTensor{Float64,1,1}
+            @test Laplace(g_1D, stencil_set) isa LazyTensor{1,1}
         end
         @testset "3D" begin
             @test Laplace(g_3D, stencil_set) == Laplace(laplace(g_3D, stencil_set),stencil_set)
-            @test Laplace(g_3D, stencil_set) isa LazyTensor{Float64,3,3}
+            @test Laplace(g_3D, stencil_set) isa LazyTensor{3,3}
         end
     end
 
@@ -80,16 +80,16 @@ end
     @testset "EquidistantGrid" begin
         Δ = laplace(g_1D, stencil_set)
         @test Δ == second_derivative(g_1D, stencil_set)
-        @test Δ isa LazyTensor{Float64,1,1}
+        @test Δ isa LazyTensor{1,1}
     end
     @testset "TensorGrid" begin
         Δ = laplace(g_3D, stencil_set)
-        @test Δ isa LazyTensor{Float64,3,3}
+        @test Δ isa LazyTensor{3,3}
         Dxx = second_derivative(g_3D, stencil_set, 1)
         Dyy = second_derivative(g_3D, stencil_set, 2)
         Dzz = second_derivative(g_3D, stencil_set, 3)
         @test Δ == Dxx + Dyy + Dzz
-        @test Δ isa LazyTensor{Float64,3,3}
+        @test Δ isa LazyTensor{3,3}
     end
 
     @testset "MappedGrid" begin
@@ -100,7 +100,7 @@ end
 
         g = equidistant_grid(c, 60,60)
 
-        @test laplace(g, stencil_set) isa LazyTensor{<:Any,2,2}
+        @test laplace(g, stencil_set) isa LazyTensor{2,2}
 
         f((x,y)) = sin(4(x + y))
         Δf((x,y)) = -32sin(4(x + y))

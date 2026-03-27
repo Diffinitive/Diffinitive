@@ -1,9 +1,9 @@
 """
-    VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
+    VolumeOperator{T,N,M,K} <: LazyTensor{1,1}
 
 A one-dimensional constant coefficients stencil operator.
 """
-struct VolumeOperator{T,N,M,K} <: LazyTensor{T,1,1}
+struct VolumeOperator{T,N,M,K} <: LazyTensor{1,1}
     inner_stencil::Stencil{T,N}
     closure_stencils::NTuple{M,Stencil{T,K}}
     size::Int
