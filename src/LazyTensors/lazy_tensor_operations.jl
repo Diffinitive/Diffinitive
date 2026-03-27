@@ -77,10 +77,7 @@ struct TensorSum{R,D,TT<:NTuple{N, LazyTensor{R,D}} where N} <: LazyTensor{R,D}
     tms::TT
 
     function TensorSum{R,D}(tms::TT) where {R,D, TT<:NTuple{N, LazyTensor{R,D}} where N}
-        @boundscheck map(tms) do tm
-            check_domain_size(tm, domain_size(tms[1]))
-            check_range_size(tm, range_size(tms[1]))
-        end
+        @boundscheck check_equal_size(tms...)
 
         return new{R,D,TT}(tms)
     end
@@ -130,7 +127,7 @@ struct TensorComposition{R,K,D, TM1<:LazyTensor{R,K}, TM2<:LazyTensor{K,D}} <: L
     t2::TM2
 
     function TensorComposition(t1::LazyTensor{R,K}, t2::LazyTensor{K,D}) where {R,K,D}
-        @boundscheck check_domain_size(t1, range_size(t2))
+        @boundscheck check_composable(t1,t2)
         return new{R,K,D, typeof(t1), typeof(t2)}(t1,t2)
     end
 end
