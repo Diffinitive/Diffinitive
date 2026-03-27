@@ -16,19 +16,28 @@ domain_size(tmi::IdentityTensor) = tmi.size
 apply(tmi::IdentityTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {D} = v[I...]
 apply_transpose(tmi::IdentityTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {D} = v[I...]
 
+"""
+    ZeroTensor{R,D} <: LazyTensor{R,D}
+    ZeroTensor(range_size, domain_size)
 
+A zero tensor of a given size.
+"""
 struct ZeroTensor{R,D} <: LazyTensor{R,D}
     range_size::NTuple{R,Int}
     domain_size::NTuple{D,Int}
 end
 
+"""
+    ZeroTensor(size::Vararg{Int})
+
+A zero operator.
+"""
 ZeroTensor(size::Vararg{Int}) = ZeroTensor(size, size)
 
 Base.zero(t::LazyTensor) = ZeroTensor(range_size(t), domain_size(t))
 
 range_size(t::ZeroTensor) = t.range_size
 domain_size(t::ZeroTensor) = t.domain_size
-
 
 function apply(t::ZeroTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any, R}) where {R,D}
     return zero(eltype(v))
