@@ -366,6 +366,17 @@ function check_range_size(tm::LazyTensor, sz)
     end
 end
 
+function check_equal_size(tms::Vararg{LazyTensor})
+    map(tms) do tm
+        check_domain_size(tm, domain_size(tms[1]))
+        check_range_size(tm, range_size(tms[1]))
+    end
+end
+
+function check_composable(tm1::LazyTensor, tm2::LazyTensor)
+    check_domain_size(tm1, range_size(tm2))
+end
+
 struct DomainSizeMismatch <: Exception
     tm::LazyTensor
     sz
