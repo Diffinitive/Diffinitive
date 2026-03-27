@@ -20,18 +20,18 @@ using LinearAlgebra
         stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "0D" begin
             Hi = inverse_inner_product(ZeroDimGrid(1.), stencil_set)
-            @test Hi isa LazyTensor{T,0,0} where T
+            @test Hi isa LazyTensor{0,0} where T
         end
         @testset "1D" begin
             Hi = inverse_inner_product(g_1D, stencil_set)
-            @test Hi isa LazyTensor{T,1,1} where T
+            @test Hi isa LazyTensor{1,1} where T
         end
         @testset "2D" begin
             Hi = inverse_inner_product(g_2D, stencil_set)
             Hi_x = inverse_inner_product(g_2D.grids[1], stencil_set)
             Hi_y = inverse_inner_product(g_2D.grids[2], stencil_set)
             @test Hi == Hi_x⊗Hi_y
-            @test Hi isa LazyTensor{T,2,2} where T
+            @test Hi isa LazyTensor{2,2} where T
         end
     end
 
@@ -97,7 +97,7 @@ using LinearAlgebra
 
         mg = equidistant_grid(c, 10,13)
 
-        @test inverse_inner_product(mg, stencil_set) isa LazyTensor{<:Any, 2,2}
+        @test inverse_inner_product(mg, stencil_set) isa LazyTensor{2,2}
 
 
         H = inner_product(mg, stencil_set)

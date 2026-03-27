@@ -55,7 +55,7 @@ end
 
 A second derivative operator in direction `Dir` with a variable coefficient.
 """
-struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:NestedStencil{T},TArray<:AbstractArray} <: LazyTensor{T,D,D}
+struct SecondDerivativeVariable{Dir,T,D,M,IStencil<:NestedStencil{T},CStencil<:NestedStencil{T},TArray<:AbstractArray} <: LazyTensor{D,D}
     inner_stencil::IStencil
     closure_stencils::NTuple{M,CStencil}
     coefficient::TArray

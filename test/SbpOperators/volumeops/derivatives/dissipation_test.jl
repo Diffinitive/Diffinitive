@@ -19,8 +19,8 @@ using Diffinitive.SbpOperators: dissipation_transpose_lower_closure_stencils, di
     g = equidistant_grid(0., 11., 20)
     D,Dᵀ = undivided_skewed04(g, 1)
 
-    @test D isa LazyTensor{Float64,1,1}
-    @test Dᵀ isa LazyTensor{Float64,1,1}
+    @test D isa LazyTensor{1,1}
+    @test Dᵀ isa LazyTensor{1,1}
 
      @testset "Accuracy conditions" begin
         N = 20
