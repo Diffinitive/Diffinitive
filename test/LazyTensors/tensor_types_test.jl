@@ -229,6 +229,15 @@ end
         @test TupleTable((2,2),(3,4)) != TupleTable((1,2),(3,4))
         @test TupleTable(([2,2],2),(3,4)) != TupleTable(([1,2],2),(3,4))
     end
+
+    @testset "Base.:+" begin
+        A = TupleTable((1,2),(3,4))
+        @test A+A == TupleTable((2,4),(6,8))
+
+        A = TupleTable((1,2),(3,4))
+        B = TupleTable((3,2),(1,0))
+        @test A+B == TupleTable((4,4),(4,4))
+    end
 end
 
 @testset "VectorTensor" begin
