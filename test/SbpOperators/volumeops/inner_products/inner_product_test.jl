@@ -20,18 +20,18 @@ using LinearAlgebra
         stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
         @testset "0D" begin
             H = inner_product(ZeroDimGrid(0.), stencil_set)
-            @test H isa LazyTensor{T,0,0} where T
+            @test H isa LazyTensor{0,0}
         end
         @testset "1D" begin
             H = inner_product(g_1D, stencil_set)
-            @test H isa LazyTensor{T,1,1} where T
+            @test H isa LazyTensor{1,1}
         end
         @testset "2D" begin
             H = inner_product(g_2D, stencil_set)
             H_x = inner_product(g_2D.grids[1], stencil_set)
             H_y = inner_product(g_2D.grids[2], stencil_set)
             @test H == H_x⊗H_y
-            @test H isa LazyTensor{T,2,2} where T
+            @test H isa LazyTensor{2,2}
         end
 
         # TBD: Should there be more tests?
@@ -107,7 +107,7 @@ using LinearAlgebra
 
         mg = equidistant_grid(c, 10,13)
 
-        @test inner_product(mg, stencil_set) isa LazyTensor{<:Any, 2,2}
+        @test inner_product(mg, stencil_set) isa LazyTensor{2,2}
 
         @testset "Accuracy" begin
             v = function(x̄)

@@ -34,8 +34,8 @@ using BenchmarkTools
 
     Ã = rand(4,2)
     A = DenseTensor(Ã,(1,),(2,))
-    I1 = IdentityTensor{Float64}(2)
-    I2 = IdentityTensor{Float64}(4)
+    I1 = IdentityTensor(2)
+    I2 = IdentityTensor(4)
     @test A∘I1 == A
     @test I2∘A == A
     @test I1∘I1 == I1

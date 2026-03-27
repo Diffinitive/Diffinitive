@@ -18,22 +18,22 @@ using LinearAlgebra
         d_l = normal_derivative(g_1D, stencil_set, LowerBoundary())
         @test d_l == normal_derivative(g_1D, stencil_set, LowerBoundary())
         @test d_l isa BoundaryOperator{T,LowerBoundary} where T
-        @test d_l isa LazyTensor{T,0,1} where T
+        @test d_l isa LazyTensor{0,1}
     end
 
     @testset "TensorGrid" begin
         g_2D = equidistant_grid((0.0, 0.0), (1.0,1.0), 11, 12)
         d_w = normal_derivative(g_2D, stencil_set, CartesianBoundary{1,LowerBoundary}())
         d_n = normal_derivative(g_2D, stencil_set, CartesianBoundary{2,UpperBoundary}())
-        Ix = IdentityTensor{Float64}((size(g_2D)[1],))
-        Iy = IdentityTensor{Float64}((size(g_2D)[2],))
+        Ix = IdentityTensor((size(g_2D)[1],))
+        Iy = IdentityTensor((size(g_2D)[2],))
         d_l = normal_derivative(g_2D.grids[1], stencil_set, LowerBoundary())
         d_r = normal_derivative(g_2D.grids[2], stencil_set, UpperBoundary())
         @test d_w == normal_derivative(g_2D, stencil_set, CartesianBoundary{1,LowerBoundary}())
         @test d_w ==  d_l⊗Iy
         @test d_n ==  Ix⊗d_r
-        @test d_w isa LazyTensor{T,1,2} where T
-        @test d_n isa LazyTensor{T,1,2} where T
+        @test d_w isa LazyTensor{1,2}
+        @test d_n isa LazyTensor{1,2}
 
         @testset "Accuracy" begin
             v = eval_on(g_2D, (x,y)-> x^2 + (y-1)^2 + x*y)
@@ -92,7 +92,7 @@ using LinearAlgebra
 
         for bid ∈ boundary_identifiers(mg)
             @testset let bid=bid
-                @test normal_derivative(mg, stencil_set, bid) isa LazyTensor{<:Any, 1, 2}
+                @test normal_derivative(mg, stencil_set, bid) isa LazyTensor{1, 2}
             end
         end
 

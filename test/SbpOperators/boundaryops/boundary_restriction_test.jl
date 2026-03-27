@@ -19,18 +19,18 @@ using StaticArrays
             e_l = boundary_restriction(g_1D,stencil_set,LowerBoundary())
             @test e_l == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),LowerBoundary())
             @test e_l isa BoundaryOperator{T,LowerBoundary} where T
-            @test e_l isa LazyTensor{T,0,1} where T
+            @test e_l isa LazyTensor{0,1}
 
             e_r = boundary_restriction(g_1D,stencil_set,UpperBoundary())
             @test e_r == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),UpperBoundary())
             @test e_r isa BoundaryOperator{T,UpperBoundary} where T
-            @test e_r isa LazyTensor{T,0,1} where T
+            @test e_r isa LazyTensor{0,1}
         end
 
         @testset "2D" begin
             e_w = boundary_restriction(g_2D,stencil_set,CartesianBoundary{1,UpperBoundary}())
             @test e_w isa InflatedTensor
-            @test e_w isa LazyTensor{T,1,2} where T
+            @test e_w isa LazyTensor{1,2}
         end
 
         @testset "0D" begin

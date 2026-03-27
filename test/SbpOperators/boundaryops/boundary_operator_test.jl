@@ -13,8 +13,8 @@ import Diffinitive.SbpOperators.BoundaryOperator
     g_1D = EquidistantGrid(range(0,1,length=11))
 
     @testset "Constructors" begin
-        @test BoundaryOperator(g_1D, closure_stencil, LowerBoundary()) isa LazyTensor{T,0,1} where T
-        @test BoundaryOperator(g_1D, closure_stencil, UpperBoundary()) isa LazyTensor{T,0,1} where T
+        @test BoundaryOperator(g_1D, closure_stencil, LowerBoundary()) isa LazyTensor{0,1}
+        @test BoundaryOperator(g_1D, closure_stencil, UpperBoundary()) isa LazyTensor{0,1}
     end
 
     op_l = BoundaryOperator(g_1D, closure_stencil, LowerBoundary())

@@ -14,8 +14,8 @@ using Diffinitive.SbpOperators: closure_size, Stencil, VolumeOperator
         g₁ = equidistant_grid(0., 1., 11)
         g₂ = equidistant_grid((0.,1.), (1.,3.), 11, 14)
         
-        @test first_derivative(g₁, stencil_set) isa LazyTensor{Float64,1,1}
-        @test first_derivative(g₂, stencil_set, 2) isa LazyTensor{Float64,2,2}
+        @test first_derivative(g₁, stencil_set) isa LazyTensor{1,1}
+        @test first_derivative(g₂, stencil_set, 2) isa LazyTensor{2,2}
         
         @test first_derivative(g₁, stencil_set) == first_derivative(g₁, stencil_set, 1)
         @test_throws DomainError(3, "Derivative direction must be 1.") first_derivative(g₁, stencil_set, 3)
@@ -24,7 +24,7 @@ using Diffinitive.SbpOperators: closure_size, Stencil, VolumeOperator
         interior_stencil = CenteredStencil(-1,0,1)
         closure_stencils = [Stencil(-1,1, center=1)]
 
-        @test first_derivative(g₁, interior_stencil, closure_stencils) isa LazyTensor{Float64,1,1}
+        @test first_derivative(g₁, interior_stencil, closure_stencils) isa LazyTensor{1,1}
     end
 
     @testset "Accuracy conditions" begin

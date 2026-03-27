@@ -48,7 +48,7 @@ The identity tensor with the correct type parameters.
 
 Implemented to simplify 1D code for SBP operators.
 """
-inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor{component_type(g)}()
+inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor()
 
 
 function inner_product(g::MappedGrid, stencil_set)

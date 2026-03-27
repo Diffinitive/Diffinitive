@@ -73,7 +73,7 @@ domain_size(tm::TensorNegation) = domain_size(tm.tm)
 
 The lazy sum of 2 or more lazy tensors.
 """
-struct TensorSum{R,D,TT<:NTuple{N, LazyTensor{T,R,D}} where N} <: LazyTensor{R,D}
+struct TensorSum{R,D,TT<:NTuple{N, LazyTensor{R,D}} where N} <: LazyTensor{R,D}
     tms::TT
 
     function TensorSum{R,D}(tms::TT) where {R,D, TT<:NTuple{N, LazyTensor{R,D}} where N}
@@ -164,7 +164,7 @@ function TensorComposition(tm::IdentityTensor{D}, tmi::IdentityTensor{D}) where 
     return tmi
 end
 
-Base.:*(a, tm::LazyTensor) = TensorComposition(ScalingTensor{range_dim(tm)}(a,range_size(tm)), tm)
+Base.:*(a, tm::LazyTensor) = TensorComposition(ScalingTensor(a,range_size(tm)), tm)
 Base.:*(tm::LazyTensor, a) = a*tm
 
 """
@@ -213,10 +213,10 @@ function InflatedTensor(before, itm::InflatedTensor, after)
     )
 end
 
-InflatedTensor(before::IdentityTensor, tm::LazyTensor) = InflatedTensor(before,tm,IdentityTensor{eltype(tm)}())
-InflatedTensor(tm::LazyTensor, after::IdentityTensor) = InflatedTensor(IdentityTensor{eltype(tm)}(),tm,after)
+InflatedTensor(before::IdentityTensor, tm::LazyTensor) = InflatedTensor(before,tm,IdentityTensor())
+InflatedTensor(tm::LazyTensor, after::IdentityTensor) = InflatedTensor(IdentityTensor(),tm,after)
 # Resolve ambiguity between the two previous methods
-InflatedTensor(I1::IdentityTensor, I2::IdentityTensor) = InflatedTensor(I1,I2,IdentityTensor{promote_type(eltype(I1), eltype(I2))}())
+InflatedTensor(I1::IdentityTensor, I2::IdentityTensor) = InflatedTensor(I1,I2,IdentityTensor())
 
 # TODO: Implement some pretty printing in terms of ⊗. E.g InflatedTensor(I(3),B,I(2)) -> I(3)⊗B⊗I(2)
 

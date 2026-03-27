@@ -8,7 +8,6 @@ struct IdentityTensor{D} <: LazyTensor{D,D}
     size::NTuple{D,Int}
 end
 
-IdentityTensor(size::NTuple{D,Int}) where D = IdentityTensor{D}(size)
 IdentityTensor(size::Vararg{Int,D}) where D = IdentityTensor{D}(size)
 
 range_size(tmi::IdentityTensor) = tmi.size

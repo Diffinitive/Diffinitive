@@ -69,7 +69,7 @@ end
     @test (m*v)[2,1] == 6
 
     @testset "Error on index out of bounds" begin
-        m = SizeDoublingMapping{Int, 1, 1}((3,))
+        m = SizeDoublingMapping{1, 1}((3,))
         v = [0,1,2]
 
         @test_throws BoundsError (m*v)[0]
@@ -78,7 +78,7 @@ end
 
     @testset "Error on unmatched dimensions" begin
         v = [0,1,2]
-        m = SizeDoublingMapping{Int, 2, 1}((3,))
+        m = SizeDoublingMapping{2, 1}((3,))
         @test_throws MethodError m*ones(Int,2,2)
         @test_throws MethodError m*m*v
     end
@@ -181,10 +181,10 @@ end
     @testset "Error on unmatched sizes" begin
         @test_throws Union{DomainSizeMismatch, RangeSizeMismatch} ScalingTensor(2.0, (3,)) + ScalingTensor(2.0, (4,))
 
-        @test_throws DomainSizeMismatch ScalingTensor(2.0, (4,)) + SizeDoublingMapping{Float64,1,1}((2,))
-        @test_throws DomainSizeMismatch SizeDoublingMapping{Float64,1,1}((2,)) + ScalingTensor(2.0, (4,))
-        @test_throws RangeSizeMismatch ScalingTensor(2.0, (2,)) + SizeDoublingMapping{Float64,1,1}((2,))
-        @test_throws RangeSizeMismatch SizeDoublingMapping{Float64,1,1}((2,)) + ScalingTensor(2.0, (2,))
+        @test_throws DomainSizeMismatch ScalingTensor(2.0, (4,)) + SizeDoublingMapping{1,1}((2,))
+        @test_throws DomainSizeMismatch SizeDoublingMapping{1,1}((2,)) + ScalingTensor(2.0, (4,))
+        @test_throws RangeSizeMismatch ScalingTensor(2.0, (2,)) + SizeDoublingMapping{1,1}((2,))
+        @test_throws RangeSizeMismatch SizeDoublingMapping{1,1}((2,)) + ScalingTensor(2.0, (2,))
     end
 
     @testset "Chained operators" begin

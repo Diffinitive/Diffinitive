@@ -142,8 +142,8 @@ function positivity_limits(Δ::Laplace, g::EquidistantGrid, b::BoundaryIdentifie
     θ_H = parse_scalar(Δ.stencil_set["H"]["closure"][1])
     θ_R = parse_scalar(Δ.stencil_set["D2"]["positivity"]["theta_R"])
 
-    τ_H = one(eltype(Δ))/(h*θ_H)
-    τ_R = one(eltype(Δ))/(h*θ_R)
+    τ_H = one(h)/(h*θ_H)
+    τ_R = one(h)/(h*θ_R)
     return τ_H, τ_R
 end
 
