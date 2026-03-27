@@ -270,6 +270,17 @@ end
         @test t*v == expected
         @test collect(t*v) isa Vector{Float64}
     end
+
+    @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+
+        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) == VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorDotTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) == VectorDotTensor(DiagonalTensor(2s), ScalingTensor(3., (5,)))
+
+        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(2., (5,))) != VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorDotTensor(DiagonalTensor(3s), ScalingTensor(3., (5,))) != VectorDotTensor(DiagonalTensor(2s), ScalingTensor(3., (5,)))
+
+    end
 end
 
 @testset "MatrixTensor" begin
@@ -313,6 +324,51 @@ end
         end
 
         @test t*v == expected
+    end
+
+    @testset "Base.:(==)" begin
+        s1 = [4., 6., 5., 6., 7.]
+        s2 = [6., 9., 3., 5., 7.]
+        A  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A == B
+
+        A  = MatrixTensor(
+            (DiagonalTensor(2s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(2s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A == B
+
+
+        A  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(5., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A != B
+
+        A  = MatrixTensor(
+            (DiagonalTensor(2s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(3s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A != B
     end
 end
 

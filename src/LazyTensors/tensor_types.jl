@@ -179,6 +179,10 @@ Base.adjoint(t::VectorDotTensor) = VectorTensor(map(adjoint, t.D))
 LazyTensors.domain_size(t::VectorDotTensor) = domain_size(t.D[1])
 LazyTensors.range_size(t::VectorDotTensor) = range_size(t.D[1])
 
+function Base.:(==)(a::VectorDotTensor, b::VectorDotTensor)
+    return a.D == b.D
+end
+
 
 ## "Matrix of tensors ∘ vector -> vector"
 struct MatrixTensor{N,M,R,D,TT<:TupleTable{N,M,<:NMTuple{N,M,LazyTensor{R,D}}}} <: LazyTensor{R,D}
@@ -208,5 +212,10 @@ end
 Base.adjoint(t::MatrixTensor) = MatrixTensor(adjoint(t.D))
 LazyTensors.domain_size(t::MatrixTensor) = domain_size(t.D[1,1])
 LazyTensors.range_size(t::MatrixTensor) = range_size(t.D[1,1])
+
+function Base.:(==)(a::MatrixTensor, b::MatrixTensor)
+    return a.D == b.D
+end
+
 
 tuple_range(n) = ntuple(identity, n)
