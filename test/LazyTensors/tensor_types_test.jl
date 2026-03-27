@@ -45,23 +45,23 @@ using BenchmarkTools
 end
 
 @testset "ZeroTensor" begin
-    @test ZeroTensor{Float64,2,2}() isa LazyTensor{Float64, 2, 2}
-    @test zero(LazyTensor{Float64,2,2}) == ZeroTensor{Float64,2,2}()
-    @test zero(LazyTensor{Float64,2,3}) == ZeroTensor{Float64,2,3}()
-    @test zero(ScalingTensor(1, (10,4))) == ZeroTensor{Int,2,2}()
+    @test ZeroTensor{2,2}() isa LazyTensor{2,2}
+    @test zero(LazyTensor{2,2}) == ZeroTensor{2,2}()
+    @test zero(LazyTensor{2,3}) == ZeroTensor{2,3}()
+    @test zero(ScalingTensor(1, (10,4))) == ZeroTensor{2,2}()
 
-    @test ZeroTensor{Float64, 2,2}()∘ZeroTensor{Float64, 2,2}() == ZeroTensor{Float64, 2,2}()
-    @test ZeroTensor{Float64, 1,2}()∘ZeroTensor{Float64, 2,3}() == ZeroTensor{Float64, 1,3}()
-    @test ZeroTensor{Float64, 2, 2}()∘ScalingTensor(1., (10,9)) == ZeroTensor{Float64, 2, 2}()
-    @test ZeroTensor{Float64, 3, 2}()∘ScalingTensor(1., (10,9)) == ZeroTensor{Float64, 3, 2}()
-    @test ScalingTensor(1., (10,9))∘ZeroTensor{Float64, 2, 2}()== ZeroTensor{Float64, 2, 2}()
-    @test ScalingTensor(1., (10,9))∘ZeroTensor{Float64, 2, 3}()== ZeroTensor{Float64, 2, 3}()
+    @test ZeroTensor{2,2}()∘ZeroTensor{2,2}() == ZeroTensor{2,2}()
+    @test ZeroTensor{1,2}()∘ZeroTensor{2,3}() == ZeroTensor{1,3}()
+    @test ZeroTensor{2,2}()∘ScalingTensor(1., (10,9)) == ZeroTensor{2,2}()
+    @test ZeroTensor{3,2}()∘ScalingTensor(1., (10,9)) == ZeroTensor{3,2}()
+    @test ScalingTensor(1., (10,9))∘ZeroTensor{2,2}()== ZeroTensor{2,2}()
+    @test ScalingTensor(1., (10,9))∘ZeroTensor{2,3}()== ZeroTensor{2,3}()
 
 
-    @test ZeroTensor{Float64,2,2}() + ZeroTensor{Float64,2,2}() == ZeroTensor{Float64,2,2}()
-    @test ZeroTensor{Float64,2,3}() + ZeroTensor{Float64,2,3}() == ZeroTensor{Float64,2,3}()
-    @test ZeroTensor{Float64,2,2}() + ScalingTensor(1., (10,9)) == ScalingTensor(1., (10,9))
-    @test ScalingTensor(1., (10,9)) + ZeroTensor{Float64,2,2}() == ScalingTensor(1., (10,9))
+    @test ZeroTensor{2,2}() + ZeroTensor{2,2}() == ZeroTensor{2,2}()
+    @test ZeroTensor{2,3}() + ZeroTensor{2,3}() == ZeroTensor{2,3}()
+    @test ZeroTensor{2,2}() + ScalingTensor(1., (10,9)) == ScalingTensor(1., (10,9))
+    @test ScalingTensor(1., (10,9)) + ZeroTensor{2,2}() == ScalingTensor(1., (10,9))
 end
 
 @testset "ScalingTensor" begin
