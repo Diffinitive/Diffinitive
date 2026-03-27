@@ -51,6 +51,8 @@ domain_size(tm::DiagonalTensor) = size(tm.diagonal)
 LazyTensors.apply(tm::DiagonalTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.diagonal[I...]*v[I...]
 LazyTensors.apply_transpose(tm::DiagonalTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.diagonal[I...]*v[I...]
 
+Base.:(==)(a::DiagonalTensor, b::DiagonalTensor) = a.diagonal == b.diagonal
+
 
 """
     DenseTensor{R,D,...}(A, range_indicies, domain_indicies) <: LazyTensor{R,D}

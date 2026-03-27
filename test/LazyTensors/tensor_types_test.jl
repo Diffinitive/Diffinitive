@@ -98,6 +98,12 @@ end
     v = rand(sz...)
     LazyTensors.apply(tm,v, 2,1)
     @test (@ballocated LazyTensors.apply($tm,$v, 2,1)) == 0
+
+
+    @testset "Base.:(==)" begin
+        @test DiagonalTensor([1,2,3,4]) == DiagonalTensor([1,2,3,4])
+        @test DiagonalTensor([2,2,3,4]) != DiagonalTensor([1,2,3,4])
+    end
 end
 
 
