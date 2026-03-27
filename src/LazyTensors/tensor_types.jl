@@ -18,9 +18,9 @@ apply_transpose(tmi::IdentityTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any
 
 """
     ZeroTensor{R,D} <: LazyTensor{R,D}
-    ZeroTensor(range_size, domain_size)
 
-A zero tensor of a given size.
+A lazy zero tensor which returns zero when applied to anything.
+It provides implementations of `+` and `∘` which short circuits to simplified expressions of the results.
 """
 struct ZeroTensor{R,D} <: LazyTensor{R,D}
     range_size::NTuple{R,Int}
@@ -28,9 +28,17 @@ struct ZeroTensor{R,D} <: LazyTensor{R,D}
 end
 
 """
-    ZeroTensor(size::Vararg{Int})
+    ZeroTensor(range_size, domain_size)
 
-A zero operator.
+A lazy zero tensor with the given range and domain size.
+"""
+ZeroTensor(::Tuple, ::Tuple)
+
+
+"""
+    ZeroTensor(sz::Vararg{Int})
+
+A lazy representation of the zero operator with range size and domain size both equal to `sz`.
 """
 ZeroTensor(size::Vararg{Int}) = ZeroTensor(size, size)
 
