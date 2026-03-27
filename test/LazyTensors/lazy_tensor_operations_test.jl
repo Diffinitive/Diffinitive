@@ -210,6 +210,17 @@ end
         v = rand(3)
         @test (-A-B-C-D)*v == -1v - 2v - 3v - 4v
     end
+
+    @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+
+        @test DiagonalTensor(s) + ScalingTensor(2., (5,)) == DiagonalTensor(s) + ScalingTensor(2., (5,))
+        @test ScalingTensor(3., (5,)) + DiagonalTensor(2s) == ScalingTensor(3., (5,)) + DiagonalTensor(2s)
+
+        @test DiagonalTensor(2s) + ScalingTensor(2., (5,)) != DiagonalTensor(s) + ScalingTensor(2., (5,))
+        @test ScalingTensor(2., (5,)) + DiagonalTensor(2s) != ScalingTensor(3., (5,)) + DiagonalTensor(2s)
+
+    end
 end
 
 

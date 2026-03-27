@@ -100,6 +100,12 @@ end
     v = rand(sz...)
     LazyTensors.apply(tm,v, 2,1)
     @test (@ballocated LazyTensors.apply($tm,$v, 2,1)) == 0
+
+
+    @testset "Base.:(==)" begin
+        @test DiagonalTensor([1,2,3,4]) == DiagonalTensor([1,2,3,4])
+        @test DiagonalTensor([2,2,3,4]) != DiagonalTensor([1,2,3,4])
+    end
 end
 
 
@@ -215,12 +221,34 @@ end
         expected = TupleTable((1-1im, 4-4im),(2-2im, 5-5im),(3-3im, 6-6im))
         @test adjoint(tt) == expected
     end
+
+    @testset "Base.:(==)" begin
+        @test TupleTable((1,2),(3,4)) == TupleTable((1,2),(3,4))
+        @test TupleTable(([1,2],2),(3,4)) == TupleTable(([1,2],2),(3,4))
+
+        @test TupleTable((2,2),(3,4)) != TupleTable((1,2),(3,4))
+        @test TupleTable(([2,2],2),(3,4)) != TupleTable(([1,2],2),(3,4))
+    end
+
+    @testset "Base.:+" begin
+        A = TupleTable((1,2),(3,4))
+        @test A+A == TupleTable((2,4),(6,8))
+
+        A = TupleTable((1,2),(3,4))
+        B = TupleTable((3,2),(1,0))
+        @test A+B == TupleTable((4,4),(4,4))
+    end
 end
 
 @testset "VectorTensor" begin
     @testset "Constructors" begin
         s = [4., 6., 5., 6., 7.]
-        @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{SVector{2,Float64}, 1, 1}
+        @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
+
+        A = VectorTensor(3) do i
+            DiagonalTensor(i*s)
+        end
+        @test A == VectorTensor(DiagonalTensor(s),DiagonalTensor(2s),DiagonalTensor(3s))
     end
 
     @testset "apply" begin
@@ -231,12 +259,39 @@ end
         @test t*v == expected
         @test collect(t*v) isa Vector{SVector{2,Float64}}
     end
+
+    @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+        @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) == VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) == VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,)))
+
+        @test VectorTensor(DiagonalTensor(s), ScalingTensor(2., (5,))) != VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) != VectorTensor(DiagonalTensor(3s), ScalingTensor(3., (5,)))
+    end
+
+    @testset "Base.:+" begin
+        s = [4., 6., 5., 6., 7.]
+        A  = VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        B  = VectorTensor(ScalingTensor(2., (5,)), DiagonalTensor(2s))
+
+        ApB = VectorTensor(
+            DiagonalTensor(s) + ScalingTensor(2., (5,)),
+            ScalingTensor(3., (5,)) + DiagonalTensor(2s),
+        )
+
+        @test A+B == ApB
+    end
 end
 
 @testset "VectorDotTensor" begin
     @testset "Constructors" begin
         s = [4., 6., 5., 6., 7.]
-        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{Float64, 1, 1}
+        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
+
+         A = VectorDotTensor(3) do i
+            DiagonalTensor(i*s)
+        end
+        @test A == VectorDotTensor(DiagonalTensor(s),DiagonalTensor(2s),DiagonalTensor(3s))
     end
 
     @testset "apply" begin
@@ -246,6 +301,30 @@ end
         expected = map((sᵢ, vᵢ)-> sᵢ*vᵢ[1]+3vᵢ[2], s,v)
         @test t*v == expected
         @test collect(t*v) isa Vector{Float64}
+    end
+
+    @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+
+        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) == VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorDotTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) == VectorDotTensor(DiagonalTensor(2s), ScalingTensor(3., (5,)))
+
+        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(2., (5,))) != VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorDotTensor(DiagonalTensor(3s), ScalingTensor(3., (5,))) != VectorDotTensor(DiagonalTensor(2s), ScalingTensor(3., (5,)))
+
+    end
+
+    @testset "Base.:+" begin
+        s = [4., 6., 5., 6., 7.]
+        A  = VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        B  = VectorDotTensor(ScalingTensor(2., (5,)), DiagonalTensor(2s))
+
+        ApB = VectorDotTensor(
+            DiagonalTensor(s) + ScalingTensor(2., (5,)),
+            ScalingTensor(3., (5,)) + DiagonalTensor(2s),
+        )
+
+        @test A+B == ApB
     end
 end
 
@@ -258,7 +337,16 @@ end
             (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
         )
 
-        @test t isa LazyTensor{SVector{2,Float64}, 1, 1}
+        @test t isa LazyTensor{1, 1}
+
+
+        t2 = MatrixTensor((
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        ))
+
+        @test t2 isa LazyTensor{1, 1}
+        @test t2 == t
 
 
         A = [
@@ -271,6 +359,17 @@ end
         TT = TupleTable(A)
 
         @test MatrixTensor(TT) == t
+
+
+        A = MatrixTensor(3,2) do i,j
+            DiagonalTensor(i*s1 + j*s2)
+        end
+
+        @test A == MatrixTensor(
+            (DiagonalTensor(1s1 + 1s2), DiagonalTensor(1s1 + 2s2)),
+            (DiagonalTensor(2s1 + 1s2), DiagonalTensor(2s1 + 2s2)),
+            (DiagonalTensor(3s1 + 1s2), DiagonalTensor(3s1 + 2s2)),
+        )
     end
 
     @testset "apply" begin
@@ -290,6 +389,72 @@ end
         end
 
         @test t*v == expected
+    end
+
+    @testset "Base.:(==)" begin
+        s1 = [4., 6., 5., 6., 7.]
+        s2 = [6., 9., 3., 5., 7.]
+        A  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A == B
+
+        A  = MatrixTensor(
+            (DiagonalTensor(2s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(2s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A == B
+
+
+        A  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(5., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A != B
+
+        A  = MatrixTensor(
+            (DiagonalTensor(2s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(3s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A != B
+    end
+
+    @testset "Base.:+" begin
+        s1 = [4., 6., 5., 6., 7.]
+        s2 = [6., 9., 3., 5., 7.]
+        A  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+
+        B = MatrixTensor(
+            (ScalingTensor(5.,(5,)), DiagonalTensor(2s1)),
+            (DiagonalTensor(2s2), ScalingTensor(7., (5,))),
+        )
+
+        ApB = MatrixTensor(
+            (DiagonalTensor(s1)+ScalingTensor(5.,(5,)), ScalingTensor(3.,(5,))+ DiagonalTensor(2s1)),
+            (ScalingTensor(6., (5,))+DiagonalTensor(2s2), DiagonalTensor(s2) + ScalingTensor(7., (5,))),
+        )
+
+        @test A+B == ApB
     end
 end
 
