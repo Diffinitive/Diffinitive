@@ -263,6 +263,19 @@ end
         @test VectorTensor(DiagonalTensor(s), ScalingTensor(2., (5,))) != VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
         @test VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) != VectorTensor(DiagonalTensor(3s), ScalingTensor(3., (5,)))
     end
+
+    @testset "Base.:+" begin
+        s = [4., 6., 5., 6., 7.]
+        A  = VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        B  = VectorTensor(ScalingTensor(2., (5,)), DiagonalTensor(2s))
+
+        ApB = VectorTensor(
+            DiagonalTensor(s) + ScalingTensor(2., (5,)),
+            ScalingTensor(3., (5,)) + DiagonalTensor(2s),
+        )
+
+        @test A+B == ApB
+    end
 end
 
 @testset "VectorDotTensor" begin
@@ -289,6 +302,19 @@ end
         @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(2., (5,))) != VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
         @test VectorDotTensor(DiagonalTensor(3s), ScalingTensor(3., (5,))) != VectorDotTensor(DiagonalTensor(2s), ScalingTensor(3., (5,)))
 
+    end
+
+    @testset "Base.:+" begin
+        s = [4., 6., 5., 6., 7.]
+        A  = VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        B  = VectorDotTensor(ScalingTensor(2., (5,)), DiagonalTensor(2s))
+
+        ApB = VectorDotTensor(
+            DiagonalTensor(s) + ScalingTensor(2., (5,)),
+            ScalingTensor(3., (5,)) + DiagonalTensor(2s),
+        )
+
+        @test A+B == ApB
     end
 end
 
@@ -378,6 +404,27 @@ end
             (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
         )
         @test A != B
+    end
+
+    @testset "Base.:+" begin
+        s1 = [4., 6., 5., 6., 7.]
+        s2 = [6., 9., 3., 5., 7.]
+        A  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+
+        B = MatrixTensor(
+            (ScalingTensor(5.,(5,)), DiagonalTensor(2s1)),
+            (DiagonalTensor(2s2), ScalingTensor(7., (5,))),
+        )
+
+        ApB = MatrixTensor(
+            (DiagonalTensor(s1)+ScalingTensor(5.,(5,)), ScalingTensor(3.,(5,))+ DiagonalTensor(2s1)),
+            (ScalingTensor(6., (5,))+DiagonalTensor(2s2), DiagonalTensor(s2) + ScalingTensor(7., (5,))),
+        )
+
+        @test A+B == ApB
     end
 end
 

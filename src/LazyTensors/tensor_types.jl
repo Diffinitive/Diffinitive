@@ -163,6 +163,11 @@ function Base.:(==)(a::VectorTensor, b::VectorTensor)
     return a.D == b.D
 end
 
+function Base.:+(a::VectorTensor{N}, b::VectorTensor{N}) where N
+    return VectorTensor(a.D .+ b.D)
+end
+
+
 ## "Vector of tensors ∘ vector -> scalar"
 struct VectorDotTensor{N,R,D,NT<:NTuple{N,LazyTensor{R,D}}} <: LazyTensor{R,D}
     D::NT
@@ -186,6 +191,10 @@ LazyTensors.range_size(t::VectorDotTensor) = range_size(t.D[1])
 
 function Base.:(==)(a::VectorDotTensor, b::VectorDotTensor)
     return a.D == b.D
+end
+
+function Base.:+(a::VectorDotTensor{N}, b::VectorDotTensor{N}) where N
+    return VectorDotTensor(a.D .+ b.D)
 end
 
 
@@ -220,6 +229,10 @@ LazyTensors.range_size(t::MatrixTensor) = range_size(t.D[1,1])
 
 function Base.:(==)(a::MatrixTensor, b::MatrixTensor)
     return a.D == b.D
+end
+
+function Base.:+(a::MatrixTensor{N}, b::MatrixTensor{N}) where N
+    return MatrixTensor(a.D + b.D)
 end
 
 
