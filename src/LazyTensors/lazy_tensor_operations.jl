@@ -116,6 +116,9 @@ end
 range_size(tmBinOp::TensorSum) = range_size(tmBinOp.tms[1])
 domain_size(tmBinOp::TensorSum) = domain_size(tmBinOp.tms[1])
 
+function Base.:(==)(a::TensorSum, b::TensorSum)
+    return a.tms == b.tms
+end
 
 """
     TensorComposition{R,K,D}
