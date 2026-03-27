@@ -48,4 +48,9 @@ The identity tensor with the correct type parameters.
 
 Implemented to simplify 1D code for SBP operators.
 """
-inverse_inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor{component_type(g)}()
+inverse_inner_product(g::ZeroDimGrid, stencil_set::StencilSet) = IdentityTensor{}()
+
+function inverse_inner_product(g::MappedGrid, stencil_set)
+    J⁻¹ = map(inv∘sqrt∘det, metric_tensor(g))
+    DiagonalTensor(J⁻¹)∘inverse_inner_product(logical_grid(g), stencil_set)
+end

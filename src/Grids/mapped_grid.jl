@@ -70,9 +70,9 @@ Base.size(g::MappedGrid) = size(g.logical_grid)
 Base.size(g::MappedGrid, d) = size(g.logical_grid, d)
 
 boundary_identifiers(g::MappedGrid) = boundary_identifiers(g.logical_grid)
-boundary_indices(g::MappedGrid, id::TensorGridBoundary) = boundary_indices(g.logical_grid, id)
+boundary_indices(g::MappedGrid, id::BoundaryIdentifier) = boundary_indices(g.logical_grid, id)
 
-function boundary_grid(g::MappedGrid, id::TensorGridBoundary)
+function boundary_grid(g::MappedGrid, id::BoundaryIdentifier)
     b_indices = boundary_indices(g.logical_grid, id)
 
     # Calculate indices of needed jacobian components
@@ -175,36 +175,14 @@ function min_spacing(g::MappedGrid{T,2} where T)
 end
 
 """
-    normal(g::MappedGrid, boundary)
-
-The outward pointing normal as a grid function on the corresponding boundary grid.
-"""
-function normal(g::MappedGrid, boundary)
-    return map(boundary_indices(g, boundary)) do I
-        normal(g, boundary, Tuple(I)...)
-    end
-end
-
-"""
     normal(g::MappedGrid, boundary, i...)
 
 The outward pointing normal to the specified boundary in grid point `i`.
 """
-function normal(g::MappedGrid, boundary, i...)
+function normal(g::MappedGrid{T,D}, boundary, i::Vararg{Int, D}) where {T,D}
     σ = _boundary_sign(component_type(g), boundary)
     ∂ξ∂x = inv(jacobian(g)[i...])
 
     k = grid_id(boundary)
     return σ*∂ξ∂x[k,:]/norm(∂ξ∂x[k,:])
-end
-
-
-function _boundary_sign(T, boundary)
-    if boundary_id(boundary) == UpperBoundary()
-        return one(T)
-    elseif boundary_id(boundary) == LowerBoundary()
-        return -one(T)
-    else
-        throw(ArgumentError("The boundary identifier must be either `LowerBoundary()` or `UpperBoundary()`"))
-    end
 end

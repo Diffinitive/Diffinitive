@@ -30,3 +30,36 @@ function normal_derivative(g::EquidistantGrid, stencil_set::StencilSet, boundary
 end
 
 normal_derivative(::ZeroDimGrid, stencil_set::StencilSet, boundary) = throw(ArgumentError("ZeroDimGrid has no boundaries"))
+
+function normal_derivative(g::MappedGrid, stencil_set::StencilSet, boundary)
+    k = grid_id(boundary)
+    b_indices = boundary_indices(g, boundary)
+
+    # Compute the weights for the logical derivatives
+    g⁻¹ = map(inv, metric_tensor(g))
+    α = map(b_indices) do I
+        gᵏⁱ = g⁻¹[I][k,:]
+        gᵏᵏ = g⁻¹[I][k,k]
+
+        gᵏⁱ./sqrt(gᵏᵏ)
+    end
+
+    σ = ScalingTensor(
+        Grids._boundary_sign(component_type(g), boundary),
+        size(boundary_grid(g,boundary)),
+    )
+
+
+    # Assemble difference operator
+    mapreduce(+,1:ndims(g)) do i
+        if i == k
+            ∂_ξᵢ = normal_derivative(logical_grid(g), stencil_set, boundary)
+        else
+            e = boundary_restriction(logical_grid(g), stencil_set, boundary)
+            ∂_ξᵢ = σ ∘ e ∘ first_derivative(logical_grid(g), stencil_set, i)
+        end
+
+        αᵢ = componentview(α,i)
+        DiagonalTensor(αᵢ) ∘ ∂_ξᵢ
+    end
+end
