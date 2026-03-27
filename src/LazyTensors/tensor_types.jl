@@ -18,10 +18,21 @@ apply_transpose(tmi::IdentityTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any
 
 
 struct ZeroTensor{R,D} <: LazyTensor{R,D}
+    range_size::NTuple{R,Int}
+    domain_size::NTuple{D,Int}
 end
 
-Base.zero(::LazyTensor{R,D}) where {R,D} = ZeroTensor{R,D}()
-Base.zero(::Type{<:LazyTensor{R,D}}) where {R,D} = ZeroTensor{R,D}()
+ZeroTensor(size::Vararg{Int}) = ZeroTensor(size, size)
+
+Base.zero(t::LazyTensor) = ZeroTensor(range_size(t), domain_size(t))
+
+range_size(t::ZeroTensor) = t.range_size
+domain_size(t::ZeroTensor) = t.domain_size
+
+
+function apply(t::ZeroTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any, R}) where {R,D}
+    return zero(eltype(v))
+end
 
 """
     ScalingTensor{T,D} <: LazyTensor{D,D}

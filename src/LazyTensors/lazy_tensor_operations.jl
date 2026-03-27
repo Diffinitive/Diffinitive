@@ -116,7 +116,7 @@ end
 range_size(tmBinOp::TensorSum) = range_size(tmBinOp.tms[1])
 domain_size(tmBinOp::TensorSum) = domain_size(tmBinOp.tms[1])
 
-TensorSum(a::ZeroTensor{R,D}, b::ZeroTensor{R,D}) where {R,D} = ZeroTensor{R,D}()
+TensorSum(a::ZeroTensor, b::ZeroTensor) = a
 TensorSum(::ZeroTensor, t::LazyTensor) = t
 TensorSum(t::LazyTensor, ::ZeroTensor) = t
 
@@ -169,15 +169,15 @@ end
 
 
 function TensorComposition(a::ZeroTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
-    return ZeroTensor{R,K}()
+    return ZeroTensor(range_size(a), domain_size(b))
 end
 
 function TensorComposition(a::ZeroTensor{R,D}, b::LazyTensor{D,K}) where {R,D,K}
-    return ZeroTensor{R,K}()
+    return ZeroTensor(range_size(a), domain_size(b))
 end
 
 function TensorComposition(a::LazyTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
-    return ZeroTensor{R,K}()
+    return ZeroTensor(range_size(a), domain_size(b))
 end
 
 

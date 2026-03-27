@@ -49,9 +49,11 @@ end
         @test ZeroTensor((2,3),(3,4)) isa LazyTensor{2,2}
         @test zero(ScalingTensor(1, (10,4))) == ZeroTensor((10,4),(10,4))
 
+        @test ZeroTensor(3,5,6) == ZeroTensor((3,5,6),(3,5,6))
+
         B = rand(3,4,2)
         B̃ = DenseTensor(B, (1,2), (3,))
-        @test zero(B̃) == ZeroTensor((3,4),(2))
+        @test zero(B̃) == ZeroTensor((3,4),(2,))
     end
 
     @testset "range_size" begin
@@ -66,23 +68,34 @@ end
 
     @testset "Application" begin
         v = rand(4,5)
-        @test ZeroTensor{2,2}()*v == zeros(4,5)
+        @test ZeroTensor(4,5)*v isa AbstractArray{Float64,2}
+        @test ZeroTensor(4,5)*v == zeros(4,5)
+
+        @test ZeroTensor((3,2,3),(4,5))*v isa AbstractArray{Float64,3}
+        @test ZeroTensor((3,2,3),(4,5))*v == zeros(3,2,3)
+
+        v = rand(1:100, 4,5)
+        @test ZeroTensor(4,5)*v isa AbstractArray{Int,2}
+        @test ZeroTensor(4,5)*v == zeros(4,5)
+
+        @test ZeroTensor((3,2,3),(4,5))*v isa AbstractArray{Int,3}
+        @test ZeroTensor((3,2,3),(4,5))*v == zeros(3,2,3)
     end
 
     @testset "Composition" begin
-        @test ZeroTensor{2,2}()∘ZeroTensor{2,2}() == ZeroTensor{2,2}()
-        @test ZeroTensor{1,2}()∘ZeroTensor{2,3}() == ZeroTensor{1,3}()
-        @test ZeroTensor{2,2}()∘ScalingTensor(1., (10,9)) == ZeroTensor{2,2}()
-        @test ZeroTensor{3,2}()∘ScalingTensor(1., (10,9)) == ZeroTensor{3,2}()
-        @test ScalingTensor(1., (10,9))∘ZeroTensor{2,2}()== ZeroTensor{2,2}()
-        @test ScalingTensor(1., (10,9))∘ZeroTensor{2,3}()== ZeroTensor{2,3}()
+        @test ZeroTensor((3,4),(5,6))∘ZeroTensor((5,6),(5,4)) == ZeroTensor((3,4),(5,4))
+        @test ZeroTensor((4,),(3,2))∘ZeroTensor((3,2),(5,4,2)) == ZeroTensor((4,), (5,4,2))
+        @test ZeroTensor((2,3),(10,9))∘ScalingTensor(1., (10,9)) == ZeroTensor((2,3),(10,9))
+        @test ZeroTensor((2,1,4),(10,9))∘ScalingTensor(1., (10,9)) == ZeroTensor((2,1,4),(10,9))
+        @test ScalingTensor(1., (10,9))∘ZeroTensor((10,9),(7,8))== ZeroTensor((10,9),(7,8))
+        @test ScalingTensor(1., (10,9))∘ZeroTensor((10,9),(4,2,7))== ZeroTensor((10,9),(4,2,7))
     end
 
     @testset "Addition" begin
-        @test ZeroTensor{2,2}() + ZeroTensor{2,2}() == ZeroTensor{2,2}()
-        @test ZeroTensor{2,3}() + ZeroTensor{2,3}() == ZeroTensor{2,3}()
-        @test ZeroTensor{2,2}() + ScalingTensor(1., (10,9)) == ScalingTensor(1., (10,9))
-        @test ScalingTensor(1., (10,9)) + ZeroTensor{2,2}() == ScalingTensor(1., (10,9))
+        @test ZeroTensor((1,2),(3,4)) + ZeroTensor((1,2),(3,4)) == ZeroTensor((1,2),(3,4))
+        @test ZeroTensor((4,3),(5,4,3)) + ZeroTensor((4,3),(5,4,3)) == ZeroTensor((4,3),(5,4,3))
+        @test ZeroTensor(10,9) + ScalingTensor(1., (10,9)) == ScalingTensor(1., (10,9))
+        @test ScalingTensor(1., (10,9)) + ZeroTensor(10,9) == ScalingTensor(1., (10,9))
     end
 end
 
