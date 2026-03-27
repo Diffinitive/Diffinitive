@@ -113,10 +113,6 @@ end
 range_size(tmBinOp::TensorSum) = range_size(tmBinOp.tms[1])
 domain_size(tmBinOp::TensorSum) = domain_size(tmBinOp.tms[1])
 
-TensorSum(a::ZeroTensor, b::ZeroTensor) = a
-TensorSum(::ZeroTensor, t::LazyTensor) = t
-TensorSum(t::LazyTensor, ::ZeroTensor) = t
-
 """
     TensorComposition{R,K,D}
 
@@ -143,43 +139,6 @@ function apply_transpose(c::TensorComposition{R,K,D}, v::AbstractArray{<:Any,R},
     apply_transpose(c.t2, c.t1'*v, I...)
 end
 
-"""
-    TensorComposition(tm, tmi::IdentityTensor)
-    TensorComposition(tmi::IdentityTensor, tm)
-
-Composes a `LazyTensor` `tm` with an `IdentityTensor` `tmi`, by returning `tm`
-"""
-function TensorComposition(tm::LazyTensor{R,D}, tmi::IdentityTensor{D}) where {R,D}
-    @boundscheck check_domain_size(tm, range_size(tmi))
-    return tm
-end
-
-function TensorComposition(tmi::IdentityTensor{R}, tm::LazyTensor{R,D}) where {R,D}
-    @boundscheck check_domain_size(tmi, range_size(tm))
-    return tm
-end
-# Specialization for the case where tm is an IdentityTensor. Required to resolve ambiguity.
-function TensorComposition(tm::IdentityTensor{D}, tmi::IdentityTensor{D}) where {D}
-    @boundscheck check_domain_size(tm, range_size(tmi))
-    return tmi
-end
-
-
-function TensorComposition(a::ZeroTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
-    return ZeroTensor(range_size(a), domain_size(b))
-end
-
-function TensorComposition(a::ZeroTensor{R,D}, b::LazyTensor{D,K}) where {R,D,K}
-    return ZeroTensor(range_size(a), domain_size(b))
-end
-
-function TensorComposition(a::LazyTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
-    return ZeroTensor(range_size(a), domain_size(b))
-end
-
-
-Base.:*(a, tm::LazyTensor) = TensorComposition(ScalingTensor(a,range_size(tm)), tm)
-Base.:*(tm::LazyTensor, a) = a*tm
 
 """
     InflatedTensor{R,D} <: LazyTensor{R,D}
