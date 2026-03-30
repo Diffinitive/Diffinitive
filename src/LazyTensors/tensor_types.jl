@@ -40,7 +40,14 @@ ZeroTensor(::Tuple, ::Tuple)
 
 A lazy representation of the zero operator with range size and domain size both equal to `sz`.
 """
-ZeroTensor(size::Vararg{Int}) = ZeroTensor(size, size)
+ZeroTensor(size::Vararg{Int}) = ZeroTensor(size)
+
+"""
+    ZeroTensor(sz::NTuple{N, Int} where N)
+
+A lazy representation of the zero operator with range size and domain size both equal to `sz`.
+"""
+ZeroTensor(size::NTuple{N, Int} where N) = ZeroTensor(size, size)
 
 Base.zero(t::LazyTensor) = ZeroTensor(range_size(t), domain_size(t))
 
