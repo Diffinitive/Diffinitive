@@ -50,6 +50,7 @@ end
         @test zero(ScalingTensor(1, (10,4))) == ZeroTensor((10,4),(10,4))
 
         @test ZeroTensor(3,5,6) == ZeroTensor((3,5,6),(3,5,6))
+        @test ZeroTensor((3,5,6)) == ZeroTensor((3,5,6),(3,5,6))
 
         B = rand(3,4,2)
         B̃ = DenseTensor(B, (1,2), (3,))
