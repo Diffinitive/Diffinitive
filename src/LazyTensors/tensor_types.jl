@@ -33,6 +33,9 @@ LazyTensors.apply_transpose(tm::ScalingTensor{<:Any,D}, v::AbstractArray{<:Any,D
 LazyTensors.range_size(m::ScalingTensor) = m.size
 LazyTensors.domain_size(m::ScalingTensor) = m.size
 
+function Base.:(==)(a::ScalingTensor, b::ScalingTensor)
+    return a.λ == b.λ && a.size == b.size
+end
 
 """
     DiagonalTensor{D, ...} <: LazyTensor{D,D}
@@ -93,5 +96,8 @@ function apply_transpose(llm::DenseTensor{R,D}, v::AbstractArray{<:Any,R}, I::Va
     apply(DenseTensor(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
 end
 
+function Base.:(==)(a::DenseTensor, b::DenseTensor)
+    return a.A == b.A && a.range_indicies == b.range_indicies && a.domain_indicies == b.domain_indicies
+end
 
 # TODO: Add tests for equality functionality for all types here and in lazy_tensor_operations.
