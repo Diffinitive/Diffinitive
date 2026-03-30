@@ -93,6 +93,7 @@ function apply_transpose(llm::DenseTensor{R,D}, v::AbstractArray{<:Any,R}, I::Va
     apply(DenseTensor(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
 end
 
+
 NMTuple{N,M,T} = NTuple{N,NTuple{M, T}}
 # Different from SMatrix because the elements can differ in type
 struct TupleTable{N,M, T <: NMTuple{N,M,Any}}
@@ -257,3 +258,5 @@ end
 
 
 tuple_range(n) = ntuple(identity, n)
+
+# TODO: Add tests for equality functionality for all types here and in lazy_tensor_operations.
