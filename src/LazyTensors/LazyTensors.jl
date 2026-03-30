@@ -20,6 +20,8 @@ export LazyOuterProduct
 export ⊗
 export DomainSizeMismatch
 export RangeSizeMismatch
+export componentview
+export ArrayComponentView
 
 export LazyArray
 export LazyFunctionArray
@@ -30,6 +32,7 @@ include("tensor_types.jl")
 include("lazy_array.jl")
 include("lazy_tensor_operations.jl")
 include("tuple_manipulation.jl")
+include("componentview.jl")
 
 # Applying lazy tensors to vectors
 Base.:*(a::LazyTensor, v::AbstractArray) = TensorApplication(a,v)
