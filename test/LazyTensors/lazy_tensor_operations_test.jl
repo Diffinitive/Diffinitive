@@ -125,6 +125,19 @@ end
         @inferred m*v
         @inferred (m*v)[1]
     end
+
+    @testset "Base.:(==)" begin
+        s = [1.,2.,3.,4.,5.]
+
+        D = DiagonalTensor(s)
+        v = rand(5)
+
+        @test D*v == D*v
+        @test D*copy(v) == D*v
+
+        @test D*(2v) != D*v
+
+    end
 end
 
 @testset "TensorNegation" begin
