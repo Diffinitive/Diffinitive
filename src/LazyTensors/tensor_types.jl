@@ -92,3 +92,6 @@ end
 function apply_transpose(llm::DenseTensor{R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,D}
     apply(DenseTensor(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
 end
+
+
+# TODO: Add tests for equality functionality for all types here and in lazy_tensor_operations.
