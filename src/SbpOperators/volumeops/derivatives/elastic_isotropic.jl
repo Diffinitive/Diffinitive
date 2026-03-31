@@ -23,18 +23,16 @@ function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
         second_derivative_variable(g,μ,stencil_set,k)
     end
 
-    Λ = DiagonalTensor(λ)
-    M = DiagonalTensor(μ)
+    ∂(i) = first_derivative(g, stencil_set, i)
+    ∂²(σ,i) = second_derivative_variable(g, σ, stencil_set, i)
+
+    ∂∂_wide(i,σ,j) = ∂(i)∘DiagonalTensor(σ)∘∂(j)
+    ∂∂_narrow(i,σ,j) = i==j ? ∂²(σ,i) : ∂(i)∘DiagonalTensor(σ)∘∂(j)
+
+    δ(i,j) = i==j ? IdentityTensor(size(g)) : ZeroTensor(size(g))
 
     return MatrixTensor(N,N) do i, j
-        ∂ᵢ = first_derivative(g, stencil_set, i)
-        ∂ⱼ = first_derivative(g, stencil_set, j)
-        if i == j
-            ∂ⱼμ∂ᵢ = second_derivative_variable(g,μ,stencil_set,i)
-            return ∂ᵢ∘Λ∘∂ⱼ + ∂ⱼμ∂ᵢ + Σₖ∂ₖμ∂ₖ
-        else
-            return ∂ᵢ∘Λ∘∂ⱼ + ∂ⱼ∘M∘∂ᵢ
-        end
+        ∂∂_wide(i,λ,j) + ∂∂_narrow(j, μ, i) + δ(i,j)∘Σₖ∂ₖμ∂ₖ
     end
 end
 
@@ -49,25 +47,23 @@ function traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
 
     e = boundary_restriction(g, stencil_set, boundary)
 
-    Λ = DiagonalTensor(e*λ)
-    M = DiagonalTensor(e*μ)
+    λ̲ = DiagonalTensor(e*λ)
+    μ̲ = DiagonalTensor(e*μ)
+    Σₖnₖμ∂ₖ = μ̲∘normal_derivative(g, stencil_set, boundary)
 
     n = normal(g, boundary)
 
     ∇ = boundary_gradient(g, stencil_set, boundary)
 
-    return MatrixTensor(N,N) do i, j
-        ∂ᵢ = first_derivative(g, stencil_set, i)
-        ∂ⱼ = first_derivative(g, stencil_set, j)
 
-        nᵢ = DiagonalTensor(componentview(n, i))
-        nⱼ = DiagonalTensor(componentview(n, j))
-        if i == j
-            Σₖnₖμ∂ₖ = M∘normal_derivative(g, stencil_set, boundary)
-            return nᵢ∘Λ∘e∘∂ⱼ + nⱼ∘M∘∇[i] + Σₖnₖμ∂ₖ
-        else
-            return nᵢ∘Λ∘e∘∂ⱼ + nⱼ∘M∘e∘∂ᵢ
-        end
+    n̲(i) = DiagonalTensor(componentview(n,i))
+
+    ∂(i) = first_derivative(g, stencil_set, i)
+
+    δ(i,j) = i==j ? IdentityTensor(size(g)) : ZeroTensor(size(g))
+
+    return MatrixTensor(N,N) do i, j
+        n(i)∘λ̲∘e∘∂(j) + n(j)∘μ̲∘∇[i] + δ(i,j)∘Σₖnₖμ∂ₖ
     end
 end
 
