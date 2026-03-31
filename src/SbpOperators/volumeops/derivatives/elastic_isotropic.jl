@@ -1,4 +1,17 @@
-# vᵢ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
+# Elastic wave equation:
+# ρüᵢ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
+#     = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
+
+# Traction:
+# tᵢ = (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ
+
+# Normal traction operator:
+# tₙ = nᵢtᵢ = (λ∂ⱼ + 2μnⱼnᵢ∂ᵢ) uⱼ
+#           = (λ∂ⱼ + 2μnⱼ∂ₙ) uⱼ
+
+# Tangential traction operator:
+# tₜ = tᵢ - nₖtₖnᵢ = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)nₖ∂ₖ) uⱼ
+#                  = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
 
 # for 2d we have
 # v₁ = ∂₁λ∂₁u₁ + ∂₁λ∂₂u₂ +
