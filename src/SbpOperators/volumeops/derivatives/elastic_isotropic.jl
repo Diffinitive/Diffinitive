@@ -128,6 +128,55 @@ function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
 end
 
 
+function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
+    # In standard coordinates:
+    # Tᵢ = nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖuᵢ
+    # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖδᵢⱼuⱼ
+    # (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ
+    #
+    #  With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = nⱼμfₖᵢ∂̃ₖ
+    #  we have
+    #
+    # Tᵢ = (nᵢλfₖⱼ∂̃ₖ + nⱼμfₖᵢ∂̃ₖ + nₛμfₖₛ∂̃ₖδᵢⱼ) uⱼ
+    #
+
+    N = ndims(g)
+
+
+    e = boundary_restriction(g, stencil_set, boundary)
+    ∂ξ∂x = collect(e*map(inv, jacobian(g)))
+
+    f̲ = [DiagonalTensor(componentview(∂ξ∂x, i, j)) for i∈1:N, j∈1:N]
+
+    λ̲ = DiagonalTensor(e*λ)
+    μ̲ = DiagonalTensor(e*μ)
+
+    n = normal(g, boundary)
+
+    nf = map(n, ∂ξ∂x) do n, f
+        f*n
+    end
+
+    n̲f̲ = [DiagonalTensor(componentview(nf, i)) for i ∈ 1:N]
+
+    ∇̃ = boundary_gradient(logical_grid(g), stencil_set, boundary)
+    n̲(i) = DiagonalTensor(componentview(n,i))
+    ∂̃(i) = first_derivative(logical_grid(g), stencil_set, i)
+
+    bg = boundary_grid(g, boundary)
+    δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
+
+    return MatrixTensor(N,N) do i, j
+        sum(1:N) do k
+            @show typeof(δ(i,j))
+            @show typeof(μ̲)
+            @show typeof(nf[k])
+            @show typeof(∇̃[k])
+            n̲(i)∘λ̲∘f̲[k,j]∘e∘∂̃(k) + n̲(j)∘μ̲∘f̲[k,i]∘∇̃[k] + δ(i,j)∘μ̲∘n̲f̲[k]∘∇̃[k]
+        end
+    end
+end
+
 
 # Helpers
 # =======
