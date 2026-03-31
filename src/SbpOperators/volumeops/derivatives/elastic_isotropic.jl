@@ -26,7 +26,7 @@ function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
     Λ = DiagonalTensor(λ)
     M = DiagonalTensor(μ)
 
-    Ds = map(Iterators.product(1:N, 1:N)) do (i,j)
+    return MatrixTensor(N,N) do i, j
         ∂ᵢ = first_derivative(g, stencil_set, i)
         ∂ⱼ = first_derivative(g, stencil_set, j)
         if i == j
@@ -36,8 +36,6 @@ function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
             return ∂ᵢ∘Λ∘∂ⱼ + ∂ⱼ∘M∘∂ᵢ
         end
     end
-
-    return MatrixTensor(Ds)
 end
 
 
@@ -58,7 +56,7 @@ function traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
 
     ∇ = boundary_gradient(g, stencil_set, boundary)
 
-    Ds = map(Iterators.product(1:N, 1:N)) do (i,j)
+    return MatrixTensor(N,N) do i, j
         ∂ᵢ = first_derivative(g, stencil_set, i)
         ∂ⱼ = first_derivative(g, stencil_set, j)
 
@@ -71,8 +69,6 @@ function traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
             return nᵢ∘Λ∘e∘∂ⱼ + nⱼ∘M∘e∘∂ᵢ
         end
     end
-
-    return MatrixTensor(Ds)
 end
 
 
