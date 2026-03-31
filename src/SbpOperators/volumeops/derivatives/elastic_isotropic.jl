@@ -1,3 +1,14 @@
+# vᵢ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
+
+# for 2d we have
+# v₁ = ∂₁λ∂₁u₁ + ∂₁λ∂₂u₂ +
+#      ∂₁μ∂₁u₁ + ∂₂μ∂₁u₂ +
+#      ∂₁μ∂₁u₁ + ∂₂μ∂₂u₁
+# v₂ = ∂₂λ∂₁u₁ + ∂₂λ∂₂u₂ +
+#      ∂₁μ∂₂u₁ + ∂₂μ∂₂u₂ +
+#      ∂₁μ∂₁u₂ + ∂₂μ∂₂u₂
+
+
 # Tensor grid
 # ===========
 function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
