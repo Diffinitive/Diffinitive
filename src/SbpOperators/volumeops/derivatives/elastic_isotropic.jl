@@ -91,7 +91,7 @@ function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
     N = ndims(grid)
 
     ∂ξ∂x = map(inv, jacobian(grid))
-    g = metric_tensor(grid)
+    g = map(inv, metric_tensor(grid))
     J = map(det, jacobian(grid))
     J⁻¹ = map(inv, J)
 
@@ -109,6 +109,7 @@ function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
         componentview(g,k,n)
     end
 
+    J̲⁻¹ = DiagonalTensor(J⁻¹)
 
     ∂̃(i) = first_derivative(logical_grid(grid), stencil_set, i)
     ∂̃²(σ,i) = second_derivative_variable(logical_grid(grid), σ, stencil_set, i)
@@ -121,13 +122,13 @@ function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
     return MatrixTensor(N, N) do i,j
         sum(1:N) do k
             sum(1:N) do n
-                ∂̃ₖλJgᵏⁿⁱʲ∂̃ₙ = ∂̃∂̃_wide(k, λ*̃J*̃g̃[k,n,j,i], n)
+                ∂̃ₖλJgᵏⁿⁱʲ∂̃ₙ = ∂̃∂̃_wide(k, λ*̃J*̃g̃[k,n,i,j], n)
 
                 ∂̃ₖμJgᵏⁿʲⁱ∂̃ₙ = ∂̃∂̃_narrow(k, μ*̃J*̃g̃[k,n,j,i], n)
 
                 δᵢⱼ∂̃ₖμJgᵏⁿˢˢ∂̃ₙ = δ(i,j)∘∂̃∂̃_narrow(k,μ*̃J*̃g[k,n],n)
 
-                return ∂̃ₖλJgᵏⁿⁱʲ∂̃ₙ + ∂̃ₖμJgᵏⁿʲⁱ∂̃ₙ + δᵢⱼ∂̃ₖμJgᵏⁿˢˢ∂̃ₙ
+                return J̲⁻¹∘(∂̃ₖλJgᵏⁿⁱʲ∂̃ₙ + ∂̃ₖμJgᵏⁿʲⁱ∂̃ₙ + δᵢⱼ∂̃ₖμJgᵏⁿˢˢ∂̃ₙ)
             end
         end
     end
