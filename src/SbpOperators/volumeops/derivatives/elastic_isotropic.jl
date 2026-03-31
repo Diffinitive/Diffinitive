@@ -60,10 +60,11 @@ function traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
 
     ∂(i) = first_derivative(g, stencil_set, i)
 
-    δ(i,j) = i==j ? IdentityTensor(size(g)) : ZeroTensor(size(g))
+    bg = boundary_grid(g, boundary)
+    δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
 
     return MatrixTensor(N,N) do i, j
-        n(i)∘λ̲∘e∘∂(j) + n(j)∘μ̲∘∇[i] + δ(i,j)∘Σₖnₖμ∂ₖ
+        n̲(i)∘λ̲∘e∘∂(j) + n̲(j)∘μ̲∘∇[i] + δ(i,j)∘Σₖnₖμ∂ₖ
     end
 end
 
