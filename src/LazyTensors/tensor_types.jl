@@ -99,5 +99,3 @@ end
 function Base.:(==)(a::DenseTensor, b::DenseTensor)
     return a.A == b.A && a.range_indicies == b.range_indicies && a.domain_indicies == b.domain_indicies
 end
-
-# TODO: Add tests for equality functionality for all types here and in lazy_tensor_operations.
