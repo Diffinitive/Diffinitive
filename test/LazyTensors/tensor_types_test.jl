@@ -42,6 +42,15 @@ using BenchmarkTools
     @test_throws DomainSizeMismatch I1∘A
     @test_throws DomainSizeMismatch A∘I2
     @test_throws DomainSizeMismatch I1∘I2
+
+
+     @testset "Base.:(==)" begin
+        @test IdentityTensor(3,2) == IdentityTensor(3,2)
+
+        @test IdentityTensor(3,2,4) != IdentityTensor(3,2)
+        @test IdentityTensor(3) != IdentityTensor(3,2)
+        @test IdentityTensor(2,2) != IdentityTensor(3,2)
+    end
 end
 
 
@@ -57,6 +66,16 @@ end
 
     @inferred (st*v)[2,2]
     @inferred (st'*v)[2,2]
+
+    @testset "Base.:(==)" begin
+        @test ScalingTensor(2.,(3,4)) == ScalingTensor(2.,(3,4))
+        @test ScalingTensor(2.,(3,4)) == ScalingTensor(2,(3,4))
+
+        @test ScalingTensor(3.,(3,4)) != ScalingTensor(2,(3,4))
+        @test ScalingTensor(2.,(2,4)) != ScalingTensor(2,(3,4))
+        @test ScalingTensor(2.,(3,)) != ScalingTensor(2,(3,4))
+        @test ScalingTensor(2.,(3,4,2)) != ScalingTensor(2,(3,4))
+    end
 end
 
 @testset "DiagonalTensor" begin
@@ -98,6 +117,12 @@ end
     v = rand(sz...)
     LazyTensors.apply(tm,v, 2,1)
     @test (@ballocated LazyTensors.apply($tm,$v, 2,1)) == 0
+
+
+    @testset "Base.:(==)" begin
+        @test DiagonalTensor([1,2,3,4]) == DiagonalTensor([1,2,3,4])
+        @test DiagonalTensor([2,2,3,4]) != DiagonalTensor([1,2,3,4])
+    end
 end
 
 
@@ -145,6 +170,16 @@ end
     @test B̃*v ≈ B[1,:,1]*v[1,1] + B[2,:,1]*v[2,1] + B[3,:,1]*v[3,1] +
                 B[1,:,2]v[1,2] + B[2,:,2]*v[2,2] + B[3,:,2]*v[3,2] atol=5e-13
 
+
+    @testset "Base.:(==)" begin
+        A = rand(2,3,4)
+
+        @test DenseTensor(A, (1,), (2,3)) == DenseTensor(A, (1,), (2,3))
+        @test DenseTensor(copy(A), (1,), (2,3)) == DenseTensor(A, (1,), (2,3))
+
+        @test DenseTensor(2A, (1,), (2,3)) != DenseTensor(A, (1,), (2,3))
+        @test DenseTensor(A, (1,2), (3,)) != DenseTensor(A, (1,), (2,3))
+    end
 
     # TODO:
     # @inferred (B̃*v)[2]

@@ -125,6 +125,19 @@ end
         @inferred m*v
         @inferred (m*v)[1]
     end
+
+    @testset "Base.:(==)" begin
+        s = [1.,2.,3.,4.,5.]
+
+        D = DiagonalTensor(s)
+        v = rand(5)
+
+        @test D*v == D*v
+        @test D*copy(v) == D*v
+
+        @test D*(2v) != D*v
+
+    end
 end
 
 @testset "TensorNegation" begin
@@ -153,6 +166,15 @@ end
 
     @test range_size(-Ã) == (2,)
     @test range_size(-B̃) == (3,)
+
+    @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+
+        @test -DiagonalTensor(s) == -DiagonalTensor(s)
+        @test -DiagonalTensor(copy(s)) == -DiagonalTensor(s)
+
+        @test -DiagonalTensor(2s) != -DiagonalTensor(s)
+    end
 end
 
 @testset "TensorSum" begin
@@ -210,6 +232,17 @@ end
         v = rand(3)
         @test (-A-B-C-D)*v == -1v - 2v - 3v - 4v
     end
+
+    @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+
+        @test DiagonalTensor(s) + ScalingTensor(2., (5,)) == DiagonalTensor(s) + ScalingTensor(2., (5,))
+        @test ScalingTensor(3., (5,)) + DiagonalTensor(2s) == ScalingTensor(3., (5,)) + DiagonalTensor(2s)
+
+        @test DiagonalTensor(2s) + ScalingTensor(2., (5,)) != DiagonalTensor(s) + ScalingTensor(2., (5,))
+        @test ScalingTensor(2., (5,)) + DiagonalTensor(2s) != ScalingTensor(3., (5,)) + DiagonalTensor(2s)
+
+    end
 end
 
 
@@ -243,6 +276,17 @@ end
     @test range_size(a*Ã) == range_size(Ã)
     @test domain_size(a*Ã) == domain_size(Ã)
     @test a*Ã*v ≈ a.*A*v rtol=1e-14
+
+    @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+
+        @test DiagonalTensor(s) ∘ ScalingTensor(2., (5,)) == DiagonalTensor(s) ∘ ScalingTensor(2., (5,))
+        @test ScalingTensor(3., (5,)) ∘ DiagonalTensor(2s) == ScalingTensor(3., (5,)) ∘ DiagonalTensor(2s)
+
+        @test DiagonalTensor(2s) ∘ ScalingTensor(2., (5,)) != DiagonalTensor(s) ∘ ScalingTensor(2., (5,))
+        @test ScalingTensor(2., (5,)) ∘ DiagonalTensor(2s) != ScalingTensor(3., (5,)) ∘ DiagonalTensor(2s)
+
+    end
 end
 
 
@@ -366,6 +410,20 @@ end
         @test  InflatedTensor(I(4), itm) == InflatedTensor(I(4,3,2), A, I(4))
 
         @test InflatedTensor(I(2), I(2), I(2)) isa InflatedTensor # The constructor should always return its type.
+    end
+
+     @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+
+        D = DiagonalTensor(s)
+        I(sz...) = IdentityTensor(sz...)
+
+        @test InflatedTensor(I(1,1),DiagonalTensor(s),I(2,2)) == InflatedTensor(I(1,1),DiagonalTensor(s),I(2,2))
+        @test InflatedTensor(I(1,1),DiagonalTensor(copy(s)),I(2,2)) == InflatedTensor(I(1,1),DiagonalTensor(s),I(2,2))
+
+        @test InflatedTensor(I(1,1),DiagonalTensor(2s),I(2,2)) != InflatedTensor(I(1,1),DiagonalTensor(s),I(2,2))
+        @test InflatedTensor(I(1,2),DiagonalTensor(s),I(2,2)) != InflatedTensor(I(1,1),DiagonalTensor(s),I(2,2))
+        @test InflatedTensor(I(1,1),DiagonalTensor(s),I(2,3)) != InflatedTensor(I(1,1),DiagonalTensor(s),I(2,2))
     end
 end
 
