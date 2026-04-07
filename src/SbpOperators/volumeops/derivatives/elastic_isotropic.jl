@@ -119,7 +119,7 @@ function tangential_traction_isotropic(g::TensorGrid, λ, μ, stencil_set, bound
     δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
 
     return MatrixTensor(ndims(g),ndims(g)) do i, j
-
+        μ̲∘(n̲(j)∘e∘∂(i) + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
     end
 end
 
@@ -188,7 +188,7 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
     # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖδᵢⱼuⱼ
     # (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ
     #
-    #  With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = nⱼμfₖᵢ∂̃ₖ
+    #  With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ
     #  we have
     #
     # Tᵢ = (nᵢλfₖⱼ∂̃ₖ + nⱼμfₖᵢ∂̃ₖ + nₛμfₖₛ∂̃ₖδᵢⱼ) uⱼ
@@ -228,6 +228,71 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
             @show typeof(∇̃[k])
             n̲(i)∘λ̲∘f̲[k,j]∘e∘∂̃(k) + n̲(j)∘μ̲∘f̲[k,i]∘∇̃[k] + δ(i,j)∘μ̲∘n̲f̲[k]∘∇̃[k]
         end
+    end
+end
+
+
+function normal_traction_isotropoic(g::MappedGrid, λ, μ, stencil_set, boundary)
+    # tₙ = nᵢtᵢ = (λ∂ⱼ + 2μnⱼ∂ₙ) uⱼ
+    #
+    # With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ
+    # we have
+    #
+    # tₙ = (λfₖⱼ∂̃ₖ + 2μnⱼ∂ₙ) uⱼ
+
+
+    e = boundary_restriction(g, stencil_set, boundary)
+
+    ∂ξ∂x = collect(e*map(inv, jacobian(g)))
+
+    f̲ = [DiagonalTensor(componentview(∂ξ∂x, i, j)) for i∈1:N, j∈1:N]
+
+    λ̲ = DiagonalTensor(e*λ)
+    μ̲ = DiagonalTensor(e*μ)
+
+    n̲(i) = DiagonalTensor(componentview(n,i))
+
+    ∂̃(i) = first_derivative(g, stencil_set, i)
+
+    ∂ₙ = normal_derivative(g, stencil_set, boundary)
+
+    N = ndims(g)
+    return VectorDot(N) do j
+        fₖⱼ∂̃ₖ = sum(k->f[k,j]∘e∘∂̃(k), 1:N)
+        λ̲∘fₖⱼ∂̃ₖ + 2μ̲∘n̲(j)∘∂ₙ
+    end
+end
+
+function tangential_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
+    # tₜ = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
+    #
+    # With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ
+    # we have
+    #
+    # tₜ = μ(nⱼfₖᵢ∂̃ₖ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
+
+
+    e = boundary_restriction(g, stencil_set, boundary)
+
+    ∂ξ∂x = collect(e*map(inv, jacobian(g)))
+
+    f̲ = [DiagonalTensor(componentview(∂ξ∂x, i, j)) for i∈1:N, j∈1:N]
+
+    λ̲ = DiagonalTensor(e*λ)
+    μ̲ = DiagonalTensor(e*μ)
+
+    n̲(i) = DiagonalTensor(componentview(n,i))
+
+    ∂̃(i) = first_derivative(g, stencil_set, i)
+
+    ∂ₙ = normal_derivative(g, stencil_set, boundary)
+
+    bg = boundary_grid(g, boundary)
+    δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
+
+    return MatrixTensor(ndims(g),ndims(g)) do i, j
+        fₖᵢ∂̃ₖ = sum(k->f[k,i]∘e∘∂̃(k), 1:N)
+        μ̲∘(n̲(j)∘fₖᵢ∂̃ₖ + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
     end
 end
 
