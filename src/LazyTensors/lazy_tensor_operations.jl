@@ -193,6 +193,15 @@ function TensorComposition(a::LazyTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
     return ZeroTensor(range_size(a), domain_size(b))
 end
 
+# Resolve ambiguities
+function TensorComposition(a::ZeroTensor{R,D}, b::IdentityTensor{D}) where {R,D}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
+function TensorComposition(a::IdentityTensor{R}, b::ZeroTensor{R,D}) where {R,D}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
 
 Base.:*(a, tm::LazyTensor) = TensorComposition(ScalingTensor(a,range_size(tm)), tm)
 Base.:*(tm::LazyTensor, a) = a*tm
