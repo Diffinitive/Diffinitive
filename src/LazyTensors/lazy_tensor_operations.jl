@@ -120,9 +120,14 @@ end
 range_size(tmBinOp::TensorSum) = range_size(tmBinOp.tms[1])
 domain_size(tmBinOp::TensorSum) = domain_size(tmBinOp.tms[1])
 
+TensorSum(a::ZeroTensor, b::ZeroTensor) = a
+TensorSum(::ZeroTensor, t::LazyTensor) = t
+TensorSum(t::LazyTensor, ::ZeroTensor) = t
+
 function Base.:(==)(a::TensorSum, b::TensorSum)
     return a.tms == b.tms
 end
+
 
 """
     TensorComposition{R,K,D}
@@ -174,6 +179,29 @@ function TensorComposition(tm::IdentityTensor{D}, tmi::IdentityTensor{D}) where 
     @boundscheck check_domain_size(tm, range_size(tmi))
     return tmi
 end
+
+
+function TensorComposition(a::ZeroTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
+function TensorComposition(a::ZeroTensor{R,D}, b::LazyTensor{D,K}) where {R,D,K}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
+function TensorComposition(a::LazyTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
+# Resolve ambiguities
+function TensorComposition(a::ZeroTensor{R,D}, b::IdentityTensor{D}) where {R,D}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
+function TensorComposition(a::IdentityTensor{R}, b::ZeroTensor{R,D}) where {R,D}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
 
 Base.:*(a, tm::LazyTensor) = TensorComposition(ScalingTensor(a,range_size(tm)), tm)
 Base.:*(tm::LazyTensor, a) = a*tm

@@ -12,6 +12,7 @@ export TensorComposition
 export TensorNegation
 export TensorSum
 export IdentityTensor
+export ZeroTensor
 export ScalingTensor
 export DiagonalTensor
 export DenseTensor
