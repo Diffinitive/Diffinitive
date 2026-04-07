@@ -81,10 +81,7 @@ struct TensorSum{R,D,TT<:NTuple{N, LazyTensor{R,D}} where N} <: LazyTensor{R,D}
     tms::TT
 
     function TensorSum{R,D}(tms::TT) where {R,D, TT<:NTuple{N, LazyTensor{R,D}} where N}
-        @boundscheck map(tms) do tm
-            check_domain_size(tm, domain_size(tms[1]))
-            check_range_size(tm, range_size(tms[1]))
-        end
+        @boundscheck check_equal_size(tms...)
 
         return new{R,D,TT}(tms)
     end
@@ -120,10 +117,6 @@ end
 range_size(tmBinOp::TensorSum) = range_size(tmBinOp.tms[1])
 domain_size(tmBinOp::TensorSum) = domain_size(tmBinOp.tms[1])
 
-TensorSum(a::ZeroTensor, b::ZeroTensor) = a
-TensorSum(::ZeroTensor, t::LazyTensor) = t
-TensorSum(t::LazyTensor, ::ZeroTensor) = t
-
 function Base.:(==)(a::TensorSum, b::TensorSum)
     return a.tms == b.tms
 end
@@ -139,7 +132,7 @@ struct TensorComposition{R,K,D, TM1<:LazyTensor{R,K}, TM2<:LazyTensor{K,D}} <: L
     t2::TM2
 
     function TensorComposition(t1::LazyTensor{R,K}, t2::LazyTensor{K,D}) where {R,K,D}
-        @boundscheck check_domain_size(t1, range_size(t2))
+        @boundscheck check_composable(t1,t2)
         return new{R,K,D, typeof(t1), typeof(t2)}(t1,t2)
     end
 end
@@ -159,52 +152,6 @@ function Base.:(==)(a::TensorComposition, b::TensorComposition)
     return a.t1 == b.t1 && a.t2 == b.t2
 end
 
-"""
-    TensorComposition(tm, tmi::IdentityTensor)
-    TensorComposition(tmi::IdentityTensor, tm)
-
-Composes a `LazyTensor` `tm` with an `IdentityTensor` `tmi`, by returning `tm`
-"""
-function TensorComposition(tm::LazyTensor{R,D}, tmi::IdentityTensor{D}) where {R,D}
-    @boundscheck check_domain_size(tm, range_size(tmi))
-    return tm
-end
-
-function TensorComposition(tmi::IdentityTensor{R}, tm::LazyTensor{R,D}) where {R,D}
-    @boundscheck check_domain_size(tmi, range_size(tm))
-    return tm
-end
-# Specialization for the case where tm is an IdentityTensor. Required to resolve ambiguity.
-function TensorComposition(tm::IdentityTensor{D}, tmi::IdentityTensor{D}) where {D}
-    @boundscheck check_domain_size(tm, range_size(tmi))
-    return tmi
-end
-
-
-function TensorComposition(a::ZeroTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
-    return ZeroTensor(range_size(a), domain_size(b))
-end
-
-function TensorComposition(a::ZeroTensor{R,D}, b::LazyTensor{D,K}) where {R,D,K}
-    return ZeroTensor(range_size(a), domain_size(b))
-end
-
-function TensorComposition(a::LazyTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
-    return ZeroTensor(range_size(a), domain_size(b))
-end
-
-# Resolve ambiguities
-function TensorComposition(a::ZeroTensor{R,D}, b::IdentityTensor{D}) where {R,D}
-    return ZeroTensor(range_size(a), domain_size(b))
-end
-
-function TensorComposition(a::IdentityTensor{R}, b::ZeroTensor{R,D}) where {R,D}
-    return ZeroTensor(range_size(a), domain_size(b))
-end
-
-
-Base.:*(a, tm::LazyTensor) = TensorComposition(ScalingTensor(a,range_size(tm)), tm)
-Base.:*(tm::LazyTensor, a) = a*tm
 
 """
     InflatedTensor{R,D} <: LazyTensor{R,D}
@@ -390,6 +337,17 @@ function check_range_size(tm::LazyTensor, sz)
     if range_size(tm) != sz
         throw(RangeSizeMismatch(tm,sz))
     end
+end
+
+function check_equal_size(tms::Vararg{LazyTensor})
+    map(tms) do tm
+        check_domain_size(tm, domain_size(tms[1]))
+        check_range_size(tm, range_size(tms[1]))
+    end
+end
+
+function check_composable(tm1::LazyTensor, tm2::LazyTensor)
+    check_domain_size(tm1, range_size(tm2))
 end
 
 struct DomainSizeMismatch <: Exception
