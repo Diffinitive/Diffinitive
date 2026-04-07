@@ -82,6 +82,47 @@ function traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
 end
 
 
+function normal_traction_isotropoic(g::TensorGrid, λ, μ, stencil_set, boundary)
+    # tₙ = nᵢtᵢ = (λ∂ⱼ + 2μnⱼ∂ₙ) uⱼ
+
+    e = boundary_restriction(g, stencil_set, boundary)
+
+    λ̲ = DiagonalTensor(e*λ)
+    μ̲ = DiagonalTensor(e*μ)
+
+    n̲(i) = DiagonalTensor(componentview(n,i))
+
+    ∂(i) = first_derivative(g, stencil_set, i)
+
+    ∂ₙ = normal_derivative(g, stencil_set, boundary)
+    return VectorDot(ndims(g)) do j
+        λ̲∘e∘∂(j) + 2μ̲∘n̲(j)∘∂ₙ
+    end
+end
+
+function tangential_traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
+    # tₜ = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
+
+
+    e = boundary_restriction(g, stencil_set, boundary)
+
+    λ̲ = DiagonalTensor(e*λ)
+    μ̲ = DiagonalTensor(e*μ)
+
+    n̲(i) = DiagonalTensor(componentview(n,i))
+
+    ∂(i) = first_derivative(g, stencil_set, i)
+
+    ∂ₙ = normal_derivative(g, stencil_set, boundary)
+
+    bg = boundary_grid(g, boundary)
+    δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
+
+    return MatrixTensor(ndims(g),ndims(g)) do i, j
+
+    end
+end
+
 # Mapped grid
 # ===========
 function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
