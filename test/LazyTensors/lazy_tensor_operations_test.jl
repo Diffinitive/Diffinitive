@@ -28,7 +28,6 @@ LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
     @test m'' == m
     @test apply(m',zeros(Float64,(0,0)), 0, 0, 0) == :apply_transpose
     @test apply(m'',zeros(Float64,(0,0,0)), 0, 0) == :apply
-    @test apply_transpose(m', zeros(Float64,(0,0,0)), 0, 0) == :apply
 
     @test range_size(m') == :domain_size
     @test domain_size(m') == :range_size

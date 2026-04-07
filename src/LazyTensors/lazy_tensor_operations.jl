@@ -119,7 +119,7 @@ function Base.:(==)(a::TensorSum, b::TensorSum)
     return a.tms == b.tms
 end
 
-Base.adjoint(t::TensorSum) == TensorSum(map(adjoint, t.tms)...)
+Base.adjoint(t::TensorSum) = TensorSum(map(adjoint, t.tms)...)
 
 
 """
