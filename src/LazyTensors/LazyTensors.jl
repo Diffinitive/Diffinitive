@@ -41,6 +41,11 @@ include("tuple_manipulation.jl")
 include("componentview.jl")
 
 # Applying lazy tensors to vectors
+"""
+    *(T::LazyTensor, v::AbstractArray)
+
+TODO
+"""
 Base.:*(a::LazyTensor, v::AbstractArray) = TensorApplication(a,v)
 Base.:*(a::LazyTensor, b::LazyTensor) = throw(MethodError(Base.:*,(a,b)))
 Base.:*(a::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*,(a,args...))
@@ -51,6 +56,11 @@ Base.:*(tm::LazyTensor, a) = a*tm
 
 #  Addition and subtraction of lazy tensors
 Base.:+(ts::LazyTensor...) = foldl(+, ts) # Break the multi argument + into regular binary + to allow pariwise specialisations to work.
+"""
+    +(A::LazyTensor, B::LazyTensor)
+
+TODO
+"""
 Base.:+(t::LazyTensor, s::LazyTensor) = TensorSum(t, s)
 Base.:-(t::LazyTensor) = TensorNegation(t)
 Base.:-(s::LazyTensor, t::LazyTensor) = s + (-t)
@@ -67,6 +77,11 @@ Base.:+(t::ZeroTensor, s::TensorSum) = (check_equal_size(t,s); s) # Resolve ambi
 Base.:-(t::ZeroTensor) = t
 
 # Composing lazy tensors
+"""
+    ∘(A::LazyTensor, B::LazyTensor)
+
+TODO
+"""
 Base.:∘(s::LazyTensor, t::LazyTensor) = TensorComposition(s,t)
 Base.:∘(s::TensorComposition, t::LazyTensor) = s.t1∘(s.t2∘t)
 ## Composing with identity
