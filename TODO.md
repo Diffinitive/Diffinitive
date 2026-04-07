@@ -17,7 +17,6 @@
  - [ ] Samla noggrannhets- och SBP-ness-tester för alla operatorer på ett ställe
  - [ ] Move export statements to top of each module
  - [ ] Implement apply_transpose for
-      - [ ] ElementwiseTensorOperation
       - [ ] VolumeOperator
       - [ ] Laplace
 
