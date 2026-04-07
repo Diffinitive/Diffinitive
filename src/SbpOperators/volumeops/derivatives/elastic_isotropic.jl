@@ -42,7 +42,7 @@ function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
     ∂∂_wide(i,σ,j) = ∂(i)∘DiagonalTensor(σ)∘∂(j)
     ∂∂_narrow(i,σ,j) = i==j ? ∂²(σ,i) : ∂(i)∘DiagonalTensor(σ)∘∂(j)
 
-    δ(i,j) = i==j ? IdentityTensor(size(g)) : ZeroTensor(size(g))
+    δ(i,j) = δ(g, i, j)
 
     return MatrixTensor(N,N) do i, j
         ∂∂_wide(i,λ,j) + ∂∂_narrow(j, μ, i) + δ(i,j)∘Σₖ∂ₖμ∂ₖ
@@ -73,8 +73,7 @@ function traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
 
     ∂(i) = e∘first_derivative(g, stencil_set, i)
 
-    bg = boundary_grid(g, boundary)
-    δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
+    δ(i,j) = δ(g, boundary, i, j)
 
     return MatrixTensor(N,N) do i, j
         n̲(i)∘λ̲∘∂(j) + n̲(j)∘μ̲∘∇[i] + δ(i,j)∘Σₖnₖμ∂ₖ
@@ -114,9 +113,7 @@ function tangential_traction_isotropic(g::TensorGrid, λ, μ, stencil_set, bound
 
     ∂ₙ = normal_derivative(g, stencil_set, boundary)
 
-
-    bg = boundary_grid(g, boundary)
-    δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
+    δ(i,j) = δ(g, boundary, i, j)
 
     return MatrixTensor(ndims(g),ndims(g)) do i, j
         μ̲∘(n̲(j)∘∇(i) + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
@@ -164,7 +161,7 @@ function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
     ∂̃∂̃_wide(i,σ,j) = ∂̃(i)∘DiagonalTensor(σ)∘∂̃(j)
     ∂̃∂̃_narrow(i,σ,j) = i==j ? ∂̃²(σ,i) : ∂̃(i)∘DiagonalTensor(σ)∘∂̃(j)
 
-    δ(i,j) = i==j ? IdentityTensor(size(grid)) : ZeroTensor(size(grid))
+    δ(i,j) = δ(grid, i, j)
 
     return MatrixTensor(N, N) do i,j
         sum(1:N) do k
@@ -217,8 +214,7 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
     n̲(i) = DiagonalTensor(componentview(n,i))
     ∂̃(i) = e∘first_derivative(logical_grid(g), stencil_set, i)
 
-    bg = boundary_grid(g, boundary)
-    δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
+    δ(i,j) = δ(g, boundary, i, j)
 
     return MatrixTensor(N,N) do i, j
         sum(1:N) do k
@@ -282,8 +278,7 @@ function tangential_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, bound
 
     ∂ₙ = normal_derivative(g, stencil_set, boundary)
 
-    bg = boundary_grid(g, boundary)
-    δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
+    δ(i,j) = δ(g, boundary, i, j)
 
     return MatrixTensor(ndims(g),ndims(g)) do i, j
         fₖᵢ∂̃ₖ = sum(k->f[k,i]∘∇̃(k), 1:N)
@@ -309,4 +304,15 @@ function boundary_gradient(g, stencil_set, boundary)
 end
 
 
+function δ(g::Grid, i, j)
+    if i==j
+        IdentityTensor(size(bg))
+    else
+        ZeroTensor(size(bg))
+    end
+end
 
+function δ(g::Grid, boundary::BoundaryIdentifier, i, j)
+    bg = boundary_grid(g, boundary)
+    return δ(bg, i, j)
+end
