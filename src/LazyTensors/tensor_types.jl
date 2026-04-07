@@ -16,6 +16,47 @@ domain_size(tmi::IdentityTensor) = tmi.size
 apply(tmi::IdentityTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {D} = v[I...]
 apply_transpose(tmi::IdentityTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {D} = v[I...]
 
+"""
+    ZeroTensor{R,D} <: LazyTensor{R,D}
+
+A lazy zero tensor which returns zero when applied to anything.
+It provides implementations of `+` and `∘` which short circuits to simplified expressions of the results.
+"""
+struct ZeroTensor{R,D} <: LazyTensor{R,D}
+    range_size::NTuple{R,Int}
+    domain_size::NTuple{D,Int}
+end
+
+"""
+    ZeroTensor(range_size, domain_size)
+
+A lazy zero tensor with the given range and domain size.
+"""
+ZeroTensor(::Tuple, ::Tuple)
+
+
+"""
+    ZeroTensor(sz::Vararg{Int})
+
+A lazy representation of the zero operator with range size and domain size both equal to `sz`.
+"""
+ZeroTensor(size::Vararg{Int}) = ZeroTensor(size)
+
+"""
+    ZeroTensor(sz::NTuple{N, Int} where N)
+
+A lazy representation of the zero operator with range size and domain size both equal to `sz`.
+"""
+ZeroTensor(size::NTuple{N, Int} where N) = ZeroTensor(size, size)
+
+Base.zero(t::LazyTensor) = ZeroTensor(range_size(t), domain_size(t))
+
+range_size(t::ZeroTensor) = t.range_size
+domain_size(t::ZeroTensor) = t.domain_size
+
+function apply(t::ZeroTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any, R}) where {R,D}
+    return zero(eltype(v))
+end
 
 """
     ScalingTensor{T,D} <: LazyTensor{D,D}
@@ -33,6 +74,9 @@ LazyTensors.apply_transpose(tm::ScalingTensor{<:Any,D}, v::AbstractArray{<:Any,D
 LazyTensors.range_size(m::ScalingTensor) = m.size
 LazyTensors.domain_size(m::ScalingTensor) = m.size
 
+function Base.:(==)(a::ScalingTensor, b::ScalingTensor)
+    return a.λ == b.λ && a.size == b.size
+end
 
 """
     DiagonalTensor{D, ...} <: LazyTensor{D,D}
@@ -91,6 +135,10 @@ end
 
 function apply_transpose(llm::DenseTensor{R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,D}
     apply(DenseTensor(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
+end
+
+function Base.:(==)(a::DenseTensor, b::DenseTensor)
+    return a.A == b.A && a.range_indicies == b.range_indicies && a.domain_indicies == b.domain_indicies
 end
 
 
@@ -258,5 +306,3 @@ end
 
 
 tuple_range(n) = ntuple(identity, n)
-
-# TODO: Add tests for equality functionality for all types here and in lazy_tensor_operations.

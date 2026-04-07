@@ -44,8 +44,72 @@ using StaticArrays
     @test_throws DomainSizeMismatch I1∘A
     @test_throws DomainSizeMismatch A∘I2
     @test_throws DomainSizeMismatch I1∘I2
+
+
+     @testset "Base.:(==)" begin
+        @test IdentityTensor(3,2) == IdentityTensor(3,2)
+
+        @test IdentityTensor(3,2,4) != IdentityTensor(3,2)
+        @test IdentityTensor(3) != IdentityTensor(3,2)
+        @test IdentityTensor(2,2) != IdentityTensor(3,2)
+    end
 end
 
+@testset "ZeroTensor" begin
+    @testset "Constructors" begin
+        @test ZeroTensor((2,3),(3,4)) isa LazyTensor{2,2}
+        @test zero(ScalingTensor(1, (10,4))) == ZeroTensor((10,4),(10,4))
+
+        @test ZeroTensor(3,5,6) == ZeroTensor((3,5,6),(3,5,6))
+        @test ZeroTensor((3,5,6)) == ZeroTensor((3,5,6),(3,5,6))
+
+        B = rand(3,4,2)
+        B̃ = DenseTensor(B, (1,2), (3,))
+        @test zero(B̃) == ZeroTensor((3,4),(2,))
+    end
+
+    @testset "range_size" begin
+        @test range_size(ZeroTensor((1,2),(3,4))) == (1,2)
+        @test range_size(ZeroTensor((11,),(3,4))) == (11,)
+    end
+
+    @testset "domain_size" begin
+        @test domain_size(ZeroTensor((1,2),(3,4))) == (3,4)
+        @test domain_size(ZeroTensor((11,),(3,4,5))) == (3,4,5)
+    end
+
+    @testset "Application" begin
+        v = rand(4,5)
+        @test ZeroTensor(4,5)*v isa AbstractArray{Float64,2}
+        @test ZeroTensor(4,5)*v == zeros(4,5)
+
+        @test ZeroTensor((3,2,3),(4,5))*v isa AbstractArray{Float64,3}
+        @test ZeroTensor((3,2,3),(4,5))*v == zeros(3,2,3)
+
+        v = rand(1:100, 4,5)
+        @test ZeroTensor(4,5)*v isa AbstractArray{Int,2}
+        @test ZeroTensor(4,5)*v == zeros(4,5)
+
+        @test ZeroTensor((3,2,3),(4,5))*v isa AbstractArray{Int,3}
+        @test ZeroTensor((3,2,3),(4,5))*v == zeros(3,2,3)
+    end
+
+    @testset "Composition" begin
+        @test ZeroTensor((3,4),(5,6))∘ZeroTensor((5,6),(5,4)) == ZeroTensor((3,4),(5,4))
+        @test ZeroTensor((4,),(3,2))∘ZeroTensor((3,2),(5,4,2)) == ZeroTensor((4,), (5,4,2))
+        @test ZeroTensor((2,3),(10,9))∘ScalingTensor(1., (10,9)) == ZeroTensor((2,3),(10,9))
+        @test ZeroTensor((2,1,4),(10,9))∘ScalingTensor(1., (10,9)) == ZeroTensor((2,1,4),(10,9))
+        @test ScalingTensor(1., (10,9))∘ZeroTensor((10,9),(7,8))== ZeroTensor((10,9),(7,8))
+        @test ScalingTensor(1., (10,9))∘ZeroTensor((10,9),(4,2,7))== ZeroTensor((10,9),(4,2,7))
+    end
+
+    @testset "Addition" begin
+        @test ZeroTensor((1,2),(3,4)) + ZeroTensor((1,2),(3,4)) == ZeroTensor((1,2),(3,4))
+        @test ZeroTensor((4,3),(5,4,3)) + ZeroTensor((4,3),(5,4,3)) == ZeroTensor((4,3),(5,4,3))
+        @test ZeroTensor(10,9) + ScalingTensor(1., (10,9)) == ScalingTensor(1., (10,9))
+        @test ScalingTensor(1., (10,9)) + ZeroTensor(10,9) == ScalingTensor(1., (10,9))
+    end
+end
 
 @testset "ScalingTensor" begin
     st = ScalingTensor(2.,(3,4))
@@ -59,6 +123,16 @@ end
 
     @inferred (st*v)[2,2]
     @inferred (st'*v)[2,2]
+
+    @testset "Base.:(==)" begin
+        @test ScalingTensor(2.,(3,4)) == ScalingTensor(2.,(3,4))
+        @test ScalingTensor(2.,(3,4)) == ScalingTensor(2,(3,4))
+
+        @test ScalingTensor(3.,(3,4)) != ScalingTensor(2,(3,4))
+        @test ScalingTensor(2.,(2,4)) != ScalingTensor(2,(3,4))
+        @test ScalingTensor(2.,(3,)) != ScalingTensor(2,(3,4))
+        @test ScalingTensor(2.,(3,4,2)) != ScalingTensor(2,(3,4))
+    end
 end
 
 @testset "DiagonalTensor" begin
@@ -153,6 +227,16 @@ end
     @test B̃*v ≈ B[1,:,1]*v[1,1] + B[2,:,1]*v[2,1] + B[3,:,1]*v[3,1] +
                 B[1,:,2]v[1,2] + B[2,:,2]*v[2,2] + B[3,:,2]*v[3,2] atol=5e-13
 
+
+    @testset "Base.:(==)" begin
+        A = rand(2,3,4)
+
+        @test DenseTensor(A, (1,), (2,3)) == DenseTensor(A, (1,), (2,3))
+        @test DenseTensor(copy(A), (1,), (2,3)) == DenseTensor(A, (1,), (2,3))
+
+        @test DenseTensor(2A, (1,), (2,3)) != DenseTensor(A, (1,), (2,3))
+        @test DenseTensor(A, (1,2), (3,)) != DenseTensor(A, (1,), (2,3))
+    end
 
     # TODO:
     # @inferred (B̃*v)[2]

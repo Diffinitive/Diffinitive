@@ -67,6 +67,10 @@ apply_transpose(tm::TensorNegation, v, I...) = -apply_transpose(tm.tm, v, I...)
 range_size(tm::TensorNegation) = range_size(tm.tm)
 domain_size(tm::TensorNegation) = domain_size(tm.tm)
 
+function Base.:(==)(a::TensorNegation, b::TensorNegation)
+    return a.tm == b.tm
+end
+
 
 """
     TensorSum{R,D,...} <: LazyTensor{R,D}
@@ -116,9 +120,14 @@ end
 range_size(tmBinOp::TensorSum) = range_size(tmBinOp.tms[1])
 domain_size(tmBinOp::TensorSum) = domain_size(tmBinOp.tms[1])
 
+TensorSum(a::ZeroTensor, b::ZeroTensor) = a
+TensorSum(::ZeroTensor, t::LazyTensor) = t
+TensorSum(t::LazyTensor, ::ZeroTensor) = t
+
 function Base.:(==)(a::TensorSum, b::TensorSum)
     return a.tms == b.tms
 end
+
 
 """
     TensorComposition{R,K,D}
@@ -146,6 +155,10 @@ function apply_transpose(c::TensorComposition{R,K,D}, v::AbstractArray{<:Any,R},
     apply_transpose(c.t2, c.t1'*v, I...)
 end
 
+function Base.:(==)(a::TensorComposition, b::TensorComposition)
+    return a.t1 == b.t1 && a.t2 == b.t2
+end
+
 """
     TensorComposition(tm, tmi::IdentityTensor)
     TensorComposition(tmi::IdentityTensor, tm)
@@ -166,6 +179,29 @@ function TensorComposition(tm::IdentityTensor{D}, tmi::IdentityTensor{D}) where 
     @boundscheck check_domain_size(tm, range_size(tmi))
     return tmi
 end
+
+
+function TensorComposition(a::ZeroTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
+function TensorComposition(a::ZeroTensor{R,D}, b::LazyTensor{D,K}) where {R,D,K}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
+function TensorComposition(a::LazyTensor{R,D}, b::ZeroTensor{D,K}) where {R,D,K}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
+# Resolve ambiguities
+function TensorComposition(a::ZeroTensor{R,D}, b::IdentityTensor{D}) where {R,D}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
+function TensorComposition(a::IdentityTensor{R}, b::ZeroTensor{R,D}) where {R,D}
+    return ZeroTensor(range_size(a), domain_size(b))
+end
+
 
 Base.:*(a, tm::LazyTensor) = TensorComposition(ScalingTensor(a,range_size(tm)), tm)
 Base.:*(tm::LazyTensor, a) = a*tm
@@ -261,6 +297,10 @@ function apply_transpose(itm::InflatedTensor{R,D}, v::AbstractArray{<:Any,R}, I:
 
     v_inner = view(v, view_index...)
     return apply_transpose(itm.tm, v_inner, inner_index...)
+end
+
+function Base.:(==)(a::InflatedTensor, b::InflatedTensor)
+    return a.before == b.before && a.tm == b.tm && a.after == b.after
 end
 
 

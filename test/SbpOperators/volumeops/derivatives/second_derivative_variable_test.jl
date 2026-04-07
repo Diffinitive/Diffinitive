@@ -47,6 +47,23 @@ using LinearAlgebra
             @test second_derivative_variable(g, c, stencil_set, 1) == second_derivative_variable(g, c, stencil_set)
             @test_throws DomainError(2, "Derivative direction must be 1.") second_derivative_variable(g, c, stencil_set, 2)
         end
+
+        @testset "Base.:(==)" begin
+            stencil_set2 = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=2)
+            stencil_set4 = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=4)
+
+            g = equidistant_grid(0., 1., 11)
+
+            c = [  1.,  3.,  6., 10., 15., 21., 28., 36., 45., 55., 66.]
+
+            @test second_derivative_variable(g, c, stencil_set2) == second_derivative_variable(g, c, stencil_set2)
+            @test second_derivative_variable(g, copy(c), stencil_set2) == second_derivative_variable(g, c, stencil_set2)
+
+            g2 = equidistant_grid(0., 1.5, 11)
+            @test second_derivative_variable(g, 2c, stencil_set) != second_derivative_variable(g, c, stencil_set)
+            @test second_derivative_variable(g2, c, stencil_set) != second_derivative_variable(g, c, stencil_set)
+            @test second_derivative_variable(g, c, stencil_set4) != second_derivative_variable(g, c, stencil_set2)
+        end
     end
 
     @testset "2D" begin
