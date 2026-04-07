@@ -106,20 +106,20 @@ function tangential_traction_isotropic(g::TensorGrid, λ, μ, stencil_set, bound
 
     e = boundary_restriction(g, stencil_set, boundary)
 
-    λ̲ = DiagonalTensor(e*λ)
     μ̲ = DiagonalTensor(e*μ)
 
     n̲(i) = DiagonalTensor(componentview(n,i))
 
-    ∂(i) = e∘first_derivative(g, stencil_set, i)
+    ∇ = boundary_gradient(logical_grid(g), stencil_set, boundary)
 
     ∂ₙ = normal_derivative(g, stencil_set, boundary)
+
 
     bg = boundary_grid(g, boundary)
     δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
 
     return MatrixTensor(ndims(g),ndims(g)) do i, j
-        μ̲∘(n̲(j)∘∂(i) + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
+        μ̲∘(n̲(j)∘∇(i) + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
     end
 end
 
@@ -274,12 +274,11 @@ function tangential_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, bound
 
     f̲ = [DiagonalTensor(componentview(∂ξ∂x, i, j)) for i∈1:N, j∈1:N]
 
-    λ̲ = DiagonalTensor(e*λ)
     μ̲ = DiagonalTensor(e*μ)
 
     n̲(i) = DiagonalTensor(componentview(n,i))
 
-    ∂̃(i) = e∘first_derivative(g, stencil_set, i)
+    ∇̃ = boundary_gradient(logical_grid(g), stencil_set, boundary)
 
     ∂ₙ = normal_derivative(g, stencil_set, boundary)
 
@@ -287,7 +286,7 @@ function tangential_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, bound
     δ(i,j) = i==j ? IdentityTensor(size(bg)) : ZeroTensor(size(bg))
 
     return MatrixTensor(ndims(g),ndims(g)) do i, j
-        fₖᵢ∂̃ₖ = sum(k->f[k,i]∘∂̃(k), 1:N)
+        fₖᵢ∂̃ₖ = sum(k->f[k,i]∘∇̃(k), 1:N)
         μ̲∘(n̲(j)∘fₖᵢ∂̃ₖ + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
     end
 end
