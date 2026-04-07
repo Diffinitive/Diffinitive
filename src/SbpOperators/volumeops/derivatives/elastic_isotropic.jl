@@ -307,6 +307,46 @@ function boundary_gradient(g, stencil_set, boundary)
 end
 
 
+
+∂(g::Grid, stencil_set, i) = first_derivative(g, stencil_set, i)
+∂²(g::Grid, stencil_set, σ,i) = second_derivative_variable(g, σ, stencil_set, i)
+
+
+function ∂∂_wide(g::Grid, stencil_set, i, σ, j)
+    ∂(i) = ∂(g, stencil_set, i)
+
+    return ∂(i)∘DiagonalTensor(σ)∘∂(j)
+end
+
+function ∂∂_narrow(g::Grid, stencil_set, i, σ, j)
+    ∂(i) = ∂(g, stencil_set, i)
+    ∂²(σ,i) = ∂²(g, stencil_set, σ, i)
+
+    if i == j
+        ∂²(σ,i)
+    else
+        ∂(i)∘DiagonalTensor(σ)∘∂(j)
+    end
+end
+
+function ∂_wide(g::Grid, stencil_set, boundary::BoundaryIdentifier, i)
+    e = boundary_restriction(g, stencil_set, boundary)
+    ∂ᵢ = ∂(g, stencil_set, i)
+
+    return e∘∂ᵢ
+end
+
+function ∂_narrow(g::Grid, stencil_set, boundary::BoundaryIdentifier, i)
+    if i == grid_id(boundary)
+        s = Grids._boundary_sign(component_type(g), boundary)
+        ∂ₙ = normal_derivative(g, stencil_set, boundary)
+        return s*∂ₙ
+    else
+        ∂ᵢ = first_derivative(g, stencil_set, i)
+        return e∘∂ᵢ
+    end
+end
+
 function δ(g::Grid, i, j)
     if i==j
         IdentityTensor(size(bg))
