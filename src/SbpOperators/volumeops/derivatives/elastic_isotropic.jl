@@ -337,6 +337,9 @@ function ∂_narrow(g::Grid, stencil_set, boundary::BoundaryIdentifier, i)
     end
 end
 
+# TODO: Extend the two functions above for mapped grids
+# TODO: Move the two functions above to a more general spot?
+
 function δ(g::Grid, i, j)
     if i==j
         IdentityTensor(size(bg))
@@ -349,3 +352,7 @@ function δ(g::Grid, boundary::BoundaryIdentifier, i, j)
     bg = boundary_grid(g, boundary)
     return δ(bg, i, j)
 end
+
+
+# TODO: Can the traction operators be combined for TensorGrid and MappedGrid?
+# TODO: Can the elastic operators be combined for TensorGrid and MappedGrid?
