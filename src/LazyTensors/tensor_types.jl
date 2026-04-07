@@ -40,7 +40,14 @@ ZeroTensor(::Tuple, ::Tuple)
 
 A lazy representation of the zero operator with range size and domain size both equal to `sz`.
 """
-ZeroTensor(size::Vararg{Int}) = ZeroTensor(size, size)
+ZeroTensor(size::Vararg{Int}) = ZeroTensor(size)
+
+"""
+    ZeroTensor(sz::NTuple{N, Int} where N)
+
+A lazy representation of the zero operator with range size and domain size both equal to `sz`.
+"""
+ZeroTensor(size::NTuple{N, Int} where N) = ZeroTensor(size, size)
 
 Base.zero(t::LazyTensor) = ZeroTensor(range_size(t), domain_size(t))
 
@@ -67,6 +74,9 @@ LazyTensors.apply_transpose(tm::ScalingTensor{<:Any,D}, v::AbstractArray{<:Any,D
 LazyTensors.range_size(m::ScalingTensor) = m.size
 LazyTensors.domain_size(m::ScalingTensor) = m.size
 
+function Base.:(==)(a::ScalingTensor, b::ScalingTensor)
+    return a.λ == b.λ && a.size == b.size
+end
 
 """
     DiagonalTensor{D, ...} <: LazyTensor{D,D}
@@ -84,6 +94,8 @@ domain_size(tm::DiagonalTensor) = size(tm.diagonal)
 
 LazyTensors.apply(tm::DiagonalTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.diagonal[I...]*v[I...]
 LazyTensors.apply_transpose(tm::DiagonalTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.diagonal[I...]*v[I...]
+
+Base.:(==)(a::DiagonalTensor, b::DiagonalTensor) = a.diagonal == b.diagonal
 
 
 """
@@ -123,4 +135,8 @@ end
 
 function apply_transpose(llm::DenseTensor{R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,D}
     apply(DenseTensor(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
+end
+
+function Base.:(==)(a::DenseTensor, b::DenseTensor)
+    return a.A == b.A && a.range_indicies == b.range_indicies && a.domain_indicies == b.domain_indicies
 end
