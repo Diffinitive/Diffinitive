@@ -222,10 +222,6 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
 
     return MatrixTensor(N,N) do i, j
         sum(1:N) do k
-            @show typeof(δ(i,j))
-            @show typeof(μ̲)
-            @show typeof(nf[k])
-            @show typeof(∇̃[k])
             n̲(i)∘λ̲∘f̲[k,j]∘e∘∂̃(k) + n̲(j)∘μ̲∘f̲[k,i]∘∇̃[k] + δ(i,j)∘μ̲∘n̲f̲[k]∘∇̃[k]
         end
     end
