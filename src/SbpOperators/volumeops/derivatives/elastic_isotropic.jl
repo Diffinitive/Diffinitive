@@ -356,3 +356,6 @@ end
 
 # TODO: Can the traction operators be combined for TensorGrid and MappedGrid?
 # TODO: Can the elastic operators be combined for TensorGrid and MappedGrid?
+# TODO: Would it be helpful to implement operators for getting the normal and tangential projections of vectors on the boundary?
+#       Could these be used to simplify the implementations of normal traction and tangential traction?
+#       (Yes? Simplest would be to construct them on the boundary grid. Then they could be combined with the regular Traction operator to get the components.)
