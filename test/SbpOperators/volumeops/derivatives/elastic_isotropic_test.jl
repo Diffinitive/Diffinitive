@@ -69,6 +69,17 @@ div(f) = x->div(f,x)
 grad(f, x) = map(i->∂(f,i,x), index_tuple(x))
 grad(f) = x->grad(f,x)
 
+# function J(f, x)
+#     n = length(f(zero(x)))
+#     m = length(x)
+
+#     _smatrix(n,m) do i,j
+#         @inline
+#         ∂(e(f,i),j,x)
+#     end
+# end
+# Can the above be made type-stable?
+
 
 function elastic_ad(u, λ, μ, x)
     map(index_tuple(x)) do i
