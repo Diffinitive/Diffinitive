@@ -50,6 +50,9 @@ e(u,i) = x->e(u,i,x)
 div(f, x) = sum(k->∂(e(f,k),k,x), index_tuple(x))
 div(f) = x->div(f,x)
 
+grad(f, x) = map(i->∂(f,i,x), index_tuple(x))
+grad(f) = x->grad(f,x)
+
 function elastic_ad(u, λ, μ, x)
     map(index_tuple(x)) do i
         sum(index_tuple(x)) do j
@@ -69,13 +72,13 @@ elastic_ad(u) = x->elastic_ad(u,x)
 function stress_ad(u, λ, μ, x)
     n = length(x)
 
-    map(ntuple(k->(mod1(k,n), fld1(k,n)), n*m)) do (i,j)
+    _smatrix(n,n) do (i,j)
         uᵢ = e(u,i)
         uⱼ = e(u,j)
 
         # σᵢⱼ = δᵢⱼλ∂ₖuₖ + μ∂ᵢuⱼ + μ∂ⱼuᵢ
         δ(i,j)*λ(x)*div(u,x) + μ(x)*(∂(uⱼ,i,x) + ∂(uᵢ,j,x))
-    end |> SMatrix{n,n}
+    end
 end
 
 
@@ -83,3 +86,15 @@ stress_ad(u, λ, μ) = x->stress_ad(u, λ, μ, x)
 
 stress_ad(u, x) = stress_ad(u, x->1, x->1, x)
 stress_ad(u) = x->stress_ad(u,x)
+
+
+## Helpers
+function _smatrix(f,n,m)
+    map(ntuple(k->(mod1(k,n), fld1(k,n)), n*m)) do (i,j)
+        f(i,j)
+    end |> SMatrix{n,m}
+end
+
+function _smatrix(tt::NTuple{N, NTuple{M, Any}}) where {N,M}
+    return _smatrix((i,j)->tt[i][j],N,M)
+end
