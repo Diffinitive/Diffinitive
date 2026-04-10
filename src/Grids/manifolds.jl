@@ -160,3 +160,74 @@ function boundary_identifiers(a::UnstructuredAtlas)
 
     return bs
 end
+
+"""
+    FunctionWithJacobian{FT,JT}
+    FunctionWithJacobian(f,J)
+
+Wraps a function and its jacobian to make it available for Grids.jacobian
+
+See also: [with_jacobian](@ref)
+"""
+struct FunctionWithJacobian{FT,JT}
+    f::FT
+    J::JT
+end
+
+(fJ::FunctionWithJacobian)(x) = fJ.f(x)
+jacobian(fJ::FunctionWithJacobian, x) = fJ.J(x)
+
+
+"""
+    with_jacobian(f, Jfun)
+
+Create a FunctionWithJacobian from `f` using `J(x) = Jfun(f,x)`.
+
+# Example
+```julia
+f = with_jacobian(ForwardDiff.jacobian) do ξ
+    @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
+end
+```
+"""
+with_jacobian(f, Jfun) = FunctionWithJacobian(f, x->Jfun(f,x))
+
+"""
+    with_jacobian(x, pm::ParameterSpace, Jfun)
+
+Create a Chart from `f` and `pm` using `J(x) = Jfun(f,x)`.
+
+# Example
+```julia
+c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do ξ
+    @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
+end
+```
+"""
+with_jacobian(x, pm::ParameterSpace, Jfun) = Chart(with_jacobian(x,Jfun), pm)
+
+"""
+    with_jacobian(xJ, pm::ParameterSpace)
+
+Create a Chart with `pm` and mapping + jacobian from `xJ`. `xJ(ξ)` should return
+a tuple `x(ξ), J(ξ)`
+
+# Example
+```julia
+c = with_jacobian(unitsquare()) do ξ
+    x = @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
+    J = @SMatrix[
+        1          0       ;
+        2ξ[1]*ξ[2] ξ[1]^2+1;
+    ]
+
+    (x,J)
+end
+```
+"""
+function with_jacobian(xJ, pm::ParameterSpace)
+    x(ξ) = xJ(ξ)[1]
+    J(ξ) = xJ(ξ)[2]
+
+    return Chart(FunctionWithJacobian(x,J), pm)
+end
