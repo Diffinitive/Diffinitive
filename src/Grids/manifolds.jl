@@ -184,10 +184,22 @@ jacobian(fJ::FunctionWithJacobian, x) = fJ.J(x)
 Create a FunctionWithJacobian from `f` using `J(x) = Jfun(f,x)`.
 
 # Example
-```julia
-f = with_jacobian(ForwardDiff.jacobian) do ξ
+```julia-repl
+julia> using ForwardDiff, StaticArrays
+julia> f = with_jacobian(ForwardDiff.jacobian) do ξ
     @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
-end
+end;
+
+julia> f([1,2])
+2-element SVector{2, Int64} with indices SOneTo(2):
+ 1
+ 4
+
+julia> jacobian(f, [1,2])
+2×2 Matrix{Int64}:
+ 1  0
+ 4  2
+
 ```
 """
 with_jacobian(f, Jfun) = FunctionWithJacobian(f, x->Jfun(f,x))
@@ -198,10 +210,22 @@ with_jacobian(f, Jfun) = FunctionWithJacobian(f, x->Jfun(f,x))
 Create a Chart from `f` and `pm` using `J(x) = Jfun(f,x)`.
 
 # Example
-```julia
-c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do ξ
-    @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
-end
+```julia-repl
+julia> using ForwardDiff, StaticArrays
+
+julia> c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do ξ
+           @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
+       end;
+
+julia> c([1,1/2])
+2-element SVector{2, Float64} with indices SOneTo(2):
+ 1.0
+ 1.0
+
+julia> jacobian(c,[1,1/2])
+2×2 Matrix{Float64}:
+ 1.0  0.0
+ 1.0  2.0
 ```
 """
 with_jacobian(x, pm::ParameterSpace, Jfun) = Chart(with_jacobian(x,Jfun), pm)
@@ -213,16 +237,28 @@ Create a Chart with `pm` and mapping + jacobian from `xJ`. `xJ(ξ)` should retur
 a tuple `x(ξ), J(ξ)`
 
 # Example
-```julia
-c = with_jacobian(unitsquare()) do ξ
-    x = @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
-    J = @SMatrix[
-        1          0       ;
-        2ξ[1]*ξ[2] ξ[1]^2+1;
-    ]
+```julia-repl
+julia> using ForwardDiff, StaticArrays
 
-    (x,J)
-end
+julia> c = with_jacobian(unitsquare()) do ξ
+           x = @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
+           J = @SMatrix[
+               1          0       ;
+               2ξ[1]*ξ[2] ξ[1]^2+1;
+           ]
+
+           (x,J)
+       end;
+
+julia> c([1,1/2])
+2-element SVector{2, Float64} with indices SOneTo(2):
+ 1.0
+ 1.0
+
+julia> jacobian(c,[1,1/2])
+2×2 SMatrix{2, 2, Float64, 4} with indices SOneTo(2)×SOneTo(2):
+ 1.0  0.0
+ 1.0  2.0
 ```
 """
 function with_jacobian(xJ, pm::ParameterSpace)
