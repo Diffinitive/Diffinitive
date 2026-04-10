@@ -41,10 +41,10 @@ e(u,i) = x->e(u,i,x)
 ∂∂(f, i, σ, j, x::AbstractArray) = ∂(x->σ(x)*∂(f,j,x),i,x)
 ∂∂(f, i, σ, j) = x->∂∂(f, i, σ, j, x::AbstractArray)
 
-Δ(f,σ,x) = sum(k->∂∂(f,σ,x), ntuple(identity, length(x)))
+Δ(f,σ,x) = sum(k->∂∂(f,k,σ,k,x), ntuple(identity, length(x)))
 Δ(f,σ) = x->Δ(f,σ,x)
 
-div(f, x) = sum(k->∂(f,k,x), ntuple(identity,length(x)))
+div(f, x) = sum(k->∂(e(f,k),k,x), ntuple(identity,length(x)))
 div(f) = x->div(f,x)
 
 
@@ -64,17 +64,20 @@ elastic_ad(u, x) = elastic_ad(u, x->1, x->1, x)
 elastic_ad(u) = x->elastic_ad(u,x)
 
 
-function stress_ad(u, λ, μ, n, x)
+function stress_ad(u, λ, μ, x)
     n = length(x)
 
     map(ntuple(k->(mod1(k,n), fld1(k,n)), n*m)) do (i,j)
+        uᵢ = e(u,i)
         uⱼ = e(u,j)
 
-        # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + δᵢⱼnₖμ∂ₖuⱼ
-        # δᵢₗnₗλ∂ⱼuⱼ + δⱼₗnₗμ∂ᵢuⱼ + δᵢⱼδₖₗnₗμ∂ₖuⱼ
-        # (δᵢₗλ∂ⱼuⱼ + δⱼₗμ∂ᵢuⱼ + δᵢⱼδₖₗμ∂ₖuⱼ)nₗ
-        # (δᵢⱼλ∂ₖuₖ + μ∂ᵢuⱼ + μ∂ⱼuᵢ)nⱼ
-
-        λ(x)*∂(uⱼ, j) + ...
+        # σᵢⱼ = δᵢⱼλ∂ₖuₖ + μ∂ᵢuⱼ + μ∂ⱼuᵢ
+        δ(i,j)*λ(x)*div(u,x) + μ(x)*(∂(uⱼ,i,x) + ∂(uᵢ,j,x))
     end |> SMatrix{n,n}
 end
+
+
+stress_ad(u, λ, μ) = x->stress_ad(u, λ, μ, x)
+
+stress_ad(u, x) = stress_ad(u, x->1, x->1, x)
+stress_ad(u) = x->stress_ad(u,x)
