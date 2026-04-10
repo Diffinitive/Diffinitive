@@ -24,6 +24,9 @@ using Diffinitive.Grids
 
 ## Automatic differentiation
 onehot(k,N) = SVector(ntuple(i->k==i ? 1 : 0,N))
+tuple_range(n) = ntuple(identity, n)
+index_tuple(x) = tuple_range(length(x))
+
 δ(i,j) = i==j ? 1 : 0
 
 e(u, i, x) = u(x)[i]
@@ -41,16 +44,15 @@ e(u,i) = x->e(u,i,x)
 ∂∂(f, i, σ, j, x::AbstractArray) = ∂(x->σ(x)*∂(f,j,x),i,x)
 ∂∂(f, i, σ, j) = x->∂∂(f, i, σ, j, x::AbstractArray)
 
-Δ(f,σ,x) = sum(k->∂∂(f,k,σ,k,x), ntuple(identity, length(x)))
+Δ(f,σ,x) = sum(k->∂∂(f,k,σ,k,x), index_tuple(x))
 Δ(f,σ) = x->Δ(f,σ,x)
 
-div(f, x) = sum(k->∂(e(f,k),k,x), ntuple(identity,length(x)))
+div(f, x) = sum(k->∂(e(f,k),k,x), index_tuple(x))
 div(f) = x->div(f,x)
 
-
 function elastic_ad(u, λ, μ, x)
-    map(ntuple(identity, length(x))) do i
-        sum(ntuple(identity, length(x)) do j
+    map(index_tuple(x)) do i
+        sum(index_tuple(x)) do j
             uⱼ = e(u,j)
             # ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + δᵢⱼ∂ₖμ∂ₖuⱼ
             ∂∂(uⱼ,i,λ,j,x) + ∂∂(uⱼ,j,μ,i,x) + δ(i,j)*Δ(uⱼ,μ,x)
