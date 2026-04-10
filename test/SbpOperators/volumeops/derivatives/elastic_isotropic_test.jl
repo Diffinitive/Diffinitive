@@ -5,6 +5,15 @@ using Diffinitive.Grids
 # using Diffinitive.LazyTensors
 
 
+test_grid(::Type{<:TensorGrid}) = equidistant_grid(unitsquare(Float64),41,41)
+
+const c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
+    @SVector[1.2ξ+0.2η, 0.9η+ξ/2]
+end
+
+test_grid(::Type{<:MappedGrid}) = equidistant_grid(c, n, m)
+
+
 @testset "elastic_isotropic" begin
 
 end
@@ -23,19 +32,11 @@ end
 
 # SBP-factorization
 # Accuracy
-
-# TensorGrid
-# MappedGrid
+    # Exact polynomials
+    # something more complicated
 
 # 2D
 # 3D
-
-# Full operator
-# Traction
-# Normal traction
-# Tangential traction
-
-
 
 
 ## Automatic differentiation
