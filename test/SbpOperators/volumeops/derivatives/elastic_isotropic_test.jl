@@ -5,6 +5,22 @@ using Diffinitive.Grids
 # using Diffinitive.LazyTensors
 
 
+@testset "elastic_isotropic" begin
+
+end
+
+@testset "traction_isotropic" begin
+
+end
+
+@testset "normal_traction_isotropic" begin
+
+end
+
+@testset "tangential_traction_isotropic" begin
+
+end
+
 # SBP-factorization
 # Accuracy
 
@@ -53,6 +69,7 @@ div(f) = x->div(f,x)
 grad(f, x) = map(i->∂(f,i,x), index_tuple(x))
 grad(f) = x->grad(f,x)
 
+
 function elastic_ad(u, λ, μ, x)
     map(index_tuple(x)) do i
         sum(index_tuple(x)) do j
@@ -91,6 +108,7 @@ stress_ad(u) = x->stress_ad(u,x)
 ## Helpers
 function _smatrix(f,n,m)
     map(ntuple(k->(mod1(k,n), fld1(k,n)), n*m)) do (i,j)
+        @inline
         f(i,j)
     end |> SMatrix{n,m}
 end
