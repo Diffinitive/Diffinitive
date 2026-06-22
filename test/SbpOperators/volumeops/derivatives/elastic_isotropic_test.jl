@@ -4,6 +4,7 @@ using Diffinitive.SbpOperators
 using Diffinitive.Grids
 # using Diffinitive.LazyTensors
 using StaticArrays
+using ForwardDiff
 
 
 test_grid(::Type{<:TensorGrid}) = equidistant_grid(unitsquare(Float64),41,41)
