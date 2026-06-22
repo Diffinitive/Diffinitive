@@ -3,6 +3,7 @@ using Test
 using Diffinitive.SbpOperators
 using Diffinitive.Grids
 # using Diffinitive.LazyTensors
+using StaticArrays
 
 
 test_grid(::Type{<:TensorGrid}) = equidistant_grid(unitsquare(Float64),41,41)
