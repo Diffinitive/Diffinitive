@@ -268,6 +268,9 @@ function MatrixTensor(Ds::Vararg{NTuple{N, LazyTensor} where N})
     return MatrixTensor(Ds)
 end
 
+MatrixTensor(::Tuple{}) = throw(ArgumentError("All dimensions of a MatrixTensor must be larger than 1"))
+MatrixTensor(::NTuple{N, Tuple{}} where N) = throw(ArgumentError("The number of columns of a MatrixTensor must be larger than 1"))
+
 function MatrixTensor(Ds::Matrix)
     return MatrixTensor(TupleTable(Ds))
 end
