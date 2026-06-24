@@ -194,11 +194,12 @@ test_grid(::Type{<:MappedGrid}) = equidistant_grid(c, n, m)
                 μ = x -> x[1],
             )
 
-            @testset "u = [x, y²] with λ = x², μ = y" test_accuracy(g;
+            @testset "u = [x, y²] with λ = x², μ = y" test_accuracy(
+                equidistant_grid(c_2d, 101, 101);
                 u = x -> @SVector[x[1],x[2]^2],
                 λ = x -> x[1]^2,
                 μ = x -> x[2],
-                broken=true,
+                rtol = 1e-5,
             )
 
             @testset "u = [y, x] with λ = x, μ = y" test_accuracy(g;
