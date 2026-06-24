@@ -7,6 +7,20 @@ using StaticArrays
 using ForwardDiff
 
 
+function test_accuracy(g; λ, μ, u, Eu = elastic_ad(u,λ,μ), kwargs...)
+    ū = map(u, g)
+    Eū = map(Eu, g)
+
+    λ̄ = map(λ,g)
+    μ̄ = map(μ,g)
+
+    E = elastic_isotropic(g, λ̄, μ̄, stencil_set)
+
+    Ēū = E*ū
+
+    @test isapprox(Ēū, Eū; kwargs...)
+end
+
 test_grid(::Type{<:TensorGrid}) = equidistant_grid(unitsquare(Float64),41,41)
 
 const c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
@@ -19,7 +33,36 @@ test_grid(::Type{<:MappedGrid}) = equidistant_grid(c, n, m)
 @testset "elastic_isotropic" begin
     @testset "EquidistantGrid" begin
         @testset "2D" begin
-            @test_broken false
+            g = equidistant_grid(unitsquare(Float64), 41, 41)
+            @testset "u = [x, y²] with λ = 1, μ = 1" test_accuracy(g;
+                u = x -> @SVector[x[1],x[2]^2],
+                λ = x -> 1.,
+                μ = x ->1.,
+            )
+
+            @testset "u = [x, y²] with λ = y, μ = x" test_accuracy(g;
+                u = x -> @SVector[x[1],x[2]^2],
+                λ = x -> x[2],
+                μ = x -> x[1],
+            )
+
+            @testset "u = [x, y²] with λ = x², μ = y" test_accuracy(g;
+                u = x -> @SVector[x[1],x[2]^2],
+                λ = x -> x[1]^2,
+                μ = x -> x[2],
+            )
+
+            @testset "u = [y, x] with λ = x, μ = y" test_accuracy(g;
+                u = x -> @SVector[x[2],x[1]],
+                λ = x -> x[1],
+                μ = x -> x[2],
+            )
+
+            @testset "u = [y, x] with λ = y, μ = xy" test_accuracy(g;
+                u = x -> @SVector[x[2],x[1]],
+                λ = x -> x[2],
+                μ = x -> x[1]*x[2],
+            )
         end
 
         @testset "3D" begin
