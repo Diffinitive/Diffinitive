@@ -36,13 +36,13 @@ function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
         second_derivative_variable(g,μ,stencil_set,k)
     end
 
-    _∂∂_wide(i,σ,j) = ∂∂_wide(g, stencil_set, i, σ, j) # TBD: Should this closure be implemented outside this function?
-    _∂∂_narrow(i,σ,j) = ∂∂_narrow(g, stencil_set, i, σ, j) # TBD: Should this closure be implemented outside this function?
+    ∂∂_wide(i,σ,j) = mixed_second_derivative_variable_wide(g, stencil_set, i, σ, j) # TBD: Should this closure be implemented outside this function?
+    ∂∂_narrow(i,σ,j) = mixed_second_derivative_variable_narrow(g, stencil_set, i, σ, j) # TBD: Should this closure be implemented outside this function?
 
-    _δ(i,j) = δ(g, i, j)
+    δ(i,j) = dirac_delta(g, i, j)
 
     return MatrixTensor(N,N) do i, j
-        _∂∂_wide(i,λ,j) + _∂∂_narrow(j, μ, i) + _δ(i,j)∘Σₖ∂ₖμ∂ₖ
+        ∂∂_wide(i,λ,j) + ∂∂_narrow(j, μ, i) + δ(i,j)∘Σₖ∂ₖμ∂ₖ
     end
 end
 
@@ -106,10 +106,10 @@ function tangential_traction_isotropic(g::TensorGrid, λ, μ, stencil_set, bound
     ∂(i) = ∂_narrow(g, stencil_set, boundary, i)
     ∂ₙ = normal_derivative(g, stencil_set, boundary)
 
-    _δ(i,j) = δ(g, boundary, i, j)
+    δ(i,j) = dirac_delta(g, boundary, i, j)
 
     return MatrixTensor(ndims(g),ndims(g)) do i, j
-        μ̲∘(n̲(j)∘∂(i) + (_δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
+        μ̲∘(n̲(j)∘∂(i) + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
     end
 end
 
@@ -148,10 +148,10 @@ function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
 
     J̲⁻¹ = DiagonalTensor(J⁻¹)
 
-    ∂̃∂̃_wide(i,σ,j) = ∂∂_wide(logical_grid(grid),stencil_set,i,σ,j)
-    ∂̃∂̃_narrow(i,σ,j) = ∂∂_narrow(logical_grid(grid),stencil_set,i,σ,j)
+    ∂̃∂̃_wide(i,σ,j) = mixed_second_derivative_variable_wide(logical_grid(grid),stencil_set,i,σ,j)
+    ∂̃∂̃_narrow(i,σ,j) = mixed_second_derivative_variable_narrow(logical_grid(grid),stencil_set,i,σ,j)
 
-    _δ(i,j) = δ(grid, i, j)
+    δ(i,j) = dirac_delta(grid, i, j)
 
     return MatrixTensor(N, N) do i,j
         sum(1:N) do k
@@ -160,7 +160,7 @@ function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
 
                 ∂̃ₖμJgᵏⁿʲⁱ∂̃ₙ = ∂̃∂̃_narrow(k, μ*̃J*̃g̃[k,n,j,i], n)
 
-                δᵢⱼ∂̃ₖμJgᵏⁿˢˢ∂̃ₙ = _δ(i,j)∘∂̃∂̃_narrow(k,μ*̃J*̃g[k,n],n)
+                δᵢⱼ∂̃ₖμJgᵏⁿˢˢ∂̃ₙ = δ(i,j)∘∂̃∂̃_narrow(k,μ*̃J*̃g[k,n],n)
 
                 return J̲⁻¹∘(∂̃ₖλJgᵏⁿⁱʲ∂̃ₙ + ∂̃ₖμJgᵏⁿʲⁱ∂̃ₙ + δᵢⱼ∂̃ₖμJgᵏⁿˢˢ∂̃ₙ)
             end
@@ -205,11 +205,11 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
     ∂̃_wide(i) = ∂_wide(logical_grid(g), stencil_set, boundary, i)
     ∂̃_narrow(i) = ∂_narrow(logical_grid(g), stencil_set, boundary, i)
 
-    _δ(i,j) = δ(g, boundary, i, j)
+    δ(i,j) = dirac_delta(g, boundary, i, j)
 
     return MatrixTensor(N,N) do i, j
         sum(1:N) do k
-            n̲(i)∘λ̲∘f̲[k,j]∘∂̃_wide(k) + n̲(j)∘μ̲∘f̲[k,i]∘∂̃_narrow(k) + _δ(i,j)∘μ̲∘n̲f̲[k]∘∂̃_narrow(k)
+            n̲(i)∘λ̲∘f̲[k,j]∘∂̃_wide(k) + n̲(j)∘μ̲∘f̲[k,i]∘∂̃_narrow(k) + δ(i,j)∘μ̲∘n̲f̲[k]∘∂̃_narrow(k)
         end
     end
 end
@@ -271,11 +271,11 @@ function tangential_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, bound
 
     ∂ₙ = normal_derivative(g, stencil_set, boundary)
 
-    _δ(i,j) = δ(g, boundary, i, j)
+    δ(i,j) = dirac_delta(g, boundary, i, j)
 
     return MatrixTensor(ndims(g),ndims(g)) do i, j
         fₖᵢ∂̃ₖ = sum(k->f[k,i]∘∂̃(k), 1:N)
-        μ̲∘(n̲(j)∘fₖᵢ∂̃ₖ + (_δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
+        μ̲∘(n̲(j)∘fₖᵢ∂̃ₖ + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
     end
 end
 
@@ -296,32 +296,29 @@ function boundary_gradient(g, stencil_set, boundary)
     end
 end
 
+# ∂ᵢσ∂ⱼ for given i,σ,j using all D1
+function mixed_second_derivative_variable_wide(g::Grid, stencil_set, i, σ, j) # TBD: Should it have mixed in the name? It's not mixed when i==j.
+    ∂(i) = first_derivative(g, stencil_set, i)
 
-
-∂(g::Grid, stencil_set, i) = first_derivative(g, stencil_set, i)
-∂²(g::Grid, stencil_set, σ,i) = second_derivative_variable(g, σ, stencil_set, i)
-
-
-function ∂∂_wide(g::Grid, stencil_set, i, σ, j)
-    _∂(i) = ∂(g, stencil_set, i) # TBD: Should this closure be implemented outside this function?
-
-    return _∂(i)∘DiagonalTensor(σ)∘_∂(j)
+    return ∂(i)∘DiagonalTensor(σ)∘∂(j)
 end
 
-function ∂∂_narrow(g::Grid, stencil_set, i, σ, j)
-    _∂(i) = ∂(g, stencil_set, i) # TBD: Should this closure be implemented outside this function?
-    _∂²(σ,i) = ∂²(g, stencil_set, σ, i) # TBD: Should this closure be implemented outside this function?
+
+# ∂ᵢσ∂ⱼ for given i,σ,j using D2 when i = j and D1 otherwise
+function mixed_second_derivative_variable_narrow(g::Grid, stencil_set, i, σ, j) # TBD: Should it have mixed in the name? It's not mixed when i==j. Could all of these be MDed under second_derivative?
+    ∂(i) = first_derivative(g, stencil_set, i)
+    ∂²(σ,i) = second_derivative_variable(g, σ, stencil_set, i)
 
     if i == j
-        _∂²(σ,i)
+        ∂²(σ,i)
     else
-        _∂(i)∘DiagonalTensor(σ)∘_∂(j)
+        ∂(i)∘DiagonalTensor(σ)∘∂(j)
     end
 end
 
 function ∂_wide(g::Grid, stencil_set, boundary::BoundaryIdentifier, i)
     e = boundary_restriction(g, stencil_set, boundary)
-    ∂ᵢ = ∂(g, stencil_set, i)
+    ∂ᵢ = first_derivative(g, stencil_set, i)
 
     return e∘∂ᵢ
 end
@@ -341,7 +338,7 @@ end
 # TODO: Extend the two functions above for mapped grids
 # TODO: Move the two functions above to a more general spot?
 
-function δ(g::Grid, i, j)
+function dirac_delta(g::Grid, i, j)
     if i==j
         IdentityTensor(size(g))
     else
@@ -349,9 +346,9 @@ function δ(g::Grid, i, j)
     end
 end
 
-function δ(g::Grid, boundary::BoundaryIdentifier, i, j)
+function dirac_delta(g::Grid, boundary::BoundaryIdentifier, i, j)
     bg = boundary_grid(g, boundary)
-    return δ(bg, i, j)
+    return dirac_delta(bg, i, j)
 end
 
 
