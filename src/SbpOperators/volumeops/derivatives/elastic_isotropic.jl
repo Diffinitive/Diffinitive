@@ -36,13 +36,13 @@ function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
         second_derivative_variable(g,μ,stencil_set,k)
     end
 
-    ∂∂_wide(i,σ,j) = ∂∂_wide(g, stencil_set, i, σ, j)
-    ∂∂_narrow(i,σ,j) = ∂∂_narrow(g, stencil_set, i, σ, j)
+    _∂∂_wide(i,σ,j) = ∂∂_wide(g, stencil_set, i, σ, j) # TBD: Should this closure be implemented outside this function?
+    _∂∂_narrow(i,σ,j) = ∂∂_narrow(g, stencil_set, i, σ, j) # TBD: Should this closure be implemented outside this function?
 
-    δ(i,j) = δ(g, i, j)
+    _δ(i,j) = δ(g, i, j)
 
     return MatrixTensor(N,N) do i, j
-        ∂∂_wide(i,λ,j) + ∂∂_narrow(j, μ, i) + δ(i,j)∘Σₖ∂ₖμ∂ₖ
+        _∂∂_wide(i,λ,j) + _∂∂_narrow(j, μ, i) + _δ(i,j)∘Σₖ∂ₖμ∂ₖ
     end
 end
 
@@ -106,10 +106,10 @@ function tangential_traction_isotropic(g::TensorGrid, λ, μ, stencil_set, bound
     ∂(i) = ∂_narrow(g, stencil_set, boundary, i)
     ∂ₙ = normal_derivative(g, stencil_set, boundary)
 
-    δ(i,j) = δ(g, boundary, i, j)
+    _δ(i,j) = δ(g, boundary, i, j)
 
     return MatrixTensor(ndims(g),ndims(g)) do i, j
-        μ̲∘(n̲(j)∘∂(i) + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
+        μ̲∘(n̲(j)∘∂(i) + (_δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
     end
 end
 
@@ -151,7 +151,7 @@ function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
     ∂̃∂̃_wide(i,σ,j) = ∂∂_wide(logical_grid(grid),stencil_set,i,σ,j)
     ∂̃∂̃_narrow(i,σ,j) = ∂∂_narrow(logical_grid(grid),stencil_set,i,σ,j)
 
-    δ(i,j) = δ(grid, i, j)
+    _δ(i,j) = δ(grid, i, j)
 
     return MatrixTensor(N, N) do i,j
         sum(1:N) do k
@@ -160,7 +160,7 @@ function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
 
                 ∂̃ₖμJgᵏⁿʲⁱ∂̃ₙ = ∂̃∂̃_narrow(k, μ*̃J*̃g̃[k,n,j,i], n)
 
-                δᵢⱼ∂̃ₖμJgᵏⁿˢˢ∂̃ₙ = δ(i,j)∘∂̃∂̃_narrow(k,μ*̃J*̃g[k,n],n)
+                δᵢⱼ∂̃ₖμJgᵏⁿˢˢ∂̃ₙ = _δ(i,j)∘∂̃∂̃_narrow(k,μ*̃J*̃g[k,n],n)
 
                 return J̲⁻¹∘(∂̃ₖλJgᵏⁿⁱʲ∂̃ₙ + ∂̃ₖμJgᵏⁿʲⁱ∂̃ₙ + δᵢⱼ∂̃ₖμJgᵏⁿˢˢ∂̃ₙ)
             end
@@ -205,11 +205,11 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
     ∂̃_wide(i) = ∂_wide(logical_grid(g), stencil_set, boundary, i)
     ∂̃_narrow(i) = ∂_narrow(logical_grid(g), stencil_set, boundary, i)
 
-    δ(i,j) = δ(g, boundary, i, j)
+    _δ(i,j) = δ(g, boundary, i, j)
 
     return MatrixTensor(N,N) do i, j
         sum(1:N) do k
-            n̲(i)∘λ̲∘f̲[k,j]∘∂̃_wide(k) + n̲(j)∘μ̲∘f̲[k,i]∘∂̃_narrow(k) + δ(i,j)∘μ̲∘n̲f̲[k]∘∂̃_narrow(k)
+            n̲(i)∘λ̲∘f̲[k,j]∘∂̃_wide(k) + n̲(j)∘μ̲∘f̲[k,i]∘∂̃_narrow(k) + _δ(i,j)∘μ̲∘n̲f̲[k]∘∂̃_narrow(k)
         end
     end
 end
@@ -271,11 +271,11 @@ function tangential_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, bound
 
     ∂ₙ = normal_derivative(g, stencil_set, boundary)
 
-    δ(i,j) = δ(g, boundary, i, j)
+    _δ(i,j) = δ(g, boundary, i, j)
 
     return MatrixTensor(ndims(g),ndims(g)) do i, j
         fₖᵢ∂̃ₖ = sum(k->f[k,i]∘∂̃(k), 1:N)
-        μ̲∘(n̲(j)∘fₖᵢ∂̃ₖ + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
+        μ̲∘(n̲(j)∘fₖᵢ∂̃ₖ + (_δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
     end
 end
 
@@ -303,19 +303,19 @@ end
 
 
 function ∂∂_wide(g::Grid, stencil_set, i, σ, j)
-    ∂(i) = ∂(g, stencil_set, i)
+    _∂(i) = ∂(g, stencil_set, i) # TBD: Should this closure be implemented outside this function?
 
-    return ∂(i)∘DiagonalTensor(σ)∘∂(j)
+    return _∂(i)∘DiagonalTensor(σ)∘_∂(j)
 end
 
 function ∂∂_narrow(g::Grid, stencil_set, i, σ, j)
-    ∂(i) = ∂(g, stencil_set, i)
-    ∂²(σ,i) = ∂²(g, stencil_set, σ, i)
+    _∂(i) = ∂(g, stencil_set, i) # TBD: Should this closure be implemented outside this function?
+    _∂²(σ,i) = ∂²(g, stencil_set, σ, i) # TBD: Should this closure be implemented outside this function?
 
     if i == j
-        ∂²(σ,i)
+        _∂²(σ,i)
     else
-        ∂(i)∘DiagonalTensor(σ)∘∂(j)
+        _∂(i)∘DiagonalTensor(σ)∘_∂(j)
     end
 end
 
