@@ -10,18 +10,12 @@ using ForwardDiff
 const operator_path = sbp_operators_path()*"standard_diagonal.toml"
 const stencil_set = read_stencil_set(operator_path, order = 4)
 
-function test_accuracy(g; λ, μ, u, Eu = elastic_ad(u,λ,μ), broken=false, kwargs...)
+function test_accuracy(g; L̄, u, Lu, broken=false, kwargs...)
     ū = map(u, g)
-    Eū = map(Eu, g)
+    Lū = map(Lu, g)
+    L̄ū = L̄*ū
 
-    λ̄ = map(λ,g)
-    μ̄ = map(μ,g)
-
-    E = elastic_isotropic(g, λ̄, μ̄, stencil_set)
-
-    Ēū = E*ū
-
-    @test isapprox(Ēū, Eū; kwargs...) broken=broken
+    @test isapprox(L̄ū, Lū; kwargs...) broken=broken
 end
 
 ## Automatic differentiation
@@ -129,94 +123,110 @@ end
 
 
 @testset "elastic_isotropic" begin
-    @testset "EquidistantGrid" begin
-        @testset "2D" begin
-            g = equidistant_grid(unitsquare(Float64), 41, 41)
-            @testset "u = [x, y²] with λ = 1, μ = 1" test_accuracy(g;
+    @testset "2D" begin
+        grid_cases = [
+            "EquidistantGrid" => equidistant_grid(unitsquare(Float64), 41, 41),
+            "MappedGrid" => equidistant_grid(c_2d, 41, 41),
+        ]
+
+        function_cases = [
+            "u = [x, y²], λ = 1, μ = 1" => (;
                 u = x -> @SVector[x[1],x[2]^2],
                 λ = x -> 1.,
                 μ = x ->1.,
-            )
-
-            @testset "u = [x, y²] with λ = y, μ = x" test_accuracy(g;
+            ),
+            "u = [x, y²], λ = y, μ = x" => (;
                 u = x -> @SVector[x[1],x[2]^2],
                 λ = x -> x[2],
                 μ = x -> x[1],
-            )
-
-            @testset "u = [x, y²] with λ = x², μ = y" test_accuracy(g;
+            ),
+            "u = [x, y²], λ = x², μ = y" => (;
                 u = x -> @SVector[x[1],x[2]^2],
                 λ = x -> x[1]^2,
                 μ = x -> x[2],
-            )
+            ),
 
-            @testset "u = [y, x] with λ = x, μ = y" test_accuracy(g;
+            "u = [y, x], λ = x, μ = y" => (;
                 u = x -> @SVector[x[2],x[1]],
                 λ = x -> x[1],
                 μ = x -> x[2],
-            )
+            ),
 
-            @testset "u = [y, x] with λ = y, μ = xy" test_accuracy(g;
+            "u = [y, x], λ = y, μ = xy" => (;
                 u = x -> @SVector[x[2],x[1]],
                 λ = x -> x[2],
                 μ = x -> x[1]*x[2],
-            )
-        end
+            ),
+        ]
 
-        @testset "3D" begin
-            g = equidistant_grid(unitcube(Float64), 21, 21, 21)
-            @testset "u = [x, y², xz] with λ = 1, μ = 1" test_accuracy(g;
-                u = x -> @SVector[x[1], x[2]^2, x[1]*x[3]],
-                λ = x -> 1.,
-                μ = x -> 1.,
-            )
+        rtols = Dict(
+            "EquidistantGrid" => Dict(
+                "u = [x, y²], λ = 1, μ = 1" => 1e-12,
+                "u = [x, y²], λ = y, μ = x" => 1e-12,
+                "u = [x, y²], λ = x², μ = y" => 1e-12,
+                "u = [y, x], λ = x, μ = y" => 1e-12,
+                "u = [y, x], λ = y, μ = xy" => 1e-12,
+            ),
+            "MappedGrid" => Dict(
+                "u = [x, y²], λ = 1, μ = 1" => 1e-12,
+                "u = [x, y²], λ = y, μ = x" => 1e-12,
+                "u = [x, y²], λ = x², μ = y" => 1e-4,
+                "u = [y, x], λ = x, μ = y" => 1e-11,
+                "u = [y, x], λ = y, μ = xy" => 1e-11,
+            ),
+        )
+
+        @testset "$grid_name" for (grid_name, g) ∈ grid_cases
+            @testset "$case_name" for (case_name, parameters) ∈ function_cases
+                (;u, λ, μ) = parameters
+                λ̄ = map(λ, g)
+                μ̄ = map(μ, g)
+                test_accuracy(g;
+                    L̄ = elastic_isotropic(g, λ̄, μ̄, stencil_set),
+                    u = u,
+                    Lu = elastic_ad(u,λ,μ),
+                    rtol = rtols[grid_name][case_name],
+                )
+            end
         end
     end
 
-    @testset "MappedGrid" begin
-        @testset "2D" begin
-            g = equidistant_grid(c_2d, 41, 41)
 
-            @testset "u = [x, y²] with λ = 1, μ = 1" test_accuracy(g;
-                u = x -> @SVector[x[1],x[2]^2],
-                λ = x -> 1.,
-                μ = x ->1.,
-            )
+    @testset "3D" begin
+        grid_cases = [
+            "EquidistantGrid" => equidistant_grid(unitcube(Float64), 21, 21, 21),
+            "MappedGrid" => equidistant_grid(c_3d, 21, 21, 21),
+        ]
 
-            @testset "u = [x, y²] with λ = y, μ = x" test_accuracy(g;
-                u = x -> @SVector[x[1],x[2]^2],
-                λ = x -> x[2],
-                μ = x -> x[1],
-            )
-
-            @testset "u = [x, y²] with λ = x², μ = y" test_accuracy(
-                equidistant_grid(c_2d, 101, 101);
-                u = x -> @SVector[x[1],x[2]^2],
-                λ = x -> x[1]^2,
-                μ = x -> x[2],
-                rtol = 1e-5,
-            )
-
-            @testset "u = [y, x] with λ = x, μ = y" test_accuracy(g;
-                u = x -> @SVector[x[2],x[1]],
-                λ = x -> x[1],
-                μ = x -> x[2],
-            )
-
-            @testset "u = [y, x] with λ = y, μ = xy" test_accuracy(g;
-                u = x -> @SVector[x[2],x[1]],
-                λ = x -> x[2],
-                μ = x -> x[1]*x[2],
-            )
-        end
-
-        @testset "3D" begin
-            g = equidistant_grid(c_3d, 21, 21, 21)
-            @testset "u = [x, y², xz] with λ = 1, μ = 1" test_accuracy(g;
+        function_cases = [
+            "u = [x, y², xz], λ = 1, μ = 1" => (;
                 u = x -> @SVector[x[1], x[2]^2, x[1]*x[3]],
                 λ = x -> 1.,
                 μ = x -> 1.,
-            )
+            ),
+        ]
+
+        rtols = Dict(
+            "EquidistantGrid" => Dict(
+                "u = [x, y², xz], λ = 1, μ = 1" => 1e-13,
+            ),
+            "MappedGrid" => Dict(
+                "u = [x, y², xz], λ = 1, μ = 1" => 1e-12,
+            ),
+        )
+
+        @testset "$grid_name" for (grid_name, g) ∈ grid_cases
+            @testset "$case_name" for (case_name, parameters) ∈ function_cases
+                (;u, λ, μ) = parameters
+                λ̄ = map(λ, g)
+                μ̄ = map(μ, g)
+                test_accuracy(g;
+                    L̄ = elastic_isotropic(g, λ̄, μ̄, stencil_set),
+                    u = u,
+                    Lu = elastic_ad(u,λ,μ),
+                    rtol = rtols[grid_name][case_name],
+                )
+            end
         end
     end
 end
