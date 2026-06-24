@@ -10,7 +10,7 @@ using ForwardDiff
 const operator_path = sbp_operators_path()*"standard_diagonal.toml"
 const stencil_set = read_stencil_set(operator_path, order = 4)
 
-function test_accuracy(g; λ, μ, u, Eu = elastic_ad(u,λ,μ), kwargs...)
+function test_accuracy(g; λ, μ, u, Eu = elastic_ad(u,λ,μ), broken=false, kwargs...)
     ū = map(u, g)
     Eū = map(Eu, g)
 
@@ -21,7 +21,7 @@ function test_accuracy(g; λ, μ, u, Eu = elastic_ad(u,λ,μ), kwargs...)
 
     Ēū = E*ū
 
-    @test isapprox(Ēū, Eū; kwargs...)
+    @test isapprox(Ēū, Eū; kwargs...) broken=broken
 end
 
 ## Automatic differentiation
