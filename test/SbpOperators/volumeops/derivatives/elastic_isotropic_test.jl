@@ -118,8 +118,16 @@ end
 
 test_grid(::Type{<:TensorGrid}) = equidistant_grid(unitsquare(Float64),41,41)
 
-const c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
+const c_2d = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
     @SVector[1.2ξ+0.2η, 0.9η+ξ/2]
+end
+
+const c_3d = with_jacobian(unitcube(), ForwardDiff.jacobian) do (ξ,η,γ)
+    @SVector[
+        1.2ξ + 0.2η + 0.3γ,
+        0.5ξ + 1.1η + 0.4γ,
+        0.2ξ + 0.1η + 0.9γ,
+    ]
 end
 
 test_grid(::Type{<:MappedGrid}) = equidistant_grid(c, n, m)
@@ -172,7 +180,7 @@ test_grid(::Type{<:MappedGrid}) = equidistant_grid(c, n, m)
 
     @testset "MappedGrid" begin
         @testset "2D" begin
-            g = equidistant_grid(c, 41, 41)
+            g = equidistant_grid(c_2d, 41, 41)
 
             @testset "u = [x, y²] with λ = 1, μ = 1" test_accuracy(g;
                 u = x -> @SVector[x[1],x[2]^2],
