@@ -17,19 +17,115 @@ test_grid(::Type{<:MappedGrid}) = equidistant_grid(c, n, m)
 
 
 @testset "elastic_isotropic" begin
+    @testset "EquidistantGrid" begin
+        @testset "2D" begin
+            @test_broken false
+        end
 
+        @testset "3D" begin
+            @test_broken false
+        end
+    end
+
+    @testset "MappedGrid" begin
+        @testset "2D" begin
+            @test_broken false
+        end
+
+        @testset "3D" begin
+            @test_broken false
+        end
+    end
 end
 
 @testset "traction_isotropic" begin
+    @testset "EquidistantGrid" begin
+        @testset "2D" begin
+            @test_broken false
+        end
 
+        @testset "3D" begin
+            @test_broken false
+        end
+    end
+
+    @testset "MappedGrid" begin
+        @testset "2D" begin
+            @test_broken false
+        end
+
+        @testset "3D" begin
+            @test_broken false
+        end
+    end
 end
 
 @testset "normal_traction_isotropic" begin
+    @testset "EquidistantGrid" begin
+        @testset "2D" begin
+            @test_broken false
+        end
 
+        @testset "3D" begin
+            @test_broken false
+        end
+    end
+
+    @testset "MappedGrid" begin
+        @testset "2D" begin
+            @test_broken false
+        end
+
+        @testset "3D" begin
+            @test_broken false
+        end
+    end
 end
 
 @testset "tangential_traction_isotropic" begin
+    @testset "EquidistantGrid" begin
+        @testset "2D" begin
+            @test_broken false
+        end
 
+        @testset "3D" begin
+            @test_broken false
+        end
+    end
+
+    @testset "MappedGrid" begin
+        @testset "2D" begin
+            @test_broken false
+        end
+
+        @testset "3D" begin
+            @test_broken false
+        end
+    end
+end
+
+
+@testset "SBP-properties" begin
+    # TODO: test for a few random vectors
+    @testset "EquidistantGrid" begin
+        @testset "2D" begin
+            @test_broken false
+        end
+
+        @testset "3D" begin
+            @test_broken false
+        end
+    end
+
+    @testset "MappedGrid" begin
+        @testset "2D" begin
+            @test_broken false
+        end
+
+        @testset "3D" begin
+            @test_broken false
+        end
+    end
 end
 
 # SBP-factorization
