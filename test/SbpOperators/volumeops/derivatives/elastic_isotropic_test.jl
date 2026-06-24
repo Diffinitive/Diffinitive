@@ -115,9 +115,6 @@ function _smatrix(tt::NTuple{N, NTuple{M, Any}}) where {N,M}
 end
 
 
-
-test_grid(::Type{<:TensorGrid}) = equidistant_grid(unitsquare(Float64),41,41)
-
 const c_2d = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
     @SVector[1.2ξ+0.2η, 0.9η+ξ/2]
 end
@@ -129,8 +126,6 @@ const c_3d = with_jacobian(unitcube(), ForwardDiff.jacobian) do (ξ,η,γ)
         0.2ξ + 0.1η + 0.9γ,
     ]
 end
-
-test_grid(::Type{<:MappedGrid}) = equidistant_grid(c, n, m)
 
 
 @testset "elastic_isotropic" begin
