@@ -167,7 +167,38 @@ test_grid(::Type{<:MappedGrid}) = equidistant_grid(c, n, m)
 
     @testset "MappedGrid" begin
         @testset "2D" begin
-            @test_broken false
+            g = equidistant_grid(c, 41, 41)
+
+            @testset "u = [x, y²] with λ = 1, μ = 1" test_accuracy(g;
+                u = x -> @SVector[x[1],x[2]^2],
+                λ = x -> 1.,
+                μ = x ->1.,
+            )
+
+            @testset "u = [x, y²] with λ = y, μ = x" test_accuracy(g;
+                u = x -> @SVector[x[1],x[2]^2],
+                λ = x -> x[2],
+                μ = x -> x[1],
+            )
+
+            @testset "u = [x, y²] with λ = x², μ = y" test_accuracy(g;
+                u = x -> @SVector[x[1],x[2]^2],
+                λ = x -> x[1]^2,
+                μ = x -> x[2],
+                broken=true,
+            )
+
+            @testset "u = [y, x] with λ = x, μ = y" test_accuracy(g;
+                u = x -> @SVector[x[2],x[1]],
+                λ = x -> x[1],
+                μ = x -> x[2],
+            )
+
+            @testset "u = [y, x] with λ = y, μ = xy" test_accuracy(g;
+                u = x -> @SVector[x[2],x[1]],
+                λ = x -> x[2],
+                μ = x -> x[1]*x[2],
+            )
         end
 
         @testset "3D" begin
