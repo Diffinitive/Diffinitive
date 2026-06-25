@@ -63,9 +63,9 @@ function traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
     n = normal(g, boundary)
     n̲(i) = DiagonalTensor(componentview(n,i))
 
-    ∂_wide(i) = ∂_wide(g, stencil_set, boundary, i)
-    ∂_narrow(i) = ∂_narrow(g, stencil_set, boundary, i)
-    δ(i,j) = δ(g, boundary, i, j)
+    ∂_wide(i) = first_derivative_wide(g, stencil_set, boundary, i)
+    ∂_narrow(i) = first_derivative_narrow(g, stencil_set, boundary, i)
+    δ(i,j) = dirac_delta(g, boundary, i, j)
     ∂ₙ = normal_derivative(g, stencil_set, boundary)
 
     return MatrixTensor(N,N) do i, j
@@ -187,7 +187,7 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
     e = boundary_restriction(g, stencil_set, boundary)
     ∂ξ∂x = collect(e*map(inv, jacobian(g)))
 
-    f̲ = [DiagonalTensor(componentview(∂ξ∂x, i, j)) for i∈1:N, j∈1:N]
+
 
     λ̲ = DiagonalTensor(e*λ)
     μ̲ = DiagonalTensor(e*μ)
@@ -198,18 +198,19 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
         f*n
     end
 
-    n̲f̲ = [DiagonalTensor(componentview(nf, i)) for i ∈ 1:N]
+    f̲(i,j) = DiagonalTensor(componentview(∂ξ∂x, i, j))
+    n̲(i) = DiagonalTensor(componentview(n,i))
+    n̲f̲(i) = DiagonalTensor(componentview(nf, i))
 
-    sn̲(i) = DiagonalTensor(componentview(n,i))
 
-    ∂̃_wide(i) = ∂_wide(logical_grid(g), stencil_set, boundary, i)
-    ∂̃_narrow(i) = ∂_narrow(logical_grid(g), stencil_set, boundary, i)
+    ∂̃_wide(i) = first_derivative_wide(logical_grid(g), stencil_set, boundary, i)
+    ∂̃_narrow(i) = first_derivative_narrow(logical_grid(g), stencil_set, boundary, i)
 
     δ(i,j) = dirac_delta(g, boundary, i, j)
 
     return MatrixTensor(N,N) do i, j
         sum(1:N) do k
-            n̲(i)∘λ̲∘f̲[k,j]∘∂̃_wide(k) + n̲(j)∘μ̲∘f̲[k,i]∘∂̃_narrow(k) + δ(i,j)∘μ̲∘n̲f̲[k]∘∂̃_narrow(k)
+            n̲(i)∘λ̲∘f̲(k,j)∘∂̃_wide(k) + n̲(j)∘μ̲∘f̲(k,i)∘∂̃_narrow(k) + δ(i,j)∘μ̲∘n̲f̲(k)∘∂̃_narrow(k)
         end
     end
 end
@@ -316,14 +317,15 @@ function mixed_second_derivative_variable_narrow(g::Grid, stencil_set, i, σ, j)
     end
 end
 
-function ∂_wide(g::Grid, stencil_set, boundary::BoundaryIdentifier, i)
+# wide and narrow first derviatives only relevant to the boundary
+function first_derivative_wide(g::Grid, stencil_set, boundary::BoundaryIdentifier, i)
     e = boundary_restriction(g, stencil_set, boundary)
     ∂ᵢ = first_derivative(g, stencil_set, i)
 
     return e∘∂ᵢ
 end
 
-function ∂_narrow(g::Grid, stencil_set, boundary::BoundaryIdentifier, i)
+function first_derivative_narrow(g::Grid, stencil_set, boundary::BoundaryIdentifier, i)
     if i == grid_id(boundary)
         s = Grids._boundary_sign(component_type(g), boundary)
         ∂ₙ = normal_derivative(g, stencil_set, boundary)
