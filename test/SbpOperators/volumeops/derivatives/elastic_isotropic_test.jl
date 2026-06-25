@@ -6,23 +6,32 @@ using Diffinitive.Grids
 using StaticArrays
 using ForwardDiff
 
+using LinearAlgebra
 
 const operator_path = sbp_operators_path()*"standard_diagonal.toml"
 const stencil_set = read_stencil_set(operator_path, order = 4)
 
-function test_accuracy(g; L̄, u, Lu, broken=false, kwargs...)
+function test_accuracy(g; L̄, u, Lu, broken=false, debug=false, kwargs...)
     ū = map(u, g)
     Lū = map(Lu, g)
     L̄ū = L̄*ū
 
+    if debug
+        @show norm(L̄ū-Lū)/norm(Lū), norm(L̄ū-Lū), norm(Lū)
+    end
+
     @test isapprox(L̄ū, Lū; kwargs...) broken=broken
 end
 
-function test_accuracy(g_domain, g_range; L̄, u, Lu, broken=false, kwargs...)
+function test_accuracy(g_domain, g_range; L̄, u, Lu, broken=false, debug=false, kwargs...)
     ū = map(u, g_domain)
     Lū = map(Lu, g_range)
 
     L̄ū = L̄*ū
+
+    if debug
+        @show norm(L̄ū-Lū)/norm(Lū), norm(L̄ū-Lū), norm(Lū)
+    end
 
     @test isapprox(L̄ū, Lū; kwargs...) broken=broken
 end
