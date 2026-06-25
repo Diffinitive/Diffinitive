@@ -207,7 +207,7 @@ with_jacobian(f, Jfun) = FunctionWithJacobian(f, x->Jfun(f,x))
 """
     with_jacobian(x, pm::ParameterSpace, Jfun)
 
-Create a Chart from `f` and `pm` using `J(x) = Jfun(f,x)`.
+Create a Chart from `x(ξ)` and `pm` using `J(ξ) = Jfun(f,ξ)`.
 
 # Example
 ```julia-repl
@@ -229,6 +229,7 @@ julia> jacobian(c,[1,1/2])
 ```
 """
 with_jacobian(x, pm::ParameterSpace, Jfun) = Chart(with_jacobian(x,Jfun), pm)
+# TBD: If you forget to pass Jfun to this method you hit with_jacobian(⋅, ::ParameterSpace) instead. It is likely that this will silently fail and give very strange down steam errors. Can we provide a better error message? Forexample check the dimension of the functions produced in the other method?
 
 """
     with_jacobian(xJ, pm::ParameterSpace)
