@@ -45,6 +45,14 @@ end
 
 boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
+function normal(c::Chart, boundary, ξ)
+    ∂ξ∂x = inv(jacobian(c,ξ))
+    σ = _boundary_sign(eltype(∂ξ∂x), boundary)
+
+    k = grid_id(boundary)
+    return σ*∂ξ∂x[k,:]/norm(∂ξ∂x[k,:])
+end
+
 
 """
     Atlas

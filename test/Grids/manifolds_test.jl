@@ -5,6 +5,8 @@ using Diffinitive.RegionIndices
 using Diffinitive.LazyTensors
 
 using StaticArrays
+using LinearAlgebra
+using ForwardDiff
 
 west = CartesianBoundary{1,LowerBoundary}
 east = CartesianBoundary{1,UpperBoundary}
@@ -12,6 +14,8 @@ south = CartesianBoundary{2,LowerBoundary}
 north = CartesianBoundary{2,UpperBoundary}
 bottom = CartesianBoundary{3, LowerBoundary}
 top = CartesianBoundary{3, UpperBoundary}
+
+unitvec(v) = v/norm(v)
 
 @testset "Chart" begin
     X(ξ) = 2ξ
@@ -34,6 +38,37 @@ top = CartesianBoundary{3, UpperBoundary}
     end
 
     @test Set(boundary_identifiers(Chart(X,unitsquare()))) == Set([east(),west(),south(),north()])
+
+    @testset "normal(::Chart, ⋅)" begin
+        c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do ξ
+            2ξ
+        end
+
+        @test normal(c, west(),  [0,0.3]) == [-1, 0]
+        @test normal(c, east(),  [1,0.8]) == [ 1, 0]
+        @test normal(c, south(), [0.2,0]) == [ 0,-1]
+        @test normal(c, north(), [0.6,1]) == [ 0, 1]
+
+
+        c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
+            @SVector[ξ-η, ξ+η]
+        end
+
+        @test normal(c, west(),  [0,0.3]) ≈ unitvec([-1, -1])
+        @test normal(c, east(),  [1,0.8]) ≈ unitvec([ 1,  1])
+        @test normal(c, south(), [0.2,0]) ≈ unitvec([ 1, -1])
+        @test normal(c, north(), [0.6,1]) ≈ unitvec([-1,  1])
+
+
+        c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
+            @SVector[1.2ξ+0.2η, 0.5ξ+0.9η]
+        end
+
+        @test normal(c, west(),  [0,0.3]) ≈  unitvec([-0.9, 0.2])
+        @test normal(c, east(),  [1,0.8]) ≈ -unitvec([-0.9, 0.2])
+        @test normal(c, south(), [0.2,0]) ≈ -unitvec([-0.5, 1.2])
+        @test normal(c, north(), [0.6,1]) ≈  unitvec([-0.5, 1.2])
+    end
 end
 
 @testset "CartesianAtlas" begin
