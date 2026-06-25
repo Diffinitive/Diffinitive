@@ -80,7 +80,7 @@ elastic_ad(u) = x->elastic_ad(u,x)
 function stress_ad(u, λ, μ, x)
     n = length(x)
 
-    _smatrix(n,n) do (i,j)
+    _smatrix(n,n) do i,j
         uᵢ = e(u,i)
         uⱼ = e(u,j)
 
@@ -95,6 +95,16 @@ stress_ad(u, λ, μ) = x->stress_ad(u, λ, μ, x)
 stress_ad(u, x) = stress_ad(u, x->1, x->1, x)
 stress_ad(u) = x->stress_ad(u,x)
 
+
+function traction_ad(u,λ,μ,c,boundary,ξ)
+    x = c(ξ)
+    σ = stress_ad(u,λ,μ,x)
+    n̂ = normal(c,boundary,ξ)
+
+    return σ*n̂
+end
+
+traction_ad(u,λ,μ,c,boundary_id) = ξ->traction_ad(u,λ,μ,c,boundary_id,ξ)
 
 ## Helpers
 function _smatrix(f,n,m)
