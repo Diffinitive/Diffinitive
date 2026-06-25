@@ -22,6 +22,9 @@
 #      ∂₁μ∂₁u₂ + ∂₂μ∂₂u₂
 
 
+# TBD: Could we remove the "_isotropic" and add "_anisotropic" for a future variant.
+
+
 # Tensor grid
 # ===========
 function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
@@ -175,15 +178,15 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
     # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖδᵢⱼuⱼ
     # (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ
     #
-    #  With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ
-    #  we have
+    # With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ we can write the traction in
+    # logical coordinates, we have
     #
     # Tᵢ = (nᵢλfₖⱼ∂̃ₖ + nⱼμfₖᵢ∂̃ₖ + nₛμfₖₛ∂̃ₖδᵢⱼ) uⱼ
     #
 
     N = ndims(g)
 
-
+    # Construct parts needed for the tranction operator:
     e = boundary_restriction(g, stencil_set, boundary)
     ∂ξ∂x = collect(e*map(inv, jacobian(g)))
 
@@ -208,6 +211,7 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
 
     δ(i,j) = dirac_delta(g, boundary, i, j)
 
+    # Assemble traction operator:
     return MatrixTensor(N,N) do i, j
         sum(1:N) do k
             n̲(i)∘λ̲∘f̲(k,j)∘∂̃_wide(k) + n̲(j)∘μ̲∘f̲(k,i)∘∂̃_narrow(k) + δ(i,j)∘μ̲∘n̲f̲(k)∘∂̃_narrow(k)
@@ -283,7 +287,7 @@ end
 
 # Helpers
 # =======
-function boundary_gradient(g, stencil_set, boundary)
+function boundary_gradient(g, stencil_set, boundary) # Does this need to have "boundary" in the name?
     return map(1:ndims(g)) do i
         if i == grid_id(boundary)
             s = Grids._boundary_sign(component_type(g), boundary)
