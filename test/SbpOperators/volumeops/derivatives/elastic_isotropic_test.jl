@@ -150,41 +150,50 @@ const c_3d = with_jacobian(unitcube(), ForwardDiff.jacobian) do (ξ,η,γ)
 end
 
 
+function_cases_2d = [
+    "u = [x, y²], λ = 1, μ = 1" => (;
+        u = x -> @SVector[x[1],x[2]^2],
+        λ = x -> 1.,
+        μ = x ->1.,
+    ),
+    "u = [x, y²], λ = y, μ = x" => (;
+        u = x -> @SVector[x[1],x[2]^2],
+        λ = x -> x[2],
+        μ = x -> x[1],
+    ),
+    "u = [x, y²], λ = x², μ = y" => (;
+        u = x -> @SVector[x[1],x[2]^2],
+        λ = x -> x[1]^2,
+        μ = x -> x[2],
+    ),
+
+    "u = [y, x], λ = x, μ = y" => (;
+        u = x -> @SVector[x[2],x[1]],
+        λ = x -> x[1],
+        μ = x -> x[2],
+    ),
+
+    "u = [y, x], λ = y, μ = xy" => (;
+        u = x -> @SVector[x[2],x[1]],
+        λ = x -> x[2],
+        μ = x -> x[1]*x[2],
+    ),
+]
+
+function_cases_3d = [
+    "u = [x, y², xz], λ = 1, μ = 1" => (;
+        u = x -> @SVector[x[1], x[2]^2, x[1]*x[3]],
+        λ = x -> 1.,
+        μ = x -> 1.,
+    ),
+]
+
+
 @testset "elastic_isotropic" begin
     @testset "2D" begin
         grid_cases = [
             "EquidistantGrid" => equidistant_grid(unitsquare(Float64), 41, 41),
             "MappedGrid" => equidistant_grid(c_2d, 41, 41),
-        ]
-
-        function_cases = [
-            "u = [x, y²], λ = 1, μ = 1" => (;
-                u = x -> @SVector[x[1],x[2]^2],
-                λ = x -> 1.,
-                μ = x ->1.,
-            ),
-            "u = [x, y²], λ = y, μ = x" => (;
-                u = x -> @SVector[x[1],x[2]^2],
-                λ = x -> x[2],
-                μ = x -> x[1],
-            ),
-            "u = [x, y²], λ = x², μ = y" => (;
-                u = x -> @SVector[x[1],x[2]^2],
-                λ = x -> x[1]^2,
-                μ = x -> x[2],
-            ),
-
-            "u = [y, x], λ = x, μ = y" => (;
-                u = x -> @SVector[x[2],x[1]],
-                λ = x -> x[1],
-                μ = x -> x[2],
-            ),
-
-            "u = [y, x], λ = y, μ = xy" => (;
-                u = x -> @SVector[x[2],x[1]],
-                λ = x -> x[2],
-                μ = x -> x[1]*x[2],
-            ),
         ]
 
         rtols = Dict(
@@ -205,7 +214,7 @@ end
         )
 
         @testset "$grid_name" for (grid_name, g) ∈ grid_cases
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases
+            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
                 (;u, λ, μ) = parameters
                 λ̄ = map(λ, g)
                 μ̄ = map(μ, g)
@@ -226,13 +235,6 @@ end
             "MappedGrid" => equidistant_grid(c_3d, 21, 21, 21),
         ]
 
-        function_cases = [
-            "u = [x, y², xz], λ = 1, μ = 1" => (;
-                u = x -> @SVector[x[1], x[2]^2, x[1]*x[3]],
-                λ = x -> 1.,
-                μ = x -> 1.,
-            ),
-        ]
 
         rtols = Dict(
             "EquidistantGrid" => Dict(
@@ -244,7 +246,7 @@ end
         )
 
         @testset "$grid_name" for (grid_name, g) ∈ grid_cases
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases
+            @testset "$case_name" for (case_name, parameters) ∈ function_cases_3d
                 (;u, λ, μ) = parameters
                 λ̄ = map(λ, g)
                 μ̄ = map(μ, g)
@@ -262,37 +264,6 @@ end
 
 @testset "traction_isotropic" begin
     @testset "2D" begin
-        function_cases = [
-            "u = [x, y²], λ = 1, μ = 1" => (;
-                u = x -> @SVector[x[1],x[2]^2],
-                λ = x -> 1.,
-                μ = x ->1.,
-            ),
-            "u = [x, y²], λ = y, μ = x" => (;
-                u = x -> @SVector[x[1],x[2]^2],
-                λ = x -> x[2],
-                μ = x -> x[1],
-            ),
-            "u = [x, y²], λ = x², μ = y" => (;
-                u = x -> @SVector[x[1],x[2]^2],
-                λ = x -> x[1]^2,
-                μ = x -> x[2],
-            ),
-
-            "u = [y, x], λ = x, μ = y" => (;
-                u = x -> @SVector[x[2],x[1]],
-                λ = x -> x[1],
-                μ = x -> x[2],
-            ),
-
-            "u = [y, x], λ = y, μ = xy" => (;
-                u = x -> @SVector[x[2],x[1]],
-                λ = x -> x[2],
-                μ = x -> x[1]*x[2],
-            ),
-        ]
-
-
         @testset "EquidistantGrid" begin
             test_params = Dict(
                 "u = [x, y²], λ = 1, μ = 1" => (;rtol=1e-14),
@@ -304,7 +275,7 @@ end
             s = unitsquare(Float64)
             g = equidistant_grid(s, 41, 41)
             c = with_jacobian(identity, s, ForwardDiff.jacobian) # Needed for the AD
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases
+            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
                 @testset "$bid" for bid ∈ boundary_identifiers(g)
                     (;u, λ, μ) = parameters
                     λ̄ = map(λ, g)
@@ -329,7 +300,7 @@ end
                 "u = [y, x], λ = y, μ = xy" => (;rtol=1e-12),
             )
             g = equidistant_grid(c_2d, 41, 41)
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases
+            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
                 @testset "$bid" for bid ∈ boundary_identifiers(g)
                     (;u, λ, μ) = parameters
                     λ̄ = map(λ, g)
