@@ -322,11 +322,11 @@ end
 
         @testset "MappedGrid" begin
             test_params = Dict(
-                "u = [x, y²], λ = 1, μ = 1" => (;rtol=1e-12, debug=true),
-                "u = [x, y²], λ = y, μ = x" => (;rtol=1e-12, debug=true),
-                "u = [x, y²], λ = x², μ = y" => (;rtol=1e-12, debug=true),
-                "u = [y, x], λ = x, μ = y" => (;rtol=1e-12, debug=true),
-                "u = [y, x], λ = y, μ = xy" => (;rtol=1e-12, debug=true),
+                "u = [x, y²], λ = 1, μ = 1" => (;rtol=1e-12),
+                "u = [x, y²], λ = y, μ = x" => (;rtol=1e-12),
+                "u = [x, y²], λ = x², μ = y" => (;rtol=1e-12),
+                "u = [y, x], λ = x, μ = y" => (;rtol=1e-12),
+                "u = [y, x], λ = y, μ = xy" => (;rtol=1e-12),
             )
             g = equidistant_grid(c_2d, 41, 41)
             @testset "$case_name" for (case_name, parameters) ∈ function_cases
