@@ -124,6 +124,30 @@ end
 
 traction_ad(u,λ,μ,c,boundary) = ξ->traction_ad(u,λ,μ,c,boundary,ξ)
 
+
+function normal_traction(u,λ,μ,c,boundary,ξ)
+    x = c(ξ)
+    σ = stress_ad(u,λ,μ,x)
+    n̂ = normal(c,boundary,ξ)
+
+    return dot(n̂,σ,n̂)
+end
+
+normal_traction(u,λ,μ,c,boundary) = ξ->normal_traction(u,λ,μ,c,boundary,ξ)
+
+
+function tangential_traction(u,λ,μ,c,boundary,ξ)
+    x = c(ξ)
+    n̂ = normal(c,boundary,ξ)
+    tₙ = normal_traction_ad(u,λ,μ,c,boundary,ξ)
+    T = traction_ad(u,λ,μ,c,boundary,ξ)
+
+    return T - tₙ*n̂
+end
+
+tangential_traction(u,λ,μ,c,boundary) = ξ->tangential_traction(u,λ,μ,c,boundary,ξ)
+
+
 ## Helpers
 function _smatrix(f,n,m)
     map(ntuple(k->(mod1(k,n), fld1(k,n)), n*m)) do (i,j)
