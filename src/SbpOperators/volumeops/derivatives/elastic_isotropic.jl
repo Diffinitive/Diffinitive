@@ -255,26 +255,24 @@ function tangential_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, bound
     #
     # tₜ = μ(nⱼfₖᵢ∂̃ₖ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
 
-    N = ndims(g)
     e = boundary_restriction(g, stencil_set, boundary)
-
     ∂ξ∂x = collect(e*map(inv, jacobian(g)))
-
-    f̲ = [DiagonalTensor(componentview(∂ξ∂x, i, j)) for i∈1:N, j∈1:N]
 
     μ̲ = DiagonalTensor(e*μ)
 
     n = normal(g, boundary)
-    n̲(i) = DiagonalTensor(componentview(n,i))
 
+    f̲(i,j) = DiagonalTensor(componentview(∂ξ∂x, i, j))
+    n̲(i) = DiagonalTensor(componentview(n,i))
     ∂̃(i) = first_derivative_narrow(logical_grid(g), stencil_set, boundary, i)
 
     ∂ₙ = normal_derivative(g, stencil_set, boundary)
 
     δ(i,j) = dirac_delta(g, boundary, i, j)
 
+    N = ndims(g)
     return MatrixTensor(ndims(g),ndims(g)) do i, j
-        fₖᵢ∂̃ₖ = sum(k->f[k,i]∘∂̃(k), 1:N)
+        fₖᵢ∂̃ₖ = sum(k->f̲(k,i)∘∂̃(k), 1:N)
         μ̲∘(n̲(j)∘fₖᵢ∂̃ₖ + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
     end
 end
