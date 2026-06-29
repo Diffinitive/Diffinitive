@@ -389,23 +389,103 @@ end
 end
 
 @testset "normal_traction_isotropic" begin
-    @testset "EquidistantGrid" begin
-        @testset "2D" begin
-            @test_broken false
+    @testset "2D" begin
+        @testset "EquidistantGrid" begin
+            test_params = Dict(
+                "u = [x, y²], λ = 1, μ = 1" => (;rtol=1e-12),
+                "u = [x, y²], λ = y, μ = x" => (;atol=1e-12),
+                "u = [x, y²], λ = x², μ = y" => (;rtol=1e-12),
+                "u = [y, x], λ = x, μ = y" => (;atol=1e-12),
+                "u = [y, x], λ = y, μ = xy" => (;atol=1e-12),
+            )
+            s = unitsquare(Float64)
+            g = equidistant_grid(s, 41, 41)
+            c = with_jacobian(identity, s, ForwardDiff.jacobian) # Needed for the AD
+            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
+                @testset "$bid" for bid ∈ boundary_identifiers(g)
+                    (;u, λ, μ) = parameters
+                    λ̄ = map(λ, g)
+                    μ̄ = map(μ, g)
+                    g̃ᵧ = boundary_grid(g, bid)
+                    test_accuracy(g, g̃ᵧ;
+                        L̄ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
+                        u = u,
+                        Lu = normal_traction_ad(u, λ, μ, c, bid),
+                        test_params[case_name]...,
+                    )
+                end
+            end
         end
 
-        @testset "3D" begin
-            @test_broken false
+        @testset "MappedGrid" begin
+            test_params = Dict(
+                "u = [x, y²], λ = 1, μ = 1" => (;rtol=1e-12),
+                "u = [x, y²], λ = y, μ = x" => (;rtol=1e-12),
+                "u = [x, y²], λ = x², μ = y" => (;rtol=1e-12),
+                "u = [y, x], λ = x, μ = y" => (;rtol=1e-12),
+                "u = [y, x], λ = y, μ = xy" => (;rtol=1e-12),
+            )
+            g = equidistant_grid(c_2d, 41, 41)
+            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
+                @testset "$bid" for bid ∈ boundary_identifiers(g)
+                    (;u, λ, μ) = parameters
+                    λ̄ = map(λ, g)
+                    μ̄ = map(μ, g)
+                    g̃ᵧ = boundary_grid(g, bid) |> logical_grid
+                    test_accuracy(g, g̃ᵧ;
+                        L̄ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
+                        u = u,
+                        Lu = normal_traction_ad(u,λ,μ,c_2d,bid),
+                        test_params[case_name]...,
+                    )
+                end
+            end
         end
     end
 
-    @testset "MappedGrid" begin
-        @testset "2D" begin
-            @test_broken false
+    @testset "3D" begin
+        @testset "EquidistantGrid" begin
+            test_params = Dict(
+                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol=1e-12),
+            )
+            s = unitcube(Float64)
+            g = equidistant_grid(s, 21, 21, 21)
+            c = with_jacobian(identity, s, ForwardDiff.jacobian) # Needed for the AD
+            @testset "$case_name" for (case_name, parameters) ∈ function_cases_3d
+                @testset "$bid" for bid ∈ boundary_identifiers(g)
+                    (;u, λ, μ) = parameters
+                    λ̄ = map(λ, g)
+                    μ̄ = map(μ, g)
+                    g̃ᵧ = boundary_grid(g, bid)
+                    test_accuracy(g, g̃ᵧ;
+                        L̄ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
+                        u = u,
+                        Lu = normal_traction_ad(u, λ, μ, c, bid),
+                        test_params[case_name]...,
+                    )
+                end
+            end
         end
 
-        @testset "3D" begin
-            @test_broken false
+        @testset "MappedGrid" begin
+            test_params = Dict(
+                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol=1e-12),
+            )
+            g = equidistant_grid(c_3d, 21, 21, 21)
+            @testset "$case_name" for (case_name, parameters) ∈ function_cases_3d
+                @testset "$bid" for bid ∈ boundary_identifiers(g)
+                    (;u, λ, μ) = parameters
+                    λ̄ = map(λ, g)
+                    μ̄ = map(μ, g)
+                    g̃ᵧ = boundary_grid(g, bid) |> logical_grid
+                    test_accuracy(g, g̃ᵧ;
+                        L̄ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
+                        u = u,
+                        Lu = normal_traction_ad(u,λ,μ,c_3d,bid),
+                        test_params[case_name]...,
+                    )
+                end
+            end
         end
     end
 end
