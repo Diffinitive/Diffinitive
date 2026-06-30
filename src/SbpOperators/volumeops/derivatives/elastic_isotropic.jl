@@ -247,7 +247,7 @@ function normal_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
     end
 end
 
-function tangential_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
+function tangential_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary) # TBD: Should we remove dependence on λ here? Add error hint?
     # tₜ = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
     #
     # With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ
