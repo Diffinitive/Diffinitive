@@ -174,6 +174,37 @@ const c_3d = with_jacobian(unitcube(), ForwardDiff.jacobian) do (ξ,η,γ)
 end
 
 
+## Analytic solutions
+∥(u,v) = u⋅unit(v)*unit(v)
+⟂(u,v) = u-(u∥v)
+unit(v) = v/norm(v)
+
+
+function plane_wave(kₚ,kₛ,k̂,u₀,x)
+    k̄ₚ = kₚ*k̂
+    k̄ₛ = kₛ*k̂
+
+    return (u₀∥k̂)*cis(k̄ₚ⋅x) + (u₀⟂k̂)*cis(k̄ₛ⋅x)
+end
+
+
+
+function elastic_greens_function(μ,kₚ,kₛ,x)
+    r(x) = norm(x)
+
+    f(x) = g(kₛ,r(x)) - g(kₚ, r(x))
+
+    return _smatrix(3,3) do i, j
+        1/μ*δ(i,j)*g(kₛ,r(x)) + ∂∂(f,i,j,x)
+    end
+end
+
+
+g(k,r) = cis(k*r)/(4π*r)
+
+
+
+
 function_cases_2d = [
     "u = [x, y²], λ = 1, μ = 1" => (;
         u = x -> @SVector[x[1],x[2]^2],
