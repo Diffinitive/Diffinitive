@@ -53,10 +53,10 @@ e(u,i) = x->e(u,i,x)
 ∂(f,i::Int) = x->∂(f,i,x)
 
 ∂∂(f, i, j, x::AbstractArray) = ∂(∂(f,j),i,x)
-∂∂(f, i, j) = x->∂∂(f, i, j, x::AbstractArray)
+∂∂(f, i, j) = x->∂∂(f, i, j, x)
 
 ∂∂(f, i, σ, j, x::AbstractArray) = ∂(x->σ(x)*∂(f,j,x),i,x)
-∂∂(f, i, σ, j) = x->∂∂(f, i, σ, j, x::AbstractArray)
+∂∂(f, i, σ, j) = x->∂∂(f, i, σ, j, x)
 
 Δ(f,σ,x) = sum(k->∂∂(f,k,σ,k,x), index_tuple(x))
 Δ(f,σ) = x->Δ(f,σ,x)
