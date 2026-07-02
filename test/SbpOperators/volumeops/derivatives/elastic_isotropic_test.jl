@@ -626,28 +626,41 @@ end
 end
 
 
-## TODO: Test that T = tₜ+tₙn̂
+@testset "T = tₜ+tₙn̂" begin
+    grid_cases = [
+        "EquidistantGrid 2D" => equidistant_grid(unitsquare(Float64), 41, 41),
+        "MappedGrid 2D" => equidistant_grid(c_2d, 41, 41),
+        "EquidistantGrid 3D" => equidistant_grid(unitcube(Float64), 21, 21, 21),
+        "MappedGrid 3D" => equidistant_grid(c_3d, 21, 21, 21),
+    ]
 
+    material_cases = [
+        "λ = 1, μ = 1" => (;
+            λ = x -> 1.,
+            μ = x -> 1.,
+        ),
+        "λ = 1+0.3sin(||x||), μ = 1+0.2cos(||x||)" => (;
+            λ = x -> 1. + 0.3sin(norm(x)),
+            μ = x -> 1. + 0.2cos(norm(x)),
+        ),
+    ]
 
-@testset "SBP-properties" begin
-    # TODO: test for a few random vectors
-    @testset "EquidistantGrid" begin
-        @testset "2D" begin
-            @test_broken false
-        end
+    @testset "$grid_name" for (grid_name, g) ∈ grid_cases
+        @testset "$case_name" for (case_name, parameters) ∈ material_cases
+            (;λ, μ) = parameters
+            λ̄ = map(λ, g)
+            μ̄ = map(μ, g)
 
-        @testset "3D" begin
-            @test_broken false
-        end
-    end
+            u = rand(SVector{ndims(g)}, size(g))
 
-    @testset "MappedGrid" begin
-        @testset "2D" begin
-            @test_broken false
-        end
+            @testset "$boundary" for boundary ∈ boundary_identifiers(g)
+                T = traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
+                tₜ = tangential_traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
+                tₙ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
+                n̂ = normal(g, boundary)
 
-        @testset "3D" begin
-            @test_broken false
+                @test T*u ≈ tₜ*u + (tₙ*u).*n̂
+            end
         end
     end
 end
