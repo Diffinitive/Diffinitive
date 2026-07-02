@@ -665,12 +665,55 @@ end
     end
 end
 
-# SBP-factorization
-# Accuracy
-    # Exact polynomials
-    # something more complicated
 
-# 2D
-# 3D
+@testset "SBP-properties" begin
+    ip(u,H,v) = mapreduce(⋅, +, u , H*v)
 
+    grid_cases = [
+        "EquidistantGrid 2D" => equidistant_grid(unitsquare(Float64), 41, 41),
+        "MappedGrid 2D" => equidistant_grid(c_2d, 41, 41),
+        "EquidistantGrid 3D" => equidistant_grid(unitcube(Float64), 21, 21, 21),
+        "MappedGrid 3D" => equidistant_grid(c_3d, 21, 21, 21),
+    ]
 
+    material_cases = [
+        "λ = 1, μ = 1" => (;
+            λ = x -> 1.,
+            μ = x -> 1.,
+        ),
+        "λ = 1+0.3sin(||x||), μ = 1+0.2cos(||x||)" => (;
+            λ = x -> 1. + 0.3sin(norm(x)),
+            μ = x -> 1. + 0.2cos(norm(x)),
+        ),
+    ]
+
+    @testset "$grid_name" for (grid_name, g) ∈ grid_cases
+        @testset "$case_name" for (case_name, parameters) ∈ material_cases
+            (;λ, μ) = parameters
+            λ̄ = map(λ, g)
+            μ̄ = map(μ, g)
+
+            # Test that the summation by parts property for the elastic operator
+            # ( vᵢ, [Eu]ᵢ)_Ω - ([Ev]ᵢ, uᵢ)_Ω = (vᵢ, [Tu]ᵢ )_∂Ω - ([Tv]ᵢ, uᵢ)_∂Ω
+            # Holds
+
+            E = elastic_isotropic(g, λ̄, μ̄, stencil_set)
+
+            u = rand(SVector{ndims(g)}, size(g))
+            v = rand(SVector{ndims(g)}, size(g))
+
+            H = inner_product(g, stencil_set)
+
+            volume_term = ip(v,H,E*u) - ip(E*v,H,u)
+            boundary_term = sum(boundary_identifiers(g)) do boundary
+                e = boundary_restriction(g, stencil_set, boundary)
+                T = traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
+                Hᵧ = inner_product(boundary_grid(g, boundary), stencil_set)
+
+                ip(e*v, Hᵧ, T*u) - ip(T*v, Hᵧ, e*u)
+            end
+
+            @test volume_term ≈ boundary_term
+       end
+    end
+end
