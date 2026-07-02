@@ -32,10 +32,29 @@ struct F end
 Grids.jacobian(::F, x) = fill(2,length(x))
 ```
 
-You can also provide a fallback function using one of the many automatic
-differentiation packages, for example
+You can also let an automatic differentation tool provide the jacobian using `with_jacobian`, for example
 
 ```julia
+using Diffinitive.Grids
 using ForwardDiff
-Grids.jacobian(f,x) = ForwardDiff.jacobian(f,x)
+using StaticArrays
+
+c = with_jacobian(ForwardDiff.jacobian) do ξ
+    @SVector[ξ[1]^2, ξ[1] + ξ[2]]
+end
 ```
+
+Behind the scenes, `with_jacobian` wraps the mapping in a `FunctionWithJacobian` struct. The wrapper forwards calls to the original mapping
+and provides a matching `Grids.jacobian` method for that one wrapped object.
+
+`with_jacobian` can also create a `Chart` directly when given a mapping, a
+parameter space, and a Jacobian function:
+
+```julia
+c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do ξ
+    @SVector[ξ[1]^2, ξ[1] + ξ[2]]
+end
+```
+
+This is equivalent to wrapping the mapping with `with_jacobian` and then
+passing the wrapped mapping and parameter space to `Chart`.
