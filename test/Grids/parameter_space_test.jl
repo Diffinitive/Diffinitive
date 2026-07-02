@@ -21,6 +21,8 @@ end
     @test unitinterval(Int) isa Interval{Int}
     @test unitinterval(Int) == Interval(0,1)
     @test limits(unitinterval(Int)) == (0,1)
+    @test centroid(unitinterval()) == 0.5
+    @test centroid(Interval(1, 3)) == 2.0
 
     @test boundary_identifiers(unitinterval()) == (LowerBoundary(), UpperBoundary())
 
@@ -50,6 +52,8 @@ end
 
     @test unithyperbox(4) isa HyperBox{Float64,4}
     @test limits(unithyperbox(4)) == ([0,0,0,0],[1,1,1,1])
+    @test centroid(unitsquare()) == @SVector[0.5, 0.5]
+    @test centroid(HyperBox([1,2], [3,4])) == @SVector[2.0, 3.0]
 
 
     @test boundary_identifiers(unitsquare()) == [
@@ -92,6 +96,9 @@ end
     @test verticies(unittetrahedron()) == ([0,0,0], [1,0,0], [0,1,0],[0,0,1])
 
     @test unitsimplex(4) isa Simplex{Float64,4}
+    @test centroid(unittriangle()) == @SVector[1/3, 1/3]
+    @test centroid(unittetrahedron()) == @SVector[0.25, 0.25, 0.25]
+    @test centroid(Simplex([1,2], [3,4])) == @SVector[2.0, 3.0]
 
     @testset "Base.in" begin
         @testset "2D" begin
