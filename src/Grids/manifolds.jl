@@ -229,7 +229,6 @@ julia> jacobian(c,[1,1/2])
 ```
 """
 with_jacobian(x, pm::ParameterSpace, Jfun) = Chart(with_jacobian(x,Jfun), pm)
-# TBD: If you forget to pass Jfun to this method you hit with_jacobian(⋅, ::ParameterSpace) instead. It is likely that this will silently fail and give very strange down steam errors. Can we provide a better error message? Forexample check the dimension of the functions produced in the other method?
 
 """
     with_jacobian(xJ, pm::ParameterSpace)
@@ -263,8 +262,24 @@ julia> jacobian(c,[1,1/2])
 ```
 """
 function with_jacobian(xJ, pm::ParameterSpace)
+    _check_coordinates_and_jacobian(xJ, _sample_parameter(pm))
+
     x(ξ) = xJ(ξ)[1]
     J(ξ) = xJ(ξ)[2]
 
     return Chart(FunctionWithJacobian(x,J), pm)
+end
+
+_sample_parameter(i::Interval) = limits(i)[1]
+_sample_parameter(box::HyperBox) = limits(box)[1]
+_sample_parameter(s::Simplex) = first(verticies(s))
+
+function _check_coordinates_and_jacobian(xJ, ξ)
+    x_J = xJ(ξ)
+
+    if !(x_J isa Tuple && length(x_J) == 2)
+        throw(ArgumentError("with_jacobian(xJ, pm) expects xJ(ξ) to return a 2-tuple `(x, J)`."))
+    end
+
+    return nothing
 end

@@ -84,6 +84,12 @@ end
             1//4   3//4;
         ]
     end
+
+    @testset "Missing jacobian function" begin
+        x(ξ) = @SVector[ξ[1]^2, ξ[1] + ξ[2]]
+
+        @test_throws ArgumentError with_jacobian(x, unitsquare())
+    end
 end
 
 @testset "CartesianAtlas" begin
