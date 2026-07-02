@@ -203,55 +203,74 @@ end
 g(k,r) = cis(k*r)/(4π*r)
 
 
+# dimension_cases = ["2D", "3D"]
+dimension_cases = ["2D"]
 
+function_cases = Dict(
+    "2D" => [
+        "u = [x, y²], λ = 1, μ = 1" => (;
+            u = x -> @SVector[x[1],x[2]^2],
+            λ = x -> 1.,
+            μ = x ->1.,
+        ),
+        "u = [x, y²], λ = y, μ = x" => (;
+            u = x -> @SVector[x[1],x[2]^2],
+            λ = x -> x[2],
+            μ = x -> x[1],
+        ),
+        "u = [x, y²], λ = x², μ = y" => (;
+            u = x -> @SVector[x[1],x[2]^2],
+            λ = x -> x[1]^2,
+            μ = x -> x[2],
+        ),
 
-function_cases_2d = [
-    "u = [x, y²], λ = 1, μ = 1" => (;
-        u = x -> @SVector[x[1],x[2]^2],
-        λ = x -> 1.,
-        μ = x ->1.,
-    ),
-    "u = [x, y²], λ = y, μ = x" => (;
-        u = x -> @SVector[x[1],x[2]^2],
-        λ = x -> x[2],
-        μ = x -> x[1],
-    ),
-    "u = [x, y²], λ = x², μ = y" => (;
-        u = x -> @SVector[x[1],x[2]^2],
-        λ = x -> x[1]^2,
-        μ = x -> x[2],
-    ),
+        "u = [y, x], λ = x, μ = y" => (;
+            u = x -> @SVector[x[2],x[1]],
+            λ = x -> x[1],
+            μ = x -> x[2],
+        ),
 
-    "u = [y, x], λ = x, μ = y" => (;
-        u = x -> @SVector[x[2],x[1]],
-        λ = x -> x[1],
-        μ = x -> x[2],
-    ),
+        "u = [y, x], λ = y, μ = xy" => (;
+            u = x -> @SVector[x[2],x[1]],
+            λ = x -> x[2],
+            μ = x -> x[1]*x[2],
+        ),
+    ],
+    "3D" => [
+        "u = [x, y², xz], λ = 1, μ = 1" => (;
+            u = x -> @SVector[x[1], x[2]^2, x[1]*x[3]],
+            λ = x -> 1.,
+            μ = x -> 1.,
+        ),
+    ],
+)
 
-    "u = [y, x], λ = y, μ = xy" => (;
-        u = x -> @SVector[x[2],x[1]],
-        λ = x -> x[2],
-        μ = x -> x[1]*x[2],
-    ),
-]
+grid_cases = Dict(
+    "2D" => [
+        "EquidistantGrid" => (ps = unitsquare(Float64), sz = (41, 41),     c = with_jacobian(identity, unitsquare(Float64), ForwardDiff.jacobian)),
+        "MappedGrid"      => (ps = c_2d,                sz = (41, 41),     c = c_2d),
+    ],
+    "3D" => [
+        "EquidistantGrid" => (ps = unitcube(Float64),   sz = (21, 21, 21), c = with_jacobian(identity, unitcube(Float64), ForwardDiff.jacobian)),
+        "MappedGrid"      => (ps = c_3d,                sz = (21, 21, 21), c = c_3d),
+    ],
+)
 
-function_cases_3d = [
-    "u = [x, y², xz], λ = 1, μ = 1" => (;
-        u = x -> @SVector[x[1], x[2]^2, x[1]*x[3]],
+ material_cases = [
+    "λ = 1, μ = 1" => (;
         λ = x -> 1.,
         μ = x -> 1.,
+    ),
+    "λ = 1+0.3sin(||x||), μ = 1+0.2cos(||x||)" => (;
+        λ = x -> 1. + 0.3sin(norm(x)),
+        μ = x -> 1. + 0.2cos(norm(x)),
     ),
 ]
 
 
 @testset "elastic_isotropic" begin
-    @testset "2D" begin
-        grid_cases = [
-            "EquidistantGrid" => equidistant_grid(unitsquare(Float64), 41, 41),
-            "MappedGrid" => equidistant_grid(c_2d, 41, 41),
-        ]
-
-        test_params = Dict(
+    test_params = Dict(
+        "2D" => Dict(
             "EquidistantGrid" => Dict(
                 "u = [x, y²], λ = 1, μ = 1" => (;rtol = 1e-12),
                 "u = [x, y²], λ = y, μ = x" => (;rtol = 1e-12),
@@ -266,50 +285,27 @@ function_cases_3d = [
                 "u = [y, x], λ = x, μ = y" => (;rtol = 1e-11),
                 "u = [y, x], λ = y, μ = xy" => (;rtol = 1e-11),
             ),
-        )
-
-        @testset "$grid_name" for (grid_name, g) ∈ grid_cases
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
-                (;u, λ, μ) = parameters
-                λ̄ = map(λ, g)
-                μ̄ = map(μ, g)
-                test_accuracy(g;
-                    L̄ = elastic_isotropic(g, λ̄, μ̄, stencil_set),
-                    u = u,
-                    Lu = elastic_ad(u,λ,μ),
-                    test_params[grid_name][case_name]...,
-                )
-            end
-        end
-    end
-
-
-    @testset "3D" begin
-        grid_cases = [
-            "EquidistantGrid" => equidistant_grid(unitcube(Float64), 21, 21, 21),
-            "MappedGrid" => equidistant_grid(c_3d, 21, 21, 21),
-        ]
-
-
-        test_params = Dict(
+        ),
+        "3D" => Dict(
             "EquidistantGrid" => Dict(
                 "u = [x, y², xz], λ = 1, μ = 1" => (;rtol = 1e-13),
             ),
             "MappedGrid" => Dict(
                 "u = [x, y², xz], λ = 1, μ = 1" => (;rtol = 1e-12),
             ),
-        )
-
-        @testset "$grid_name" for (grid_name, g) ∈ grid_cases
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_3d
-                (;u, λ, μ) = parameters
+        ),
+    )
+    @testset "$dim" for dim ∈ dimension_cases
+        @testset "$grid_name" for (grid_name, (;ps, sz)) ∈ grid_cases[dim]
+            g = equidistant_grid(ps, sz...)
+            @testset "$case_name" for (case_name, (;u, λ, μ)) ∈ function_cases[dim]
                 λ̄ = map(λ, g)
                 μ̄ = map(μ, g)
                 test_accuracy(g;
                     L̄ = elastic_isotropic(g, λ̄, μ̄, stencil_set),
                     u = u,
                     Lu = elastic_ad(u,λ,μ),
-                    test_params[grid_name][case_name]...,
+                    test_params[dim][grid_name][case_name]...,
                 )
             end
         end
@@ -318,100 +314,50 @@ end
 
 
 @testset "traction_isotropic" begin
-    @testset "2D" begin
-        @testset "EquidistantGrid" begin
-            test_params = Dict(
+    test_params = Dict(
+        "2D" => Dict(
+            "EquidistantGrid" => Dict(
                 "u = [x, y²], λ = 1, μ = 1" => (;rtol=1e-14),
                 "u = [x, y²], λ = y, μ = x" => (;atol=1e-12),
                 "u = [x, y²], λ = x², μ = y" => (;rtol=1e-14),
                 "u = [y, x], λ = x, μ = y" => (;atol=1e-13),
                 "u = [y, x], λ = y, μ = xy" => (;atol=1e-13),
-            )
-            s = unitsquare(Float64)
-            g = equidistant_grid(s, 41, 41)
-            c = with_jacobian(identity, s, ForwardDiff.jacobian) # Needed for the AD
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
-                @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
-                    λ̄ = map(λ, g)
-                    μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid)
-                    test_accuracy(g, g̃ᵧ;
-                        L̄ = traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
-                        u = u,
-                        Lu = traction_ad(u, λ, μ, c, bid),
-                        test_params[case_name]...,
-                    )
-                end
-            end
-        end
-
-        @testset "MappedGrid" begin
-            test_params = Dict(
+            ),
+            "MappedGrid" => Dict(
                 "u = [x, y²], λ = 1, μ = 1" => (;rtol=1e-12),
                 "u = [x, y²], λ = y, μ = x" => (;rtol=1e-12),
                 "u = [x, y²], λ = x², μ = y" => (;rtol=1e-12),
                 "u = [y, x], λ = x, μ = y" => (;rtol=1e-12),
                 "u = [y, x], λ = y, μ = xy" => (;rtol=1e-12),
-            )
-            g = equidistant_grid(c_2d, 41, 41)
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
-                @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
-                    λ̄ = map(λ, g)
-                    μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid) |> logical_grid
-                    test_accuracy(g, g̃ᵧ;
-                        L̄ = traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
-                        u = u,
-                        Lu = traction_ad(u,λ,μ,c_2d,bid),
-                        test_params[case_name]...,
-                    )
-                end
-            end
-        end
-    end
-
-    @testset "3D" begin
-        @testset "EquidistantGrid" begin
-            test_params = Dict(
+            ),
+        ),
+        "3D" => Dict(
+            "EquidistantGrid" => Dict(
                 "u = [x, y², xz], λ = 1, μ = 1" => (;rtol=1e12),
-            )
-            s = unitcube(Float64)
-            g = equidistant_grid(s, 21, 21, 21)
-            c = with_jacobian(identity, s, ForwardDiff.jacobian) # Needed for the AD
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_3d
+            ),
+            "MappedGrid" => Dict(
+                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol=1e12),
+            ),
+        ),
+    )
+
+    @testset "$dim" for dim ∈ dimension_cases
+        @testset "$grid_name" for (grid_name, (;ps, sz, c)) ∈ grid_cases[dim]
+            g = equidistant_grid(ps, sz...)
+            @testset "$case_name" for (case_name, (;u, λ, μ)) ∈ function_cases[dim]
                 @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
                     λ̄ = map(λ, g)
                     μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid)
-                    test_accuracy(g, g̃ᵧ;
+                    gᵧ = boundary_grid(g, bid)
+
+                    if gᵧ isa MappedGrid
+                        gᵧ = logical_grid(gᵧ)
+                    end
+                    test_accuracy(g, gᵧ;
                         L̄ = traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
                         u = u,
                         Lu = traction_ad(u, λ, μ, c, bid),
-                        test_params[case_name]...,
-                    )
-                end
-            end
-        end
-
-        @testset "MappedGrid" begin
-            test_params = Dict(
-                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol=1e12),
-            )
-            g = equidistant_grid(c_3d, 21, 21, 21)
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_3d
-                @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
-                    λ̄ = map(λ, g)
-                    μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid) |> logical_grid
-                    test_accuracy(g, g̃ᵧ;
-                        L̄ = traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
-                        u = u,
-                        Lu = traction_ad(u,λ,μ,c_3d,bid),
-                        test_params[case_name]...,
+                        test_params[dim][grid_name][case_name]...,
                     )
                 end
             end
@@ -421,100 +367,50 @@ end
 
 
 @testset "normal_traction_isotropic" begin
-    @testset "2D" begin
-        @testset "EquidistantGrid" begin
-            test_params = Dict(
+    test_params = Dict(
+        "2D" => Dict(
+            "EquidistantGrid" => Dict(
                 "u = [x, y²], λ = 1, μ = 1" => (;rtol=1e-12),
                 "u = [x, y²], λ = y, μ = x" => (;atol=1e-12),
                 "u = [x, y²], λ = x², μ = y" => (;rtol=1e-12),
                 "u = [y, x], λ = x, μ = y" => (;atol=1e-12),
                 "u = [y, x], λ = y, μ = xy" => (;atol=1e-12),
-            )
-            s = unitsquare(Float64)
-            g = equidistant_grid(s, 41, 41)
-            c = with_jacobian(identity, s, ForwardDiff.jacobian) # Needed for the AD
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
-                @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
-                    λ̄ = map(λ, g)
-                    μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid)
-                    test_accuracy(g, g̃ᵧ;
-                        L̄ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
-                        u = u,
-                        Lu = normal_traction_ad(u, λ, μ, c, bid),
-                        test_params[case_name]...,
-                    )
-                end
-            end
-        end
-
-        @testset "MappedGrid" begin
-            test_params = Dict(
+            ),
+            "MappedGrid" => Dict(
                 "u = [x, y²], λ = 1, μ = 1" => (;rtol=1e-12),
                 "u = [x, y²], λ = y, μ = x" => (;rtol=1e-12),
                 "u = [x, y²], λ = x², μ = y" => (;rtol=1e-12),
                 "u = [y, x], λ = x, μ = y" => (;rtol=1e-12),
                 "u = [y, x], λ = y, μ = xy" => (;rtol=1e-12),
-            )
-            g = equidistant_grid(c_2d, 41, 41)
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
-                @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
-                    λ̄ = map(λ, g)
-                    μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid) |> logical_grid
-                    test_accuracy(g, g̃ᵧ;
-                        L̄ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
-                        u = u,
-                        Lu = normal_traction_ad(u,λ,μ,c_2d,bid),
-                        test_params[case_name]...,
-                    )
-                end
-            end
-        end
-    end
-
-    @testset "3D" begin
-        @testset "EquidistantGrid" begin
-            test_params = Dict(
+            ),
+        ),
+        "3D" => Dict(
+            "EquidistantGrid" => Dict(
                 "u = [x, y², xz], λ = 1, μ = 1" => (;rtol=1e-12),
-            )
-            s = unitcube(Float64)
-            g = equidistant_grid(s, 21, 21, 21)
-            c = with_jacobian(identity, s, ForwardDiff.jacobian) # Needed for the AD
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_3d
+            ),
+            "MappedGrid" => Dict(
+                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol=1e-12),
+            ),
+        ),
+    )
+
+    @testset "$dim" for dim ∈ dimension_cases
+        @testset "$grid_name" for (grid_name, (;ps, sz, c)) ∈ grid_cases[dim]
+            g = equidistant_grid(ps, sz...)
+            @testset "$case_name" for (case_name, (;u, λ, μ)) ∈ function_cases[dim]
                 @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
                     λ̄ = map(λ, g)
                     μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid)
-                    test_accuracy(g, g̃ᵧ;
+                    gᵧ = boundary_grid(g, bid)
+
+                    if gᵧ isa MappedGrid
+                        gᵧ = logical_grid(gᵧ)
+                    end
+                    test_accuracy(g, gᵧ;
                         L̄ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
                         u = u,
                         Lu = normal_traction_ad(u, λ, μ, c, bid),
-                        test_params[case_name]...,
-                    )
-                end
-            end
-        end
-
-        @testset "MappedGrid" begin
-            test_params = Dict(
-                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol=1e-12),
-            )
-            g = equidistant_grid(c_3d, 21, 21, 21)
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_3d
-                @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
-                    λ̄ = map(λ, g)
-                    μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid) |> logical_grid
-                    test_accuracy(g, g̃ᵧ;
-                        L̄ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
-                        u = u,
-                        Lu = normal_traction_ad(u,λ,μ,c_3d,bid),
-                        test_params[case_name]...,
+                        test_params[dim][grid_name][case_name]...,
                     )
                 end
             end
@@ -524,100 +420,50 @@ end
 
 
 @testset "tangential_traction_isotropic" begin
-    @testset "2D" begin
-        @testset "EquidistantGrid" begin
-            test_params = Dict(
+    test_params = Dict(
+        "2D" => Dict(
+            "EquidistantGrid" => Dict(
                 "u = [x, y²], λ = 1, μ = 1" => (;atol=1e-12),
                 "u = [x, y²], λ = y, μ = x" => (;atol=1e-12),
                 "u = [x, y²], λ = x², μ = y" => (;atol=1e-12),
                 "u = [y, x], λ = x, μ = y" => (;rtol=1e-12),
                 "u = [y, x], λ = y, μ = xy" => (;rtol=1e-12),
-            )
-            s = unitsquare(Float64)
-            g = equidistant_grid(s, 41, 41)
-            c = with_jacobian(identity, s, ForwardDiff.jacobian) # Needed for the AD
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
-                @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
-                    λ̄ = map(λ, g)
-                    μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid)
-                    test_accuracy(g, g̃ᵧ;
-                        L̄ = tangential_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
-                        u = u,
-                        Lu = tangential_traction_ad(u, λ, μ, c, bid),
-                        test_params[case_name]...,
-                    )
-                end
-            end
-        end
-
-        @testset "MappedGrid" begin
-            test_params = Dict(
+            ),
+            "MappedGrid" => Dict(
                 "u = [x, y²], λ = 1, μ = 1" => (;rtol=1e-12),
                 "u = [x, y²], λ = y, μ = x" => (;rtol=1e-12),
                 "u = [x, y²], λ = x², μ = y" => (;rtol=1e-12),
                 "u = [y, x], λ = x, μ = y" => (;rtol=1e-12),
                 "u = [y, x], λ = y, μ = xy" => (;rtol=1e-12),
-            )
-            g = equidistant_grid(c_2d, 41, 41)
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_2d
-                @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
-                    λ̄ = map(λ, g)
-                    μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid) |> logical_grid
-                    test_accuracy(g, g̃ᵧ;
-                        L̄ = tangential_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
-                        u = u,
-                        Lu = tangential_traction_ad(u,λ,μ,c_2d,bid),
-                        test_params[case_name]...,
-                    )
-                end
-            end
-        end
-    end
-
-    @testset "3D" begin
-        @testset "EquidistantGrid" begin
-            test_params = Dict(
+            ),
+        ),
+        "3D" => Dict(
+            "EquidistantGrid" => Dict(
                 "u = [x, y², xz], λ = 1, μ = 1" => (;atol=1e-12),
-            )
-            s = unitcube(Float64)
-            g = equidistant_grid(s, 21, 21, 21)
-            c = with_jacobian(identity, s, ForwardDiff.jacobian) # Needed for the AD
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_3d
+            ),
+            "MappedGrid" => Dict(
+                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol=1e-12),
+            ),
+        ),
+    )
+
+    @testset "$dim" for dim ∈ dimension_cases
+        @testset "$grid_name" for (grid_name, (;ps, sz, c)) ∈ grid_cases[dim]
+            g = equidistant_grid(ps, sz...)
+            @testset "$case_name" for (case_name, (;u, λ, μ)) ∈ function_cases[dim]
                 @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
                     λ̄ = map(λ, g)
                     μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid)
-                    test_accuracy(g, g̃ᵧ;
+                    gᵧ = boundary_grid(g, bid)
+
+                    if gᵧ isa MappedGrid
+                        gᵧ = logical_grid(gᵧ)
+                    end
+                    test_accuracy(g, gᵧ;
                         L̄ = tangential_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
                         u = u,
                         Lu = tangential_traction_ad(u, λ, μ, c, bid),
-                        test_params[case_name]...,
-                    )
-                end
-            end
-        end
-
-        @testset "MappedGrid" begin
-            test_params = Dict(
-                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol=1e-12),
-            )
-            g = equidistant_grid(c_3d, 21, 21, 21)
-            @testset "$case_name" for (case_name, parameters) ∈ function_cases_3d
-                @testset "$bid" for bid ∈ boundary_identifiers(g)
-                    (;u, λ, μ) = parameters
-                    λ̄ = map(λ, g)
-                    μ̄ = map(μ, g)
-                    g̃ᵧ = boundary_grid(g, bid) |> logical_grid
-                    test_accuracy(g, g̃ᵧ;
-                        L̄ = tangential_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
-                        u = u,
-                        Lu = tangential_traction_ad(u,λ,μ,c_3d,bid),
-                        test_params[case_name]...,
+                        test_params[dim][grid_name][case_name]...,
                     )
                 end
             end
@@ -627,39 +473,23 @@ end
 
 
 @testset "T = tₜ+tₙn̂" begin
-    grid_cases = [
-        "EquidistantGrid 2D" => equidistant_grid(unitsquare(Float64), 41, 41),
-        "MappedGrid 2D" => equidistant_grid(c_2d, 41, 41),
-        "EquidistantGrid 3D" => equidistant_grid(unitcube(Float64), 21, 21, 21),
-        "MappedGrid 3D" => equidistant_grid(c_3d, 21, 21, 21),
-    ]
+    @testset "$dim" for dim ∈ dimension_cases
+        @testset "$grid_name" for (grid_name, (;ps, sz)) ∈ grid_cases[dim]
+            g = equidistant_grid(ps, sz...)
+            @testset "$case_name" for (case_name, (;λ, μ)) ∈ material_cases
+                λ̄ = map(λ, g)
+                μ̄ = map(μ, g)
 
-    material_cases = [
-        "λ = 1, μ = 1" => (;
-            λ = x -> 1.,
-            μ = x -> 1.,
-        ),
-        "λ = 1+0.3sin(||x||), μ = 1+0.2cos(||x||)" => (;
-            λ = x -> 1. + 0.3sin(norm(x)),
-            μ = x -> 1. + 0.2cos(norm(x)),
-        ),
-    ]
+                u = rand(SVector{ndims(g)}, size(g))
 
-    @testset "$grid_name" for (grid_name, g) ∈ grid_cases
-        @testset "$case_name" for (case_name, parameters) ∈ material_cases
-            (;λ, μ) = parameters
-            λ̄ = map(λ, g)
-            μ̄ = map(μ, g)
+                @testset "$boundary" for boundary ∈ boundary_identifiers(g)
+                    T = traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
+                    tₜ = tangential_traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
+                    tₙ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
+                    n̂ = normal(g, boundary)
 
-            u = rand(SVector{ndims(g)}, size(g))
-
-            @testset "$boundary" for boundary ∈ boundary_identifiers(g)
-                T = traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
-                tₜ = tangential_traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
-                tₙ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
-                n̂ = normal(g, boundary)
-
-                @test T*u ≈ tₜ*u + (tₙ*u).*n̂
+                    @test T*u ≈ tₜ*u + (tₙ*u).*n̂
+                end
             end
         end
     end
@@ -669,51 +499,36 @@ end
 @testset "SBP-properties" begin
     ip(u,H,v) = mapreduce(⋅, +, u , H*v)
 
-    grid_cases = [
-        "EquidistantGrid 2D" => equidistant_grid(unitsquare(Float64), 41, 41),
-        "MappedGrid 2D" => equidistant_grid(c_2d, 41, 41),
-        "EquidistantGrid 3D" => equidistant_grid(unitcube(Float64), 21, 21, 21),
-        "MappedGrid 3D" => equidistant_grid(c_3d, 21, 21, 21),
-    ]
+    @testset "$dim" for dim ∈ dimension_cases
+        @testset "$grid_name" for (grid_name, (;ps, sz)) ∈ grid_cases[dim]
+            g = equidistant_grid(ps, sz...)
+            @testset "$case_name" for (case_name, parameters) ∈ material_cases
+                (;λ, μ) = parameters
+                λ̄ = map(λ, g)
+                μ̄ = map(μ, g)
 
-    material_cases = [
-        "λ = 1, μ = 1" => (;
-            λ = x -> 1.,
-            μ = x -> 1.,
-        ),
-        "λ = 1+0.3sin(||x||), μ = 1+0.2cos(||x||)" => (;
-            λ = x -> 1. + 0.3sin(norm(x)),
-            μ = x -> 1. + 0.2cos(norm(x)),
-        ),
-    ]
+                # Test that the summation by parts property for the elastic operator
+                # ( vᵢ, [Eu]ᵢ)_Ω - ([Ev]ᵢ, uᵢ)_Ω = (vᵢ, [Tu]ᵢ )_∂Ω - ([Tv]ᵢ, uᵢ)_∂Ω
+                # Holds
 
-    @testset "$grid_name" for (grid_name, g) ∈ grid_cases
-        @testset "$case_name" for (case_name, parameters) ∈ material_cases
-            (;λ, μ) = parameters
-            λ̄ = map(λ, g)
-            μ̄ = map(μ, g)
+                E = elastic_isotropic(g, λ̄, μ̄, stencil_set)
 
-            # Test that the summation by parts property for the elastic operator
-            # ( vᵢ, [Eu]ᵢ)_Ω - ([Ev]ᵢ, uᵢ)_Ω = (vᵢ, [Tu]ᵢ )_∂Ω - ([Tv]ᵢ, uᵢ)_∂Ω
-            # Holds
+                u = rand(SVector{ndims(g)}, size(g))
+                v = rand(SVector{ndims(g)}, size(g))
 
-            E = elastic_isotropic(g, λ̄, μ̄, stencil_set)
+                H = inner_product(g, stencil_set)
 
-            u = rand(SVector{ndims(g)}, size(g))
-            v = rand(SVector{ndims(g)}, size(g))
+                volume_term = ip(v,H,E*u) - ip(E*v,H,u)
+                boundary_term = sum(boundary_identifiers(g)) do boundary
+                    e = boundary_restriction(g, stencil_set, boundary)
+                    T = traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
+                    Hᵧ = inner_product(boundary_grid(g, boundary), stencil_set)
 
-            H = inner_product(g, stencil_set)
+                    ip(e*v, Hᵧ, T*u) - ip(T*v, Hᵧ, e*u)
+                end
 
-            volume_term = ip(v,H,E*u) - ip(E*v,H,u)
-            boundary_term = sum(boundary_identifiers(g)) do boundary
-                e = boundary_restriction(g, stencil_set, boundary)
-                T = traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
-                Hᵧ = inner_product(boundary_grid(g, boundary), stencil_set)
-
-                ip(e*v, Hᵧ, T*u) - ip(T*v, Hᵧ, e*u)
-            end
-
-            @test volume_term ≈ boundary_term
-       end
+                @test volume_term ≈ boundary_term
+           end
+        end
     end
 end
