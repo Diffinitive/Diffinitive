@@ -262,17 +262,13 @@ julia> jacobian(c,[1,1/2])
 ```
 """
 function with_jacobian(xJ, pm::ParameterSpace)
-    _check_coordinates_and_jacobian(xJ, _sample_parameter(pm))
+    _check_coordinates_and_jacobian(xJ, centroid(pm))
 
     x(ξ) = xJ(ξ)[1]
     J(ξ) = xJ(ξ)[2]
 
     return Chart(FunctionWithJacobian(x,J), pm)
 end
-
-_sample_parameter(i::Interval) = limits(i)[1]
-_sample_parameter(box::HyperBox) = limits(box)[1]
-_sample_parameter(s::Simplex) = first(verticies(s))
 
 function _check_coordinates_and_jacobian(xJ, ξ)
     x_J = xJ(ξ)
