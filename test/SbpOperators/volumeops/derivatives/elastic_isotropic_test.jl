@@ -251,20 +251,20 @@ function_cases_3d = [
             "MappedGrid" => equidistant_grid(c_2d, 41, 41),
         ]
 
-        rtols = Dict(
+        test_params = Dict(
             "EquidistantGrid" => Dict(
-                "u = [x, y²], λ = 1, μ = 1" => 1e-12,
-                "u = [x, y²], λ = y, μ = x" => 1e-12,
-                "u = [x, y²], λ = x², μ = y" => 1e-12,
-                "u = [y, x], λ = x, μ = y" => 1e-12,
-                "u = [y, x], λ = y, μ = xy" => 1e-12,
+                "u = [x, y²], λ = 1, μ = 1" => (;rtol = 1e-12),
+                "u = [x, y²], λ = y, μ = x" => (;rtol = 1e-12),
+                "u = [x, y²], λ = x², μ = y" => (;rtol = 1e-12),
+                "u = [y, x], λ = x, μ = y" => (;rtol = 1e-12),
+                "u = [y, x], λ = y, μ = xy" => (;rtol = 1e-12),
             ),
             "MappedGrid" => Dict(
-                "u = [x, y²], λ = 1, μ = 1" => 1e-12,
-                "u = [x, y²], λ = y, μ = x" => 1e-12,
-                "u = [x, y²], λ = x², μ = y" => 1e-4,
-                "u = [y, x], λ = x, μ = y" => 1e-11,
-                "u = [y, x], λ = y, μ = xy" => 1e-11,
+                "u = [x, y²], λ = 1, μ = 1" => (;rtol = 1e-12),
+                "u = [x, y²], λ = y, μ = x" => (;rtol = 1e-12),
+                "u = [x, y²], λ = x², μ = y" => (;rtol = 1e-4),
+                "u = [y, x], λ = x, μ = y" => (;rtol = 1e-11),
+                "u = [y, x], λ = y, μ = xy" => (;rtol = 1e-11),
             ),
         )
 
@@ -277,7 +277,7 @@ function_cases_3d = [
                     L̄ = elastic_isotropic(g, λ̄, μ̄, stencil_set),
                     u = u,
                     Lu = elastic_ad(u,λ,μ),
-                    rtol = rtols[grid_name][case_name],
+                    test_params[grid_name][case_name]...,
                 )
             end
         end
@@ -291,12 +291,12 @@ function_cases_3d = [
         ]
 
 
-        rtols = Dict(
+        test_params = Dict(
             "EquidistantGrid" => Dict(
-                "u = [x, y², xz], λ = 1, μ = 1" => 1e-13,
+                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol = 1e-13),
             ),
             "MappedGrid" => Dict(
-                "u = [x, y², xz], λ = 1, μ = 1" => 1e-12,
+                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol = 1e-12),
             ),
         )
 
@@ -309,7 +309,7 @@ function_cases_3d = [
                     L̄ = elastic_isotropic(g, λ̄, μ̄, stencil_set),
                     u = u,
                     Lu = elastic_ad(u,λ,μ),
-                    rtol = rtols[grid_name][case_name],
+                    test_params[grid_name][case_name]...,
                 )
             end
         end
