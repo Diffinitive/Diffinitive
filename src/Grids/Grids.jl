@@ -26,6 +26,7 @@ export unittetrahedron
 export unitsimplex
 
 export Chart
+export with_jacobian
 
 export Atlas
 export charts
