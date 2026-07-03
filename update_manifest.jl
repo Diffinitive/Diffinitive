@@ -19,4 +19,5 @@ update_and_log(root, ".")
 update_and_log(root, "benchmark")
 update_and_log(root, "docs")
 update_and_log(root, "test")
+update_and_log(root, "notebooks")
 
