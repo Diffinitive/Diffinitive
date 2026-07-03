@@ -608,6 +608,45 @@ refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_op
         '15	tooling/mergemap	14	-1'
     or set failures (math $failures + 1)
 
+    set -l expected_current_repository_after_merge 'o default
+|
+|   o feature/sbp_operators/vector_operators
+|  /|
+| o | feature/lazy_tensors/matrix_of_operators
+| | |
+| o | refactor/lazy_tensors/operator_simplifications
+|/  |
+|   o feature/grids/chart_normal
+|  /
+| /
+|/
+| o examples
+|/
+| o feature/grids/multiblock_grids
+|/
+| o feature/lazy_tensors/pretty_printing
+|/
+| o refactor/lazy_tensors/adjoint
+|/
+| o refactor/sbpoperators/boundary_operators
+|/
+| o tooling/mergemap
+|/'
+    __branch_graph_assert_render 'current repository graph after merge' "$expected_current_repository_after_merge" \
+        'default	examples' \
+        'default	feature/grids/chart_normal' \
+        'default	feature/grids/multiblock_grids' \
+        'default	feature/lazy_tensors/pretty_printing' \
+        'default	refactor/lazy_tensors/adjoint' \
+        'default	refactor/lazy_tensors/operator_simplifications' \
+        'default	refactor/sbpoperators/boundary_operators' \
+        'default	tooling/mergemap' \
+        'feature/grids/chart_normal	feature/sbp_operators/vector_operators' \
+        'feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators' \
+        'refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators' \
+        -- default
+    or set failures (math $failures + 1)
+
     set -l expected_current_repository 'o default
 |
 |   o feature/sbp_operators/vector_operators
