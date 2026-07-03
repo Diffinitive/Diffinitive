@@ -1,5 +1,33 @@
 #!/usr/bin/env fish
 
+# Print an ASCII dependency graph for open Mercurial branches in the current
+# repository. Edges point from the nearest open ancestor branch to the dependent
+# open branch, with closed intermediate branches treated as transparent ancestry.
+#
+# Usage:
+#   scripts/hg_branch_graph.fish
+#       Render the open-branch dependency graph.
+#   scripts/hg_branch_graph.fish --test
+#       Run the script's synthetic rendering and dependency tests.
+#   scripts/hg_branch_graph.fish --help
+#       Show the command-line help.
+#
+# The graph is a summary of branch relationships, not a replacement for
+# `hg log -G`: it collapses revisions within each branch and removes dependency
+# edges already implied by an indirect path.
+
+function __branch_graph_help --description 'Print command usage'
+    printf '%s\n' \
+        'Print an ASCII dependency graph for open Mercurial branches.' \
+        '' \
+        'Usage:' \
+        '  hg_branch_graph.fish [--help|-h]' \
+        '  hg_branch_graph.fish [--test|test]' \
+        '' \
+        'With no arguments, renders the branch dependency graph for the current repository.' \
+        'Use --test to run the built-in graph rendering and dependency tests.'
+end
+
 function __hg_open_branches --description 'Print open Mercurial branches, one per line'
     hg branches --template '{branch}\n'
 end
@@ -693,12 +721,14 @@ end
 
 if not set -q HG_BRANCH_GRAPH_LIBRARY_ONLY
     switch "$argv[1]"
+        case --help -h
+            __branch_graph_help
         case test --test
             test_branch_dependency_graph
         case ''
             print_branch_dependency_graph
         case '*'
-            printf 'Usage: %s [--test|test]\n' (status filename) >&2
+            printf 'Usage: %s [--help|-h] [--test|test]\n' (status filename) >&2
             exit 2
     end
 end
