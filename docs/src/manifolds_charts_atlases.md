@@ -32,7 +32,7 @@ struct F end
 Grids.jacobian(::F, x) = fill(2,length(x))
 ```
 
-You can also let an automatic differentation tool provide the jacobian using `with_jacobian`, for example
+You can also let an automatic differentiation tool provide the Jacobian using `with_jacobian`, for example
 
 ```julia
 using Diffinitive.Grids
