@@ -56,6 +56,75 @@ function reduce_branch_dependencies --description 'Remove dependency edges cover
     ' | sort -u
 end
 
+function __compute_branch_dependencies_from_files --argument-names open_file rev_file
+    awk -F '\t' -v open_file="$open_file" '
+        BEGIN {
+            while ((getline line < open_file) > 0) {
+                open[line] = 1
+            }
+            close(open_file)
+        }
+
+        function add_label(labels, label,     separator) {
+            if (label == "") {
+                return labels
+            }
+
+            if (seen_label[label]) {
+                return labels
+            }
+
+            seen_label[label] = 1
+            separator = labels == "" ? "" : SUBSEP
+            return labels separator label
+        }
+
+        function add_labels(labels, source,     count, i, labels_parts) {
+            count = split(source, labels_parts, SUBSEP)
+            for (i = 1; i <= count; i++) {
+                labels = add_label(labels, labels_parts[i])
+            }
+
+            return labels
+        }
+
+        function print_dependencies(labels, branch,     count, i, labels_parts) {
+            count = split(labels, labels_parts, SUBSEP)
+            for (i = 1; i <= count; i++) {
+                if (labels_parts[i] != "" && labels_parts[i] != branch && open[labels_parts[i]]) {
+                    print labels_parts[i] "\t" branch
+                }
+            }
+        }
+
+        {
+            rev = $1
+            branch = $2
+            p1_rev = $3
+            p2_rev = $4
+
+            if (!open[branch]) {
+                delete seen_label
+                labels = ""
+                labels = add_labels(labels, rev_labels[p1_rev])
+                labels = add_labels(labels, rev_labels[p2_rev])
+                rev_labels[rev] = labels
+                next
+            }
+
+            print_dependencies(rev_labels[p1_rev], branch)
+            print_dependencies(rev_labels[p2_rev], branch)
+
+            delete seen_label
+            labels = ""
+            labels = add_labels(labels, rev_labels[p1_rev])
+            labels = add_labels(labels, rev_labels[p2_rev])
+            labels = add_label(labels, branch)
+            rev_labels[rev] = labels
+        }
+    ' "$rev_file" | sort -u | reduce_branch_dependencies
+end
+
 function compute_branch_dependencies --description 'Print open-branch dependencies as source<TAB>target'
     set -l open_branches (__hg_open_branches)
 
@@ -68,44 +137,7 @@ function compute_branch_dependencies --description 'Print open-branch dependenci
     printf '%s\n' $open_branches > $open_file
     hg log -r 'sort(all(), rev)' --template '{rev}\t{branch}\t{p1rev}\t{p2rev}\n' > $rev_file
 
-    awk -F '\t' -v open_file="$open_file" '
-        BEGIN {
-            while ((getline line < open_file) > 0) {
-                open[line] = 1
-            }
-            close(open_file)
-        }
-
-        {
-            rev = $1
-            branch = $2
-            p1_rev = $3
-            p2_rev = $4
-            rev_to_branch[$1] = $2
-
-            if (!open[branch]) {
-                next
-            }
-
-            p1_branch = rev_to_branch[p1_rev]
-            p2_branch = rev_to_branch[p2_rev]
-
-            if (!seen_branch[branch]) {
-                seen_branch[branch] = 1
-                if (p1_branch != "" && p1_branch != branch && open[p1_branch]) {
-                    print p1_branch "\t" branch
-                }
-            }
-
-            if (p1_branch != "" && p1_branch != branch && open[p1_branch]) {
-                print p1_branch "\t" branch
-            }
-
-            if (p2_branch != "" && p2_branch != branch && open[p2_branch]) {
-                print p2_branch "\t" branch
-            }
-        }
-    ' "$rev_file" | sort -u | reduce_branch_dependencies
+    __compute_branch_dependencies_from_files "$open_file" "$rev_file"
 
     rm -f $open_file $rev_file
 end
@@ -432,6 +464,42 @@ function __branch_graph_assert_dependencies --argument-names name expected
     return 1
 end
 
+function __branch_graph_assert_computed_dependencies --argument-names name expected
+    set -l separator_index (contains -i -- -- $argv)
+
+    if test -z "$separator_index"
+        echo 'Internal test error: missing -- separator.' >&2
+        return 2
+    end
+
+    set -l open_branches
+    if test $separator_index -gt 3
+        set open_branches $argv[3..(math $separator_index - 1)]
+    end
+
+    set -l open_file (mktemp)
+    set -l rev_file (mktemp)
+    set -l actual_file (mktemp)
+    set -l expected_file (mktemp)
+
+    printf '%s\n' $open_branches > "$open_file"
+    printf '%s\n' $argv[(math $separator_index + 1)..-1] > "$rev_file"
+
+    __compute_branch_dependencies_from_files "$open_file" "$rev_file" > "$actual_file"
+    printf '%s\n' "$expected" > "$expected_file"
+
+    if diff -u "$expected_file" "$actual_file" >/dev/null
+        rm -f "$open_file" "$rev_file" "$actual_file" "$expected_file"
+        printf 'ok - %s\n' "$name"
+        return 0
+    end
+
+    printf 'not ok - %s\n' "$name" >&2
+    diff -u "$expected_file" "$actual_file" >&2
+    rm -f "$open_file" "$rev_file" "$actual_file" "$expected_file"
+    return 1
+end
+
 function test_branch_dependency_graph --description 'Run synthetic graph rendering tests'
     set -l failures 0
 
@@ -497,6 +565,47 @@ B	C'
 | /
 |/'
     __branch_graph_assert_render 'A, B, and default merge into C' "$expected_three_parent_merge" 'default	A' 'default	B' 'default	C' 'A	C' 'B	C' -- default
+    or set failures (math $failures + 1)
+
+    set -l expected_current_repository_dependencies 'default	examples
+default	feature/grids/chart_normal
+default	feature/grids/multiblock_grids
+default	feature/lazy_tensors/pretty_printing
+default	refactor/lazy_tensors/adjoint
+default	refactor/lazy_tensors/operator_simplifications
+default	refactor/sbpoperators/boundary_operators
+default	tooling/mergemap
+feature/grids/chart_normal	feature/sbp_operators/vector_operators
+feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators
+refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators'
+    __branch_graph_assert_computed_dependencies 'current repository dependencies through closed branches' "$expected_current_repository_dependencies" \
+        default \
+        examples \
+        feature/grids/chart_normal \
+        feature/grids/multiblock_grids \
+        feature/lazy_tensors/matrix_of_operators \
+        feature/lazy_tensors/pretty_printing \
+        feature/sbp_operators/vector_operators \
+        refactor/lazy_tensors/adjoint \
+        refactor/lazy_tensors/operator_simplifications \
+        refactor/sbpoperators/boundary_operators \
+        tooling/mergemap \
+        -- \
+        '1	default	-1	-1' \
+        '2	refactor/lazy_tensors/operator_simplifications	1	-1' \
+        '3	feature/grids/with_jacobian	1	-1' \
+        '4	feature/grids/chart_normal	3	-1' \
+        '5	feature/lazy_tensors/matrix_of_operators	1	2' \
+        '6	feature/sbp_operators/vector_operators	1	-1' \
+        '7	feature/sbp_operators/vector_operators	6	4' \
+        '8	feature/sbp_operators/vector_operators	7	5' \
+        '9	feature/grids/multiblock_grids	1	-1' \
+        '10	feature/lazy_tensors/pretty_printing	1	-1' \
+        '11	refactor/lazy_tensors/adjoint	1	-1' \
+        '12	refactor/sbpoperators/boundary_operators	1	-1' \
+        '13	examples	1	-1' \
+        '14	default	1	-1' \
+        '15	tooling/mergemap	14	-1'
     or set failures (math $failures + 1)
 
     set -l expected_current_repository 'o default
