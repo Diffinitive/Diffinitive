@@ -1,25 +1,14 @@
-# Elastic wave equation:
-# ρüᵢ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
-#     = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
-
-# Traction:
-# tᵢ = (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ
-
-# Normal traction operator:
-# tₙ = nᵢtᵢ = (λ∂ⱼ + 2μnⱼnᵢ∂ᵢ) uⱼ
-#           = (λ∂ⱼ + 2μnⱼ∂ₙ) uⱼ
-
-# Tangential traction operator:
-# tₜ = tᵢ - nₖtₖnᵢ = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)nₖ∂ₖ) uⱼ
-#                  = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
+# Elastic operator:
+# Eᵢⱼuⱼ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
+#       = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
 
 # for 2d we have
-# v₁ = ∂₁λ∂₁u₁ + ∂₁λ∂₂u₂ +
-#      ∂₁μ∂₁u₁ + ∂₂μ∂₁u₂ +
-#      ∂₁μ∂₁u₁ + ∂₂μ∂₂u₁
-# v₂ = ∂₂λ∂₁u₁ + ∂₂λ∂₂u₂ +
-#      ∂₁μ∂₂u₁ + ∂₂μ∂₂u₂ +
-#      ∂₁μ∂₁u₂ + ∂₂μ∂₂u₂
+# v₁ = E₁ⱼuⱼ = ∂₁λ∂₁u₁ + ∂₁λ∂₂u₂ +
+#              ∂₁μ∂₁u₁ + ∂₂μ∂₁u₂ +
+#              ∂₁μ∂₁u₁ + ∂₂μ∂₂u₁
+# v₂ = E₂ⱼuⱼ = ∂₂λ∂₁u₁ + ∂₂λ∂₂u₂ +
+#              ∂₁μ∂₂u₁ + ∂₂μ∂₂u₂ +
+#              ∂₁μ∂₁u₂ + ∂₂μ∂₂u₂
 
 
 # Tensor grid
@@ -39,7 +28,7 @@ function elastic(g::TensorGrid, λ, μ, stencil_set)
     ∂∂_wide(i,σ,j) = mixed_second_derivative_variable_wide(g, stencil_set, i, σ, j) # TBD: Should this closure be implemented outside this function?
     ∂∂_narrow(i,σ,j) = mixed_second_derivative_variable_narrow(g, stencil_set, i, σ, j) # TBD: Should this closure be implemented outside this function?
 
-    δ(i,j) = dirac_delta(g, i, j)
+    δ(i,j) = dirac_delta(size(g), i, j)
 
     return MatrixTensor(N,N) do i, j
         ∂∂_wide(i,λ,j) + ∂∂_narrow(j, μ, i) + δ(i,j)∘Σₖ∂ₖμ∂ₖ
@@ -47,76 +36,10 @@ function elastic(g::TensorGrid, λ, μ, stencil_set)
 end
 
 
-function traction(g::TensorGrid, λ, μ, stencil_set, boundary)
-    # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖuᵢ
-    # =>
-    # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖδᵢⱼuⱼ
-    # (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ
-    # (nᵢλ∂ⱼ + nⱼμ∂ᵢ + δᵢⱼμ∂ₙ) uⱼ
-
-    N = ndims(g)
-
-    e = boundary_restriction(g, stencil_set, boundary)
-    λ̲ = DiagonalTensor(e*λ)
-    μ̲ = DiagonalTensor(e*μ)
-
-    n = normal(g, boundary)
-    n̲(i) = DiagonalTensor(componentview(n,i))
-
-    ∂_wide(i) = first_derivative_wide(g, stencil_set, boundary, i)
-    ∂_narrow(i) = first_derivative_narrow(g, stencil_set, boundary, i)
-    δ(i,j) = dirac_delta(g, boundary, i, j)
-    ∂ₙ = normal_derivative(g, stencil_set, boundary)
-
-    return MatrixTensor(N,N) do i, j
-        n̲(i)∘λ̲∘∂_wide(j) + n̲(j)∘μ̲∘∂_narrow(i) + δ(i,j)∘μ̲∘∂ₙ
-    end
-end
-
-
-function normal_traction(g::TensorGrid, λ, μ, stencil_set, boundary)
-    # tₙ = nᵢtᵢ = (λ∂ⱼ + 2μnⱼ∂ₙ) uⱼ
-
-    e = boundary_restriction(g, stencil_set, boundary)
-
-    λ̲ = DiagonalTensor(e*λ)
-    μ̲ = DiagonalTensor(e*μ)
-
-    n = normal(g, boundary)
-    n̲(i) = DiagonalTensor(componentview(n,i))
-
-    ∂(i) = first_derivative_wide(g, stencil_set, boundary, i)
-
-    ∂ₙ = normal_derivative(g, stencil_set, boundary)
-    return VectorDotTensor(ndims(g)) do j
-        λ̲∘∂(j) + 2μ̲∘n̲(j)∘∂ₙ
-    end
-end
-
-function tangential_traction(g::TensorGrid, λ, μ, stencil_set, boundary)
-    # tₜ = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
-
-    e = boundary_restriction(g, stencil_set, boundary)
-
-    μ̲ = DiagonalTensor(e*μ)
-
-    n = normal(g, boundary)
-    n̲(i) = DiagonalTensor(componentview(n,i))
-
-    ∂(i) = first_derivative_narrow(g, stencil_set, boundary, i)
-    ∂ₙ = normal_derivative(g, stencil_set, boundary)
-
-    δ(i,j) = dirac_delta(g, boundary, i, j)
-
-    return MatrixTensor(ndims(g),ndims(g)) do i, j
-        μ̲∘(n̲(j)∘∂(i) + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
-    end
-end
-
 # Mapped grid
 # ===========
 function elastic(grid::MappedGrid, λ, μ, stencil_set)
-    # Lᵢⱼuⱼ = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
+    # Eᵢⱼuⱼ = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
     #
     #       = J⁻¹(∂̃ₖλJg̃ᵏⁿⁱʲ∂̃ₙ + ∂̃ₖμJg̃ᵏⁿʲⁱ∂̃ₙ + δᵢⱼ∂̃ₖμJg̃ᵏⁿˢˢ∂̃ₙ) uⱼ
     #
@@ -151,7 +74,7 @@ function elastic(grid::MappedGrid, λ, μ, stencil_set)
     ∂̃∂̃_wide(i,σ,j) = mixed_second_derivative_variable_wide(logical_grid(grid),stencil_set,i,σ,j)
     ∂̃∂̃_narrow(i,σ,j) = mixed_second_derivative_variable_narrow(logical_grid(grid),stencil_set,i,σ,j)
 
-    δ(i,j) = dirac_delta(grid, i, j)
+    δ(i,j) = dirac_delta(size(grid), i, j)
 
     return MatrixTensor(N, N) do i,j
         sum(1:N) do k
@@ -169,128 +92,9 @@ function elastic(grid::MappedGrid, λ, μ, stencil_set)
 end
 
 
-function traction(g::MappedGrid, λ, μ, stencil_set, boundary)
-    # In standard coordinates:
-    # Tᵢ = nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖuᵢ
-    # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖδᵢⱼuⱼ
-    # (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ
-    #
-    # With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ we can write the traction in
-    # logical coordinates, we have
-    #
-    # Tᵢ = (nᵢλfₖⱼ∂̃ₖ + nⱼμfₖᵢ∂̃ₖ + nₛμfₖₛ∂̃ₖδᵢⱼ) uⱼ
-    #
-
-    N = ndims(g)
-
-    # Construct parts needed for the tranction operator:
-    e = boundary_restriction(g, stencil_set, boundary)
-    ∂ξ∂x = collect(e*map(inv, jacobian(g)))
-
-    λ̲ = DiagonalTensor(e*λ)
-    μ̲ = DiagonalTensor(e*μ)
-
-    n = normal(g, boundary)
-
-    nf = map(n, ∂ξ∂x) do n, f
-        f*n
-    end
-
-    f̲(i,j) = DiagonalTensor(componentview(∂ξ∂x, i, j))
-    n̲(i) = DiagonalTensor(componentview(n,i))
-    n̲f̲(i) = DiagonalTensor(componentview(nf, i))
-
-
-    ∂̃_wide(i) = first_derivative_wide(logical_grid(g), stencil_set, boundary, i)
-    ∂̃_narrow(i) = first_derivative_narrow(logical_grid(g), stencil_set, boundary, i)
-
-    δ(i,j) = dirac_delta(g, boundary, i, j)
-
-    # Assemble traction operator:
-    return MatrixTensor(N,N) do i, j
-        sum(1:N) do k
-            n̲(i)∘λ̲∘f̲(k,j)∘∂̃_wide(k) + n̲(j)∘μ̲∘f̲(k,i)∘∂̃_narrow(k) + δ(i,j)∘μ̲∘n̲f̲(k)∘∂̃_narrow(k)
-        end
-    end
-end
-
-
-function normal_traction(g::MappedGrid, λ, μ, stencil_set, boundary)
-    # tₙ = nᵢtᵢ = (λ∂ⱼ + 2μnⱼ∂ₙ) uⱼ
-    #
-    # With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ
-    # we have
-    #
-    # tₙ = (λfₖⱼ∂̃ₖ + 2μnⱼ∂ₙ) uⱼ
-
-    e = boundary_restriction(g, stencil_set, boundary)
-    ∂ξ∂x = collect(e*map(inv, jacobian(g)))
-
-    λ̲ = DiagonalTensor(e*λ)
-    μ̲ = DiagonalTensor(e*μ)
-
-    n = normal(g, boundary)
-
-    f̲(i,j) = DiagonalTensor(componentview(∂ξ∂x, i, j))
-    n̲(i) = DiagonalTensor(componentview(n,i))
-    ∂̃(i) = first_derivative_wide(logical_grid(g), stencil_set, boundary, i)
-
-    ∂ₙ = normal_derivative(g, stencil_set, boundary)
-
-    N = ndims(g)
-    return VectorDotTensor(N) do j
-        fₖⱼ∂̃ₖ = sum(k->f̲(k,j)∘∂̃(k), 1:N)
-        λ̲∘fₖⱼ∂̃ₖ + 2μ̲∘n̲(j)∘∂ₙ
-    end
-end
-
-function tangential_traction(g::MappedGrid, λ, μ, stencil_set, boundary) # TBD: Should we remove dependence on λ here? Add error hint?
-    # tₜ = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
-    #
-    # With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ
-    # we have
-    #
-    # tₜ = μ(nⱼfₖᵢ∂̃ₖ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
-
-    e = boundary_restriction(g, stencil_set, boundary)
-    ∂ξ∂x = collect(e*map(inv, jacobian(g)))
-
-    μ̲ = DiagonalTensor(e*μ)
-
-    n = normal(g, boundary)
-
-    f̲(i,j) = DiagonalTensor(componentview(∂ξ∂x, i, j))
-    n̲(i) = DiagonalTensor(componentview(n,i))
-    ∂̃(i) = first_derivative_narrow(logical_grid(g), stencil_set, boundary, i)
-
-    ∂ₙ = normal_derivative(g, stencil_set, boundary)
-
-    δ(i,j) = dirac_delta(g, boundary, i, j)
-
-    N = ndims(g)
-    return MatrixTensor(ndims(g),ndims(g)) do i, j
-        fₖᵢ∂̃ₖ = sum(k->f̲(k,i)∘∂̃(k), 1:N)
-        μ̲∘(n̲(j)∘fₖᵢ∂̃ₖ + (δ(i,j) - 2n̲(i)∘n̲(j))∘∂ₙ)
-    end
-end
-
 
 # Helpers
 # =======
-function boundary_gradient(g, stencil_set, boundary) # Does this need to have "boundary" in the name?
-    return map(1:ndims(g)) do i
-        if i == grid_id(boundary)
-            s = Grids._boundary_sign(component_type(g), boundary)
-            ∂ₙ = normal_derivative(g, stencil_set, boundary)
-            return s*∂ₙ
-        else
-            e = boundary_restriction(g, stencil_set, boundary)
-            ∂ᵢ = first_derivative(g, stencil_set, i)
-            return e∘∂ᵢ
-        end
-    end
-end
-
 # ∂ᵢσ∂ⱼ for given i,σ,j using all D1
 function mixed_second_derivative_variable_wide(g::Grid, stencil_set, i, σ, j) # TBD: Should it have mixed in the name? It's not mixed when i==j.
     ∂(i) = first_derivative(g, stencil_set, i)
@@ -311,45 +115,4 @@ function mixed_second_derivative_variable_narrow(g::Grid, stencil_set, i, σ, j)
     end
 end
 
-# wide and narrow first derviatives only relevant to the boundary
-function first_derivative_wide(g::Grid, stencil_set, boundary::BoundaryIdentifier, i)
-    e = boundary_restriction(g, stencil_set, boundary)
-    ∂ᵢ = first_derivative(g, stencil_set, i)
-
-    return e∘∂ᵢ
-end
-
-function first_derivative_narrow(g::Grid, stencil_set, boundary::BoundaryIdentifier, i)
-    if i == grid_id(boundary)
-        s = Grids._boundary_sign(component_type(g), boundary)
-        ∂ₙ = normal_derivative(g, stencil_set, boundary)
-        return s*∂ₙ
-    else
-        e = boundary_restriction(g, stencil_set, boundary)
-        ∂ᵢ = first_derivative(g, stencil_set, i)
-        return e∘∂ᵢ
-    end
-end
-
-# TODO: Extend the two functions above for mapped grids
-# TODO: Move the two functions above to a more general spot?
-
-function dirac_delta(g::Grid, i, j)
-    if i==j
-        IdentityTensor(size(g))
-    else
-        ZeroTensor(size(g))
-    end
-end
-
-function dirac_delta(g::Grid, boundary::BoundaryIdentifier, i, j)
-    bg = boundary_grid(g, boundary)
-    return dirac_delta(bg, i, j)
-end
-
-
-# TODO: Can the traction operators be combined for TensorGrid and MappedGrid?
 # TODO: Can the elastic operators be combined for TensorGrid and MappedGrid?
-# TODO: Would it be helpful to implement operators for getting the normal and tangential projections of vectors on the boundary?
-#       Could these be used to simplify the implementations of normal traction and tangential traction?
-#       (Yes? Simplest would be to construct them on the boundary grid. Then they could be combined with the regular Traction operator to get the components.)

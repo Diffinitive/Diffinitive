@@ -59,6 +59,23 @@ function apply(t::ZeroTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any, R})
 end
 
 """
+    dirac_delta(sz, i, j)
+
+A lazy tensor implementation of the Dirac delta function of range and domain size `sz`, i.e., returns an
+`IdentityTensor` for `i == j` and a `ZeroTensor` otherwise.
+
+See also: [`IdentityTensor`](@ref), [`ZeroTensor`](@ref).
+"""
+# TODO: Not really a tensor type... perhaps we should have e.g. tensor_functions.jl or something?
+function dirac_delta(sz, i, j)
+    if i==j
+        IdentityTensor(sz)
+    else
+        ZeroTensor(sz)
+    end
+end
+
+"""
     ScalingTensor{T,D} <: LazyTensor{D,D}
 
 A lazy tensor that scales its input with `λ`.
