@@ -30,10 +30,10 @@ export undivided_skewed04
 export closure_size
 export divergence
 export gradient
-export elastic_isotropic
-export traction_isotropic
-export normal_traction_isotropic
-export tangential_traction_isotropic
+export elastic
+export traction
+export normal_traction
+export tangential_traction
 
 @enum Parity begin
     odd = -1
@@ -76,6 +76,6 @@ include("boundaryops/boundary_operator.jl")
 include("boundaryops/boundary_restriction.jl")
 include("boundaryops/normal_derivative.jl")
 include("volumeops/derivatives/vector_calculus.jl")
-include("volumeops/derivatives/elastic_isotropic.jl")
+include("volumeops/derivatives/elastic.jl")
 
 end # module
