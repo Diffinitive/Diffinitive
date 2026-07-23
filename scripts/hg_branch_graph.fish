@@ -7,6 +7,8 @@
 # Usage:
 #   scripts/hg_branch_graph.fish
 #       Render the open-branch dependency graph.
+#   scripts/hg_branch_graph.fish --dependencies
+#       Print the branch dependencies as source<TAB>target.
 #   scripts/hg_branch_graph.fish --test
 #       Run the script's synthetic rendering and dependency tests.
 #   scripts/hg_branch_graph.fish --help
@@ -22,9 +24,11 @@ function __branch_graph_help --description 'Print command usage'
         '' \
         'Usage:' \
         '  hg_branch_graph.fish [--help|-h]' \
+        '  hg_branch_graph.fish [--dependencies|--deps]' \
         '  hg_branch_graph.fish [--test|test]' \
         '' \
         'With no arguments, renders the branch dependency graph for the current repository.' \
+        'Use --dependencies to print branch dependencies as source<TAB>target.' \
         'Use --test to run the built-in graph rendering and dependency tests.'
 end
 
@@ -421,6 +425,17 @@ function print_branch_dependency_graph --description 'Print the computed branch 
     rm -f "$edges_file"
 end
 
+function print_branch_dependency_information --description 'Print the computed branch dependencies as source<TAB>target'
+    set -l open_branches (__hg_open_branches)
+
+    if test (count $open_branches) -eq 0
+        echo 'No open branches found.'
+        return 1
+    end
+
+    compute_branch_dependencies
+end
+
 function __branch_graph_render_test --description 'Render a synthetic graph from edge lines and roots'
     set -l separator_index (contains -i -- -- $argv)
 
@@ -725,10 +740,12 @@ if not set -q HG_BRANCH_GRAPH_LIBRARY_ONLY
             __branch_graph_help
         case test --test
             test_branch_dependency_graph
+        case --dependencies --deps
+            print_branch_dependency_information
         case ''
             print_branch_dependency_graph
         case '*'
-            printf 'Usage: %s [--help|-h] [--test|test]\n' (status filename) >&2
+            printf 'Usage: %s [--help|-h] [--dependencies|--deps] [--test|test]\n' (status filename) >&2
             exit 2
     end
 end
