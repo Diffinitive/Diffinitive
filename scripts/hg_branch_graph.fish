@@ -9,6 +9,8 @@
 #       Render the open-branch dependency graph.
 #   scripts/hg_branch_graph.fish --dependencies
 #       Print the branch dependencies as source<TAB>target.
+#   scripts/hg_branch_graph.fish --reduced-dependencies
+#       Print the reduced branch dependencies as source<TAB>target.
 #   scripts/hg_branch_graph.fish --test
 #       Run the script's synthetic rendering and dependency tests.
 #   scripts/hg_branch_graph.fish --help
@@ -25,10 +27,12 @@ function __branch_graph_help --description 'Print command usage'
         'Usage:' \
         '  hg_branch_graph.fish [--help|-h]' \
         '  hg_branch_graph.fish [--dependencies|--deps]' \
+        '  hg_branch_graph.fish [--reduced-dependencies|--reduced-deps]' \
         '  hg_branch_graph.fish [--test|test]' \
         '' \
         'With no arguments, renders the branch dependency graph for the current repository.' \
         'Use --dependencies to print branch dependencies as source<TAB>target.' \
+        'Use --reduced-dependencies to print reduced branch dependencies as source<TAB>target.' \
         'Use --test to run the built-in graph rendering and dependency tests.'
 end
 
@@ -436,6 +440,10 @@ function print_branch_dependency_information --description 'Print the computed b
     compute_branch_dependencies
 end
 
+function print_reduced_branch_dependency_information --description 'Print the computed reduced branch dependencies as source<TAB>target'
+    print_branch_dependency_information
+end
+
 function __branch_graph_render_test --description 'Render a synthetic graph from edge lines and roots'
     set -l separator_index (contains -i -- -- $argv)
 
@@ -742,10 +750,12 @@ if not set -q HG_BRANCH_GRAPH_LIBRARY_ONLY
             test_branch_dependency_graph
         case --dependencies --deps
             print_branch_dependency_information
+        case --reduced-dependencies --reduced-deps
+            print_reduced_branch_dependency_information
         case ''
             print_branch_dependency_graph
         case '*'
-            printf 'Usage: %s [--help|-h] [--dependencies|--deps] [--test|test]\n' (status filename) >&2
+            printf 'Usage: %s [--help|-h] [--dependencies|--deps] [--reduced-dependencies|--reduced-deps] [--test|test]\n' (status filename) >&2
             exit 2
     end
 end
