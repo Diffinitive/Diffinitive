@@ -273,6 +273,12 @@ end
 
 
 ## "Matrix of tensors ∘ vector -> vector"
+"""
+    MatrixTensor{N,M,R,D} <: LazyTensor{R,D}
+
+Describes a mapping of an `M` component `D` dimensional tensor to an `N` component `R` dimensional
+tensor implemented as a `LazyTensor`
+"""
 struct MatrixTensor{N,M,R,D,TT<:TupleTable{N,M,<:NMTuple{N,M,LazyTensor{R,D}}}} <: LazyTensor{R,D}
     D::TT # Matrix of Tensors
 end

@@ -1,15 +1,12 @@
-# Elastic operator:
-# Eᵢⱼuⱼ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
-#       = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
+"""
+    Elastic{Dim, TM} <: LazyTensor{Dim, Dim}
 
-# for 2d we have
-# v₁ = E₁ⱼuⱼ = ∂₁λ∂₁u₁ + ∂₁λ∂₂u₂ +
-#              ∂₁μ∂₁u₁ + ∂₂μ∂₁u₂ +
-#              ∂₁μ∂₁u₁ + ∂₂μ∂₂u₁
-# v₂ = E₂ⱼuⱼ = ∂₂λ∂₁u₁ + ∂₂λ∂₂u₂ +
-#              ∂₁μ∂₂u₁ + ∂₂μ∂₂u₂ +
-#              ∂₁μ∂₁u₂ + ∂₂μ∂₂u₂
+The isotropic elastic (Navier-Cauchy) differential operator as a `LazyTensor`.
 
+The `Elastic` operator `E` is such that given a displacement vector `ū`, 
+`E*ū` approximates the  divergence of the Cauchy stress tensor, i.e.,
+Eᵢⱼuⱼ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ, i, j = 1,..,`Dim`.
+"""
 struct Elastic{Dim, TM<:LazyTensor{Dim, Dim}} <: LazyTensor{Dim, Dim}
     D::TM       # Difference operator
     stencil_set::StencilSet # Stencil set of the operator
@@ -18,7 +15,7 @@ end
 """
     Elastic(g::Grid, stencil_set::StencilSet)
 
-Creates the `Elastic` operator `E` with the first and second Lamé parameters
+Creates the `Elastic` operator with the first and second Lamé parameters
 `λ` and `μ` on `g` given `stencil_set`.
 
 See also [`elastic`](@ref).
@@ -33,8 +30,38 @@ LazyTensors.domain_size(E::Elastic) = LazyTensors.domain_size(E.D)
 LazyTensors.apply(E::Elastic, v::AbstractArray, I...) = LazyTensors.apply(E.D, v, I...)
 
 
+# Elastic operator:
+# Eᵢⱼuⱼ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
+#       = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
+
+# for 2d we have
+# v₁ = E₁ⱼuⱼ = ∂₁λ∂₁u₁ + ∂₁λ∂₂u₂ +
+#              ∂₁μ∂₁u₁ + ∂₂μ∂₁u₂ +
+#              ∂₁μ∂₁u₁ + ∂₂μ∂₂u₁
+# v₂ = E₂ⱼuⱼ = ∂₂λ∂₁u₁ + ∂₂λ∂₂u₂ +
+#              ∂₁μ∂₂u₁ + ∂₂μ∂₂u₂ +
+#              ∂₁μ∂₁u₂ + ∂₂μ∂₂u₂
+#
 # Tensor grid
 # ===========
+"""
+    elastic(g::Grid, λ, μ, stencil_set)
+
+Creates the isotropic elastic (Navier-Cauchy) differential operator operator `E` with
+first- and second Lamé parameters `λ`, `μ`, as a `LazyTensor` on `g` using SBP finite differnence operators
+from `stencil_set`.
+
+`E` is a `MatrixTensor` on the grid `g`, such that for a displacement vector grid function ū,
+`E*ū` approximates the divergence of the Cauchy stress tensor
+Eᵢⱼuⱼ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ, i,j = 1,...,ndims(g)
+
+The approximation depends on the type of grid and the stencil set. It uses a combination of
+narrow and wide second derivative approximations for improved dispersion properties.
+
+See also: [`second_derivative_variable`](@ref), [`mixed_second_derivative_variable_wide`](@ref), 
+[`mixed_second_derivative_variable_narrow`](@ref), [`MatrixTensor`](@ref)
+"""
+function elastic end
 function elastic(g::TensorGrid, λ, μ, stencil_set)
     # ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
     # =>
@@ -117,7 +144,14 @@ end
 
 # Helpers
 # =======
-# ∂ᵢσ∂ⱼ for given i,σ,j using all D1
+"""
+    mixed_second_derivative_variable_wide(g::Grid, stencil_set, i, σ, j)
+
+The mixed derivative operator ∂ᵢσ∂ⱼ on `g` as a `LazyTensor` approximated
+using first derivative operators from `stencil_set`.
+
+See also: [`first_derivative`](@ref)
+"""
 function mixed_second_derivative_variable_wide(g::Grid, stencil_set, i, σ, j) # TBD: Should it have mixed in the name? It's not mixed when i==j.
     ∂(i) = first_derivative(g, stencil_set, i)
 
@@ -125,7 +159,16 @@ function mixed_second_derivative_variable_wide(g::Grid, stencil_set, i, σ, j) #
 end
 
 
-# ∂ᵢσ∂ⱼ for given i,σ,j using D2 when i = j and D1 otherwise
+"""
+    mixed_second_derivative_variable_narrow(g::Grid, stencil_set, i, σ, j)
+
+The mixed derivative operator ∂ᵢσ∂ⱼ on `g` as a `LazyTensor` approximated
+using operators from from `stencil_set`. When i = j narrow variable coefficient
+second derivative operators are used, while for i  ≠ j first derivative operators
+are used.
+
+See also: [`first_derivative`](@ref), [`second_derivative_variable`](@ref)
+"""
 function mixed_second_derivative_variable_narrow(g::Grid, stencil_set, i, σ, j) # TBD: Should it have mixed in the name? It's not mixed when i==j. Could all of these be MDed under second_derivative?
     ∂(i) = first_derivative(g, stencil_set, i)
     ∂²(σ,i) = second_derivative_variable(g, σ, stencil_set, i)
