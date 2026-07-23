@@ -2,7 +2,6 @@ module LazyTensors
 
 export LazyTensor
 export apply
-export apply_transpose
 export range_dim, domain_dim
 export range_size, domain_size
 

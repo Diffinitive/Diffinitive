@@ -309,7 +309,7 @@ end
             (
                 InflatedTensor(I(3,2), A, I(4)),
                 (v-> @tullio res[a,b,c,d] := Ã[c,i]*v[a,b,i,d]), # Expected result of apply
-                (v-> @tullio res[a,b,c,d] := Ã[i,c]*v[a,b,i,d]), # Expected result of apply_transpose
+                (v-> @tullio res[a,b,c,d] := Ã[i,c]*v[a,b,i,d]), # Expected result of transposed application
             ),
             (
                 InflatedTensor(I(3,2), B, I(4)),
@@ -353,12 +353,12 @@ end
             ),
         ]
 
-        @testset "$tm" for (tm, true_apply, true_apply_transpose) ∈ cases
+        @testset "$tm" for (tm, true_apply, true_transposed_apply) ∈ cases
             v = rand(domain_size(tm)...)
             @test tm*v ≈ true_apply(v) rtol=1e-14
 
             v = rand(range_size(tm)...)
-            @test tm'*v ≈ true_apply_transpose(v) rtol=1e-14
+            @test tm'*v ≈ true_transposed_apply(v) rtol=1e-14
         end
 
         @testset "application to other type" begin
