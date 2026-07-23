@@ -157,7 +157,19 @@ grid_cases = Dict(
         μ = x -> 1. + 0.2cos(norm(x)),
     ),
 ]
-
+@testset "Elastic" begin
+    @testset "$dim" for dim ∈ dimension_cases
+        @testset "$grid_name" for (grid_name, (;ps, sz)) ∈ grid_cases[dim]
+            g = equidistant_grid(ps, sz...)
+            u = rand(SVector{ndims(g)}, size(g))
+            λ = rand(sz...)
+            μ = rand(sz...)
+            E = Elastic(g, λ, μ, stencil_set)
+            L = elastic(g, λ, μ, stencil_set)
+            @test E*u == L*u
+        end
+    end
+end
 
 @testset "elastic" begin
     test_params = Dict(
