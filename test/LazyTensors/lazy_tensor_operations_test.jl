@@ -4,15 +4,6 @@ using Diffinitive.RegionIndices
 
 using Tullio
 
-struct TransposableDummyMapping{R,D} <: LazyTensor{R,D} end
-
-LazyTensors.apply(m::TransposableDummyMapping{R}, v, I::Vararg{Any,R}) where R = :apply
-LazyTensors.apply_transpose(m::TransposableDummyMapping{R,D}, v, I::Vararg{Any,D}) where {R,D} = :apply_transpose
-
-LazyTensors.range_size(m::TransposableDummyMapping) = :range_size
-LazyTensors.domain_size(m::TransposableDummyMapping) = :domain_size
-
-
 struct SizeDoublingMapping{R,D} <: LazyTensor{R,D}
     domain_size::NTuple{D,Int}
 end
@@ -20,18 +11,6 @@ end
 LazyTensors.apply(m::SizeDoublingMapping{R}, v, i::Vararg{Any,R}) where {R} = (:apply,v,i)
 LazyTensors.range_size(m::SizeDoublingMapping) = 2 .* m.domain_size
 LazyTensors.domain_size(m::SizeDoublingMapping) = m.domain_size
-
-
-@testset "Mapping transpose" begin
-    m = TransposableDummyMapping{2,3}()
-    @test m' isa LazyTensor{3,2}
-    @test m'' == m
-    @test apply(m',zeros(Float64,(0,0)), 0, 0, 0) == :apply_transpose
-    @test apply(m'',zeros(Float64,(0,0,0)), 0, 0) == :apply
-
-    @test range_size(m') == :domain_size
-    @test domain_size(m') == :range_size
-end
 
 
 @testset "TensorApplication" begin

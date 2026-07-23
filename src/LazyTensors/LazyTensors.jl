@@ -7,7 +7,6 @@ export range_dim, domain_dim
 export range_size, domain_size
 
 export TensorApplication
-export TensorTranspose
 export TensorComposition
 export TensorNegation
 export TensorSum

@@ -28,30 +28,6 @@ Base.size(ta::TensorApplication) = range_size(ta.t)
 
 
 """
-    TensorTranspose{R,D} <: LazyTensor{D,R}
-
-Struct for lazy transpose of a LazyTensor.
-
-If a mapping implements the the `apply_transpose` method this allows working with
-the transpose of mapping `m` by using `m'`. `m'` will work as a regular LazyTensor lazily calling
-the appropriate methods of `m`.
-"""
-struct TensorTranspose{R,D, TM<:LazyTensor{R,D}} <: LazyTensor{D,R}
-    tm::TM
-end
-
-# # TBD: Should this be implemented on a type by type basis or through a trait to provide earlier errors?
-# Jonatan 2020-09-25: Is the problem that you can take the transpose of any LazyTensor even if it doesn't implement `apply_transpose`?
-Base.adjoint(tm::LazyTensor) = TensorTranspose(tm)
-Base.adjoint(tmt::TensorTranspose) = tmt.tm
-
-apply(tmt::TensorTranspose{R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,D} = apply_transpose(tmt.tm, v, I...)
-
-range_size(tmt::TensorTranspose) = domain_size(tmt.tm)
-domain_size(tmt::TensorTranspose) = range_size(tmt.tm)
-
-
-"""
     TensorNegation{R,D} <: LazyTensor{R,D}
 
 The negation of a LazyTensor.
