@@ -21,8 +21,8 @@ Constructs the BoundaryOperator with stencil `closure_stencil` for a
 `boundary`.
 """
 function BoundaryOperator(grid::EquidistantGrid, closure_stencil::Stencil, boundary::BoundaryIdentifier)
-    ST = typeof(closure_stencil)
     B = typeof(boundary)
+    ST = typeof(closure_stencil)
     return BoundaryOperator{B,ST}(closure_stencil,size(grid)[1])
 end
 
