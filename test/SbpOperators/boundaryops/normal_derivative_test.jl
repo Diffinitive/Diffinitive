@@ -17,7 +17,7 @@ using LinearAlgebra
 
         d_l = normal_derivative(g_1D, stencil_set, LowerBoundary())
         @test d_l == normal_derivative(g_1D, stencil_set, LowerBoundary())
-        @test d_l isa BoundaryOperator{T,LowerBoundary} where T
+        @test d_l isa BoundaryOperator{<:Stencil,LowerBoundary}
         @test d_l isa LazyTensor{0,1}
     end
 
