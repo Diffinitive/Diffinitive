@@ -44,6 +44,18 @@ function reduce_branch_dependencies --description 'Remove dependency edges cover
     awk -F '\t' '
         NF >= 2 {
             edge[$1 SUBSEP $2] = 1
+            add_node($1)
+            add_node($2)
+        }
+
+        function add_node(node) {
+            if (node == "" || seen_node[node]) {
+                return
+            }
+
+            seen_node[node] = 1
+            node_count += 1
+            nodes[node_count] = node
         }
 
         function reachable_without_edge(source, target, skip_source, skip_target,     current, child, key) {
@@ -77,16 +89,153 @@ function reduce_branch_dependencies --description 'Remove dependency edges cover
             return 0
         }
 
+        function reachable_component_without_edge(source, target, skip_source, skip_target,     current, child, key) {
+            if (source == target) {
+                return 1
+            }
+
+            if (visited_component[source]) {
+                return 0
+            }
+            visited_component[source] = 1
+
+            for (key in component_edge) {
+                split(key, edge_parts, SUBSEP)
+                current = edge_parts[1]
+                child = edge_parts[2]
+
+                if (current != source) {
+                    continue
+                }
+
+                if (current == skip_source && child == skip_target) {
+                    continue
+                }
+
+                if (reachable_component_without_edge(child, target, skip_source, skip_target)) {
+                    return 1
+                }
+            }
+
+            return 0
+        }
+
+        function edge_rank(source, source_component) {
+            if (source == "default") {
+                return 0
+            }
+
+            if (source == component_representative[source_component]) {
+                return 1
+            }
+
+            return 2
+        }
+
+        function prefer_edge(source, target, previous_source, previous_target, source_component,     rank, previous_rank) {
+            if (previous_source == "") {
+                return 1
+            }
+
+            rank = edge_rank(source, source_component)
+            previous_rank = edge_rank(previous_source, source_component)
+
+            if (rank < previous_rank) {
+                return 1
+            }
+
+            if (rank > previous_rank) {
+                return 0
+            }
+
+            if (source < previous_source) {
+                return 1
+            }
+
+            if (source > previous_source) {
+                return 0
+            }
+
+            return target < previous_target
+        }
+
         END {
+            for (i = 1; i <= node_count; i++) {
+                source = nodes[i]
+
+                if (component[source] != "") {
+                    continue
+                }
+
+                component_count += 1
+                component[source] = component_count
+                component_representative[component_count] = source
+
+                for (j = i + 1; j <= node_count; j++) {
+                    target = nodes[j]
+
+                    if (component[target] != "") {
+                        continue
+                    }
+
+                    delete visited
+                    source_reaches_target = reachable_without_edge(source, target, "", "")
+                    delete visited
+                    target_reaches_source = reachable_without_edge(target, source, "", "")
+
+                    if (source_reaches_target && target_reaches_source) {
+                        component[target] = component_count
+                    }
+                }
+            }
+
+            for (i = 1; i <= node_count; i++) {
+                source = nodes[i]
+                source_component = component[source]
+
+                if (component_representative[source_component] == "default") {
+                    continue
+                }
+
+                if (source == "default" || source < component_representative[source_component]) {
+                    component_representative[source_component] = source
+                }
+            }
+
             for (key in edge) {
                 split(key, edge_parts, SUBSEP)
                 source = edge_parts[1]
                 target = edge_parts[2]
+                source_component = component[source]
+                target_component = component[target]
 
-                delete visited
-                if (!reachable_without_edge(source, target, source, target)) {
-                    print source "\t" target
+                if (source_component == target_component) {
+                    reduced_edge[source SUBSEP target] = 1
+                    continue
                 }
+
+                component_edge[source_component SUBSEP target_component] = 1
+
+                if (prefer_edge(source, target, component_edge_source[source_component SUBSEP target_component], component_edge_target[source_component SUBSEP target_component], source_component)) {
+                    component_edge_source[source_component SUBSEP target_component] = source
+                    component_edge_target[source_component SUBSEP target_component] = target
+                }
+            }
+
+            for (key in component_edge) {
+                split(key, edge_parts, SUBSEP)
+                source = edge_parts[1]
+                target = edge_parts[2]
+
+                delete visited_component
+                if (!reachable_component_without_edge(source, target, source, target)) {
+                    reduced_edge[component_edge_source[key] SUBSEP component_edge_target[key]] = 1
+                }
+            }
+
+            for (key in reduced_edge) {
+                split(key, edge_parts, SUBSEP)
+                print edge_parts[1] "\t" edge_parts[2]
             }
         }
     ' | sort -u
@@ -158,7 +307,7 @@ function __compute_branch_dependencies_from_files --argument-names open_file rev
             labels = add_label(labels, branch)
             rev_labels[rev] = labels
         }
-    ' "$rev_file" | sort -u | reduce_branch_dependencies
+    ' "$rev_file" | sort -u
 end
 
 function compute_branch_dependencies --description 'Print open-branch dependencies as source<TAB>target'
@@ -176,6 +325,10 @@ function compute_branch_dependencies --description 'Print open-branch dependenci
     __compute_branch_dependencies_from_files "$open_file" "$rev_file"
 
     rm -f $open_file $rev_file
+end
+
+function compute_reduced_branch_dependencies --description 'Print reduced open-branch dependencies as source<TAB>target'
+    compute_branch_dependencies | reduce_branch_dependencies
 end
 
 function __branch_graph_children --argument-names node edges_file
@@ -265,6 +418,42 @@ function __branch_graph_is_isolated --argument-names node edges_file
     test (count $children) -eq 0; and test (count $parents) -eq 0
 end
 
+function __branch_graph_has_children --argument-names node edges_file
+    set -l children (__branch_graph_children "$node" "$edges_file")
+
+    test (count $children) -gt 0
+end
+
+function __branch_graph_single_child --argument-names node edges_file
+    set -l children (__branch_graph_children "$node" "$edges_file")
+
+    if test (count $children) -eq 1
+        printf '%s\n' "$children[1]"
+    end
+end
+
+function __branch_graph_subtree_stops_at_path --argument-names node edges_file
+    set -l path $argv[3..-1]
+    set -l next_path $path $node
+    set -l children (__branch_graph_children "$node" "$edges_file")
+
+    if test (count $children) -eq 0
+        return 0
+    end
+
+    for child in $children
+        if contains -- "$child" $next_path
+            continue
+        end
+
+        if not __branch_graph_subtree_stops_at_path "$child" "$edges_file" $next_path
+            return 1
+        end
+    end
+
+    return 0
+end
+
 function __branch_graph_prefix --argument-names depth
     set -l prefix ''
 
@@ -280,8 +469,9 @@ function __branch_graph_prefix --argument-names depth
 end
 
 function __branch_graph_try_print_two_parent_join --argument-names node edges_file depth
+    set -l path $argv[4..-1]
     set -l children (__branch_graph_children $node $edges_file)
-    set -l candidates (__branch_graph_descendants "$node" "$edges_file" | sort -ur)
+    set -l candidates (__branch_graph_descendants "$node" "$edges_file" $path | sort -ur)
 
     for candidate in $candidates
         set -l parents (__branch_graph_parents $candidate $edges_file)
@@ -345,10 +535,9 @@ function __branch_graph_try_print_two_parent_join --argument-names node edges_fi
         for child in (printf '%s\n' $remaining_children | sort)
             test -n "$child"; or continue
 
-            __branch_graph_print_node "$child" "$edges_file" (math $depth + 1) $node
+            __branch_graph_print_node "$child" "$edges_file" (math $depth + 1) $path $node
 
-            set -l grandchildren (__branch_graph_children "$child" "$edges_file")
-            if test (count $grandchildren) -eq 0
+            if __branch_graph_subtree_stops_at_path "$child" "$edges_file" $path $node
                 printf '%s|/\n' "$prefix"
             end
         end
@@ -361,15 +550,35 @@ end
 
 function __branch_graph_print_node --argument-names node edges_file depth
     set -l path $argv[4..-1]
+    set -l prefix (__branch_graph_prefix $depth)
+    set -l next_path $path $node
 
-    if __branch_graph_try_print_two_parent_join "$node" "$edges_file" "$depth"
+    if test $depth -gt 0
+        set -l only_child (__branch_graph_single_child "$node" "$edges_file")
+
+        if test -n "$only_child"
+            if contains -- "$only_child" $next_path
+                printf '%so %s (cycle)\n' "$prefix" "$only_child"
+                printf '%s|\n' "$prefix"
+                printf '%so %s\n' "$prefix" "$node"
+                return 0
+            end
+
+            if not __branch_graph_has_children "$only_child" "$edges_file"
+                printf '%so %s\n' "$prefix" "$only_child"
+                printf '%s|\n' "$prefix"
+                printf '%so %s\n' "$prefix" "$node"
+                return 0
+            end
+        end
+    end
+
+    if __branch_graph_try_print_two_parent_join "$node" "$edges_file" "$depth" $path
         return 0
     end
 
-    set -l prefix (__branch_graph_prefix $depth)
     printf '%so %s\n' "$prefix" "$node"
 
-    set -l next_path $path $node
     set -l children (__branch_graph_children $node $edges_file)
     set -l first_child 1
 
@@ -380,17 +589,73 @@ function __branch_graph_print_node --argument-names node edges_file depth
         end
 
         if contains -- $child $next_path
-            printf '%so %s (cycle)\n' (__branch_graph_prefix (math $depth + 1)) "$child"
+            if test $depth -gt 0
+                printf '%s  o %s (cycle)\n' "$prefix" "$child"
+                printf '%s /\n' "$prefix"
+                continue
+            else
+                printf '%so %s (cycle)\n' (__branch_graph_prefix (math $depth + 1)) "$child"
+            end
             printf '%s|/\n' "$prefix"
+            continue
+        end
+
+        if test $depth -gt 0; and not __branch_graph_has_children "$child" "$edges_file"
+            printf '%s  o %s\n' "$prefix" "$child"
+            printf '%s /\n' "$prefix"
             continue
         end
 
         __branch_graph_print_node "$child" "$edges_file" (math $depth + 1) $next_path
 
-        set -l grandchildren (__branch_graph_children $child $edges_file)
-        if test (count $grandchildren) -eq 0
+        if __branch_graph_subtree_stops_at_path "$child" "$edges_file" $next_path
             printf '%s|/\n' "$prefix"
         end
+    end
+end
+
+function __branch_graph_render_from_edges --argument-names edges_file
+    set -l open_branches $argv[2..-1]
+    set -l roots (__branch_graph_roots "$edges_file" $open_branches)
+    set -l rendered_branches
+    set -l printed_component 0
+
+    if not __branch_graph_is_isolated default "$edges_file"
+        __branch_graph_print_node default "$edges_file" 0 ''
+        set rendered_branches $rendered_branches default (__branch_graph_descendants default "$edges_file")
+        set printed_component 1
+    end
+
+    for root in $roots
+        if contains -- "$root" $rendered_branches
+            continue
+        end
+        if test (count $roots) -gt 1; and __branch_graph_is_isolated "$root" "$edges_file"
+            continue
+        end
+
+        if test $printed_component -eq 1
+            printf '\n'
+        end
+        __branch_graph_print_node "$root" "$edges_file" 0 ''
+        set rendered_branches $rendered_branches "$root" (__branch_graph_descendants "$root" "$edges_file")
+        set printed_component 1
+    end
+
+    for branch in $open_branches
+        if contains -- "$branch" $rendered_branches
+            continue
+        end
+        if __branch_graph_is_isolated "$branch" "$edges_file"
+            continue
+        end
+
+        if test $printed_component -eq 1
+            printf '\n'
+        end
+        __branch_graph_print_node "$branch" "$edges_file" 0 ''
+        set rendered_branches $rendered_branches "$branch" (__branch_graph_descendants "$branch" "$edges_file")
+        set printed_component 1
     end
 end
 
@@ -399,7 +664,7 @@ function print_branch_dependency_graph --description 'Print the computed branch 
     set -l open_branches (__hg_open_branches)
 
     begin
-        compute_branch_dependencies
+        compute_reduced_branch_dependencies
     end > "$edges_file"
 
     if test (count $open_branches) -eq 0
@@ -408,23 +673,7 @@ function print_branch_dependency_graph --description 'Print the computed branch 
         return 1
     end
 
-    set -l roots (__branch_graph_roots "$edges_file" $open_branches)
-
-    if contains -- default $roots
-        if test (count $roots) -eq 1; or not __branch_graph_is_isolated default "$edges_file"
-            __branch_graph_print_node default "$edges_file" 0 ''
-        end
-    end
-
-    for root in $roots
-        if test "$root" = default
-            continue
-        end
-        if test (count $roots) -gt 1; and __branch_graph_is_isolated "$root" "$edges_file"
-            continue
-        end
-        __branch_graph_print_node "$root" "$edges_file" 0 ''
-    end
+    __branch_graph_render_from_edges "$edges_file" $open_branches
 
     rm -f "$edges_file"
 end
@@ -441,7 +690,14 @@ function print_branch_dependency_information --description 'Print the computed b
 end
 
 function print_reduced_branch_dependency_information --description 'Print the computed reduced branch dependencies as source<TAB>target'
-    print_branch_dependency_information
+    set -l open_branches (__hg_open_branches)
+
+    if test (count $open_branches) -eq 0
+        echo 'No open branches found.'
+        return 1
+    end
+
+    compute_reduced_branch_dependencies
 end
 
 function __branch_graph_render_test --description 'Render a synthetic graph from edge lines and roots'
@@ -477,11 +733,57 @@ function __branch_graph_render_test --description 'Render a synthetic graph from
     rm -f "$raw_edges_file" "$edges_file"
 end
 
+function __branch_graph_render_open_test --description 'Render a synthetic graph from edge lines and open branches'
+    set -l separator_index (contains -i -- -- $argv)
+
+    if test -z "$separator_index"
+        echo 'Internal test error: missing -- separator.' >&2
+        return 2
+    end
+
+    set -l edge_args
+    if test $separator_index -gt 1
+        set edge_args $argv[1..(math $separator_index - 1)]
+    end
+
+    set -l open_branches $argv[(math $separator_index + 1)..-1]
+    set -l raw_edges_file (mktemp)
+    set -l edges_file (mktemp)
+
+    for edge in $edge_args
+        printf '%s\n' "$edge"
+    end > "$raw_edges_file"
+
+    reduce_branch_dependencies < "$raw_edges_file" > "$edges_file"
+    __branch_graph_render_from_edges "$edges_file" $open_branches
+
+    rm -f "$raw_edges_file" "$edges_file"
+end
+
 function __branch_graph_assert_render --argument-names name expected
     set -l actual_file (mktemp)
     set -l expected_file (mktemp)
 
     __branch_graph_render_test $argv[3..-1] > "$actual_file"
+    printf '%s\n' "$expected" > "$expected_file"
+
+    if diff -u "$expected_file" "$actual_file" >/dev/null
+        rm -f "$actual_file" "$expected_file"
+        printf 'ok - %s\n' "$name"
+        return 0
+    end
+
+    printf 'not ok - %s\n' "$name" >&2
+    diff -u "$expected_file" "$actual_file" >&2
+    rm -f "$actual_file" "$expected_file"
+    return 1
+end
+
+function __branch_graph_assert_open_render --argument-names name expected
+    set -l actual_file (mktemp)
+    set -l expected_file (mktemp)
+
+    __branch_graph_render_open_test $argv[3..-1] > "$actual_file"
     printf '%s\n' "$expected" > "$expected_file"
 
     if diff -u "$expected_file" "$actual_file" >/dev/null
@@ -536,7 +838,7 @@ function __branch_graph_assert_computed_dependencies --argument-names name expec
     printf '%s\n' $open_branches > "$open_file"
     printf '%s\n' $argv[(math $separator_index + 1)..-1] > "$rev_file"
 
-    __compute_branch_dependencies_from_files "$open_file" "$rev_file" > "$actual_file"
+    __compute_branch_dependencies_from_files "$open_file" "$rev_file" | reduce_branch_dependencies > "$actual_file"
     printf '%s\n' "$expected" > "$expected_file"
 
     if diff -u "$expected_file" "$actual_file" >/dev/null
@@ -557,6 +859,12 @@ function test_branch_dependency_graph --description 'Run synthetic graph renderi
     set -l expected_reduced_dependencies 'A	B
 B	C'
     printf '%s\n' 'A	B' 'A	C' 'B	C' | __branch_graph_assert_dependencies 'remove transitive dependency edge' "$expected_reduced_dependencies"
+    or set failures (math $failures + 1)
+
+    set -l expected_reduced_cycle_dependencies 'default	feature
+default	tooling
+tooling	default'
+    printf '%s\n' 'default	feature' 'default	tooling' 'tooling	default' 'tooling	feature' | __branch_graph_assert_dependencies 'keep outgoing dependency from cycle' "$expected_reduced_cycle_dependencies"
     or set failures (math $failures + 1)
 
     set -l expected_single 'o default'
@@ -581,10 +889,10 @@ B	C'
 
     set -l expected_nested 'o default
 |
-| o D
+| o C
 | |
-| | o C
-| |/
+| o D
+|/
 | o B
 |/
 | o A
@@ -616,6 +924,126 @@ B	C'
 | /
 |/'
     __branch_graph_assert_render 'A, B, and default merge into C' "$expected_three_parent_merge" 'default	A' 'default	B' 'default	C' 'A	C' 'B	C' -- default
+    or set failures (math $failures + 1)
+
+    set -l expected_rootless_default_cycle 'o default
+|
+| o default (cycle)
+| |
+| o tooling/mergemap
+|/
+| o examples
+|/'
+    __branch_graph_assert_open_render 'default cycle without graph root' "$expected_rootless_default_cycle" \
+        'default	examples' \
+        'default	tooling/mergemap' \
+        'tooling/mergemap	default' \
+        -- default examples tooling/mergemap
+    or set failures (math $failures + 1)
+
+    set -l expected_rootless_non_default_cycle 'o A
+|
+| o A (cycle)
+| |
+| o B
+|/'
+    __branch_graph_assert_open_render 'non-default cycle without graph root' "$expected_rootless_non_default_cycle" \
+        'A	B' \
+        'B	A' \
+        -- A B
+    or set failures (math $failures + 1)
+
+    set -l expected_current_repository_reduced_dependencies 'default	examples
+default	feature/grids/chart_normal
+default	feature/grids/multiblock_grids
+default	feature/lazy_tensors/pretty_printing
+default	refactor/lazy_tensors/operator_simplifications
+default	refactor/sbp_operators/boundary_operator_type_paramaters
+default	refactor/sbpoperators/boundary_operators
+default	tooling/mergemap
+feature/grids/chart_normal	feature/sbp_operators/vector_operators
+feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators
+refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators
+refactor/sbp_operators/boundary_operator_type_paramaters	refactor/lazy_tensors/adjoint
+tooling/mergemap	default'
+    printf '%s\n' \
+        'default	examples' \
+        'default	feature/grids/chart_normal' \
+        'default	feature/grids/multiblock_grids' \
+        'default	feature/lazy_tensors/matrix_of_operators' \
+        'default	feature/lazy_tensors/pretty_printing' \
+        'default	feature/sbp_operators/vector_operators' \
+        'default	refactor/lazy_tensors/adjoint' \
+        'default	refactor/lazy_tensors/operator_simplifications' \
+        'default	refactor/sbp_operators/boundary_operator_type_paramaters' \
+        'default	refactor/sbpoperators/boundary_operators' \
+        'default	tooling/mergemap' \
+        'feature/grids/chart_normal	feature/sbp_operators/vector_operators' \
+        'feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators' \
+        'refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators' \
+        'refactor/lazy_tensors/operator_simplifications	feature/sbp_operators/vector_operators' \
+        'refactor/sbp_operators/boundary_operator_type_paramaters	refactor/lazy_tensors/adjoint' \
+        'tooling/mergemap	default' \
+        'tooling/mergemap	refactor/lazy_tensors/adjoint' \
+        'tooling/mergemap	refactor/sbp_operators/boundary_operator_type_paramaters' \
+        | __branch_graph_assert_dependencies 'current repository reduced dependencies' "$expected_current_repository_reduced_dependencies"
+    or set failures (math $failures + 1)
+
+    set -l expected_current_repository_open_graph 'o default
+|
+|   o feature/sbp_operators/vector_operators
+|  /|
+| o | feature/lazy_tensors/matrix_of_operators
+| | |
+| o | refactor/lazy_tensors/operator_simplifications
+|/  |
+|   o feature/grids/chart_normal
+|  /
+| /
+|/
+| o examples
+|/
+| o feature/grids/multiblock_grids
+|/
+| o feature/lazy_tensors/pretty_printing
+|/
+| o refactor/lazy_tensors/adjoint
+| |
+| o refactor/sbp_operators/boundary_operator_type_paramaters
+|/
+| o refactor/sbpoperators/boundary_operators
+|/
+| o default (cycle)
+| |
+| o tooling/mergemap
+|/'
+    __branch_graph_assert_open_render 'current repository graph with default cycle' "$expected_current_repository_open_graph" \
+        'default	examples' \
+        'default	feature/grids/chart_normal' \
+        'default	feature/grids/multiblock_grids' \
+        'default	feature/lazy_tensors/pretty_printing' \
+        'default	refactor/lazy_tensors/operator_simplifications' \
+        'default	refactor/sbp_operators/boundary_operator_type_paramaters' \
+        'default	refactor/sbpoperators/boundary_operators' \
+        'default	tooling/mergemap' \
+        'feature/grids/chart_normal	feature/sbp_operators/vector_operators' \
+        'feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators' \
+        'refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators' \
+        'refactor/sbp_operators/boundary_operator_type_paramaters	refactor/lazy_tensors/adjoint' \
+        'tooling/mergemap	default' \
+        -- \
+        tooling/mergemap \
+        refactor/lazy_tensors/adjoint \
+        feature/sbp_operators/vector_operators \
+        refactor/sbpoperators/boundary_operators \
+        feature/lazy_tensors/pretty_printing \
+        feature/grids/multiblock_grids \
+        examples \
+        refactor/sbp_operators/boundary_operator_type_paramaters \
+        default \
+        feature/grids/chart_normal \
+        feature/lazy_tensors/matrix_of_operators \
+        refactor/lazy_tensors/operator_simplifications
     or set failures (math $failures + 1)
 
     set -l expected_current_repository_dependencies 'default	examples
