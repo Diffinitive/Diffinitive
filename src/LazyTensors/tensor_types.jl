@@ -239,6 +239,12 @@ end
 
 
 ## "Vector of tensors ∘ vector -> scalar"
+"""
+    VectorDotTensor{N,R,D} <: LazyTensor{R,D}
+
+Describes a mapping of an `N` component `D` dimensional tensor to scalar valued `R` dimensional
+tensor implemented as a `LazyTensor`
+"""
 struct VectorDotTensor{N,R,D,NT<:NTuple{N,LazyTensor{R,D}}} <: LazyTensor{R,D}
     D::NT
     ## TODO: add constructor with tests for checking domain and range size   (allequal(domain_size), tms)
