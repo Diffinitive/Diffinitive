@@ -332,20 +332,17 @@ end
     @testset "$dim" for dim ∈ dimension_cases
         @testset "$grid_name" for (grid_name, (;ps, sz)) ∈ grid_cases[dim]
             g = equidistant_grid(ps, sz...)
-            @testset "$case_name" for (case_name, (;λ, μ)) ∈ material_cases
-                λ̄ = map(λ, g)
-                μ̄ = map(μ, g)
+            λ̄ = rand(sz...)
+            μ̄ = rand(sz...)
+            u = rand(SVector{ndims(g)}, size(g))
 
-                u = rand(SVector{ndims(g)}, size(g))
+            @testset "$boundary" for boundary ∈ boundary_identifiers(g)
+                T = traction(g, λ̄, μ̄, stencil_set, boundary)
+                tₜ = tangential_traction(g, λ̄, μ̄, stencil_set, boundary)
+                tₙ = normal_traction(g, λ̄, μ̄, stencil_set, boundary)
+                n̂ = normal(g, boundary)
 
-                @testset "$boundary" for boundary ∈ boundary_identifiers(g)
-                    T = traction(g, λ̄, μ̄, stencil_set, boundary)
-                    tₜ = tangential_traction(g, λ̄, μ̄, stencil_set, boundary)
-                    tₙ = normal_traction(g, λ̄, μ̄, stencil_set, boundary)
-                    n̂ = normal(g, boundary)
-
-                    @test T*u ≈ tₜ*u + (tₙ*u).*n̂
-                end
+                @test T*u ≈ tₜ*u + (tₙ*u).*n̂ rtol=1e-12
             end
         end
     end
