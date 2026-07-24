@@ -215,7 +215,7 @@ with_jacobian(f, Jfun) = FunctionWithJacobian(f, x->Jfun(f,x))
 """
     with_jacobian(x, pm::ParameterSpace, Jfun)
 
-Create a Chart from `f` and `pm` using `J(x) = Jfun(f,x)`.
+Create a Chart from `x(ξ)` and `pm` using `J(ξ) = Jfun(f,ξ)`.
 
 # Example
 ```julia-repl
@@ -270,8 +270,20 @@ julia> jacobian(c,[1,1/2])
 ```
 """
 function with_jacobian(xJ, pm::ParameterSpace)
+    _check_coordinates_and_jacobian(xJ, centroid(pm))
+
     x(ξ) = xJ(ξ)[1]
     J(ξ) = xJ(ξ)[2]
 
     return Chart(FunctionWithJacobian(x,J), pm)
+end
+
+function _check_coordinates_and_jacobian(xJ, ξ)
+    x_J = xJ(ξ)
+
+    if !(x_J isa Tuple && length(x_J) == 2)
+        throw(ArgumentError("with_jacobian(xJ, pm) expects xJ(ξ) to return a 2-tuple `(x, J)`."))
+    end
+
+    return nothing
 end

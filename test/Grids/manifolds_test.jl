@@ -4,6 +4,7 @@ using Diffinitive.Grids
 using Diffinitive.RegionIndices
 using Diffinitive.LazyTensors
 
+using ForwardDiff
 using StaticArrays
 using LinearAlgebra
 using ForwardDiff
@@ -68,6 +69,61 @@ unitvec(v) = v/norm(v)
         @test normal(c, east(),  [1,0.8]) ≈ -unitvec([-0.9, 0.2])
         @test normal(c, south(), [0.2,0]) ≈ -unitvec([-0.5, 1.2])
         @test normal(c, north(), [0.6,1]) ≈  unitvec([-0.5, 1.2])
+    end
+end
+
+@testset "with_jacobian" begin
+    @testset "Function with jacobian" begin
+        x(ξ) = @SVector[ξ[1] + 2ξ[2], ξ[1]*ξ[2]]
+        xJ = with_jacobian(x, ForwardDiff.jacobian)
+
+        @test xJ(@SVector[3, 4]) == @SVector[11, 12]
+        @test jacobian(xJ, @SVector[3, 4]) == @SMatrix[
+            1 2;
+            4 3;
+        ]
+    end
+
+    @testset "Chart with jacobian" begin
+        x(ξ) = @SVector[ξ[1]^2, ξ[1] + ξ[2]]
+
+        c = with_jacobian(x, unitsquare(), ForwardDiff.jacobian)
+        x = @SVector[1//2, 1//4]
+
+        @test c isa Chart{2}
+        @test parameterspace(c) == unitsquare()
+        @test c(x) == @SVector[1//4, 3//4]
+        @test jacobian(c, x) == @SMatrix[
+            1//1 0//1;
+            1//1 1//1;
+        ]
+    end
+
+    @testset "Chart from combined mapping and jacobian" begin
+        xJ(ξ) = (
+            @SVector[ξ[1] - ξ[2], ξ[1]*ξ[2]],
+            @SMatrix[
+                1     -1;
+                ξ[2]  ξ[1];
+            ],
+        )
+
+        c = with_jacobian(xJ, unitsquare())
+        x = @SVector[3//4, 1//4]
+
+        @test c isa Chart{2}
+        @test parameterspace(c) == unitsquare()
+        @test c(x) == @SVector[1//2, 3//16]
+        @test jacobian(c, x) == @SMatrix[
+            1//1  -1//1;
+            1//4   3//4;
+        ]
+    end
+
+    @testset "Missing jacobian function" begin
+        x(ξ) = @SVector[ξ[1]^2, ξ[1] + ξ[2]]
+
+        @test_throws ArgumentError with_jacobian(x, unitsquare())
     end
 end
 
