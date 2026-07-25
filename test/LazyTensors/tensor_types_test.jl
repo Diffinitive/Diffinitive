@@ -119,6 +119,9 @@ end
     @test st*v == 2.0 .* v
     @test st'*v == 2.0 .* v
 
+    complex_st = ScalingTensor(2 + 3im, (2,))
+    @test complex_st'*[1 - im, 4 + 2im] == [-1 - 5im, 14 - 8im]
+
     @inferred (st*v)[2,2]
     @inferred (st'*v)[2,2]
 
@@ -154,6 +157,8 @@ end
         @test tm'*v == diag.*v
     end
 
+    complex_tm = DiagonalTensor([1 + 2im, 3 - 4im])
+    @test complex_tm'*[5 - 6im, 7 + 8im] == [-7 - 16im, -11 + 52im]
 
     @testset "allocations size=$sz" for sz ∈ [(4,),(3,2),(3,4,2)]
         diag = rand(sz...)
@@ -196,6 +201,14 @@ end
 
     @test Ã*ones(4) ≈ A*ones(4) atol=5e-13
     @test Ã*v ≈ A*v atol=5e-13
+    @test Ã'*w ≈ A'*w
+
+    A = [
+        1 + 2im 3 - 4im;
+        5 + 6im 7 + 8im;
+    ]
+    Ã = DenseTensor(A, (1,), (2,))
+    w = [2 - im, 3 + 2im]
     @test Ã'*w ≈ A'*w
 
     A = rand(2,3,4)
