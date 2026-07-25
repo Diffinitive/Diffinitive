@@ -14,11 +14,6 @@ the functions
     domain_size(::LazyTensor)
 ```
 to allow querying for one or the other.
-
-Optionally the action of the transpose may be defined through
-```julia
-    apply_transpose(t::LazyTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg) where {R,D}
-```
 """
 abstract type LazyTensor{R,D} end
 
@@ -28,13 +23,6 @@ abstract type LazyTensor{R,D} end
 Return the result of the mapping for a given index.
 """
 function apply end
-
-"""
-    apply_transpose(t::LazyTensor{R,D}, v::AbstractArray{<:Any,R}, I::Vararg) where {R,D}
-
-Return the result of the transposed mapping for a given index.
-"""
-function apply_transpose end
 
 """
     range_dim(::LazyTensor)

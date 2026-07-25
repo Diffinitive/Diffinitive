@@ -6,6 +6,7 @@ using Diffinitive.Grids
 using Diffinitive.RegionIndices
 import Diffinitive.SbpOperators.Stencil
 import Diffinitive.SbpOperators.BoundaryOperator
+import Diffinitive.SbpOperators.BoundaryOperatorAdjoint
 
 
 @testset "BoundaryOperator" begin
@@ -19,13 +20,26 @@ import Diffinitive.SbpOperators.BoundaryOperator
 
     op_l = BoundaryOperator(g_1D, closure_stencil, LowerBoundary())
     op_r = BoundaryOperator(g_1D, closure_stencil, UpperBoundary())
+    op_l_adjoint = op_l'
+    op_r_adjoint = op_r'
 
     @testset "Sizes" begin
         @test domain_size(op_l) == (11,)
         @test domain_size(op_r) == (11,)
+        @test domain_size(op_l_adjoint) == ()
+        @test domain_size(op_r_adjoint) == ()
 
         @test range_size(op_l) == ()
         @test range_size(op_r) == ()
+        @test range_size(op_l_adjoint) == (11,)
+        @test range_size(op_r_adjoint) == (11,)
+    end
+
+    @testset "Adjoint" begin
+        @test op_l_adjoint isa BoundaryOperatorAdjoint
+        @test op_r_adjoint isa BoundaryOperatorAdjoint
+        @test op_l_adjoint' == op_l
+        @test op_r_adjoint' == op_r
     end
 
     @testset "Application" begin
@@ -51,12 +65,16 @@ import Diffinitive.SbpOperators.BoundaryOperator
         @test (op_l'*u)[Index(6,Interior)] == 0
         @test (op_l'*u)[Index(10,Upper)] == 0
         @test (op_l'*u)[Index(11,Upper)] == 0
+        @test apply(op_l_adjoint, u, Index(1,Lower)) == 2*u[]
+        @test apply(op_l_adjoint, u, Index(6,Interior)) == 0
 
         @test (op_r'*u)[Index(1,Lower)] == 0
         @test (op_r'*u)[Index(2,Lower)] == 0
         @test (op_r'*u)[Index(6,Interior)] == 0
         @test (op_r'*u)[Index(10,Upper)] == u[]
         @test (op_r'*u)[Index(11,Upper)] == 2*u[]
+        @test apply(op_r_adjoint, u, Index(10,Upper)) == u[]
+        @test apply(op_r_adjoint, u, Index(11,Upper)) == 2*u[]
     end
 
     @testset "Inferred" begin
@@ -65,19 +83,18 @@ import Diffinitive.SbpOperators.BoundaryOperator
 
         @inferred apply(op_l, v)
         @inferred apply(op_r, v)
+        @inferred apply(op_l_adjoint, u, 4)
+        @inferred apply(op_r_adjoint, u, 4)
+        @inferred apply(op_l_adjoint, u, Index(1,Lower))
+        @inferred apply(op_l_adjoint, u, Index(2,Lower))
+        @inferred apply(op_l_adjoint, u, Index(6,Interior))
+        @inferred apply(op_l_adjoint, u, Index(10,Upper))
+        @inferred apply(op_l_adjoint, u, Index(11,Upper))
 
-        @inferred apply_transpose(op_l, u, 4)
-        @inferred apply_transpose(op_l, u, Index(1,Lower))
-        @inferred apply_transpose(op_l, u, Index(2,Lower))
-        @inferred apply_transpose(op_l, u, Index(6,Interior))
-        @inferred apply_transpose(op_l, u, Index(10,Upper))
-        @inferred apply_transpose(op_l, u, Index(11,Upper))
-
-        @inferred apply_transpose(op_r, u, 4)
-        @inferred apply_transpose(op_r, u, Index(1,Lower))
-        @inferred apply_transpose(op_r, u, Index(2,Lower))
-        @inferred apply_transpose(op_r, u, Index(6,Interior))
-        @inferred apply_transpose(op_r, u, Index(10,Upper))
-        @inferred apply_transpose(op_r, u, Index(11,Upper))
+        @inferred apply(op_r_adjoint, u, Index(1,Lower))
+        @inferred apply(op_r_adjoint, u, Index(2,Lower))
+        @inferred apply(op_r_adjoint, u, Index(6,Interior))
+        @inferred apply(op_r_adjoint, u, Index(10,Upper))
+        @inferred apply(op_r_adjoint, u, Index(11,Upper))
     end
 end
