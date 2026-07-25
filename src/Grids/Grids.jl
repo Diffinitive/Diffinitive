@@ -13,6 +13,7 @@ export Box
 export Triangle
 export Tetrahedron
 
+export centroid
 export limits
 export unitinterval
 export unitsquare
