@@ -81,8 +81,6 @@ Base.:+(t::TensorSum, s::ZeroTensor) = (check_equal_size(t,s); t) # Resolve ambi
 Base.:+(t::ZeroTensor, s::TensorSum) = (check_equal_size(t,s); s) # Resolve ambiguity
 Base.:-(t::ZeroTensor) = t
 
-#TODO Write about the philosophy of operators and types in the docs. Operators
-#for convenience. Types for full control.
 
 # Composing lazy tensors
 """
