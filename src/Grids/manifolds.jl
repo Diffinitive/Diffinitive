@@ -46,11 +46,24 @@ end
 boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
 function normal(c::Chart, boundary, ξ)
-    ∂ξ∂x = inv(jacobian(c,ξ))
-    σ = _boundary_sign(eltype(∂ξ∂x), boundary)
+    # The formula is based on expressing the normal in terms of vectors ∂x/∂ξᵢ,
+    # call the coordinate vector a.
+    # In physical coordinates we have n = ∂x/∂ξᵢaᵢ.
+    # For a boundary where ξₖ = const, n should be orthogonal to ∂x/∂ξⱼ for all j != k
+    # This gives the system
+    #    ∂x/∂ξⱼ ⋅ ∂x/∂ξᵢaᵢ = δⱼₖ
+    #    ⇔ gᵢⱼaᵢ = δⱼₖ
+    #    ⇔ aᵢ = gⁱʲδⱼₖ
+    #    ⇔ n = ∂x/∂ξᵢ gⁱʲδⱼₖ
+
+    ∂x∂ξ = jacobian(c, ξ)
+    g = ∂x∂ξ' * ∂x∂ξ
+    g⁻¹ = inv(g)
+    σ = _boundary_sign(eltype(g), boundary)
 
     k = grid_id(boundary)
-    return σ*∂ξ∂x[k,:]/norm(∂ξ∂x[k,:])
+    n = ∂x∂ξ * g⁻¹[:, k]
+    return σ * n / norm(n)
 end
 
 

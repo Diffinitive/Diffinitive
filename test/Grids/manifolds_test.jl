@@ -69,6 +69,16 @@ unitvec(v) = v/norm(v)
         @test normal(c, east(),  [1,0.8]) ≈ -unitvec([-0.9, 0.2])
         @test normal(c, south(), [0.2,0]) ≈ -unitvec([-0.5, 1.2])
         @test normal(c, north(), [0.6,1]) ≈  unitvec([-0.5, 1.2])
+
+
+        c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
+            @SVector[ξ, η, ξ + η]
+        end
+
+        @test normal(c, west(),  [0,0.3]) ≈ unitvec([-2,  1, -1])
+        @test normal(c, east(),  [1,0.8]) ≈ unitvec([ 2, -1,  1])
+        @test normal(c, south(), [0.2,0]) ≈ unitvec([ 1, -2, -1])
+        @test normal(c, north(), [0.6,1]) ≈ unitvec([-1,  2,  1])
     end
 end
 
