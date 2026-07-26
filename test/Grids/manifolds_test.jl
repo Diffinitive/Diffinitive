@@ -7,7 +7,6 @@ using Diffinitive.LazyTensors
 using ForwardDiff
 using StaticArrays
 using LinearAlgebra
-using ForwardDiff
 
 west = CartesianBoundary{1,LowerBoundary}
 east = CartesianBoundary{1,UpperBoundary}
