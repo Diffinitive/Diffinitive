@@ -18,12 +18,12 @@ using StaticArrays
         @testset "1D" begin
             e_l = boundary_restriction(g_1D,stencil_set,LowerBoundary())
             @test e_l == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),LowerBoundary())
-            @test e_l isa BoundaryOperator{T,LowerBoundary} where T
+            @test e_l isa BoundaryOperator{LowerBoundary}
             @test e_l isa LazyTensor{0,1}
 
             e_r = boundary_restriction(g_1D,stencil_set,UpperBoundary())
             @test e_r == BoundaryOperator(g_1D,Stencil{Float64}(e_closure),UpperBoundary())
-            @test e_r isa BoundaryOperator{T,UpperBoundary} where T
+            @test e_r isa BoundaryOperator{UpperBoundary}
             @test e_r isa LazyTensor{0,1}
         end
 
