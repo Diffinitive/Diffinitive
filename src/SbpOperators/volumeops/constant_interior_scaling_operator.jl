@@ -46,4 +46,8 @@ function LazyTensors.apply(op::ConstantInteriorScalingOperator, v::AbstractVecto
     return LazyTensors.apply(op, v, Index(i, r))
 end
 
+# REVIEW: Should take the complex conjugate of t?
+# function Base.adjoint(t::ConstantInteriorScalingOperator)
+#     return ConstantInteriorScalingOperator(conj(t.interior_weight), conj.(t.closure_weights), t.size)
+# end
 Base.adjoint(t::ConstantInteriorScalingOperator) = t
