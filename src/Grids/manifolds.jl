@@ -46,11 +46,11 @@ end
 boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
 """
-    normal(c::Chart, boundary, ξ)
+    boundary_normal(c::Chart, boundary, ξ)
 
 The normal on the `boundary` of the chart `c` evaluated at `ξ`. 
 """
-function normal(c::Chart, boundary, ξ)
+function boundary_normal(c::Chart, boundary, ξ)
     # The formula is based on expressing the normal in terms of vectors ∂x/∂ξᵢ,
     # and the coordinate vector a.
     # In physical coordinates we have n = ∂x/∂ξᵢaᵢ.
