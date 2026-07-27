@@ -45,9 +45,14 @@ end
 
 boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
+"""
+    normal(c::Chart, boundary, ξ)
+
+The normal on the `boundary` of the chart `c` evaluated at `ξ`. 
+"""
 function normal(c::Chart, boundary, ξ)
     # The formula is based on expressing the normal in terms of vectors ∂x/∂ξᵢ,
-    # call the coordinate vector a.
+    # and the coordinate vector a.
     # In physical coordinates we have n = ∂x/∂ξᵢaᵢ.
     # For a boundary where ξₖ = const, n should be orthogonal to ∂x/∂ξⱼ for all j != k
     # This gives the system
