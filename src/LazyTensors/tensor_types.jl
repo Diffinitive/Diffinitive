@@ -14,7 +14,8 @@ range_size(tmi::IdentityTensor) = tmi.size
 domain_size(tmi::IdentityTensor) = tmi.size
 
 apply(tmi::IdentityTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {D} = v[I...]
-apply_transpose(tmi::IdentityTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {D} = v[I...]
+
+Base.adjoint(t::IdentityTensor) = t
 
 """
     ZeroTensor{R,D} <: LazyTensor{R,D}
@@ -58,6 +59,9 @@ function apply(t::ZeroTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any, R})
     return zero(eltype(v))
 end
 
+Base.adjoint(t::ZeroTensor) = ZeroTensor(domain_size(t), range_size(t))
+
+
 """
     ScalingTensor{T,D} <: LazyTensor{D,D}
 
@@ -69,7 +73,6 @@ struct ScalingTensor{T,D} <: LazyTensor{D,D}
 end
 
 LazyTensors.apply(tm::ScalingTensor{<:Any,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.λ*v[I...]
-LazyTensors.apply_transpose(tm::ScalingTensor{<:Any,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.λ*v[I...]
 
 LazyTensors.range_size(m::ScalingTensor) = m.size
 LazyTensors.domain_size(m::ScalingTensor) = m.size
@@ -77,6 +80,9 @@ LazyTensors.domain_size(m::ScalingTensor) = m.size
 function Base.:(==)(a::ScalingTensor, b::ScalingTensor)
     return a.λ == b.λ && a.size == b.size
 end
+
+Base.adjoint(t::ScalingTensor) = ScalingTensor(conj(t.λ), t.size)
+
 
 """
     DiagonalTensor{D, ...} <: LazyTensor{D,D}
@@ -91,11 +97,11 @@ end
 range_size(tm::DiagonalTensor) = size(tm.diagonal)
 domain_size(tm::DiagonalTensor) = size(tm.diagonal)
 
-
 LazyTensors.apply(tm::DiagonalTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.diagonal[I...]*v[I...]
-LazyTensors.apply_transpose(tm::DiagonalTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.diagonal[I...]*v[I...]
 
 Base.:(==)(a::DiagonalTensor, b::DiagonalTensor) = a.diagonal == b.diagonal
+
+Base.adjoint(t::DiagonalTensor) = DiagonalTensor(conj(t.diagonal))
 
 
 """
@@ -133,10 +139,8 @@ function apply(llm::DenseTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R
     return sum(A_view.*v)
 end
 
-function apply_transpose(llm::DenseTensor{R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,D}
-    apply(DenseTensor(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
-end
-
 function Base.:(==)(a::DenseTensor, b::DenseTensor)
     return a.A == b.A && a.range_indicies == b.range_indicies && a.domain_indicies == b.domain_indicies
 end
+
+Base.adjoint(t::DenseTensor) = DenseTensor(conj(t.A), t.domain_indicies, t.range_indicies)

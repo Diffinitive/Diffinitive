@@ -28,31 +28,6 @@ Base.size(ta::TensorApplication) = range_size(ta.t)
 
 
 """
-    TensorTranspose{R,D} <: LazyTensor{D,R}
-
-Struct for lazy transpose of a LazyTensor.
-
-If a mapping implements the the `apply_transpose` method this allows working with
-the transpose of mapping `m` by using `m'`. `m'` will work as a regular LazyTensor lazily calling
-the appropriate methods of `m`.
-"""
-struct TensorTranspose{R,D, TM<:LazyTensor{R,D}} <: LazyTensor{D,R}
-    tm::TM
-end
-
-# # TBD: Should this be implemented on a type by type basis or through a trait to provide earlier errors?
-# Jonatan 2020-09-25: Is the problem that you can take the transpose of any LazyTensor even if it doesn't implement `apply_transpose`?
-Base.adjoint(tm::LazyTensor) = TensorTranspose(tm)
-Base.adjoint(tmt::TensorTranspose) = tmt.tm
-
-apply(tmt::TensorTranspose{R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,D} = apply_transpose(tmt.tm, v, I...)
-apply_transpose(tmt::TensorTranspose{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {R,D} = apply(tmt.tm, v, I...)
-
-range_size(tmt::TensorTranspose) = domain_size(tmt.tm)
-domain_size(tmt::TensorTranspose) = range_size(tmt.tm)
-
-
-"""
     TensorNegation{R,D} <: LazyTensor{R,D}
 
 The negation of a LazyTensor.
@@ -62,7 +37,6 @@ struct TensorNegation{R,D,TM<:LazyTensor{R,D}} <: LazyTensor{R,D}
 end
 
 apply(tm::TensorNegation, v, I...) = -apply(tm.tm, v, I...)
-apply_transpose(tm::TensorNegation, v, I...) = -apply_transpose(tm.tm, v, I...)
 
 range_size(tm::TensorNegation) = range_size(tm.tm)
 domain_size(tm::TensorNegation) = domain_size(tm.tm)
@@ -71,6 +45,7 @@ function Base.:(==)(a::TensorNegation, b::TensorNegation)
     return a.tm == b.tm
 end
 
+Base.adjoint(t::TensorNegation) = TensorNegation(adjoint(t.tm))
 
 """
     TensorSum{R,D,...} <: LazyTensor{R,D}
@@ -109,14 +84,6 @@ function apply(tmBinOp::TensorSum{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any
     return +(vs...)
 end
 
-function apply_transpose(tmBinOp::TensorSum{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R}) where {R,D}
-    vs = map(tmBinOp.tms) do tm
-        apply_transpose(tm,v,I...)
-    end
-
-    return +(vs...)
-end
-
 range_size(tmBinOp::TensorSum) = range_size(tmBinOp.tms[1])
 domain_size(tmBinOp::TensorSum) = domain_size(tmBinOp.tms[1])
 
@@ -127,6 +94,8 @@ TensorSum(t::LazyTensor, ::ZeroTensor) = t
 function Base.:(==)(a::TensorSum, b::TensorSum)
     return a.tms == b.tms
 end
+
+Base.adjoint(t::TensorSum) = TensorSum(map(adjoint, t.tms)...)
 
 
 """
@@ -151,13 +120,11 @@ function apply(c::TensorComposition{R,K,D}, v::AbstractArray{<:Any,D}, I::Vararg
     apply(c.t1, c.t2*v, I...)
 end
 
-function apply_transpose(c::TensorComposition{R,K,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,K,D}
-    apply_transpose(c.t2, c.t1'*v, I...)
-end
-
 function Base.:(==)(a::TensorComposition, b::TensorComposition)
     return a.t1 == b.t1 && a.t2 == b.t2
 end
+
+Base.adjoint(t::TensorComposition) = TensorComposition(adjoint(t.t2), adjoint(t.t1))
 
 """
     TensorComposition(tm, tmi::IdentityTensor)
@@ -287,21 +254,11 @@ function apply(itm::InflatedTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{An
     return apply(itm.tm, v_inner, inner_index...)
 end
 
-function apply_transpose(itm::InflatedTensor{R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,D}
-    dim_before = range_dim(itm.before)
-    dim_domain = domain_dim(itm.tm)
-    dim_range = range_dim(itm.tm)
-    dim_after = range_dim(itm.after)
-
-    view_index, inner_index = split_index(dim_before, dim_range, dim_domain, dim_after, I...)
-
-    v_inner = view(v, view_index...)
-    return apply_transpose(itm.tm, v_inner, inner_index...)
-end
-
 function Base.:(==)(a::InflatedTensor, b::InflatedTensor)
     return a.before == b.before && a.tm == b.tm && a.after == b.after
 end
+
+Base.adjoint(t::InflatedTensor) = InflatedTensor(t.before, adjoint(t.tm), t.after)
 
 
 @doc raw"""

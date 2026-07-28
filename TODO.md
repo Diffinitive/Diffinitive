@@ -16,8 +16,7 @@
        See (https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing)
  - [ ] Samla noggrannhets- och SBP-ness-tester för alla operatorer på ett ställe
  - [ ] Move export statements to top of each module
- - [ ] Implement apply_transpose for
-      - [ ] ElementwiseTensorOperation
+ - [ ] Implement Base.adjoint for
       - [ ] VolumeOperator
       - [ ] Laplace
 
