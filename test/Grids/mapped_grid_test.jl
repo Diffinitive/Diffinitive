@@ -339,13 +339,13 @@ end
     end
 end
 
-@testset "normal" begin
+@testset "boundary_normal" begin
     g = mapped_grid(_partially_curved_mapping()...,10, 11)
 
-    @test normal(g, CartesianBoundary{1,LowerBoundary}()) == fill(@SVector[-1,0], 11)
-    @test normal(g, CartesianBoundary{1,UpperBoundary}()) == fill(@SVector[1,0], 11)
-    @test normal(g, CartesianBoundary{2,LowerBoundary}()) == fill(@SVector[0,-1], 10)
-    @test normal(g, CartesianBoundary{2,UpperBoundary}()) ≈ map(boundary_grid(g,CartesianBoundary{2,UpperBoundary}())|>logical_grid) do ξ̄
+    @test boundary_normal(g, CartesianBoundary{1,LowerBoundary}()) == fill(@SVector[-1,0], 11)
+    @test boundary_normal(g, CartesianBoundary{1,UpperBoundary}()) == fill(@SVector[1,0], 11)
+    @test boundary_normal(g, CartesianBoundary{2,LowerBoundary}()) == fill(@SVector[0,-1], 10)
+    @test boundary_normal(g, CartesianBoundary{2,UpperBoundary}()) ≈ map(boundary_grid(g,CartesianBoundary{2,UpperBoundary}())|>logical_grid) do ξ̄
         α = 1-2ξ̄[1]
         @SVector[α,1]/√(α^2 + 1)
     end
@@ -355,28 +355,28 @@ end
     unit(v) = v/norm(v)
     @testset let bId = CartesianBoundary{1,LowerBoundary}()
         lbg = boundary_grid(logical_grid(g), bId)
-        @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+        @test boundary_normal(g, bId) ≈ map(lbg) do (ξ, η)
             -unit(@SVector[1/2,  η/3-1/6])
         end
     end
 
     @testset let bId = CartesianBoundary{1,UpperBoundary}()
         lbg = boundary_grid(logical_grid(g), bId)
-        @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+        @test boundary_normal(g, bId) ≈ map(lbg) do (ξ, η)
             unit(@SVector[7/2, 2η-1]/(5 + 3η + 2η^2))
         end
     end
 
     @testset let bId = CartesianBoundary{2,LowerBoundary}()
         lbg = boundary_grid(logical_grid(g), bId)
-        @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+        @test boundary_normal(g, bId) ≈ map(lbg) do (ξ, η)
             -unit(@SVector[-2ξ, 2]/(6 + ξ^2 - 2ξ))
         end
     end
 
     @testset let bId = CartesianBoundary{2,UpperBoundary}()
         lbg = boundary_grid(logical_grid(g), bId)
-        @test normal(g, bId) ≈ map(lbg) do (ξ, η)
+        @test boundary_normal(g, bId) ≈ map(lbg) do (ξ, η)
             unit(@SVector[-3ξ, 2]/(6 + ξ^2 + 3ξ))
         end
     end

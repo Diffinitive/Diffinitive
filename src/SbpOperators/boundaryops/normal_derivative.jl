@@ -31,7 +31,7 @@ end
 
 normal_derivative(::ZeroDimGrid, stencil_set::StencilSet, boundary) = throw(ArgumentError("ZeroDimGrid has no boundaries"))
 
-function normal_derivative(g::MappedGrid, stencil_set::StencilSet, boundary)
+function normal_derivative(g::MappedGrid{T,D,<:TensorGrid}, stencil_set::StencilSet, boundary::TensorGridBoundary) where {T,D}
     k = grid_id(boundary)
     b_indices = boundary_indices(g, boundary)
 
