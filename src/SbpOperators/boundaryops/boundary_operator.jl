@@ -48,12 +48,7 @@ function LazyTensors.apply(op::BoundaryOperator{UpperBoundary}, v::AbstractVecto
     apply_stencil_backwards(op.stencil,v,op.size)
 end
 
-# REVIEW: An alternative would be if we could take the adjoint of a Stencil to get a
-# a new stencil. We would still need the BoundaryOperatorAdjoint type since the adjoint
-# operator has swapped dimensions for range and dim, but the implementation would otherwise
-# look the same as for `BoundaryOperator`?
-# The same approach would also be useful for constructing adjoint operators of other 
-# base 1D operators, e.g. a `VolumeOperator`.
+
 """
     BoundaryOperatorAdjoint{B} <: LazyTensor{1,0}
 
