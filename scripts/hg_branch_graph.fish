@@ -432,6 +432,12 @@ function __branch_graph_single_child --argument-names node edges_file
     end
 end
 
+function __branch_graph_parent_count --argument-names node edges_file
+    set -l parents (__branch_graph_parents "$node" "$edges_file")
+
+    count $parents
+end
+
 function __branch_graph_subtree_stops_at_path --argument-names node edges_file
     set -l path $argv[3..-1]
     set -l next_path $path $node
@@ -553,6 +559,10 @@ function __branch_graph_print_node --argument-names node edges_file depth
     set -l prefix (__branch_graph_prefix $depth)
     set -l next_path $path $node
 
+    if __branch_graph_try_print_two_parent_join "$node" "$edges_file" "$depth" $path
+        return 0
+    end
+
     if test $depth -gt 0
         set -l only_child (__branch_graph_single_child "$node" "$edges_file")
 
@@ -564,17 +574,13 @@ function __branch_graph_print_node --argument-names node edges_file depth
                 return 0
             end
 
-            if not __branch_graph_has_children "$only_child" "$edges_file"
-                printf '%so %s\n' "$prefix" "$only_child"
+            if test (__branch_graph_parent_count "$only_child" "$edges_file") -eq 1
+                __branch_graph_print_node "$only_child" "$edges_file" "$depth" $next_path
                 printf '%s|\n' "$prefix"
                 printf '%so %s\n' "$prefix" "$node"
                 return 0
             end
         end
-    end
-
-    if __branch_graph_try_print_two_parent_join "$node" "$edges_file" "$depth" $path
-        return 0
     end
 
     printf '%so %s\n' "$prefix" "$node"
@@ -1044,6 +1050,78 @@ tooling/mergemap	default'
         feature/grids/chart_normal \
         feature/lazy_tensors/matrix_of_operators \
         refactor/lazy_tensors/operator_simplifications
+    or set failures (math $failures + 1)
+
+    set -l expected_current_repository_traction_reduced_dependencies 'default	examples
+default	feature/grids/multiblock_grids
+default	feature/lazy_tensors/pretty_printing
+default	refactor/lazy_tensors/adjoint
+default	refactor/sbpoperators/boundary_operators
+feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators
+feature/sbp_operators/vector_operators	feature/sbp_operators/traction_conditons
+refactor/lazy_tensors/adjoint	refactor/lazy_tensors/operator_simplifications
+refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators'
+    printf '%s\n' \
+        'default	examples' \
+        'default	feature/grids/multiblock_grids' \
+        'default	feature/lazy_tensors/matrix_of_operators' \
+        'default	feature/lazy_tensors/pretty_printing' \
+        'default	feature/sbp_operators/traction_conditons' \
+        'default	feature/sbp_operators/vector_operators' \
+        'default	refactor/lazy_tensors/adjoint' \
+        'default	refactor/lazy_tensors/operator_simplifications' \
+        'default	refactor/sbpoperators/boundary_operators' \
+        'feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/traction_conditons' \
+        'feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators' \
+        'feature/sbp_operators/vector_operators	feature/sbp_operators/traction_conditons' \
+        'refactor/lazy_tensors/adjoint	refactor/lazy_tensors/operator_simplifications' \
+        'refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators' \
+        'refactor/lazy_tensors/operator_simplifications	feature/sbp_operators/traction_conditons' \
+        'refactor/lazy_tensors/operator_simplifications	feature/sbp_operators/vector_operators' \
+        | __branch_graph_assert_dependencies 'current repository traction reduced dependencies' "$expected_current_repository_traction_reduced_dependencies"
+    or set failures (math $failures + 1)
+
+    set -l expected_current_repository_traction_graph 'o default
+|
+| o refactor/sbpoperators/boundary_operators
+|/
+| o feature/sbp_operators/traction_conditons
+| |
+| o feature/sbp_operators/vector_operators
+| |
+| o feature/lazy_tensors/matrix_of_operators
+| |
+| o refactor/lazy_tensors/operator_simplifications
+| |
+| o refactor/lazy_tensors/adjoint
+|/
+| o feature/lazy_tensors/pretty_printing
+|/
+| o feature/grids/multiblock_grids
+|/
+| o examples
+|/'
+    __branch_graph_assert_open_render 'current repository graph with traction chain' "$expected_current_repository_traction_graph" \
+        'default	examples' \
+        'default	feature/grids/multiblock_grids' \
+        'default	feature/lazy_tensors/pretty_printing' \
+        'default	refactor/lazy_tensors/adjoint' \
+        'default	refactor/sbpoperators/boundary_operators' \
+        'feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators' \
+        'feature/sbp_operators/vector_operators	feature/sbp_operators/traction_conditons' \
+        'refactor/lazy_tensors/adjoint	refactor/lazy_tensors/operator_simplifications' \
+        'refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators' \
+        -- \
+        default \
+        refactor/lazy_tensors/adjoint \
+        feature/sbp_operators/traction_conditons \
+        refactor/lazy_tensors/operator_simplifications \
+        refactor/sbpoperators/boundary_operators \
+        feature/lazy_tensors/pretty_printing \
+        feature/grids/multiblock_grids \
+        examples \
+        feature/sbp_operators/vector_operators \
+        feature/lazy_tensors/matrix_of_operators
     or set failures (math $failures + 1)
 
     set -l expected_current_repository_dependencies 'default	examples

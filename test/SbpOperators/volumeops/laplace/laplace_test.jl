@@ -179,7 +179,7 @@ end
             @test sqrt(sum(H*e.^2)) ≈ 0 atol = tol
             # Symmetry
             r = randn(size(u))
-            @test_broken (D'∘H - H∘D)*r .≈ 0 atol = 1e-13 # TODO: Need to implement apply_transpose for D.
+            @test_broken (D'∘H - H∘D)*r .≈ 0 atol = 1e-13 # TODO: Need to implement Base.adjoint for D.
         end
     end
 
@@ -200,7 +200,7 @@ end
                 @test sqrt(sum(H*e.^2)) ≈ 0 atol = tol
                 # Symmetry
                 r = randn(size(u))
-                @test_broken (D'∘H - H∘D)*r .≈ 0 atol = 1e-13 # TODO: Need to implement apply_transpose for D.
+                @test_broken (D'∘H - H∘D)*r .≈ 0 atol = 1e-13 # TODO: Need to implement Base.adjoint for D.
             end
         end
     end
