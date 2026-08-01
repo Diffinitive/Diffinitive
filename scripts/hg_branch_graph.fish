@@ -900,6 +900,41 @@ tooling	default'
     __branch_graph_assert_render 'nested branch' "$expected_nested" 'default	A' 'default	B' 'default	D' 'D	C' -- default
     or set failures (math $failures + 1)
 
+    set -l expected_nested_leaf_siblings 'o default
+|
+| o parent
+| |
+| | o leaf_b
+| |/
+| | o leaf_a
+| |/
+|/'
+    __branch_graph_assert_render 'nested leaf siblings' "$expected_nested_leaf_siblings" \
+        'default	parent' \
+        'parent	leaf_a' \
+        'parent	leaf_b' \
+        -- default
+    or set failures (math $failures + 1)
+
+    set -l expected_nested_leaf_and_chain 'o default
+|
+| o parent
+| |
+| | o leaf
+| |/
+| | o chain_leaf
+| | |
+| | o chain_mid
+| |/
+|/'
+    __branch_graph_assert_render 'nested leaf sibling with chain sibling' "$expected_nested_leaf_and_chain" \
+        'default	parent' \
+        'parent	leaf' \
+        'parent	chain_mid' \
+        'chain_mid	chain_leaf' \
+        -- default
+    or set failures (math $failures + 1)
+
     set -l expected_diamond 'o default
 |
 |   o C
