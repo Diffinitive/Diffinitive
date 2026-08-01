@@ -45,6 +45,32 @@ end
 
 boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
+"""
+    boundary_normal(c::Chart, boundary, ξ)
+
+The normal on the `boundary` of the chart `c` evaluated at `ξ`. 
+"""
+function boundary_normal(c::Chart, boundary, ξ)
+    # The formula is based on expressing the normal in terms of vectors ∂x/∂ξᵢ.
+    # Call the coordinate vector for n in this basis a.
+    # In physical coordinates we have n = ∂x/∂ξᵢaᵢ.
+    # For a boundary where ξₖ = const, n should be orthogonal to ∂x/∂ξⱼ for all j != k
+    # This gives the system
+    #    ∂x/∂ξⱼ ⋅ ∂x/∂ξᵢaᵢ = δⱼₖ
+    #    ⇔ gᵢⱼaᵢ = δⱼₖ
+    #    ⇔ aᵢ = gⁱʲδⱼₖ
+    #    ⇔ n = ∂x/∂ξᵢ gⁱʲδⱼₖ
+
+    ∂x∂ξ = jacobian(c, ξ)
+    g = ∂x∂ξ' * ∂x∂ξ
+    g⁻¹ = inv(g)
+    σ = _boundary_sign(eltype(g), boundary)
+
+    k = grid_id(boundary)
+    n = ∂x∂ξ * g⁻¹[:, k]
+    return σ * n / norm(n)
+end
+
 
 """
     Atlas

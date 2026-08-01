@@ -81,7 +81,7 @@ function Base.:(==)(a::ScalingTensor, b::ScalingTensor)
     return a.λ == b.λ && a.size == b.size
 end
 
-Base.adjoint(t::ScalingTensor) = t
+Base.adjoint(t::ScalingTensor) = ScalingTensor(conj(t.λ), t.size)
 
 
 """
@@ -101,7 +101,7 @@ LazyTensors.apply(tm::DiagonalTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{An
 
 Base.:(==)(a::DiagonalTensor, b::DiagonalTensor) = a.diagonal == b.diagonal
 
-Base.adjoint(t::DiagonalTensor) = t
+Base.adjoint(t::DiagonalTensor) = DiagonalTensor(conj(t.diagonal))
 
 
 """
@@ -143,4 +143,4 @@ function Base.:(==)(a::DenseTensor, b::DenseTensor)
     return a.A == b.A && a.range_indicies == b.range_indicies && a.domain_indicies == b.domain_indicies
 end
 
-Base.adjoint(t::DenseTensor) = DenseTensor(t.A, t.domain_indicies, t.range_indicies)
+Base.adjoint(t::DenseTensor) = DenseTensor(conj(t.A), t.domain_indicies, t.range_indicies)

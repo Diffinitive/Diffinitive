@@ -17,12 +17,14 @@ using Diffinitive.Grids
     @test range_size(a) == (10,)
     @test domain_size(a) == (10,)
 
-
-    a = ConstantInteriorScalingOperator(.5, (.1,.2), 7)
     v = ones(7)
-
+    a = ConstantInteriorScalingOperator(.5, (.1,.2), 7)
     @test a*v == [.1,.2,.5,.5,.5,.2,.1]
     @test a'*v == [.1,.2,.5,.5,.5,.2,.1]
+
+    a = ConstantInteriorScalingOperator(.5+1im, complex.((.1-2im,.2)), 7)
+    @test a*v == [.1-2im,.2,.5+1im,.5+1im,.5+1im,.2,.1-2im]
+    @test a'*v == [.1+2im,.2,.5-1im,.5-1im,.5-1im,.2,.1+2im]
 
     @test (a*rand(ComplexF64, domain_size(a)... ))[1] isa ComplexF64
     @test (a'*rand(ComplexF64, domain_size(a')...))[1] isa ComplexF64

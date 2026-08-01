@@ -49,7 +49,7 @@ export min_spacing
 export coarsen
 export refine
 export eval_on
-export normal
+export boundary_normal
 
 export BoundaryIdentifier
 export TensorGridBoundary
