@@ -13,6 +13,7 @@ export Box
 export Triangle
 export Tetrahedron
 
+export centroid
 export limits
 export unitinterval
 export unitsquare
@@ -25,6 +26,7 @@ export unittetrahedron
 export unitsimplex
 
 export Chart
+export with_jacobian
 
 export Atlas
 export charts
@@ -47,7 +49,7 @@ export min_spacing
 export coarsen
 export refine
 export eval_on
-export normal
+export boundary_normal
 
 export BoundaryIdentifier
 export TensorGridBoundary

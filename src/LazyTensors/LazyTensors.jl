@@ -4,12 +4,10 @@ using StaticArrays
 
 export LazyTensor
 export apply
-export apply_transpose
 export range_dim, domain_dim
 export range_size, domain_size
 
 export TensorApplication
-export TensorTranspose
 export TensorComposition
 export TensorNegation
 export TensorSum
@@ -44,22 +42,32 @@ include("componentview.jl")
 """
     *(T::LazyTensor, v::AbstractArray)
 
-TODO
+Lazy application of a LazyTensor to an array. The elements of the result are
+computed on indexing the returned array.
 """
 Base.:*(a::LazyTensor, v::AbstractArray) = TensorApplication(a,v)
 Base.:*(a::LazyTensor, b::LazyTensor) = throw(MethodError(Base.:*,(a,b)))
 Base.:*(a::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*,(a,args...))
+# TODO: Simplification of application with identity?
 
-# Multipication by constant
+# Multiplication by constant
+"""
+    *(a, tm::LazyTensor)
+    *(tm::LazyTensor, a)
+
+Lazy multiplication of a lazy tensor and a constant, giving a resulting LazyTensor.
+"""
 Base.:*(a, tm::LazyTensor) = TensorComposition(ScalingTensor(a,range_size(tm)), tm)
 Base.:*(tm::LazyTensor, a) = a*tm
+
 
 #  Addition and subtraction of lazy tensors
 Base.:+(ts::LazyTensor...) = foldl(+, ts) # Break the multi argument + into regular binary + to allow pariwise specialisations to work.
 """
     +(A::LazyTensor, B::LazyTensor)
 
-TODO
+Lazy summation of two `LazyTensor`s. Provides basic simplifications when
+adding sums, and zero tensors.
 """
 Base.:+(t::LazyTensor, s::LazyTensor) = TensorSum(t, s)
 Base.:-(t::LazyTensor) = TensorNegation(t)
@@ -76,11 +84,13 @@ Base.:+(t::TensorSum, s::ZeroTensor) = (check_equal_size(t,s); t) # Resolve ambi
 Base.:+(t::ZeroTensor, s::TensorSum) = (check_equal_size(t,s); s) # Resolve ambiguity
 Base.:-(t::ZeroTensor) = t
 
+
 # Composing lazy tensors
 """
     ∘(A::LazyTensor, B::LazyTensor)
 
-TODO
+Lazy composition of `LazyTensor`s. Provides basic simplifications when
+composing with zero and identity tensors.
 """
 Base.:∘(s::LazyTensor, t::LazyTensor) = TensorComposition(s,t)
 Base.:∘(s::TensorComposition, t::LazyTensor) = s.t1∘(s.t2∘t)

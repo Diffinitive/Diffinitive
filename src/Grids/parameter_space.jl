@@ -52,6 +52,13 @@ The limits of the interval.
 """
 limits(i::Interval) = (i.a, i.b)
 
+"""
+    centroid(i::Interval)
+
+The centroid of the interval.
+"""
+centroid(i::Interval) = (i.a + i.b)/2
+
 boundary_identifiers(::Interval) = (LowerBoundary(), UpperBoundary())
 
 Base.in(x, i::Interval) = i.a <= x <= i.b
@@ -101,6 +108,13 @@ limits(box::HyperBox, d) = (box.a[d], box.b[d])
 The lower and upper limits of `box` as tuples.
 """
 limits(box::HyperBox) = (box.a, box.b)
+
+"""
+    centroid(box::HyperBox)
+
+The centroid of the hyper box.
+"""
+centroid(box::HyperBox) = (box.a + box.b)/2
 
 function boundary_identifiers(box::HyperBox)
     mapreduce(vcat, 1:ndims(box)) do d
@@ -184,6 +198,13 @@ end
 Verticies of `s`.
 """
 verticies(s::Simplex) = s.verticies
+
+"""
+    centroid(s::Simplex)
+
+The centroid of the simplex.
+"""
+centroid(s::Simplex{T,D,NV}) where {T,D,NV} = sum(s.verticies)/NV
 
 Triangle{T} = Simplex{T,2}
 Tetrahedron{T} = Simplex{T,3}

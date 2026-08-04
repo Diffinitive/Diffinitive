@@ -4,7 +4,9 @@ using Diffinitive.Grids
 using Diffinitive.RegionIndices
 using Diffinitive.LazyTensors
 
+using ForwardDiff
 using StaticArrays
+using LinearAlgebra
 
 west = CartesianBoundary{1,LowerBoundary}
 east = CartesianBoundary{1,UpperBoundary}
@@ -12,6 +14,8 @@ south = CartesianBoundary{2,LowerBoundary}
 north = CartesianBoundary{2,UpperBoundary}
 bottom = CartesianBoundary{3, LowerBoundary}
 top = CartesianBoundary{3, UpperBoundary}
+
+unitvec(v) = v/norm(v)
 
 @testset "Chart" begin
     X(ξ) = 2ξ
@@ -34,6 +38,112 @@ top = CartesianBoundary{3, UpperBoundary}
     end
 
     @test Set(boundary_identifiers(Chart(X,unitsquare()))) == Set([east(),west(),south(),north()])
+
+    @testset "boundary_normal(::Chart, ⋅)" begin
+        c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do ξ
+            2ξ
+        end
+
+        @test boundary_normal(c, west(),  [0, 0.3]) == [-1, 0]
+        @test boundary_normal(c, east(),  [1, 0.8]) == [ 1, 0]
+        @test boundary_normal(c, south(), [0.2, 0]) == [ 0,-1]
+        @test boundary_normal(c, north(), [0.6, 1]) == [ 0, 1]
+
+
+        c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
+            @SVector[ξ-η, ξ+η]
+        end
+
+        @test boundary_normal(c, west(),  [0, 0.3]) ≈ unitvec([-1, -1]) rtol=1e-12
+        @test boundary_normal(c, east(),  [1, 0.8]) ≈ unitvec([ 1,  1]) rtol=1e-12
+        @test boundary_normal(c, south(), [0.2, 0]) ≈ unitvec([ 1, -1]) rtol=1e-12
+        @test boundary_normal(c, north(), [0.6, 1]) ≈ unitvec([-1,  1]) rtol=1e-12
+
+
+        c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
+            @SVector[1.2ξ+0.2η, 0.5ξ+0.9η]
+        end
+
+        @test boundary_normal(c, west(),  [0, 0.3]) ≈ unitvec([-0.9,  0.2]) rtol=1e-12
+        @test boundary_normal(c, east(),  [1, 0.8]) ≈ unitvec([ 0.9, -0.2]) rtol=1e-12
+        @test boundary_normal(c, south(), [0.2, 0]) ≈ unitvec([ 0.5, -1.2]) rtol=1e-12
+        @test boundary_normal(c, north(), [0.6, 1]) ≈ unitvec([-0.5,  1.2]) rtol=1e-12
+
+
+        c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do (ξ,η)
+            @SVector[ξ, η, ξ + η]
+        end
+
+        @test boundary_normal(c, west(),   [0, 0.3]) ≈ unitvec([-2,  1, -1]) rtol=1e-12
+        @test boundary_normal(c, east(),   [1, 0.8]) ≈ unitvec([ 2, -1,  1]) rtol=1e-12
+        @test boundary_normal(c, south(),  [0.2, 0]) ≈ unitvec([ 1, -2, -1]) rtol=1e-12
+        @test boundary_normal(c, north(),  [0.6, 1]) ≈ unitvec([-1,  2,  1]) rtol=1e-12
+        
+          c = with_jacobian(unitcube(), ForwardDiff.jacobian) do (ξ,η,χ)
+            @SVector[ξ, η, ξ + χ]
+        end
+        @test boundary_normal(c, west(),   [0, 0.2, 0.3]) ≈ unitvec([-1,  0,  0]) rtol=1e-12
+        @test boundary_normal(c, east(),   [1, 0.2, 0.1]) ≈ unitvec([ 1,  0,  0]) rtol=1e-12
+        @test boundary_normal(c, south(),  [0.2, 0, 0.4]) ≈ unitvec([ 0, -1,  0]) rtol=1e-12
+        @test boundary_normal(c, north(),  [0.2, 1, 0.6]) ≈ unitvec([ 0,  1,  0]) rtol=1e-12
+        @test boundary_normal(c, bottom(), [0.1, 0.5, 0]) ≈ unitvec([ 1,  0, -1]) rtol=1e-12
+        @test boundary_normal(c, top(),    [0.6, 0.1, 1]) ≈ unitvec([-1,  0,  1]) rtol=1e-12
+    end
+end
+
+@testset "with_jacobian" begin
+    @testset "Function with jacobian" begin
+        x(ξ) = @SVector[ξ[1] + 2ξ[2], ξ[1]*ξ[2]]
+        xJ = with_jacobian(x, ForwardDiff.jacobian)
+
+        @test xJ(@SVector[3, 4]) == @SVector[11, 12]
+        @test jacobian(xJ, @SVector[3, 4]) == @SMatrix[
+            1 2;
+            4 3;
+        ]
+    end
+
+    @testset "Chart with jacobian" begin
+        x(ξ) = @SVector[ξ[1]^2, ξ[1] + ξ[2]]
+
+        c = with_jacobian(x, unitsquare(), ForwardDiff.jacobian)
+        x = @SVector[1//2, 1//4]
+
+        @test c isa Chart{2}
+        @test parameterspace(c) == unitsquare()
+        @test c(x) == @SVector[1//4, 3//4]
+        @test jacobian(c, x) == @SMatrix[
+            1//1 0//1;
+            1//1 1//1;
+        ]
+    end
+
+    @testset "Chart from combined mapping and jacobian" begin
+        xJ(ξ) = (
+            @SVector[ξ[1] - ξ[2], ξ[1]*ξ[2]],
+            @SMatrix[
+                1     -1;
+                ξ[2]  ξ[1];
+            ],
+        )
+
+        c = with_jacobian(xJ, unitsquare())
+        x = @SVector[3//4, 1//4]
+
+        @test c isa Chart{2}
+        @test parameterspace(c) == unitsquare()
+        @test c(x) == @SVector[1//2, 3//16]
+        @test jacobian(c, x) == @SMatrix[
+            1//1  -1//1;
+            1//4   3//4;
+        ]
+    end
+
+    @testset "Missing jacobian function" begin
+        x(ξ) = @SVector[ξ[1]^2, ξ[1] + ξ[2]]
+
+        @test_throws ArgumentError with_jacobian(x, unitsquare())
+    end
 end
 
 @testset "CartesianAtlas" begin

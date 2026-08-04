@@ -77,7 +77,7 @@ LazyTensors.range_size(op::SecondDerivativeVariable) = size(op.coefficient)
 LazyTensors.domain_size(op::SecondDerivativeVariable) = size(op.coefficient)
 
 function Base.:(==)(a::SecondDerivativeVariable, b::SecondDerivativeVariable)
-    return a.inner_stencil == b.inner_stencil && a.closure_stencils == b.closure_stencils && a.coefficient == b.coefficient
+    return a.inner_stencil == b.inner_stencil && a.closure_stencils == b.closure_stencils && a.coefficient == b.coefficient && derivative_direction(a) == derivative_direction(b)
 end
 
 function derivative_view(op, a, I)

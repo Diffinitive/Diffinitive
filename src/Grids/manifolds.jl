@@ -45,6 +45,32 @@ end
 
 boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
+"""
+    boundary_normal(c::Chart, boundary, ξ)
+
+The normal on the `boundary` of the chart `c` evaluated at `ξ`. 
+"""
+function boundary_normal(c::Chart, boundary, ξ)
+    # The formula is based on expressing the normal in terms of vectors ∂x/∂ξᵢ.
+    # Call the coordinate vector for n in this basis a.
+    # In physical coordinates we have n = ∂x/∂ξᵢaᵢ.
+    # For a boundary where ξₖ = const, n should be orthogonal to ∂x/∂ξⱼ for all j != k
+    # This gives the system
+    #    ∂x/∂ξⱼ ⋅ ∂x/∂ξᵢaᵢ = δⱼₖ
+    #    ⇔ gᵢⱼaᵢ = δⱼₖ
+    #    ⇔ aᵢ = gⁱʲδⱼₖ
+    #    ⇔ n = ∂x/∂ξᵢ gⁱʲδⱼₖ
+
+    ∂x∂ξ = jacobian(c, ξ)
+    g = ∂x∂ξ' * ∂x∂ξ
+    g⁻¹ = inv(g)
+    σ = _boundary_sign(eltype(g), boundary)
+
+    k = grid_id(boundary)
+    n = ∂x∂ξ * g⁻¹[:, k]
+    return σ * n / norm(n)
+end
+
 
 """
     Atlas
@@ -159,4 +185,123 @@ function boundary_identifiers(a::UnstructuredAtlas)
     end
 
     return bs
+end
+
+"""
+    FunctionWithJacobian{FT,JT}
+    FunctionWithJacobian(f,J)
+
+Wraps a function and its jacobian to make it available for Grids.jacobian
+
+See also: [with_jacobian](@ref)
+"""
+struct FunctionWithJacobian{FT,JT}
+    f::FT
+    J::JT
+end
+
+(fJ::FunctionWithJacobian)(x) = fJ.f(x)
+jacobian(fJ::FunctionWithJacobian, x) = fJ.J(x)
+
+
+"""
+    with_jacobian(f, Jfun)
+
+Create a FunctionWithJacobian from `f` using `J(x) = Jfun(f,x)`.
+
+# Example
+```julia-repl
+julia> using ForwardDiff, StaticArrays
+julia> f = with_jacobian(ForwardDiff.jacobian) do ξ
+    @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
+end;
+
+julia> f([1,2])
+2-element SVector{2, Int64} with indices SOneTo(2):
+ 1
+ 4
+
+julia> jacobian(f, [1,2])
+2×2 Matrix{Int64}:
+ 1  0
+ 4  2
+
+```
+"""
+with_jacobian(f, Jfun) = FunctionWithJacobian(f, x->Jfun(f,x))
+
+"""
+    with_jacobian(x, pm::ParameterSpace, Jfun)
+
+Create a Chart from `x(ξ)` and `pm` using `J(ξ) = Jfun(f,ξ)`.
+
+# Example
+```julia-repl
+julia> using ForwardDiff, StaticArrays
+
+julia> c = with_jacobian(unitsquare(), ForwardDiff.jacobian) do ξ
+           @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
+       end;
+
+julia> c([1,1/2])
+2-element SVector{2, Float64} with indices SOneTo(2):
+ 1.0
+ 1.0
+
+julia> jacobian(c,[1,1/2])
+2×2 Matrix{Float64}:
+ 1.0  0.0
+ 1.0  2.0
+```
+"""
+with_jacobian(x, pm::ParameterSpace, Jfun) = Chart(with_jacobian(x,Jfun), pm)
+
+"""
+    with_jacobian(xJ, pm::ParameterSpace)
+
+Create a Chart with `pm` and mapping + jacobian from `xJ`. `xJ(ξ)` should return
+a tuple `x(ξ), J(ξ)`
+
+# Example
+```julia-repl
+julia> using ForwardDiff, StaticArrays
+
+julia> c = with_jacobian(unitsquare()) do ξ
+           x = @SVector[ξ[1], ξ[2]*(ξ[1]^2+1)]
+           J = @SMatrix[
+               1          0       ;
+               2ξ[1]*ξ[2] ξ[1]^2+1;
+           ]
+
+           (x,J)
+       end;
+
+julia> c([1,1/2])
+2-element SVector{2, Float64} with indices SOneTo(2):
+ 1.0
+ 1.0
+
+julia> jacobian(c,[1,1/2])
+2×2 SMatrix{2, 2, Float64, 4} with indices SOneTo(2)×SOneTo(2):
+ 1.0  0.0
+ 1.0  2.0
+```
+"""
+function with_jacobian(xJ, pm::ParameterSpace)
+    _check_coordinates_and_jacobian(xJ, centroid(pm))
+
+    x(ξ) = xJ(ξ)[1]
+    J(ξ) = xJ(ξ)[2]
+
+    return Chart(FunctionWithJacobian(x,J), pm)
+end
+
+function _check_coordinates_and_jacobian(xJ, ξ)
+    x_J = xJ(ξ)
+
+    if !(x_J isa Tuple && length(x_J) == 2)
+        throw(ArgumentError("with_jacobian(xJ, pm) expects xJ(ξ) to return a 2-tuple `(x, J)`."))
+    end
+
+    return nothing
 end
