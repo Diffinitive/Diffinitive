@@ -1,5 +1,5 @@
-"""
-    BoundaryOperator{B} <: LazyTensor{0,1}
+ """
+    BoundaryOperator{B, ST} <: LazyTensor{0, 1}
 
 Implements the boundary operator `op` for 1D as a `LazyTensor`
 
@@ -47,6 +47,7 @@ end
 function LazyTensors.apply(op::BoundaryOperator{UpperBoundary}, v::AbstractVector)
     apply_stencil_backwards(op.stencil,v,op.size)
 end
+
 
 """
     BoundaryOperatorAdjoint{B} <: LazyTensor{1,0}
