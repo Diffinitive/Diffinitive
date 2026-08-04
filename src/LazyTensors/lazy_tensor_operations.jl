@@ -222,9 +222,9 @@ Base.adjoint(t::InflatedTensor) = InflatedTensor(t.before, adjoint(t.tm), t.afte
 
 
 @doc raw"""
-    LazyOuterProduct(tms...)
+    TensorOuterProduct(ts...)
 
-Creates a `TensorComposition` for the outer product of `tms...`.
+Creates a `TensorComposition` for the outer product of `LazyTensors` `ts...`.
 This is done by separating the outer product into regular products of outer products involving only identity mappings and one non-identity mapping.
 
 First let
@@ -258,16 +258,16 @@ To apply ``A⊗B⊗C`` we evaluate
 (A⊗B⊗C)v = [(A⊗I_{|M|}⊗I_{|P|})  [(I_{|J|}⊗B⊗I_{|P|}) [(I_{|J|}⊗I_{|N|}⊗C)v]]]
 ```
 """
-function LazyOuterProduct end
+function TensorOuterProduct end
 
-function LazyOuterProduct(tm1::LazyTensor, tm2::LazyTensor)
-    itm1 = InflatedTensor(tm1, IdentityTensor(range_size(tm2)))
-    itm2 = InflatedTensor(IdentityTensor(domain_size(tm1)),tm2)
+function TensorOuterProduct(t1::LazyTensor, t2::LazyTensor)
+    it1 = InflatedTensor(t1, IdentityTensor(range_size(t2)))
+    it2 = InflatedTensor(IdentityTensor(domain_size(t1)),t2)
 
-    return itm1∘itm2
+    return it1∘it2
 end
 
-LazyOuterProduct(tms::Vararg{LazyTensor}) = foldl(LazyOuterProduct, tms)
+TensorOuterProduct(ts::Vararg{LazyTensor}) = foldl(TensorOuterProduct, ts)
 
 
 

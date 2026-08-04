@@ -9,13 +9,13 @@ export TensorApplication
 export TensorComposition
 export TensorNegation
 export TensorSum
+export TensorOuterProduct
 export IdentityTensor
 export ZeroTensor
 export ScalingTensor
 export DiagonalTensor
 export DenseTensor
 export InflatedTensor
-export LazyOuterProduct
 export ⊗
 export DomainSizeMismatch
 export RangeSizeMismatch
@@ -109,9 +109,9 @@ Base.:∘(t::TensorComposition, s::ZeroTensor) = (check_composable(t,s); ZeroTen
 Lazy outer product of `LazyTensor`s. Provides basic simplifications when
 forming outer products with zero tensors and identity tensors.
 
-See also: [`LazyOuterProduct`](@ref).
+See also: [`TensorOuterProduct`](@ref).
 """
-⊗(t1::LazyTensor, t2::LazyTensor) = LazyOuterProduct(t1,t2)
+⊗(t1::LazyTensor, t2::LazyTensor) = TensorOuterProduct(t1,t2)
 # Outer products with IdentityTensor
 ⊗(t1::IdentityTensor, t2::IdentityTensor) = IdentityTensor(t1.size...,t2.size...)
 ⊗(t1::LazyTensor, t2::IdentityTensor) = InflatedTensor(t1, t2)
