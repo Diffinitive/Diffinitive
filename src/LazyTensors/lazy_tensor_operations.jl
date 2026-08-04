@@ -267,10 +267,6 @@ function LazyOuterProduct(tm1::LazyTensor, tm2::LazyTensor)
     return itm1∘itm2
 end
 
-LazyOuterProduct(t1::IdentityTensor, t2::IdentityTensor) = IdentityTensor(t1.size...,t2.size...)
-LazyOuterProduct(t1::LazyTensor, t2::IdentityTensor) = InflatedTensor(t1, t2)
-LazyOuterProduct(t1::IdentityTensor, t2::LazyTensor) = InflatedTensor(t1, t2)
-
 LazyOuterProduct(tms::Vararg{LazyTensor}) = foldl(LazyOuterProduct, tms)
 
 

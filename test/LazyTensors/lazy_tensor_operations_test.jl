@@ -445,15 +445,20 @@ end
     @test B̃Ã*v₂ ≈ BAv
 
     @testset "Indentity mapping arguments" begin
-        @test LazyOuterProduct(IdentityTensor(3,2), IdentityTensor(1,2)) == IdentityTensor(3,2,1,2)
-
-        Ã = DenseTensor(A,(1,),(2,))
-        @test LazyOuterProduct(IdentityTensor(3,2), Ã) == InflatedTensor(IdentityTensor(3,2),Ã)
-        @test LazyOuterProduct(Ã, IdentityTensor(3,2)) == InflatedTensor(Ã,IdentityTensor(3,2))
+        @test IdentityTensor(3,2) ⊗ IdentityTensor(1,2) == IdentityTensor(3,2,1,2)
+        @test IdentityTensor(3,2) ⊗ Ã == InflatedTensor(IdentityTensor(3,2),Ã)
+        @test Ã ⊗ IdentityTensor(3,2) == InflatedTensor(Ã,IdentityTensor(3,2))
 
         I1 = IdentityTensor(3,2)
         I2 = IdentityTensor(4)
         @test I1⊗Ã⊗I2 == InflatedTensor(I1, Ã, I2)
+    end
+
+    @testset "Zero mapping arguments" begin
+        @test ZeroTensor(3,2) ⊗ ZeroTensor(1,2) == ZeroTensor(3,2,1,2)
+
+        @test ZeroTensor(3,2) ⊗ Ã == ZeroTensor((3,2,3), (3,2,2))
+        @test Ã ⊗ ZeroTensor(3,2) == ZeroTensor((3,3,2), (2,3,2))
     end
 end
 

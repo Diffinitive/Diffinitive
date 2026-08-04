@@ -103,6 +103,24 @@ Base.:∘(t::ZeroTensor, s::IdentityTensor) = (check_composable(t,s); ZeroTensor
 Base.:∘(t::TensorComposition, s::ZeroTensor) = (check_composable(t,s); ZeroTensor(range_size(t), domain_size(s))) # ResolveAmbiguity
 
 # Outer products of tensors
-⊗(a::LazyTensor, b::LazyTensor) = LazyOuterProduct(a,b)
+"""
+    ⊗(t1::LazyTensor, t2::LazyTensor)
+
+Lazy outer product of `LazyTensor`s. Provides basic simplifications when
+forming outer products with zero tensors and identity tensors.
+
+See also: [`LazyOuterProduct`](@ref).
+"""
+⊗(t1::LazyTensor, t2::LazyTensor) = LazyOuterProduct(t1,t2)
+# Outer products with IdentityTensor
+⊗(t1::IdentityTensor, t2::IdentityTensor) = IdentityTensor(t1.size...,t2.size...)
+⊗(t1::LazyTensor, t2::IdentityTensor) = InflatedTensor(t1, t2)
+⊗(t1::IdentityTensor, t2::LazyTensor) = InflatedTensor(t1, t2)
+# Outer product with ZeroTensor
+⊗(t1::LazyTensor, t2::ZeroTensor) = ZeroTensor((range_size(t1)...,range_size(t2)...),(domain_size(t1)..., domain_size(t2)...))
+⊗(t1::ZeroTensor, t2::LazyTensor) = ZeroTensor((range_size(t1)...,range_size(t2)...),(domain_size(t1)..., domain_size(t2)...))
+⊗(t1::ZeroTensor, t2::ZeroTensor) = ZeroTensor((range_size(t1)...,range_size(t2)...),(domain_size(t1)..., domain_size(t2)...)) # Resolve ambiguity
+⊗(t1::ZeroTensor, t2::IdentityTensor) = ZeroTensor((range_size(t1)...,range_size(t2)...),(domain_size(t1)..., domain_size(t2)...)) # Resolve ambiguity
+⊗(t1::IdentityTensor, t2::ZeroTensor) = ZeroTensor((range_size(t1)...,range_size(t2)...),(domain_size(t1)..., domain_size(t2)...)) # Resolve ambiguity
 
 end # module
