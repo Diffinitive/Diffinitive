@@ -270,7 +270,6 @@ end
 TensorOuterProduct(ts::Vararg{LazyTensor}) = foldl(TensorOuterProduct, ts)
 
 
-
 """
     inflate(tm::LazyTensor, sz, dir)
 
@@ -293,6 +292,8 @@ function inflate(tm::LazyTensor, sz, dir)
     return foldl(⊗, parts)
 end
 
+
+# TODO: Move these functions elsewhere? E.g. to LazyArray.jl? Also should we not export them?
 function check_domain_size(tm::LazyTensor, sz)
     if domain_size(tm) != sz
         throw(DomainSizeMismatch(tm,sz))
