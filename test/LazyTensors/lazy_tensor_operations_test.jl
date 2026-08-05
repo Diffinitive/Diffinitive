@@ -153,6 +153,11 @@ end
 
         @test -DiagonalTensor(2s) != -DiagonalTensor(s)
     end
+
+    @testset "ZeroTensor argument" begin
+        @test -ZeroTensor(3,3) == ZeroTensor(3,3)
+    end
+
 end
 
 @testset "TensorSum" begin
@@ -211,6 +216,13 @@ end
         @test (-A-B-C-D)*v == -1v - 2v - 3v - 4v
     end
 
+    @testset "ZeroTensor arguments" begin
+        A = ScalingTensor(1.0, (3,3))
+        @test ZeroTensor(3,3) + A == A + ZeroTensor(3,3) == A
+        @test_throws DomainSizeMismatch ZeroTensor((3,3), (2,3)) + A
+        @test_throws RangeSizeMismatch ZeroTensor((1,3), (3,3)) + A
+    end
+
     @testset "Base.:(==)" begin
         s = [4., 6., 5., 6., 7.]
 
@@ -265,6 +277,18 @@ end
         @test ScalingTensor(2., (5,)) ∘ DiagonalTensor(2s) != ScalingTensor(3., (5,)) ∘ DiagonalTensor(2s)
 
     end
+
+    @testset "IndentityTensor arguments" begin
+        @test IdentityTensor(range_size(Ã)) ∘ Ã == Ã ∘ IdentityTensor(domain_size(Ã)) == Ã
+        @test_throws DomainSizeMismatch Ã ∘ IdentityTensor(range_size(Ã))
+    end
+
+    @testset "ZeroTensor arguments" begin
+        @test ZeroTensor((1, 2), range_size(Ã)) ∘ Ã == ZeroTensor((1, 2), domain_size((Ã)))
+        @test Ã ∘ ZeroTensor(domain_size(Ã), (1 , 2)) == ZeroTensor(range_size(Ã), (1 , 2))
+        @test_throws DomainSizeMismatch Ã ∘ ZeroTensor(range_size(Ã), (1 , 2))
+    end
+
 end
 
 
@@ -444,7 +468,7 @@ end
     @tullio BAv[k,i] := A[i,j]*B[k,l,m]*v₂[l,m,j]
     @test B̃Ã*v₂ ≈ BAv
 
-    @testset "Indentity mapping arguments" begin
+    @testset "IndentityTensor arguments" begin
         @test IdentityTensor(3,2) ⊗ IdentityTensor(1,2) == IdentityTensor(3,2,1,2)
         @test IdentityTensor(3,2) ⊗ Ã == InflatedTensor(IdentityTensor(3,2),Ã)
         @test Ã ⊗ IdentityTensor(3,2) == InflatedTensor(Ã,IdentityTensor(3,2))
@@ -454,7 +478,7 @@ end
         @test I1⊗Ã⊗I2 == InflatedTensor(I1, Ã, I2)
     end
 
-    @testset "Zero mapping arguments" begin
+    @testset "ZeroTensor arguments" begin
         @test ZeroTensor(3,2) ⊗ ZeroTensor(1,2) == ZeroTensor(3,2,1,2)
 
         @test ZeroTensor(3,2) ⊗ Ã == ZeroTensor((3,2,3), (3,2,2))
