@@ -132,7 +132,7 @@ end
 
 
 
-
+# TODO: Rename to TensorInflation to better align with naming of other operations on LazyTensors?
 """
     InflatedTensor{R, D} <: LazyTensor{R, D}
 
