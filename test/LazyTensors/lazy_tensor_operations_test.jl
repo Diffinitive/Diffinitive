@@ -198,22 +198,24 @@ end
         C = ScalingTensor(3.0, (3,))
         D = ScalingTensor(4.0, (3,))
 
-        @test A+B+C+D isa TensorSum
+        @test A+B+C+D == TensorSum(A,B,C,D)
+        @test TensorSum(A,B,C,D) != TensorSum(TensorSum(A,B),TensorSum(C,D)) # Constructor does not flatten
         @test length((A+B+C+D).tms) == 4
 
 
-        @test A+B-C+D isa TensorSum
+        @test A+B-C+D == TensorSum(A,B,-C,D)
         @test length((A+B-C+D).tms) == 4
 
         v = rand(3)
         @test (A+B-C+D)*v == 1v + 2v - 3v + 4v
 
 
-        @test -A-B-C-D isa TensorSum
+        @test -A-B-C-D == TensorSum(-A,-B,-C,-D)
         @test length((-A-B-C-D).tms) == 4
 
         v = rand(3)
         @test (-A-B-C-D)*v == -1v - 2v - 3v - 4v
+
     end
 
     @testset "ZeroTensor arguments" begin
