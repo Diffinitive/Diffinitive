@@ -259,7 +259,7 @@ To apply ``A⊗B⊗C`` we evaluate
 ```
 """
 function TensorOuterProduct end
-
+# TODO: Remove TensorOuterProduct and just use ⊗? It is not a type.
 function TensorOuterProduct(t1::LazyTensor, t2::LazyTensor)
     inflt1 = InflatedTensor(t1, IdentityTensor(range_size(t2)))
     inflt2 = InflatedTensor(IdentityTensor(domain_size(t1)), t2)
