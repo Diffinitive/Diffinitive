@@ -78,9 +78,9 @@ Base.:+(t1::LazyTensor, t2::LazyTensor) = TensorSum(t1, t2)
 Base.:+(ts::LazyTensor...) = foldl(+, ts) # Break the multi argument + into regular binary + to allow pariwise specialisations to work.
 ## Specializations to flatten the nesting of tensors. This helps Julia during inference.
 # TODO: Move these to TensorSum instead of Base.:+? Seems like we will always want this
-Base.:+(t1::TensorSum, t2::TensorSum) = TensorSum(t1.tms..., t2.tms...)
-Base.:+(t1::TensorSum, t2::LazyTensor) = TensorSum(t1.tms..., t2)
-Base.:+(t1::LazyTensor, t2::TensorSum) = TensorSum(t1, t2.tms...)
+Base.:+(t1::TensorSum, t2::TensorSum) = TensorSum(t1.ts..., t2.ts...)
+Base.:+(t1::TensorSum, t2::LazyTensor) = TensorSum(t1.ts..., t2)
+Base.:+(t1::LazyTensor, t2::TensorSum) = TensorSum(t1, t2.ts...)
 ## Addition of zero
 Base.:+(t1::LazyTensor, t2::ZeroTensor) = (check_equal_size(t1, t2); t1)
 Base.:+(t1::ZeroTensor, t2::LazyTensor) = (check_equal_size(t1, t2); t2)
