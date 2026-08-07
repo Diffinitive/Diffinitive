@@ -199,11 +199,8 @@ end
 ## "Vector of tensors ∘ scalar -> vector"
 struct VectorTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor{R, D}
     ts::NT
-    function VectorTensor(ts::NT) where {NT <: NTuple{N, LazyTensor{R, D}} where {N, R, D}}
+    function VectorTensor(ts::NT) where {N, R, D, NT <: NTuple{N, LazyTensor{R, D}}}
         @boundscheck check_equal_size(ts...)
-        N = length(ts)
-        R = range_dim(ts[1])
-        D = domain_dim(ts[1])
         return new{N, R, D, NT}(ts)
     end
 end
@@ -243,11 +240,8 @@ end
 ## "Vector of tensors ∘ vector -> scalar"
 struct VectorDotTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor{R, D}
     ts::NT
-    function VectorDotTensor(ts::NT) where {NT <: NTuple{N, LazyTensor{R, D}} where {N, R, D}}
+    function VectorDotTensor(ts::NT) where {N, R, D, NT <: NTuple{N, LazyTensor{R, D}}}
         @boundscheck check_equal_size(ts...)
-        N = length(ts)
-        R = range_dim(ts[1])
-        D = domain_dim(ts[1])
         return new{N, R, D, NT}(ts)
     end
 end
@@ -297,11 +291,8 @@ The elements of the `MatrixTensor` are `LazyTensors` of equal dimensions and siz
 """
 struct MatrixTensor{N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}}} <: LazyTensor{R, D}
     ts::TT # Matrix of Tensors
-    function MatrixTensor(ts::TT) where {TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}} where {N, M, R, D}}
+    function MatrixTensor(ts::TT) where {N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}}}
         @boundscheck check_equal_size((ts.table...)...)
-        N, M = size(ts)
-        R = range_dim(ts[1,1])
-        D = domain_dim(ts[1,1])
         new{N, M, R, D, TT}(ts)
     end
 end
