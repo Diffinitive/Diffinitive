@@ -287,7 +287,14 @@ function Base.:+(a::VectorDotTensor, b::VectorDotTensor)
 end
 
 
-## "Matrix of tensors ∘ vector -> vector"
+"""
+    MatrixTensor{N,M,R,D} <: LazyTensor{R,D}
+
+Describes a mapping of an `M` component `D` dimensional tensor to an `N` component `R` dimensional
+tensor implemented as a `LazyTensor`
+
+The elements of the `MatrixTensor` are `LazyTensors` of equal dimensions and sizes.
+"""
 struct MatrixTensor{N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}}} <: LazyTensor{R, D}
     ts::TT # Matrix of Tensors
     function MatrixTensor(ts::TT) where {TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}} where {N, M, R, D}}
@@ -299,18 +306,30 @@ struct MatrixTensor{N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTenso
     end
 end
 
-function MatrixTensor(ts::NTuple{N, NTuple{M, LazyTensor}} where {N,M})
-    return MatrixTensor(TupleTable(ts))
-end
+"""
+    MatrixTensor(::NTuple{N, NTuple{M, LazyTensor}})
+    MatrixTensor(::Vararg{NTuple{N, LazyTensor})
 
-function MatrixTensor(ts::Vararg{NTuple{N, LazyTensor} where N})
-    return MatrixTensor(ts)
-end
+Constructs an `N`-by-`M` `MatrixTensor` from an `M`-tuples of `LazyTensor`s
+either given as a single `N`-tuple or `N` arguments.
+"""
+MatrixTensor(ts::NTuple{N, NTuple{M, LazyTensor}} where {N,M}) = MatrixTensor(TupleTable(ts))
+MatrixTensor(ts::Vararg{NTuple{N, LazyTensor} where N}) = MatrixTensor(ts)
 
+"""
+    MatrixTensor(::Matrix}
+
+Constructs a `MatrixTensor` from a `Matrix` of `LazyTensor`s.
+"""
 function MatrixTensor(ts::Matrix)
     return MatrixTensor(TupleTable(ts))
 end
 
+"""
+    MatrixTensor(f, n, m}
+
+Constructs an `n`-by-`m` `MatrixTensor` by mapping the function `f`, where `f(i,j)` returns a `LazyTensor`
+"""
 function MatrixTensor(f, n, m)
     return map(tuple_range(n)) do i
         map(tuple_range(m)) do j
