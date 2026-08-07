@@ -196,7 +196,15 @@ function Base.:+(a::TupleTable, b::TupleTable)
     end |> TupleTable
 end
 
-## "Vector of tensors ∘ scalar -> vector"
+
+"""
+    VectorTensor{N,R,D} <: LazyTensor{R,D}
+
+Describes a mapping of a scalar-valued `D` dimensional tensor to an `N` component `R` dimensional
+tensor implemented as a `LazyTensor`.
+
+The elements of the `VectorTensor` are `LazyTensor`s of equal dimensions and sizes.
+"""
 struct VectorTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor{R, D}
     ts::NT
     function VectorTensor(ts::NT) where {N, R, D, NT <: NTuple{N, LazyTensor{R, D}}}
@@ -205,8 +213,23 @@ struct VectorTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor{R,
     end
 end
 
+
+"""
+    VectorTensor(::NTuple{N, NTuple{M, LazyTensor}})
+    VectorTensor(::Vararg{NTuple{N, LazyTensor})
+
+Constructs an  `N`-element `VectorTensor` from an `N` `LazyTensor`s
+either given as a single `N`-tuple or `N` arguments.
+"""
 VectorTensor(ts::Vararg{LazyTensor}) = VectorTensor(ts)
 
+
+"""
+    VectorTensor(f, n}
+
+Constructs an `n`-element `VectorTensor` by mapping the function `f`,
+where `f(i)` returns a `LazyTensor`.
+"""
 function VectorTensor(f, n)
     return VectorTensor(map(f, tuple_range(n)))
 end
@@ -237,7 +260,14 @@ function Base.:+(a::VectorTensor, b::VectorTensor)
 end
 
 
-## "Vector of tensors ∘ vector -> scalar"
+"""
+    VectorDotTensor{N,R,D} <: LazyTensor{R,D}
+
+Describes a mapping of an `N` component `D` dimensional tensor to scalar valued `R` dimensional
+tensor implemented as a `LazyTensor`.
+
+The elements of the `VectorDotTensor` are `LazyTensor`s of equal dimensions and sizes.
+"""
 struct VectorDotTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor{R, D}
     ts::NT
     function VectorDotTensor(ts::NT) where {N, R, D, NT <: NTuple{N, LazyTensor{R, D}}}
@@ -246,8 +276,23 @@ struct VectorDotTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor
     end
 end
 
+
+"""
+    VectorDotTensor(::NTuple{N, NTuple{M, LazyTensor}})
+    VectorDotTensor(::Vararg{NTuple{N, LazyTensor})
+
+Constructs an  `N`-element `VectorDotTensor` from an `N` `LazyTensor`s
+either given as a single `N`-tuple or `N` arguments.
+"""
 VectorDotTensor(ts::Vararg{LazyTensor}) = VectorDotTensor(ts)
 
+
+"""
+    VectorDotTensor(f, n}
+
+Constructs an `n`-element `VectorDotTensor` by mapping the function `f`,
+where `f(i)` returns a `LazyTensor`.
+"""
 function VectorDotTensor(f, n)
     return VectorDotTensor(map(f, tuple_range(n)))
 end
@@ -287,7 +332,7 @@ end
 Describes a mapping of an `M` component `D` dimensional tensor to an `N` component `R` dimensional
 tensor implemented as a `LazyTensor`
 
-The elements of the `MatrixTensor` are `LazyTensors` of equal dimensions and sizes.
+The elements of the `MatrixTensor` are `LazyTensor`s of equal dimensions and sizes.
 """
 struct MatrixTensor{N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}}} <: LazyTensor{R, D}
     ts::TT # Matrix of Tensors
@@ -319,7 +364,8 @@ end
 """
     MatrixTensor(f, n, m}
 
-Constructs an `n`-by-`m` `MatrixTensor` by mapping the function `f`, where `f(i,j)` returns a `LazyTensor`
+Constructs an `n`-by-`m` `MatrixTensor` by mapping the function `f`,
+where `f(i,j)` returns a `LazyTensor`
 """
 function MatrixTensor(f, n, m)
     return map(tuple_range(n)) do i
