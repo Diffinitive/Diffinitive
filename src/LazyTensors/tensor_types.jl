@@ -145,7 +145,9 @@ end
 
 Base.adjoint(t::DenseTensor) = DenseTensor(conj(t.A), t.domain_indicies, t.range_indicies)
 
-
+# TODO: Move TupleTable somewhere else? 
+# Perhaps we should create e.g. tuple_utils.jl which includes tuple_manipulation.jl
+# TupleTable and tuple_range.
 NMTuple{N,M,T} = NTuple{N,NTuple{M, T}}
 # Different from SMatrix because the elements can differ in type
 struct TupleTable{N,M, T <: NMTuple{N,M,Any}}
