@@ -341,6 +341,8 @@ end
     @testset "Constructors" begin
         s = [4., 6., 5., 6., 7.]
         @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
+        @test_throws DomainSizeMismatch VectorTensor(ZeroTensor((1,), (1,)), ZeroTensor((1,), (2,)))
+        @test_throws RangeSizeMismatch VectorTensor(ZeroTensor((1,), (1,)), ZeroTensor((2,), (1,)))
 
         A = VectorTensor(3) do i
             DiagonalTensor(i*s)
@@ -370,6 +372,9 @@ end
         s = [4., 6., 5., 6., 7.]
         A  = VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
         B  = VectorTensor(ScalingTensor(2., (5,)), DiagonalTensor(2s))
+        C = VectorTensor(ScalingTensor(2., (5,)), ScalingTensor(3., (5,)), ScalingTensor(2., (5,)))
+        D = VectorTensor(ZeroTensor((5,), (1,)), ZeroTensor((5,), (1,)))
+        E = VectorTensor(ZeroTensor((1,), (5,)), ZeroTensor((1,), (5,)))
 
         ApB = VectorTensor(
             DiagonalTensor(s) + ScalingTensor(2., (5,)),
@@ -377,6 +382,9 @@ end
         )
 
         @test A+B == ApB
+        @test_throws DimensionMismatch A + C
+        @test_throws DomainSizeMismatch A + D
+        @test_throws RangeSizeMismatch A + E
     end
 end
 
@@ -384,6 +392,8 @@ end
     @testset "Constructors" begin
         s = [4., 6., 5., 6., 7.]
         @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
+        @test_throws DomainSizeMismatch VectorDotTensor(ZeroTensor((1,), (1,)), ZeroTensor((1,), (2,)))
+        @test_throws RangeSizeMismatch VectorDotTensor(ZeroTensor((1,), (1,)), ZeroTensor((2,), (1,)))
 
          A = VectorDotTensor(3) do i
             DiagonalTensor(i*s)
@@ -415,6 +425,10 @@ end
         s = [4., 6., 5., 6., 7.]
         A  = VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
         B  = VectorDotTensor(ScalingTensor(2., (5,)), DiagonalTensor(2s))
+        C = VectorDotTensor(ScalingTensor(2., (5,)), ScalingTensor(3., (5,)), ScalingTensor(2., (5,)))
+        D = VectorDotTensor(ZeroTensor((5,), (1,)), ZeroTensor((5,), (1,)))
+        E = VectorDotTensor(ZeroTensor((1,), (5,)), ZeroTensor((1,), (5,)))
+
 
         ApB = VectorDotTensor(
             DiagonalTensor(s) + ScalingTensor(2., (5,)),
@@ -422,6 +436,9 @@ end
         )
 
         @test A+B == ApB
+        @test_throws DimensionMismatch A + C
+        @test_throws DomainSizeMismatch A + D
+        @test_throws RangeSizeMismatch A + E
     end
 end
 
@@ -466,6 +483,15 @@ end
             (DiagonalTensor(1s1 + 1s2), DiagonalTensor(1s1 + 2s2)),
             (DiagonalTensor(2s1 + 1s2), DiagonalTensor(2s1 + 2s2)),
             (DiagonalTensor(3s1 + 1s2), DiagonalTensor(3s1 + 2s2)),
+        )
+
+        @test_throws DomainSizeMismatch MatrixTensor(
+            (DiagonalTensor(1s1 + 1s2), DiagonalTensor(1s1 + 2s2)),
+            (DiagonalTensor(2s1 + 1s2), ZeroTensor((5,), (1,)))
+        )
+        @test_throws RangeSizeMismatch MatrixTensor(
+            (DiagonalTensor(1s1 + 1s2), DiagonalTensor(1s1 + 2s2)),
+            (DiagonalTensor(2s1 + 1s2), ZeroTensor((1,), (5,)))
         )
     end
 
@@ -545,6 +571,19 @@ end
             (ScalingTensor(5.,(5,)), DiagonalTensor(2s1)),
             (DiagonalTensor(2s2), ScalingTensor(7., (5,))),
         )
+        C = MatrixTensor(
+            (ScalingTensor(5.,(5,)), DiagonalTensor(2s1)),
+            (DiagonalTensor(2s2), ScalingTensor(7., (5,))),
+            (DiagonalTensor(2s2), ScalingTensor(7., (5,))))
+        D = MatrixTensor(
+            (ZeroTensor((5,), (1,)), ZeroTensor((5,), (1,))),
+            (ZeroTensor((5,), (1,)), ZeroTensor((5,), (1,)))
+        )
+        E = MatrixTensor(
+            (ZeroTensor((1,), (5,)), ZeroTensor((1,), (5,))),
+            (ZeroTensor((1,), (5,)), ZeroTensor((1,), (5,)))
+        )
+
 
         ApB = MatrixTensor(
             (DiagonalTensor(s1)+ScalingTensor(5.,(5,)), ScalingTensor(3.,(5,))+ DiagonalTensor(2s1)),
@@ -552,6 +591,9 @@ end
         )
 
         @test A+B == ApB
+        @test_throws DimensionMismatch A + C
+        @test_throws DomainSizeMismatch A + D
+        @test_throws RangeSizeMismatch A + E
     end
 end
 
