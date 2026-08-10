@@ -60,31 +60,53 @@ The adjoint of the mapping as a `LazyTensor`.
 Base.adjoint(::LazyTensor)
 
 
-# TODO: Add tests for check functions
 # TODO: Add docs for check functions
 
+check_domain_size(::Type{Bool}, t::LazyTensor, sz) = domain_size(t) == sz
+
 function check_domain_size(t::LazyTensor, sz)
-    if domain_size(t) != sz
+    if !check_domain_size(Bool, t, sz)
         throw(DomainSizeMismatch(t, sz))
     end
 end
 
+
+check_range_size(::Type{Bool}, t::LazyTensor, sz) = range_size(t) == sz
+
 function check_range_size(t::LazyTensor, sz)
-    if range_size(t) != sz
+    if !check_range_size(Bool, t, sz)
         throw(RangeSizeMismatch(t, sz))
     end
 end
 
-function check_equal_size(ts::Vararg{LazyTensor})
-    map(ts) do t
-        check_domain_size(t, domain_size(ts[1]))
-        check_range_size(t, range_size(ts[1]))
+
+function check_equal_size(::Type{Bool}, t1::LazyTensor, ts::Vararg{LazyTensor})
+    ref_domain_size = domain_size(t1)
+    ref_range_size = range_size(t1)
+
+    return all((t1, ts...)) do t
+        check_domain_size(Bool, t, ref_domain_size) & check_range_size(Bool, t, ref_range_size)
     end
 end
 
-function check_composable(t1::LazyTensor, t2::LazyTensor)
-    check_domain_size(t1, range_size(t2))
+function check_equal_size(t1::LazyTensor, ts::Vararg{LazyTensor})
+    if !check_equal_size(Bool, t1, ts...)
+        for t ∈ (t1, ts...)
+            check_domain_size(t, domain_size(t1))
+            check_range_size(t, range_size(t1))
+        end
+    end
 end
+
+
+check_composable(::Type{Bool}, t1::LazyTensor, t2::LazyTensor) = check_domain_size(Bool, t1, range_size(t2))
+
+function check_composable(t1::LazyTensor, t2::LazyTensor)
+    if !check_composable(Bool, t1, t2)
+        throw(DomainSizeMismatch(t1, range_size(t2)))
+    end
+end
+
 
 struct DomainSizeMismatch <: Exception
     t::LazyTensor
