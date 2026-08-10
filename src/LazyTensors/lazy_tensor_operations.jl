@@ -119,17 +119,6 @@ end
 
 Base.adjoint(tcomp::TensorComposition) = TensorComposition(adjoint(tcomp.t2), adjoint(tcomp.t1))
 
-"""
-    TensorComposition(t, it::IdentityTensor)
-    TensorComposition(it::IdentityTensor, t)
-
-Composes a `LazyTensor` `t` with an `IdentityTensor` `it`, by returning `t`
-"""
-function TensorComposition(t::LazyTensor{R, D}, it::IdentityTensor{D}) where {R, D}
-    @boundscheck check_domain_size(t, range_size(it))
-    return t
-end
-
 
 """
     InflatedTensor{R, D} <: LazyTensor{R, D}
