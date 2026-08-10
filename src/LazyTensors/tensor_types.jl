@@ -145,18 +145,38 @@ end
 
 Base.adjoint(t::DenseTensor) = DenseTensor(conj(t.A), t.domain_indicies, t.range_indicies)
 
+
 # TODO: Move TupleTable somewhere else? 
 # Perhaps we should create e.g. tuple_utils.jl which includes tuple_manipulation.jl
 # TupleTable and tuple_range.
-NMTuple{N,M,T} = NTuple{N,NTuple{M, T}}
-# Different from SMatrix because the elements can differ in type
-struct TupleTable{N,M, T <: NMTuple{N,M,Any}}
+NMTuple{N, M, T} = NTuple{N, NTuple{M, T}}
+"""
+   TupleTable{N, M, T}
+
+A static `N` row, `M` column table of types `T` built from tuples.
+
+A tuple table `t::TupleTable` is indexable, similar to matrix objects, i.e.,
+t[i,j] returns the the table entry in position i, j. In contrast to, e.g., 
+`StaticArrays.SMatrix` the elements of `t` can differ in type.
+"""
+struct TupleTable{N, M, T <: NMTuple{N, M, Any}}
     table::T
 end
 
+
+"""
+   TupleTable(rows...)
+   TupleTable(A::Matrix)
+
+Creates a TupleTable{N,M} from either `N` `rows` of `M` element tuples or from
+a `N`-by-`M` `Matrix`.
+
+"""
 function TupleTable(rows...)
-    if !allequal(length, rows)
-        throw(DimensionMismatch("All rows must have the same length"))
+    @boundscheck begin
+        if !allequal(length, rows)
+            throw(DimensionMismatch("All rows must have the same length"))
+        end
     end
     TupleTable(rows)
 end
@@ -171,17 +191,24 @@ function TupleTable(A::Matrix)
     end |> TupleTable
 end
 
-Base.size(::Type{<:TupleTable{N,M}}) where {N,M} = (N,M)
+Base.size(::Type{<:TupleTable{N, M}}) where {N, M} = (N, M)
 Base.size(t::TupleTable) = size(typeof(t))
 
 Base.getindex(t::TupleTable, i, j) = t.table[i][j]
 
+
+"""
+   Base.adjoint(tt::TupleTable)
+
+Creates the transposed TupleTable storing the adjoints of the elements 
+of `tt`.
+"""
 function Base.adjoint(tt::TupleTable)
     N, M = size(tt)
 
     return map(tuple_range(M)) do j
         map(tuple_range(N)) do i
-            adjoint(tt[i,j])
+            adjoint(tt[i, j])
         end
     end |> TupleTable
 end
@@ -190,7 +217,13 @@ function Base.:(==)(a::TupleTable, b::TupleTable)
     return a.table == b.table
 end
 
+
 function Base.:+(a::TupleTable, b::TupleTable)
+    @boundscheck begin
+        if size(a) != size(b)
+            throw(DimensionMismatch("adding TupleTable objects of sizes $(size(a)) and $(size(b))"))
+        end
+    end
     return map(a.table, b.table) do aᵢ, bᵢ
         aᵢ .+ bᵢ
     end |> TupleTable
@@ -411,4 +444,9 @@ function Base.:+(a::MatrixTensor, b::MatrixTensor)
 end
 
 
+"""
+   tuple_range(n)
+
+The range 1, ..., n as a tuple
+"""
 tuple_range(n) = ntuple(identity, n)
