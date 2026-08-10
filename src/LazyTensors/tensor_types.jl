@@ -240,7 +240,7 @@ The elements of the `VectorTensor` are `LazyTensor`s of equal dimensions and siz
 """
 struct VectorTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor{R, D}
     ts::NT
-    function VectorTensor(ts::NT) where {N, R, D, NT <: NTuple{N, LazyTensor{R, D}}}
+    function VectorTensor{N, R, D}(ts::NT) where {N, R, D, NT <: NTuple{N, LazyTensor{R, D}}}
         @boundscheck check_equal_size(ts...)
         return new{N, R, D, NT}(ts)
     end
@@ -303,7 +303,7 @@ The elements of the `VectorDotTensor` are `LazyTensor`s of equal dimensions and 
 """
 struct VectorDotTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor{R, D}
     ts::NT
-    function VectorDotTensor(ts::NT) where {N, R, D, NT <: NTuple{N, LazyTensor{R, D}}}
+    function VectorDotTensor{N, R, D}(ts::NT) where {N, R, D, NT <: NTuple{N, LazyTensor{R, D}}}
         @boundscheck check_equal_size(ts...)
         return new{N, R, D, NT}(ts)
     end
@@ -369,7 +369,7 @@ The elements of the `MatrixTensor` are `LazyTensor`s of equal dimensions and siz
 """
 struct MatrixTensor{N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}}} <: LazyTensor{R, D}
     ts::TT # Matrix of Tensors
-    function MatrixTensor(ts::TT) where {N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}}}
+    function MatrixTensor{N, M, R, D}(ts::TT) where {N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}}}
         @boundscheck check_equal_size((ts.table...)...)
         new{N, M, R, D, TT}(ts)
     end
