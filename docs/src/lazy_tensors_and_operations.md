@@ -160,7 +160,7 @@ Available operations include:
 * `-` for lazy negation and subtraction.
 * scalar multiplication with `*`.
 * `∘` for lazy composition.
-* `'` for transposes, when the concrete tensor implements `Base.adjoint`.
+* `'` for transposes, when the concrete tensor implements [`Base.adjoint`](@ref).
 * `⊗` for lazy outer products.
 
 For example, `Dx + Dy` creates a lazy sum of two derivative operators:
@@ -190,6 +190,7 @@ julia> (Dxy * v)[6,6]
 0.0
 ```
 
+
 Adjoints are also lazy:
 
 ```jldoctest lazy_tensors
@@ -198,7 +199,6 @@ julia> A = DenseTensor([1.0 2.0; 3.0 4.0], (1,), (2,));
 julia> A' isa LazyTensor{1,1}
 true
 ```
-
 ## Simplifications
 
 The operator overloads perform a few basic simplifications. These are intended
