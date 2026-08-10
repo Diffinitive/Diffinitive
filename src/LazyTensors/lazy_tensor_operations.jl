@@ -131,8 +131,6 @@ function TensorComposition(t::LazyTensor{R, D}, it::IdentityTensor{D}) where {R,
 end
 
 
-
-# TODO: Rename to TensorInflation to better align with naming of other operations on LazyTensors?
 """
     InflatedTensor{R, D} <: LazyTensor{R, D}
 

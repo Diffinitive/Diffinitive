@@ -36,7 +36,6 @@ Base.:+(t1::LazyTensor, t2::LazyTensor) = TensorSum(t1, t2)
 #  Addition and subtraction of lazy tensors
 Base.:+(ts::LazyTensor...) = foldl(+, ts) # Break the multi argument + into regular binary + to allow pariwise specialisations to work.
 ## Specializations to flatten the nesting of tensors. This helps Julia during inference.
-# TODO: Move these to TensorSum instead of Base.:+? Seems like we will always want this
 Base.:+(t1::TensorSum, t2::TensorSum) = TensorSum(t1.ts..., t2.ts...)
 Base.:+(t1::TensorSum, t2::LazyTensor) = TensorSum(t1.ts..., t2)
 Base.:+(t1::LazyTensor, t2::TensorSum) = TensorSum(t1, t2.ts...)
@@ -78,7 +77,7 @@ composing with `ZeroTensor`s and `IdentityTensor`s.
 See also: [`TensorComposition`](@ref).
 """
 Base.:∘(t1::LazyTensor, t2::LazyTensor) = TensorComposition(t1, t2)
-Base.:∘(tcomp::TensorComposition, t::LazyTensor) = tcomp.t1∘(tcomp.t2∘t) # TODO: Move TensorComposition. Seems like we will always want this
+Base.:∘(tcomp::TensorComposition, t::LazyTensor) = tcomp.t1∘(tcomp.t2∘t)
 ## Composing with identity
 Base.:∘(t1::LazyTensor, t2::IdentityTensor) = (check_composable(t1, t2); t1)
 Base.:∘(t1::IdentityTensor, t2::LazyTensor) = (check_composable(t1, t2); t2)
