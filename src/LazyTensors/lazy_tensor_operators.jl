@@ -16,19 +16,15 @@ Base.:*(t::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*, (t,
 
 
 """
-    *(a, t::LazyTensor)
-    *(t::LazyTensor, a)
+    *(a::Number, t::LazyTensor)
+    *(t::LazyTensor, a::Number)
 
 Lazy multiplication of a `LazyTensor` and a constant, resulting in a scaled `LazyTensor`.
 
 See also: [`TensorComposition`](@ref), [`ScalingTensor`](@ref).
 """
-Base.:*(a, t::LazyTensor) = TensorComposition(ScalingTensor(a, range_size(t)), t)
-Base.:*(t::LazyTensor, a) = a*t
-#TODO: Should we not have e.g. a::Number, for clearer error handeling?
-#      Only case I can see where we would want something else if we let `a` be some
-#      heap-allocated scalar, e.g. a = @view b[1] for some array b. But then it is
-#      not really a constant so I think we don't need to support this case here.
+Base.:*(a::Number, t::LazyTensor) = TensorComposition(ScalingTensor(a, range_size(t)), t)
+Base.:*(t::LazyTensor, a::Number) = a*t
 
 """
     +(t1::LazyTensor, t2::LazyTensor)
