@@ -10,9 +10,7 @@ See also [`TensorApplication`](@ref)
 Base.:*(t::LazyTensor, v::AbstractArray) = TensorApplication(t, v)
 Base.:*(t1::LazyTensor, t2::LazyTensor) = throw(MethodError(Base.:*, (t1, t2)))
 Base.:*(t::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*, (t, args...))
-# TODO: Simplification of application with identity?
-#       Base.:*(t::IdentityTensor, v::AbstractArray) = v
-# Would this lead to type-unstable code?
+Base.:*(t::IdentityTensor, v::AbstractArray) = v
 
 
 """
