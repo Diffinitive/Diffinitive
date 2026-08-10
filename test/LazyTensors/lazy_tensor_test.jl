@@ -38,12 +38,20 @@ end
     end
 
     @testset "check_equal_size" begin
+        another_matching = ZeroTensor((2, 3), (4, 5))
+
         @test check_equal_size(Bool, t, matching)
+        @test check_equal_size(Bool, t, matching, another_matching)
         @test !check_equal_size(Bool, t, different_domain)
         @test !check_equal_size(Bool, t, different_range)
+        @test !check_equal_size(Bool, t, matching, different_domain)
+        @test !check_equal_size(Bool, t, matching, different_range)
         @test isnothing(check_equal_size(t, matching))
+        @test isnothing(check_equal_size(t, matching, another_matching))
         @test_throws DomainSizeMismatch check_equal_size(t, different_domain)
         @test_throws RangeSizeMismatch check_equal_size(t, different_range)
+        @test_throws DomainSizeMismatch check_equal_size(t, matching, different_domain)
+        @test_throws RangeSizeMismatch check_equal_size(t, matching, different_range)
     end
 
     @testset "check_composable" begin

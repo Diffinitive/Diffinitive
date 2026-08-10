@@ -80,24 +80,25 @@ function check_range_size(t::LazyTensor, sz)
 end
 
 
-function check_equal_size(::Type{Bool}, t1::LazyTensor, ts::Vararg{LazyTensor})
-    ref_domain_size = domain_size(t1)
-    ref_range_size = range_size(t1)
+function check_equal_size(::Type{Bool}, t1::LazyTensor, t2::LazyTensor)
+    return check_domain_size(Bool, t2, domain_size(t1)) & check_range_size(Bool, t2, range_size(t1))
+end
 
-    return all((t1, ts...)) do t
-        check_domain_size(Bool, t, ref_domain_size) & check_range_size(Bool, t, ref_range_size)
+function check_equal_size(::Type{Bool}, t1::LazyTensor, t2::LazyTensor, ts::LazyTensor...)
+    return check_equal_size(Bool, t1, t2) & check_equal_size(Bool, t1, ts...)
+end
+
+function check_equal_size(t1::LazyTensor, t2::LazyTensor)
+    if !check_equal_size(Bool, t1, t2)
+        check_domain_size(t2, domain_size(t1))
+        check_range_size(t2, range_size(t1))
     end
 end
 
-function check_equal_size(t1::LazyTensor, ts::Vararg{LazyTensor})
-    if !check_equal_size(Bool, t1, ts...)
-        for t ∈ (t1, ts...)
-            check_domain_size(t, domain_size(t1))
-            check_range_size(t, range_size(t1))
-        end
-    end
+function check_equal_size(t1::LazyTensor, t2::LazyTensor, ts::LazyTensor...)
+    check_equal_size(t1, t2)
+    check_equal_size(t1, ts...)
 end
-
 
 check_composable(::Type{Bool}, t1::LazyTensor, t2::LazyTensor) = check_domain_size(Bool, t1, range_size(t2))
 
