@@ -58,3 +58,51 @@ function domain_size end
 The adjoint of the mapping as a `LazyTensor`.
 """
 Base.adjoint(::LazyTensor)
+
+
+# TODO: Add tests for check functions
+# TODO: Add docs for check functions
+
+function check_domain_size(t::LazyTensor, sz)
+    if domain_size(t) != sz
+        throw(DomainSizeMismatch(t, sz))
+    end
+end
+
+function check_range_size(t::LazyTensor, sz)
+    if range_size(t) != sz
+        throw(RangeSizeMismatch(t, sz))
+    end
+end
+
+function check_equal_size(ts::Vararg{LazyTensor})
+    map(ts) do t
+        check_domain_size(t, domain_size(ts[1]))
+        check_range_size(t, range_size(ts[1]))
+    end
+end
+
+function check_composable(t1::LazyTensor, t2::LazyTensor)
+    check_domain_size(t1, range_size(t2))
+end
+
+struct DomainSizeMismatch <: Exception
+    t::LazyTensor
+    sz
+end
+
+function Base.showerror(io::IO, err::DomainSizeMismatch)
+    print(io, "DomainSizeMismatch: ")
+    print(io, "domain size $(domain_size(err.t)) of LazyTensor not matching size $(err.sz)")
+end
+
+
+struct RangeSizeMismatch <: Exception
+    t::LazyTensor
+    sz
+end
+
+function Base.showerror(io::IO, err::RangeSizeMismatch)
+    print(io, "RangeSizeMismatch: ")
+    print(io, "range size $(range_size(err.t)) of LazyTensor not matching size $(err.sz)")
+end
