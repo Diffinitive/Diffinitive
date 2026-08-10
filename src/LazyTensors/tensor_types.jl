@@ -254,6 +254,12 @@ end
 Constructs an  `N`-element `VectorTensor` from an `N` `LazyTensor`s
 either given as a single `N`-tuple or `N` arguments.
 """
+function VectorTensor(ts::NT) where {NT <: NTuple{N, LazyTensor} where N}
+    N = length(ts)
+    R = range_dim(ts[1])
+    D = range_dim(ts[1])
+    VectorTensor{N, R, D}(ts)
+end
 VectorTensor(ts::Vararg{LazyTensor}) = VectorTensor(ts)
 
 
@@ -317,6 +323,13 @@ end
 Constructs an  `N`-element `VectorDotTensor` from an `N` `LazyTensor`s
 either given as a single `N`-tuple or `N` arguments.
 """
+function VectorDotTensor(ts::NT) where {NT <: NTuple{N, LazyTensor} where N}
+    N = length(ts)
+    R = range_dim(ts[1])
+    D = range_dim(ts[1])
+    VectorDotTensor{N, R, D}(ts)
+end
+VectorDotTensor(ts::NTuple{N, <: LazyTensor{R, D}}) where {N, R, D} = VectorDotTensor{N, R, D}(ts)
 VectorDotTensor(ts::Vararg{LazyTensor}) = VectorDotTensor(ts)
 
 
@@ -360,7 +373,7 @@ end
 
 
 """
-    MatrixTensor{N,M,R,D} <: LazyTensor{R,D}
+    MatrixTensor{N, M, R, D} <: LazyTensor{R, D}
 
 Describes a mapping of an `M` component `D` dimensional tensor to an `N` component `R` dimensional
 tensor implemented as a `LazyTensor`
@@ -376,13 +389,20 @@ struct MatrixTensor{N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTenso
 end
 
 """
+    MatrixTensor(::TupleTable)
     MatrixTensor(::NTuple{N, NTuple{M, LazyTensor}})
     MatrixTensor(::Vararg{NTuple{N, LazyTensor})
 
-Constructs an `N`-by-`M` `MatrixTensor` from an `M`-tuples of `LazyTensor`s
+Constructs an `N`-by-`M` `MatrixTensor` from either a `N`-by-`M` `M`-tuples of `LazyTensor`s
 either given as a single `N`-tuple or `N` arguments.
 """
-MatrixTensor(ts::NTuple{N, NTuple{M, LazyTensor}} where {N,M}) = MatrixTensor(TupleTable(ts))
+function MatrixTensor(ts::TT) where {TT <: TupleTable{N, M, <: NMTuple{N, M, LazyTensor}} where {N, M}}
+    N, M = size(ts)
+    R = range_dim(ts[1,1])
+    D = domain_dim(ts[1,1])
+    MatrixTensor{N, M, R, D}(ts)
+end
+MatrixTensor(ts::NTuple{N, NTuple{M, LazyTensor}} where {N, M}) = MatrixTensor(TupleTable(ts))
 MatrixTensor(ts::Vararg{NTuple{N, LazyTensor} where N}) = MatrixTensor(ts)
 
 """
