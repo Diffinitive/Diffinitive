@@ -4,6 +4,10 @@ export LazyTensor
 export apply
 export range_dim, domain_dim
 export range_size, domain_size
+export check_domain_size
+export check_range_size
+export check_equal_size
+export check_composable
 
 export TensorApplication
 export TensorComposition
