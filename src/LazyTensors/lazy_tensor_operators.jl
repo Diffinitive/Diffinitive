@@ -98,9 +98,9 @@ Base.:∘(t1::TensorComposition, t2::ZeroTensor) = (check_composable(t1, t2); Ze
 Lazy outer product of `LazyTensor`s. Provides basic simplifications when
 forming outer products with `ZeroTensor`s and `IdentityTensor`s.
 
-See also: [`TensorOuterProduct`](@ref).
+See also: [`outer_product`](@ref).
 """
-⊗(t1::LazyTensor, t2::LazyTensor) = TensorOuterProduct(t1, t2)
+⊗(t1::LazyTensor, t2::LazyTensor) = outer_product(t1, t2)
 # Outer products with IdentityTensor
 ⊗(t1::IdentityTensor, t2::IdentityTensor) = IdentityTensor(t1.size..., t2.size...)
 ⊗(t1::LazyTensor, t2::IdentityTensor) = InflatedTensor(t1, t2)

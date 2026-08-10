@@ -9,7 +9,7 @@ export TensorApplication
 export TensorComposition
 export TensorNegation
 export TensorSum
-export TensorOuterProduct
+export outer_product
 export IdentityTensor
 export ZeroTensor
 export ScalingTensor

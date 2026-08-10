@@ -431,12 +431,12 @@ end
     end
 end
 
-@testset "TensorOuterProduct" begin
+@testset "outer_product" begin
     A = ScalingTensor(2.0, (5,))
     B = ScalingTensor(3.0, (3,))
     C = ScalingTensor(5.0, (3,2))
 
-    AB = TensorOuterProduct(A,B)
+    AB = outer_product(A,B)
     @test AB isa LazyTensor{2,2}
     @test range_size(AB) == (5,3)
     @test domain_size(AB) == (5,3)
@@ -444,7 +444,7 @@ end
     v = rand(range_size(AB)...)
     @test AB*v == 6*v
 
-    ABC = TensorOuterProduct(A,B,C)
+    ABC = outer_product(A,B,C)
 
     @test ABC isa LazyTensor{4,4}
     @test range_size(ABC) == (5,3,3,2)
@@ -462,11 +462,11 @@ end
     Ã = DenseTensor(A,(1,),(2,))
     B̃ = DenseTensor(B,(1,),(2,3))
 
-    ÃB̃ = TensorOuterProduct(Ã,B̃)
+    ÃB̃ = outer_product(Ã,B̃)
     @tullio ABv[i,k] := A[i,j]*B[k,l,m]*v₁[j,l,m]
     @test ÃB̃*v₁ ≈ ABv
 
-    B̃Ã = TensorOuterProduct(B̃,Ã)
+    B̃Ã = outer_product(B̃,Ã)
     @tullio BAv[k,i] := A[i,j]*B[k,l,m]*v₂[l,m,j]
     @test B̃Ã*v₂ ≈ BAv
 
