@@ -606,12 +606,6 @@ function __branch_graph_print_node --argument-names node edges_file depth
             continue
         end
 
-        if test $depth -gt 0; and not __branch_graph_has_children "$child" "$edges_file"
-            printf '%s  o %s\n' "$prefix" "$child"
-            printf '%s /\n' "$prefix"
-            continue
-        end
-
         __branch_graph_print_node "$child" "$edges_file" (math $depth + 1) $next_path
 
         if __branch_graph_subtree_stops_at_path "$child" "$edges_file" $next_path
@@ -906,6 +900,41 @@ tooling	default'
     __branch_graph_assert_render 'nested branch' "$expected_nested" 'default	A' 'default	B' 'default	D' 'D	C' -- default
     or set failures (math $failures + 1)
 
+    set -l expected_nested_leaf_siblings 'o default
+|
+| o parent
+| |
+| | o leaf_b
+| |/
+| | o leaf_a
+| |/
+|/'
+    __branch_graph_assert_render 'nested leaf siblings' "$expected_nested_leaf_siblings" \
+        'default	parent' \
+        'parent	leaf_a' \
+        'parent	leaf_b' \
+        -- default
+    or set failures (math $failures + 1)
+
+    set -l expected_nested_leaf_and_chain 'o default
+|
+| o parent
+| |
+| | o leaf
+| |/
+| | o chain_leaf
+| | |
+| | o chain_mid
+| |/
+|/'
+    __branch_graph_assert_render 'nested leaf sibling with chain sibling' "$expected_nested_leaf_and_chain" \
+        'default	parent' \
+        'parent	leaf' \
+        'parent	chain_mid' \
+        'chain_mid	chain_leaf' \
+        -- default
+    or set failures (math $failures + 1)
+
     set -l expected_diamond 'o default
 |
 |   o C
@@ -1121,6 +1150,101 @@ refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_op
         feature/grids/multiblock_grids \
         examples \
         feature/sbp_operators/vector_operators \
+        feature/lazy_tensors/matrix_of_operators
+    or set failures (math $failures + 1)
+
+    set -l expected_current_repository_operator_fusing_reduced_dependencies 'default	bugfix/sbp_operators/second_derivative_variable/equality
+default	examples
+default	feature/grids/multiblock_grids
+default	feature/lazy_tensors/pretty_printing
+default	refactor/lazy_tensors/operator_simplifications
+default	refactor/sbpoperators/boundary_operators
+default	tooling/mergemap
+feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators
+feature/sbp_operators/vector_operators	feature/sbp_operators/traction_conditons
+refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators
+refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/operator_fusing
+tooling/mergemap	default'
+    printf '%s\n' \
+        'default	bugfix/sbp_operators/second_derivative_variable/equality' \
+        'default	examples' \
+        'default	feature/grids/multiblock_grids' \
+        'default	feature/lazy_tensors/matrix_of_operators' \
+        'default	feature/lazy_tensors/operator_fusing' \
+        'default	feature/lazy_tensors/pretty_printing' \
+        'default	feature/sbp_operators/traction_conditons' \
+        'default	feature/sbp_operators/vector_operators' \
+        'default	refactor/lazy_tensors/operator_simplifications' \
+        'default	refactor/sbpoperators/boundary_operators' \
+        'default	tooling/mergemap' \
+        'feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/traction_conditons' \
+        'feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators' \
+        'feature/sbp_operators/vector_operators	feature/sbp_operators/traction_conditons' \
+        'refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators' \
+        'refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/operator_fusing' \
+        'refactor/lazy_tensors/operator_simplifications	feature/sbp_operators/traction_conditons' \
+        'refactor/lazy_tensors/operator_simplifications	feature/sbp_operators/vector_operators' \
+        'tooling/mergemap	bugfix/sbp_operators/second_derivative_variable/equality' \
+        'tooling/mergemap	default' \
+        'tooling/mergemap	feature/lazy_tensors/operator_fusing' \
+        'tooling/mergemap	feature/sbp_operators/traction_conditons' \
+        'tooling/mergemap	feature/sbp_operators/vector_operators' \
+        'tooling/mergemap	refactor/lazy_tensors/operator_simplifications' \
+        | __branch_graph_assert_dependencies 'current repository operator fusing reduced dependencies' "$expected_current_repository_operator_fusing_reduced_dependencies"
+    or set failures (math $failures + 1)
+
+    set -l expected_current_repository_operator_fusing_graph 'o default
+|
+| o default (cycle)
+| |
+| o tooling/mergemap
+|/
+| o refactor/sbpoperators/boundary_operators
+|/
+| o refactor/lazy_tensors/operator_simplifications
+| |
+| | o feature/lazy_tensors/operator_fusing
+| |/
+| | o feature/sbp_operators/traction_conditons
+| | |
+| | o feature/sbp_operators/vector_operators
+| | |
+| | o feature/lazy_tensors/matrix_of_operators
+| |/
+|/
+| o feature/lazy_tensors/pretty_printing
+|/
+| o feature/grids/multiblock_grids
+|/
+| o examples
+|/
+| o bugfix/sbp_operators/second_derivative_variable/equality
+|/'
+    __branch_graph_assert_open_render 'current repository graph with operator fusing branch' "$expected_current_repository_operator_fusing_graph" \
+        'default	bugfix/sbp_operators/second_derivative_variable/equality' \
+        'default	examples' \
+        'default	feature/grids/multiblock_grids' \
+        'default	feature/lazy_tensors/pretty_printing' \
+        'default	refactor/lazy_tensors/operator_simplifications' \
+        'default	refactor/sbpoperators/boundary_operators' \
+        'default	tooling/mergemap' \
+        'feature/lazy_tensors/matrix_of_operators	feature/sbp_operators/vector_operators' \
+        'feature/sbp_operators/vector_operators	feature/sbp_operators/traction_conditons' \
+        'refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/matrix_of_operators' \
+        'refactor/lazy_tensors/operator_simplifications	feature/lazy_tensors/operator_fusing' \
+        'tooling/mergemap	default' \
+        -- \
+        default \
+        bugfix/sbp_operators/second_derivative_variable/equality \
+        examples \
+        feature/grids/multiblock_grids \
+        feature/lazy_tensors/operator_fusing \
+        feature/lazy_tensors/pretty_printing \
+        feature/sbp_operators/traction_conditons \
+        feature/sbp_operators/vector_operators \
+        refactor/lazy_tensors/operator_simplifications \
+        refactor/sbpoperators/boundary_operators \
+        tooling/mergemap \
         feature/lazy_tensors/matrix_of_operators
     or set failures (math $failures + 1)
 
