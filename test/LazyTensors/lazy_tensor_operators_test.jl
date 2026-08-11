@@ -94,6 +94,13 @@ end
 
     @test (Ã ∘ B̃) ∘ C̃ == TensorComposition(Ã, TensorComposition(B̃, C̃))
 
+    @testset "Non-LazyTensor arguments" begin
+        @test_throws MethodError Ã ∘ sin
+        @test_throws MethodError sin ∘ Ã
+        @test_throws MethodError Ã ∘ :not_a_lazy_tensor
+        @test_throws MethodError :not_a_lazy_tensor ∘ Ã
+    end
+
     @testset "IdentityTensor arguments" begin
         @test IdentityTensor(range_size(Ã)) ∘ Ã == Ã ∘ IdentityTensor(domain_size(Ã)) == Ã
         @test IdentityTensor(range_size(Ã)) ∘ IdentityTensor(range_size(Ã)) == IdentityTensor(range_size(Ã))

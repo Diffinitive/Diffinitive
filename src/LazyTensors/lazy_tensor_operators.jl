@@ -76,6 +76,8 @@ composing with `ZeroTensor`s and `IdentityTensor`s.
 
 See also: [`TensorComposition`](@ref).
 """
+Base.:∘(t::LazyTensor, x) = throw(MethodError(Base.:∘, (t, x)))
+Base.:∘(x, t::LazyTensor) = throw(MethodError(Base.:∘, (x, t)))
 Base.:∘(t1::LazyTensor, t2::LazyTensor) = TensorComposition(t1, t2)
 Base.:∘(tcomp::TensorComposition, t::LazyTensor) = tcomp.t1∘(tcomp.t2∘t)
 ## Composing with identity
