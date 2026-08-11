@@ -40,12 +40,21 @@ end
     @test A + B + C + D == TensorSum(A, B, C, D)
     @test A + B - C + D == TensorSum(A, B, TensorNegation(C), D)
 
+    @test TensorSum(A, B) + TensorSum(C, D) == TensorSum(A, B, C, D)
+    @test TensorSum(A, B) + C == TensorSum(A, B, C)
+    @test A + TensorSum(B, C) == TensorSum(A, B, C)
+    @test TensorSum(A, B) + C + TensorSum(D,A) == TensorSum(A, B, C, D, A)
+
     @test -A == TensorNegation(A)
     @test -A - B - C - D == TensorSum(TensorNegation(A), TensorNegation(B), TensorNegation(C), TensorNegation(D))
 
     @testset "ZeroTensor arguments" begin
         A = ScalingTensor(1.0, (3, 3))
+        AB = TensorSum(A, ScalingTensor(2.0, (3, 3)))
+
         @test ZeroTensor(3, 3) + A == A + ZeroTensor(3, 3) == A
+        @test ZeroTensor(3, 3) + ZeroTensor(3, 3) == ZeroTensor(3, 3)
+        @test AB + ZeroTensor(3, 3) == ZeroTensor(3, 3) + AB == AB
         @test -ZeroTensor(3, 3) == ZeroTensor(3, 3)
         @test_throws DomainSizeMismatch ZeroTensor((3, 3), (2, 3)) + A
         @test_throws RangeSizeMismatch ZeroTensor((1, 3), (3, 3)) + A
@@ -64,16 +73,23 @@ end
     @test Ã ∘ B̃ == TensorComposition(Ã, B̃)
     @test_throws DomainSizeMismatch B̃ ∘ Ã
 
-    @test (Ã ∘ B̃) ∘ C̃ == Ã ∘ (B̃ ∘ C̃)
+    @test (Ã ∘ B̃) ∘ C̃ == TensorComposition(Ã, TensorComposition(B̃, C̃))
 
     @testset "IdentityTensor arguments" begin
         @test IdentityTensor(range_size(Ã)) ∘ Ã == Ã ∘ IdentityTensor(domain_size(Ã)) == Ã
+        @test IdentityTensor(range_size(Ã)) ∘ IdentityTensor(range_size(Ã)) == IdentityTensor(range_size(Ã))
+        @test (Ã ∘ B̃) ∘ IdentityTensor(domain_size(B̃)) == Ã ∘ B̃
+        @test IdentityTensor(range_size(Ã))∘(Ã ∘ B̃) == Ã ∘ B̃
         @test_throws DomainSizeMismatch Ã ∘ IdentityTensor(range_size(Ã))
     end
 
     @testset "ZeroTensor arguments" begin
         @test ZeroTensor((1, 2), range_size(Ã)) ∘ Ã == ZeroTensor((1, 2), domain_size(Ã))
         @test Ã ∘ ZeroTensor(domain_size(Ã), (1, 2)) == ZeroTensor(range_size(Ã), (1, 2))
+        @test ZeroTensor((1, 2), range_size(Ã)) ∘ ZeroTensor(range_size(Ã), (4,)) == ZeroTensor((1, 2), (4,))
+        @test IdentityTensor(range_size(Ã)) ∘ ZeroTensor(range_size(Ã), (4,)) == ZeroTensor(range_size(Ã), (4,))
+        @test ZeroTensor((1, 2), domain_size(Ã)) ∘ IdentityTensor(domain_size(Ã)) == ZeroTensor((1, 2), domain_size(Ã))
+        @test (Ã ∘ B̃) ∘ ZeroTensor(domain_size(B̃), (1, 2)) == ZeroTensor(range_size(Ã), (1, 2))
         @test_throws DomainSizeMismatch Ã ∘ ZeroTensor(range_size(Ã), (1, 2))
     end
 end
@@ -102,5 +118,7 @@ end
         @test ZeroTensor(3, 2) ⊗ ZeroTensor(1, 2) == ZeroTensor(3, 2, 1, 2)
         @test ZeroTensor(3, 2) ⊗ Ã == ZeroTensor((3, 2, 3), (3, 2, 2))
         @test Ã ⊗ ZeroTensor(3, 2) == ZeroTensor((3, 3, 2), (2, 3, 2))
+        @test ZeroTensor(3, 2) ⊗ IdentityTensor(1, 2) == ZeroTensor(3, 2, 1, 2)
+        @test IdentityTensor(3, 2) ⊗ ZeroTensor(1, 2) == ZeroTensor(3, 2, 1, 2)
     end
 end
