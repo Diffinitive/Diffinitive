@@ -34,7 +34,7 @@ include("lazy_tensor.jl")
 include("tensor_types.jl")
 include("lazy_array.jl")
 include("lazy_tensor_operations.jl")
-include("lazy_tensor_operators.jl")
+include("lazy_tensor_operator_overloads.jl")
 include("tuple_manipulation.jl")
 include("componentview.jl")
 

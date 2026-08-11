@@ -170,12 +170,14 @@ end
     B = ScalingTensor(3.0, (3,))
     AsumB = TensorSum(A, B)
     AsubB = TensorSum(A, TensorNegation(B))
+    singleA = TensorSum(A)
 
     v = [1.1, 1.2, 1.3]
     for i in eachindex(v)
         @test TensorApplication(AsumB, v)[i] == 2v[i] + 3v[i]
         @test TensorApplication(AsubB, v)[i] == 2v[i] - 3v[i]
         @test TensorApplication(AsumB', v)[i] == 2v[i] + 3v[i]
+        @test TensorApplication(singleA, v)[i] == 2v[i]
     end
 
     @test range_size(AsumB) == range_size(A) == range_size(B)

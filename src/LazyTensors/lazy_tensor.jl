@@ -99,6 +99,13 @@ end
 
 
 """
+    check_equal_size(Bool, t::LazyTensor)
+
+Return `true`. A single lazy tensor is considered to have an agreeable size.
+"""
+check_equal_size(::Type{Bool}, ::LazyTensor) = true
+
+"""
     check_equal_size(Bool, t1::LazyTensor, t2::LazyTensor)
 
 Return whether `t2` has the same domain size and range size as `t1`.
@@ -116,6 +123,14 @@ range size as `t1`.
 function check_equal_size(::Type{Bool}, t1::LazyTensor, t2::LazyTensor, ts::LazyTensor...)
     return check_equal_size(Bool, t1, t2) & check_equal_size(Bool, t1, ts...)
 end
+
+"""
+    check_equal_size(t::LazyTensor)
+
+A single lazy tensor does not throw an error when checking that all sizes are
+equal.
+"""
+check_equal_size(::LazyTensor) = nothing
 
 """
     check_equal_size(t1::LazyTensor, t2::LazyTensor)
