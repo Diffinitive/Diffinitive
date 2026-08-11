@@ -74,6 +74,12 @@ using LinearAlgebra
             @test_throws DomainError(3, "Derivative direction must be in 1:2.") second_derivative_variable(g, c, stencil_set, 3)
         end
 
+        @testset "Base.:(==)" begin
+            @test second_derivative_variable(g, c, stencil_set, 1) == second_derivative_variable(g, c, stencil_set, 1)
+            @test second_derivative_variable(g, c, stencil_set, 1) != second_derivative_variable(g, c, stencil_set, 2)
+            @test second_derivative_variable(g, 2c, stencil_set, 1) != second_derivative_variable(g, c, stencil_set, 1)
+        end
+
         @testset "application" begin
             function apply_to_functions(dir; v, c)
                 g = equidistant_grid((0.,0.), (10.,8.), 11, 9) # h = 1
