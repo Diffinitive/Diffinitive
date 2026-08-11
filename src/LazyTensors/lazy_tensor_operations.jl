@@ -12,7 +12,7 @@ struct TensorApplication{T, R, D, LT<:LazyTensor{R, D}, AA<:AbstractArray{<:Any,
     v::AA
 
     function TensorApplication(t::LazyTensor{R, D}, v::AbstractArray{<:Any, D}) where {R, D}
-        @boundscheck check_domain_size(t, size(v))
+        check_domain_size(t, size(v))
         I = ntuple(i->1, range_dim(t))
         T = typeof(apply(t, v, I...))
         return new{T, R, D, typeof(t), typeof(v)}(t,v)
@@ -56,7 +56,7 @@ struct TensorSum{R, D, LTT<:NTuple{N, LazyTensor{R, D}} where N} <: LazyTensor{R
     ts::LTT
 
     function TensorSum{R, D}(ts::LTT) where {R, D, LTT<:NTuple{N, LazyTensor{R,D}} where N}
-        @boundscheck check_equal_size(ts...)
+        check_equal_size(ts...)
 
         return new{R, D, LTT}(ts)
     end
@@ -101,7 +101,7 @@ struct TensorComposition{R, K, D, LT1<:LazyTensor{R, K}, LT2<:LazyTensor{K, D}} 
     t2::LT2
 
     function TensorComposition(t1::LazyTensor{R, K}, t2::LazyTensor{K, D}) where {R, K, D}
-        @boundscheck check_composable(t1,t2)
+        check_composable(t1,t2)
         return new{R, K, D, typeof(t1), typeof(t2)}(t1,t2)
     end
 end
