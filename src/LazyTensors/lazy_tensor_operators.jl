@@ -10,7 +10,7 @@ See also [`TensorApplication`](@ref)
 Base.:*(t::LazyTensor, v::AbstractArray) = TensorApplication(t, v)
 Base.:*(t1::LazyTensor, t2::LazyTensor) = throw(MethodError(Base.:*, (t1, t2)))
 Base.:*(t::LazyTensor, args::Union{LazyTensor, AbstractArray}...) = foldr(*, (t, args...))
-Base.:*(t::IdentityTensor, v::AbstractArray) = v
+Base.:*(t::IdentityTensor, v::AbstractArray) = (check_domain_size(t, size(v)); v)
 
 
 """

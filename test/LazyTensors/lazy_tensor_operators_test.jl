@@ -21,6 +21,7 @@ LazyTensors.domain_size(m::OperatorSizeDoublingMapping) = m.domain_size
     @test_throws MethodError m * m
 
     @test IdentityTensor(3) * v === v
+    @test_throws DomainSizeMismatch IdentityTensor(4) * v
 
     @testset "Error hint" begin
         err = try
