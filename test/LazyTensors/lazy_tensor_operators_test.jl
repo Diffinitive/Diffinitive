@@ -1,5 +1,6 @@
 using Test
 using Diffinitive.LazyTensors
+using StaticArrays
 
 struct OperatorSizeDoublingMapping{R,D} <: LazyTensor{R,D}
     domain_size::NTuple{D,Int}
@@ -28,6 +29,9 @@ end
 
     @test a * A == TensorComposition(ScalingTensor(a, range_size(A)), A)
     @test A * a == TensorComposition(ScalingTensor(a, range_size(A)), A)
+
+    S = rand(SMatrix{3,3})
+    @test S*A == TensorComposition(ScalingTensor(S, range_size(A)), A)
 end
 
 @testset "addition and subtraction operators" begin

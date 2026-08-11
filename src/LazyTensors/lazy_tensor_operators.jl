@@ -14,15 +14,14 @@ Base.:*(t::IdentityTensor, v::AbstractArray) = v
 
 
 """
-    *(a::Number, t::LazyTensor)
-    *(t::LazyTensor, a::Number)
+    *(a, t::LazyTensor)
+    *(t::LazyTensor, a)
 
 Lazy multiplication of a `LazyTensor` and a constant, resulting in a scaled `LazyTensor`.
-
 See also: [`TensorComposition`](@ref), [`ScalingTensor`](@ref).
 """
-Base.:*(a::Number, t::LazyTensor) = TensorComposition(ScalingTensor(a, range_size(t)), t)
-Base.:*(t::LazyTensor, a::Number) = a*t
+Base.:*(a, t::LazyTensor) = TensorComposition(ScalingTensor(a, range_size(t)), t)
+Base.:*(t::LazyTensor, a) = a*t
 
 """
     +(t1::LazyTensor, t2::LazyTensor)
