@@ -58,3 +58,141 @@ function domain_size end
 The adjoint of the mapping as a `LazyTensor`.
 """
 Base.adjoint(::LazyTensor)
+
+
+"""
+    check_domain_size(Bool, t::LazyTensor, sz)
+
+Return whether the domain size of `t` matches `sz`.
+"""
+check_domain_size(::Type{Bool}, t::LazyTensor, sz) = domain_size(t) == sz
+
+"""
+    check_domain_size(t::LazyTensor, sz)
+
+Throw a `DomainSizeMismatch` if the domain size of `t` does not match `sz`.
+"""
+function check_domain_size(t::LazyTensor, sz)
+    if !check_domain_size(Bool, t, sz)
+        throw(DomainSizeMismatch(t, sz))
+    end
+end
+
+
+"""
+    check_range_size(Bool, t::LazyTensor, sz)
+
+Return whether the range size of `t` matches `sz`.
+"""
+check_range_size(::Type{Bool}, t::LazyTensor, sz) = range_size(t) == sz
+
+"""
+    check_range_size(t::LazyTensor, sz)
+
+Throw a `RangeSizeMismatch` if the range size of `t` does not match `sz`.
+"""
+function check_range_size(t::LazyTensor, sz)
+    if !check_range_size(Bool, t, sz)
+        throw(RangeSizeMismatch(t, sz))
+    end
+end
+
+
+"""
+    check_equal_size(Bool, t::LazyTensor)
+
+Return `true`. A single lazy tensor is considered to have an agreeable size.
+"""
+check_equal_size(::Type{Bool}, ::LazyTensor) = true
+
+"""
+    check_equal_size(Bool, t1::LazyTensor, t2::LazyTensor)
+
+Return whether `t2` has the same domain size and range size as `t1`.
+"""
+function check_equal_size(::Type{Bool}, t1::LazyTensor, t2::LazyTensor)
+    return check_domain_size(Bool, t2, domain_size(t1)) & check_range_size(Bool, t2, range_size(t1))
+end
+
+"""
+    check_equal_size(Bool, t1::LazyTensor, t2::LazyTensor, ts::LazyTensor...)
+
+Return whether `t2` and all tensors in `ts` have the same domain size and
+range size as `t1`.
+"""
+function check_equal_size(::Type{Bool}, t1::LazyTensor, t2::LazyTensor, ts::LazyTensor...)
+    return check_equal_size(Bool, t1, t2) & check_equal_size(Bool, t1, ts...)
+end
+
+"""
+    check_equal_size(t::LazyTensor)
+
+A single lazy tensor does not throw an error when checking that all sizes are
+equal.
+"""
+check_equal_size(::LazyTensor) = nothing
+
+"""
+    check_equal_size(t1::LazyTensor, t2::LazyTensor)
+
+Throw a `DomainSizeMismatch` or `RangeSizeMismatch` if `t2` has a different
+domain size or range size from `t1`.
+"""
+function check_equal_size(t1::LazyTensor, t2::LazyTensor)
+    if !check_equal_size(Bool, t1, t2)
+        check_domain_size(t2, domain_size(t1))
+        check_range_size(t2, range_size(t1))
+    end
+end
+
+"""
+    check_equal_size(t1::LazyTensor, t2::LazyTensor, ts::LazyTensor...)
+
+Throw a `DomainSizeMismatch` or `RangeSizeMismatch` if `t2` or any tensor in
+`ts` has a different domain size or range size from `t1`.
+"""
+function check_equal_size(t1::LazyTensor, t2::LazyTensor, ts::LazyTensor...)
+    check_equal_size(t1, t2)
+    check_equal_size(t1, ts...)
+end
+
+"""
+    check_composable(Bool, t1::LazyTensor, t2::LazyTensor)
+
+Return whether `t1` can be composed after `t2`.
+"""
+check_composable(::Type{Bool}, t1::LazyTensor, t2::LazyTensor) = check_domain_size(Bool, t1, range_size(t2))
+
+"""
+    check_composable(t1::LazyTensor, t2::LazyTensor)
+
+Throw a `DomainSizeMismatch` if the domain size of `t1` does not match the
+range size of `t2`.
+"""
+function check_composable(t1::LazyTensor, t2::LazyTensor)
+    if !check_composable(Bool, t1, t2)
+        throw(DomainSizeMismatch(t1, range_size(t2)))
+    end
+end
+
+
+struct DomainSizeMismatch <: Exception
+    t::LazyTensor
+    sz
+end
+
+function Base.showerror(io::IO, err::DomainSizeMismatch)
+    print(io, "DomainSizeMismatch: ")
+    print(io, "domain size $(domain_size(err.t)) of LazyTensor not matching size $(err.sz)")
+end
+
+
+struct RangeSizeMismatch <: Exception
+    t::LazyTensor
+    sz
+end
+
+function Base.showerror(io::IO, err::RangeSizeMismatch)
+    print(io, "RangeSizeMismatch: ")
+    print(io, "range size $(range_size(err.t)) of LazyTensor not matching size $(err.sz)")
+end
