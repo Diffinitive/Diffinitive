@@ -344,6 +344,8 @@ end
         @test_throws DomainSizeMismatch VectorTensor(ZeroTensor((1,), (1,)), ZeroTensor((1,), (2,)))
         @test_throws RangeSizeMismatch VectorTensor(ZeroTensor((1,), (1,)), ZeroTensor((2,), (1,)))
 
+        @test VectorTensor(ZeroTensor((2,), (3,4)), ZeroTensor((2,), (3,4))) isa LazyTensor{1, 2}
+
         A = VectorTensor(3) do i
             DiagonalTensor(i*s)
         end
@@ -376,6 +378,8 @@ end
         @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
         @test_throws DomainSizeMismatch VectorDotTensor(ZeroTensor((1,), (1,)), ZeroTensor((1,), (2,)))
         @test_throws RangeSizeMismatch VectorDotTensor(ZeroTensor((1,), (1,)), ZeroTensor((2,), (1,)))
+
+        @test VectorDotTensor(ZeroTensor((2,), (3,4)), ZeroTensor((2,), (3,4))) isa LazyTensor{1, 2}
 
          A = VectorDotTensor(3) do i
             DiagonalTensor(i*s)
@@ -415,6 +419,11 @@ end
         )
 
         @test t isa LazyTensor{1, 1}
+
+        @test MatrixTensor(
+            (ZeroTensor((2,), (3,4)), ZeroTensor((2,), (3,4))),
+            (ZeroTensor((2,), (3,4)), ZeroTensor((2,), (3,4))),
+        ) isa LazyTensor{1, 2}
 
 
         t2 = MatrixTensor((

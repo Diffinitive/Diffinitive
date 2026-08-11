@@ -251,7 +251,7 @@ A VectorTensor with elements `ts`.
 """
 function VectorTensor(ts::NTuple{N, LazyTensor}) where N
     R = range_dim(ts[1])
-    D = range_dim(ts[1])
+    D = domain_dim(ts[1])
     return VectorTensor{N, R, D}(ts)
 end
 
@@ -309,7 +309,7 @@ A VectorDotTensor with elements `ts`.
 """
 function VectorDotTensor(ts::NTuple{N, LazyTensor}) where N
     R = range_dim(ts[1])
-    D = range_dim(ts[1])
+    D = domain_dim(ts[1])
     return VectorDotTensor{N, R, D}(ts)
 end
 
