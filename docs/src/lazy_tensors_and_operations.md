@@ -11,8 +11,6 @@ The core interface consists of:
 * [`range_size`](@ref) and [`domain_size`](@ref), which describe the output and
   input array sizes.
 * [`apply`](@ref), which computes one output value.
-* [`Base.adjoint`](@ref), which is optional and is used by transposed
-  tensors.
 
 This is the representation used by operators in `SbpOperators`. For example, a
 first derivative operator is a `LazyTensor`, not a stored differentiation
@@ -162,8 +160,7 @@ Available operations include:
 * `-` for lazy negation and subtraction.
 * scalar multiplication with `*`.
 * `∘` for lazy composition.
-* `'` for lazy transposition, when the underlying tensor implements
-  [`Base.adjoint`](@ref).
+* `'` for transposes, when the concrete tensor implements [`Base.adjoint`](@ref).
 * `⊗` for lazy outer products.
 
 For example, `Dx + Dy` creates a lazy sum of two derivative operators:
@@ -193,19 +190,15 @@ julia> (Dxy * v)[6,6]
 0.0
 ```
 
-```@raw comment
-TODO: Base.adjoint is not yet implemented for VolumeOperator!
 
-Transposition is also lazy:
+Adjoints are also lazy:
 
-#```jldoctest lazy_tensors
-#julia> D' isa LazyTensor{1,1}
-#true
-#```
+```jldoctest lazy_tensors
+julia> A = DenseTensor([1.0 2.0; 3.0 4.0], (1,), (2,));
 
+julia> A' isa LazyTensor{1,1}
+true
 ```
-
-
 ## Simplifications
 
 The operator overloads perform a few basic simplifications. These are intended

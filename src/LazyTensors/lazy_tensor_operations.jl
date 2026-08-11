@@ -119,20 +119,7 @@ end
 
 Base.adjoint(tcomp::TensorComposition) = TensorComposition(adjoint(tcomp.t2), adjoint(tcomp.t1))
 
-"""
-    TensorComposition(t, it::IdentityTensor)
-    TensorComposition(it::IdentityTensor, t)
 
-Composes a `LazyTensor` `t` with an `IdentityTensor` `it`, by returning `t`
-"""
-function TensorComposition(t::LazyTensor{R, D}, it::IdentityTensor{D}) where {R, D}
-    @boundscheck check_domain_size(t, range_size(it))
-    return t
-end
-
-
-
-# TODO: Rename to TensorInflation to better align with naming of other operations on LazyTensors?
 """
     InflatedTensor{R, D} <: LazyTensor{R, D}
 
@@ -222,7 +209,7 @@ Base.adjoint(inflt::InflatedTensor) = InflatedTensor(inflt.before, adjoint(inflt
 
 
 @doc raw"""
-    TensorOuterProduct(ts...)
+    outer_product(ts...)
 
 Creates a `TensorComposition` for the outer product of `LazyTensors` `ts...`.
 This is done by separating the outer product into regular products of outer products involving only identity mappings and one non-identity mapping.
@@ -258,16 +245,16 @@ To apply ``A⊗B⊗C`` we evaluate
 (A⊗B⊗C)v = [(A⊗I_{|M|}⊗I_{|P|})  [(I_{|J|}⊗B⊗I_{|P|}) [(I_{|J|}⊗I_{|N|}⊗C)v]]]
 ```
 """
-function TensorOuterProduct end
-# TODO: Remove TensorOuterProduct and just use ⊗? It is not a type.
-function TensorOuterProduct(t1::LazyTensor, t2::LazyTensor)
+function outer_product end
+
+function outer_product(t1::LazyTensor, t2::LazyTensor)
     inflt1 = InflatedTensor(t1, IdentityTensor(range_size(t2)))
     inflt2 = InflatedTensor(IdentityTensor(domain_size(t1)), t2)
 
     return inflt1∘inflt2
 end
 
-TensorOuterProduct(ts::Vararg{LazyTensor}) = foldl(TensorOuterProduct, ts)
+outer_product(ts::Vararg{LazyTensor}) = foldl(outer_product, ts)
 
 
 """
@@ -290,50 +277,4 @@ function inflate(t::LazyTensor, sz, dir)
     Is = IdentityTensor.(sz)
     parts = Base.setindex(Is, t, dir)
     return foldl(⊗, parts)
-end
-
-
-# TODO: Move these functions elsewhere? E.g. to LazyArray.jl? Also should we not export them?
-function check_domain_size(t::LazyTensor, sz)
-    if domain_size(t) != sz
-        throw(DomainSizeMismatch(t, sz))
-    end
-end
-
-function check_range_size(t::LazyTensor, sz)
-    if range_size(t) != sz
-        throw(RangeSizeMismatch(t, sz))
-    end
-end
-
-function check_equal_size(ts::Vararg{LazyTensor})
-    map(ts) do t
-        check_domain_size(t, domain_size(ts[1]))
-        check_range_size(t, range_size(ts[1]))
-    end
-end
-
-function check_composable(t1::LazyTensor, t2::LazyTensor)
-    check_domain_size(t1, range_size(t2))
-end
-
-struct DomainSizeMismatch <: Exception
-    t::LazyTensor
-    sz
-end
-
-function Base.showerror(io::IO, err::DomainSizeMismatch)
-    print(io, "DomainSizeMismatch: ")
-    print(io, "domain size $(domain_size(err.t)) of LazyTensor not matching size $(err.sz)")
-end
-
-
-struct RangeSizeMismatch <: Exception
-    t::LazyTensor
-    sz
-end
-
-function Base.showerror(io::IO, err::RangeSizeMismatch)
-    print(io, "RangeSizeMismatch: ")
-    print(io, "range size $(range_size(err.t)) of LazyTensor not matching size $(err.sz)")
 end
