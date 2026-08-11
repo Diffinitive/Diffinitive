@@ -84,15 +84,19 @@ end
     A = rand(2, 3)
     B = rand(3, 4)
     C = rand(4, 5)
+    D = rand(5, 6)
 
     Ã = DenseTensor(A, (1,), (2,))
     B̃ = DenseTensor(B, (1,), (2,))
     C̃ = DenseTensor(C, (1,), (2,))
+    D̃ = DenseTensor(D, (1,), (2,))
 
     @test Ã ∘ B̃ == TensorComposition(Ã, B̃)
     @test_throws DomainSizeMismatch B̃ ∘ Ã
 
     @test (Ã ∘ B̃) ∘ C̃ == TensorComposition(Ã, TensorComposition(B̃, C̃))
+
+    @test (Ã ∘ B̃) ∘ (C̃∘D̃) == TensorComposition(Ã, TensorComposition(B̃, TensorComposition(C̃,D̃)))
 
     @testset "Non-LazyTensor arguments" begin
         @test_throws MethodError Ã ∘ sin
