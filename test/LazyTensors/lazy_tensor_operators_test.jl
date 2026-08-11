@@ -56,11 +56,12 @@ end
     @testset "ZeroTensor arguments" begin
         A = ScalingTensor(1.0, (3, 3))
         AB = TensorSum(A, ScalingTensor(2.0, (3, 3)))
+        Z =  ZeroTensor(3, 3)
 
-        @test ZeroTensor(3, 3) + A == A + ZeroTensor(3, 3) == A
-        @test ZeroTensor(3, 3) + ZeroTensor(3, 3) == ZeroTensor(3, 3)
-        @test AB + ZeroTensor(3, 3) == ZeroTensor(3, 3) + AB == AB
-        @test -ZeroTensor(3, 3) == ZeroTensor(3, 3)
+        @test Z + A == A + Z == A
+        @test Z + Z == Z
+        @test AB + Z == Z + AB == AB
+        @test -Z == Z
         @test_throws DomainSizeMismatch ZeroTensor((3, 3), (2, 3)) + A
         @test_throws RangeSizeMismatch ZeroTensor((1, 3), (3, 3)) + A
     end
