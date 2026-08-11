@@ -150,8 +150,10 @@ Base.adjoint(t::DenseTensor) = DenseTensor(conj(t.A), t.domain_indicies, t.range
 # Perhaps we should create e.g. tuple_utils.jl which includes tuple_manipulation.jl
 # TupleTable and tuple_range.
 NMTuple{N, M, T} = NTuple{N, NTuple{M, T}}
+
+
 """
-   TupleTable{N, M, T}
+   TupleTable{N, M, T <: NMTuple{N, M, Any}}
 
 A static `N` row, `M` column table of types `T` built from tuples.
 
@@ -166,10 +168,8 @@ end
 
 """
    TupleTable(rows...)
-   TupleTable(A::Matrix)
 
-Creates a TupleTable{N,M} from either `N` `rows` of `M` element tuples or from
-a `N`-by-`M` `Matrix`.
+A `TupleTable` with elements specified by `rows`.
 
 """
 function TupleTable(rows...)
@@ -179,6 +179,11 @@ function TupleTable(rows...)
     TupleTable(rows)
 end
 
+"""
+   TupleTable(A::Matrix)
+
+A `TupleTable{N,M}` with elements from the N×M matrix `A`.
+"""
 function TupleTable(A::Matrix)
     N, M = size(A)
 
@@ -198,8 +203,7 @@ Base.getindex(t::TupleTable, i, j) = t.table[i][j]
 """
    Base.adjoint(tt::TupleTable)
 
-Creates the transposed TupleTable storing the adjoints of the elements 
-of `tt`.
+The adjoint of the `TupleTable` `tt`, similar to the adjoint of a matrix.
 """
 function Base.adjoint(tt::TupleTable)
     N, M = size(tt)
