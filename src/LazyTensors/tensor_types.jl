@@ -217,7 +217,6 @@ function Base.:(==)(a::TupleTable, b::TupleTable)
     return a.table == b.table
 end
 
-
 function Base.:+(a::TupleTable, b::TupleTable)
     @boundscheck begin
         if size(a) != size(b)
@@ -288,17 +287,6 @@ function Base.:(==)(a::VectorTensor, b::VectorTensor)
     return a.ts == b.ts
 end
 
-function Base.:+(a::VectorTensor, b::VectorTensor)
-    @boundscheck begin
-        if length(a) != length(b)
-            throw(DimensionMismatch("adding VectorTensor objects of lengths $(length(a)) and $(length(b))"))
-        end
-        check_equal_size(a, b)
-    end
-    return VectorTensor(a.ts .+ b.ts)
-end
-
-
 """
     VectorDotTensor{N,R,D} <: LazyTensor{R,D}
 
@@ -360,17 +348,6 @@ LazyTensors.range_size(vdt::VectorDotTensor) = range_size(vdt.ts[1])
 function Base.:(==)(a::VectorDotTensor, b::VectorDotTensor)
     return a.ts == b.ts
 end
-
-function Base.:+(a::VectorDotTensor, b::VectorDotTensor)
-    @boundscheck begin
-        if length(a) != length(b)
-            throw(DimensionMismatch("adding VectorDotTensor objects of lengths $(length(a)) and $(length(b))"))
-        end
-        check_equal_size(a, b)
-    end
-    return VectorDotTensor(a.ts .+ b.ts)
-end
-
 
 """
     MatrixTensor{N, M, R, D} <: LazyTensor{R, D}
@@ -452,17 +429,6 @@ Base.size(mt::MatrixTensor) = size(mt.ts)
 function Base.:(==)(a::MatrixTensor, b::MatrixTensor)
     return a.ts == b.ts
 end
-
-function Base.:+(a::MatrixTensor, b::MatrixTensor)
-    @boundscheck begin
-        if size(a) != size(b)
-            throw(DimensionMismatch("adding MatrixTensor objects of sizes $(size(a)) and $(size(b))"))
-        end
-        check_equal_size(a, b)
-    end
-    return MatrixTensor(a.ts + b.ts)
-end
-
 
 """
    tuple_range(n)

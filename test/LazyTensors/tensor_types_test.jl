@@ -368,24 +368,6 @@ end
         @test VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) != VectorTensor(DiagonalTensor(3s), ScalingTensor(3., (5,)))
     end
 
-    @testset "Base.:+" begin
-        s = [4., 6., 5., 6., 7.]
-        A  = VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
-        B  = VectorTensor(ScalingTensor(2., (5,)), DiagonalTensor(2s))
-        C = VectorTensor(ScalingTensor(2., (5,)), ScalingTensor(3., (5,)), ScalingTensor(2., (5,)))
-        D = VectorTensor(ZeroTensor((5,), (1,)), ZeroTensor((5,), (1,)))
-        E = VectorTensor(ZeroTensor((1,), (5,)), ZeroTensor((1,), (5,)))
-
-        ApB = VectorTensor(
-            DiagonalTensor(s) + ScalingTensor(2., (5,)),
-            ScalingTensor(3., (5,)) + DiagonalTensor(2s),
-        )
-
-        @test A+B == ApB
-        @test_throws DimensionMismatch A + C
-        @test_throws DomainSizeMismatch A + D
-        @test_throws RangeSizeMismatch A + E
-    end
 end
 
 @testset "VectorDotTensor" begin
@@ -421,25 +403,6 @@ end
 
     end
 
-    @testset "Base.:+" begin
-        s = [4., 6., 5., 6., 7.]
-        A  = VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
-        B  = VectorDotTensor(ScalingTensor(2., (5,)), DiagonalTensor(2s))
-        C = VectorDotTensor(ScalingTensor(2., (5,)), ScalingTensor(3., (5,)), ScalingTensor(2., (5,)))
-        D = VectorDotTensor(ZeroTensor((5,), (1,)), ZeroTensor((5,), (1,)))
-        E = VectorDotTensor(ZeroTensor((1,), (5,)), ZeroTensor((1,), (5,)))
-
-
-        ApB = VectorDotTensor(
-            DiagonalTensor(s) + ScalingTensor(2., (5,)),
-            ScalingTensor(3., (5,)) + DiagonalTensor(2s),
-        )
-
-        @test A+B == ApB
-        @test_throws DimensionMismatch A + C
-        @test_throws DomainSizeMismatch A + D
-        @test_throws RangeSizeMismatch A + E
-    end
 end
 
 @testset "MatrixTensor" begin
@@ -559,42 +522,6 @@ end
         @test A != B
     end
 
-    @testset "Base.:+" begin
-        s1 = [4., 6., 5., 6., 7.]
-        s2 = [6., 9., 3., 5., 7.]
-        A  = MatrixTensor(
-            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
-            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
-        )
-
-        B = MatrixTensor(
-            (ScalingTensor(5.,(5,)), DiagonalTensor(2s1)),
-            (DiagonalTensor(2s2), ScalingTensor(7., (5,))),
-        )
-        C = MatrixTensor(
-            (ScalingTensor(5.,(5,)), DiagonalTensor(2s1)),
-            (DiagonalTensor(2s2), ScalingTensor(7., (5,))),
-            (DiagonalTensor(2s2), ScalingTensor(7., (5,))))
-        D = MatrixTensor(
-            (ZeroTensor((5,), (1,)), ZeroTensor((5,), (1,))),
-            (ZeroTensor((5,), (1,)), ZeroTensor((5,), (1,)))
-        )
-        E = MatrixTensor(
-            (ZeroTensor((1,), (5,)), ZeroTensor((1,), (5,))),
-            (ZeroTensor((1,), (5,)), ZeroTensor((1,), (5,)))
-        )
-
-
-        ApB = MatrixTensor(
-            (DiagonalTensor(s1)+ScalingTensor(5.,(5,)), ScalingTensor(3.,(5,))+ DiagonalTensor(2s1)),
-            (ScalingTensor(6., (5,))+DiagonalTensor(2s2), DiagonalTensor(s2) + ScalingTensor(7., (5,))),
-        )
-
-        @test A+B == ApB
-        @test_throws DimensionMismatch A + C
-        @test_throws DomainSizeMismatch A + D
-        @test_throws RangeSizeMismatch A + E
-    end
 end
 
 @testset "tuple_range()" begin
