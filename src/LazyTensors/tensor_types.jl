@@ -291,10 +291,8 @@ end
 """
     VectorDotTensor{N,R,D} <: LazyTensor{R,D}
 
-Describes a mapping of an `N` component `D` dimensional tensor to scalar valued `R` dimensional
-tensor implemented as a `LazyTensor`.
-
-The elements of the `VectorDotTensor` are `LazyTensor`s of equal dimensions and sizes.
+A vector of LazyTensors `ts` which when applied to an AbstractArray of vectors `a` gives a
+TensorApplication where each element `I` is the sum Σᵢ (ts[i]*a[:][i])[I].
 """
 struct VectorDotTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor{R, D}
     ts::NT
@@ -306,11 +304,9 @@ end
 
 
 """
-    VectorDotTensor(::NTuple{N, NTuple{M, LazyTensor}})
-    VectorDotTensor(::Vararg{NTuple{N, LazyTensor})
+    VectorDotTensor(ts::NTuple{N, LazyTensor} where N)
 
-Constructs an  `N`-element `VectorDotTensor` from an `N` `LazyTensor`s
-either given as a single `N`-tuple or `N` arguments.
+A VectorDotTensor with elements `ts`.
 """
 function VectorDotTensor(ts::NT) where {NT <: NTuple{N, LazyTensor} where N}
     N = length(ts)
@@ -318,15 +314,26 @@ function VectorDotTensor(ts::NT) where {NT <: NTuple{N, LazyTensor} where N}
     D = range_dim(ts[1])
     VectorDotTensor{N, R, D}(ts)
 end
+
+"""
+    VectorDotTensor(ts::NTuple{N, <: LazyTensor{R, D}}) where {N, R, D}
+
+A VectorDotTensor with elements `ts`.
+"""
 VectorDotTensor(ts::NTuple{N, <: LazyTensor{R, D}}) where {N, R, D} = VectorDotTensor{N, R, D}(ts)
+
+"""
+    VectorDotTensor(ts::Vararg{LazyTensor})
+
+A VectorDotTensor with elements `ts`.
+"""
 VectorDotTensor(ts::Vararg{LazyTensor}) = VectorDotTensor(ts)
 
 
 """
     VectorDotTensor(f, n}
 
-Constructs an `n`-element `VectorDotTensor` by mapping the function `f`,
-where `f(i)` returns a `LazyTensor`.
+A VectorDotTensor of `n` LazyTensors with elements determined by `f(i)` for ``i = 1...n``.
 """
 function VectorDotTensor(f, n)
     return VectorDotTensor(map(f, tuple_range(n)))
