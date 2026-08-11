@@ -360,10 +360,8 @@ end
 """
     MatrixTensor{N, M, R, D} <: LazyTensor{R, D}
 
-Describes a mapping of an `M` component `D` dimensional tensor to an `N` component `R` dimensional
-tensor implemented as a `LazyTensor`
-
-The elements of the `MatrixTensor` are `LazyTensor`s of equal dimensions and sizes.
+A matrix of LazyTensors `ts` which when applied to an AbstractArray of vectors `a` gives a
+TensorApplication `ta` such that  ta[I][i] equals the sum Σⱼ (ts[i,j]*a[:][j])[I].
 """
 struct MatrixTensor{N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}}} <: LazyTensor{R, D}
     ts::TT # Matrix of Tensors
@@ -374,12 +372,9 @@ struct MatrixTensor{N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTenso
 end
 
 """
-    MatrixTensor(::TupleTable)
-    MatrixTensor(::NTuple{N, NTuple{M, LazyTensor}})
-    MatrixTensor(::Vararg{NTuple{N, LazyTensor})
+    MatrixTensor(ts::TupleTable)
 
-Constructs an `N`-by-`M` `MatrixTensor` from either a `N`-by-`M` `M`-tuples of `LazyTensor`s
-either given as a single `N`-tuple or `N` arguments.
+A MatrixTensor with elements `ts`.
 """
 function MatrixTensor(ts::TT) where {TT <: TupleTable{N, M, <: NMTuple{N, M, LazyTensor}} where {N, M}}
     N, M = size(ts)
@@ -387,13 +382,25 @@ function MatrixTensor(ts::TT) where {TT <: TupleTable{N, M, <: NMTuple{N, M, Laz
     D = domain_dim(ts[1,1])
     MatrixTensor{N, M, R, D}(ts)
 end
+
+"""
+    MatrixTensor(ts::NTuple{N, NTuple{M, LazyTensor}} where {N,M})
+
+A MatrixTensor with elements `ts`.
+"""
 MatrixTensor(ts::NTuple{N, NTuple{M, LazyTensor}} where {N, M}) = MatrixTensor(TupleTable(ts))
+
+"""
+    MatrixTensor(ts::Vararg{NTuple{N, LazyTensor} where N)
+
+A MatrixTensor with elements `ts`.
+"""
 MatrixTensor(ts::Vararg{NTuple{N, LazyTensor} where N}) = MatrixTensor(ts)
 
 """
-    MatrixTensor(::Matrix}
+    MatrixTensor(ts::Matrix}
 
-Constructs a `MatrixTensor` from a `Matrix` of `LazyTensor`s.
+A MatrixTensor with elements `ts`.
 """
 function MatrixTensor(ts::Matrix)
     return MatrixTensor(TupleTable(ts))
@@ -402,8 +409,7 @@ end
 """
     MatrixTensor(f, n, m}
 
-Constructs an `n`-by-`m` `MatrixTensor` by mapping the function `f`,
-where `f(i,j)` returns a `LazyTensor`
+An MatrixTensor of n×m LazyTensors with elements determined by `f(i,j)` for ``i = 1...n`` and ``j = 1...m``.
 """
 function MatrixTensor(f, n, m)
     return map(tuple_range(n)) do i
@@ -415,7 +421,6 @@ end
 
 MatrixTensor(::Tuple{}) = throw(ArgumentError("All dimensions of a MatrixTensor must be larger than 1"))
 MatrixTensor(::NTuple{N, Tuple{}} where N) = throw(ArgumentError("The number of columns of a MatrixTensor must be larger than 1"))
-
 
 function apply(mt::MatrixTensor{N,M,R,D}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {N,M,R,D}
     return map(tuple_range(N)) do i
