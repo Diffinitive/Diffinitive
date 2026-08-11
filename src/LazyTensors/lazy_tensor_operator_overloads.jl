@@ -115,31 +115,25 @@ See also: [`outer_product`](@ref).
 ⊗(t1::IdentityTensor, t2::ZeroTensor) = ZeroTensor((range_size(t1)..., range_size(t2)...), (domain_size(t1)..., domain_size(t2)...)) # Resolve ambiguity
 
 function Base.:+(a::VectorTensor, b::VectorTensor)
-    @boundscheck begin
-        if length(a) != length(b)
-            throw(DimensionMismatch("adding VectorTensor objects of lengths $(length(a)) and $(length(b))"))
-        end
-        check_equal_size(a, b)
+    if length(a) != length(b)
+        throw(DimensionMismatch("adding VectorTensor objects of lengths $(length(a)) and $(length(b))"))
     end
+    check_equal_size(a, b)
     return VectorTensor(a.ts .+ b.ts)
 end
 
 function Base.:+(a::VectorDotTensor, b::VectorDotTensor)
-    @boundscheck begin
-        if length(a) != length(b)
-            throw(DimensionMismatch("adding VectorDotTensor objects of lengths $(length(a)) and $(length(b))"))
-        end
-        check_equal_size(a, b)
+    if length(a) != length(b)
+        throw(DimensionMismatch("adding VectorDotTensor objects of lengths $(length(a)) and $(length(b))"))
     end
+    check_equal_size(a, b)
     return VectorDotTensor(a.ts .+ b.ts)
 end
 
 function Base.:+(a::MatrixTensor, b::MatrixTensor)
-    @boundscheck begin
-        if size(a) != size(b)
-            throw(DimensionMismatch("adding MatrixTensor objects of sizes $(size(a)) and $(size(b))"))
-        end
-        check_equal_size(a, b)
+    if size(a) != size(b)
+        throw(DimensionMismatch("adding MatrixTensor objects of sizes $(size(a)) and $(size(b))"))
     end
+    check_equal_size(a, b)
     return MatrixTensor(a.ts + b.ts)
 end

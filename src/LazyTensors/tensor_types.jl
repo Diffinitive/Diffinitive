@@ -216,10 +216,8 @@ function Base.:(==)(a::TupleTable, b::TupleTable)
 end
 
 function Base.:+(a::TupleTable, b::TupleTable)
-    @boundscheck begin
-        if size(a) != size(b)
-            throw(DimensionMismatch("adding TupleTable objects of sizes $(size(a)) and $(size(b))"))
-        end
+    if size(a) != size(b)
+        throw(DimensionMismatch("adding TupleTable objects of sizes $(size(a)) and $(size(b))"))
     end
     return map(a.table, b.table) do aᵢ, bᵢ
         aᵢ .+ bᵢ
