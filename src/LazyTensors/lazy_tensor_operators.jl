@@ -55,6 +55,7 @@ negating `ZeroTensor`s.
 See also: [`TensorNegation`](@ref).
 """
 Base.:-(t::LazyTensor) = TensorNegation(t)
+Base.:-(t::TensorNegation) = t.t
 Base.:-(t::ZeroTensor) = t
 
 

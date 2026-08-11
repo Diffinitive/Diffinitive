@@ -51,6 +51,7 @@ end
 
     @test -A == TensorNegation(A)
     @test -A - B - C - D == TensorSum(TensorNegation(A), TensorNegation(B), TensorNegation(C), TensorNegation(D))
+    @test -(-A) == A
 
     @testset "ZeroTensor arguments" begin
         A = ScalingTensor(1.0, (3, 3))
