@@ -21,6 +21,15 @@ LazyTensors.domain_size(m::OperatorSizeDoublingMapping) = m.domain_size
     @test_throws MethodError m * m
 
     @test IdentityTensor(3) * v === v
+
+    @testset "Error hint" begin
+        err = try
+            m * m
+        catch err
+            err
+        end
+        @test occursin("Did you mean to use `∘` to compose lazy tensors?", sprint(showerror, err))
+    end
 end
 
 @testset "scalar multiplication operator" begin

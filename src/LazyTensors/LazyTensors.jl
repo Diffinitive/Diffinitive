@@ -38,4 +38,22 @@ include("lazy_tensor_operators.jl")
 include("tuple_manipulation.jl")
 include("componentview.jl")
 
+function __init__()
+    if isdefined(Base.Experimental, :register_error_hint)
+        Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
+            if exc.f != Base.:*
+                return
+            end
+
+            if length(exc.args) != 2
+                return
+            end
+
+            if all(arg -> arg isa LazyTensor, exc.args)
+                print(io, "\nDid you mean to use `∘` to compose lazy tensors?")
+            end
+        end
+    end
+end
+
 end # module
