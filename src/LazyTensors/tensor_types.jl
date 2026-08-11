@@ -245,15 +245,14 @@ end
 
 
 """
-    VectorTensor(ts::NTuple{N, LazyTensor} where N)
+    VectorTensor(ts::NTuple{N, LazyTensor}) where N
 
 A VectorTensor with elements `ts`.
 """
-function VectorTensor(ts::NT) where {NT <: NTuple{N, LazyTensor} where N}
-    N = length(ts)
+function VectorTensor(ts::NTuple{N, LazyTensor}) where N
     R = range_dim(ts[1])
     D = range_dim(ts[1])
-    VectorTensor{N, R, D}(ts)
+    return VectorTensor{N, R, D}(ts)
 end
 
 """
@@ -304,23 +303,15 @@ end
 
 
 """
-    VectorDotTensor(ts::NTuple{N, LazyTensor} where N)
+    VectorDotTensor(ts::NTuple{N, LazyTensor}) where N
 
 A VectorDotTensor with elements `ts`.
 """
-function VectorDotTensor(ts::NT) where {NT <: NTuple{N, LazyTensor} where N}
-    N = length(ts)
+function VectorDotTensor(ts::NTuple{N, LazyTensor}) where N
     R = range_dim(ts[1])
     D = range_dim(ts[1])
-    VectorDotTensor{N, R, D}(ts)
+    return VectorDotTensor{N, R, D}(ts)
 end
-
-"""
-    VectorDotTensor(ts::NTuple{N, <: LazyTensor{R, D}}) where {N, R, D}
-
-A VectorDotTensor with elements `ts`.
-"""
-VectorDotTensor(ts::NTuple{N, <: LazyTensor{R, D}}) where {N, R, D} = VectorDotTensor{N, R, D}(ts)
 
 """
     VectorDotTensor(ts::Vararg{LazyTensor})
@@ -376,11 +367,10 @@ end
 
 A MatrixTensor with elements `ts`.
 """
-function MatrixTensor(ts::TT) where {TT <: TupleTable{N, M, <: NMTuple{N, M, LazyTensor}} where {N, M}}
-    N, M = size(ts)
+function MatrixTensor(ts::TupleTable{N, M, <:NMTuple{N, M, LazyTensor}}) where {N, M}
     R = range_dim(ts[1,1])
     D = domain_dim(ts[1,1])
-    MatrixTensor{N, M, R, D}(ts)
+    return MatrixTensor{N, M, R, D}(ts)
 end
 
 """
