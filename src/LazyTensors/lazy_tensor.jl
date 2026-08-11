@@ -50,3 +50,11 @@ function range_size end
 Return the domain size for the mapping.
 """
 function domain_size end
+
+
+"""
+    Base.adjoint(::LazyTensor)
+
+The adjoint of the mapping as a `LazyTensor`.
+"""
+Base.adjoint(::LazyTensor)
