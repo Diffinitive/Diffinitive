@@ -38,7 +38,6 @@ end
 
 ## Automatic differentiation
 onehot(k,N) = SVector(ntuple(i->k==i ? 1 : 0,N))
-tuple_range(n) = ntuple(identity, n)
 index_tuple(x) = tuple_range(length(x))
 
 δ(i,j) = i==j ? 1 : 0
