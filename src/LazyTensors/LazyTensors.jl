@@ -30,6 +30,7 @@ export DomainSizeMismatch
 export RangeSizeMismatch
 export componentview
 export ArrayComponentView
+export dirac_delta
 
 export LazyArray
 export LazyFunctionArray

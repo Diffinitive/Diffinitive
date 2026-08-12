@@ -4,33 +4,71 @@ using Diffinitive.SbpOperators
 using Diffinitive.Grids
 
 using StaticArrays
-using AutomaticCalculus: e, ∂∂, δ, Δ, J, index_tuple
+using AutomaticCalculus: e, ∂, δ, divergence, J
 
 using LinearAlgebra
 
-operator_path = sbp_operators_path()*"standard_diagonal.toml"
-stencil_set = read_stencil_set(operator_path, order = 4)
+const operator_path = sbp_operators_path()*"standard_diagonal.toml"
+const stencil_set = read_stencil_set(operator_path, order = 4)
 
 ## Automatic differentiation
-function elastic_ad(u, λ, μ, x)
-    map(index_tuple(x)) do i
-        sum(index_tuple(x)) do j
-            uⱼ = e(u,j)
-            # ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + δᵢⱼ∂ₖμ∂ₖuⱼ
-            ∂∂(uⱼ,i,λ,j,x) + ∂∂(uⱼ,j,μ,i,x) + δ(i,j)*Δ(uⱼ,μ,x)
-        end
-    end |> SVector
+function stress_ad(u, λ, μ, x)
+    n = length(x)
+
+    _smatrix(n,n) do i,j
+        uᵢ = e(u,i)
+        uⱼ = e(u,j)
+
+        # σᵢⱼ = δᵢⱼλ∂ₖuₖ + μ∂ᵢuⱼ + μ∂ⱼuᵢ
+        δ(i,j)*λ(x)*divergence(u,x) + μ(x)*(∂(uⱼ,i,x) + ∂(uᵢ,j,x))
+    end
 end
 
-elastic_ad(u, λ, μ) = x->elastic_ad(u, λ, μ, x)
-elastic_ad(u, x) = elastic_ad(u, x->1, x->1, x)
-elastic_ad(u) = x->elastic_ad(u,x)
+
+stress_ad(u, λ, μ) = x->stress_ad(u, λ, μ, x)
+stress_ad(u, x) = stress_ad(u, x->1, x->1, x)
+stress_ad(u) = x->stress_ad(u,x)
+
+
+function traction_ad(u,λ,μ,c,boundary,ξ)
+    x = c(ξ)
+    σ = stress_ad(u,λ,μ,x)
+    n̂ = boundary_normal(c,boundary,ξ)
+
+    return σ*n̂
+end
+
+traction_ad(u,λ,μ,c,boundary) = ξ->traction_ad(u,λ,μ,c,boundary,ξ)
+
+
+function normal_traction_ad(u,λ,μ,c,boundary,ξ)
+    x = c(ξ)
+    σ = stress_ad(u,λ,μ,x)
+    n̂ = boundary_normal(c,boundary,ξ)
+
+    return dot(n̂,σ,n̂)
+end
+
+normal_traction_ad(u,λ,μ,c,boundary) = ξ->normal_traction_ad(u,λ,μ,c,boundary,ξ)
+
+
+function tangential_traction_ad(u,λ,μ,c,boundary,ξ)
+    x = c(ξ)
+    n̂ = boundary_normal(c,boundary,ξ)
+    tₙ = normal_traction_ad(u,λ,μ,c,boundary,ξ)
+    T = traction_ad(u,λ,μ,c,boundary,ξ)
+
+    return T - tₙ*n̂
+end
+
+tangential_traction_ad(u,λ,μ,c,boundary) = ξ->tangential_traction_ad(u,λ,μ,c,boundary,ξ)
 
 
 ## Helpers
-function test_accuracy(g; L̄, u, Lu, broken=false, debug=false, kwargs...)
-    ū = map(u, g)
-    Lū = map(Lu, g)
+function test_accuracy(g_domain, g_range; L̄, u, Lu, broken=false, debug=false, kwargs...)
+    ū = map(u, g_domain)
+    Lū = map(Lu, g_range)
+
     L̄ū = L̄*ū
 
     if debug
@@ -65,36 +103,8 @@ const c_3d = with_jacobian(unitcube(), J) do (ξ,η,γ)
 end
 
 
-## Analytic solutions
-∥(u,v) = u⋅unit(v)*unit(v)
-⟂(u,v) = u-(u∥v)
-unit(v) = v/norm(v)
-
-
-function plane_wave(kₚ,kₛ,k̂,u₀,x)
-    k̄ₚ = kₚ*k̂
-    k̄ₛ = kₛ*k̂
-
-    return (u₀∥k̂)*cis(k̄ₚ⋅x) + (u₀⟂k̂)*cis(k̄ₛ⋅x)
-end
-
-
-
-function elastic_greens_function(μ,kₚ,kₛ,x)
-    r(x) = norm(x)
-
-    f(x) = g(kₛ,r(x)) - g(kₚ, r(x))
-
-    return _smatrix(3,3) do i, j
-        1/μ*δ(i,j)*g(kₛ,r(x)) + ∂∂(f,i,j,x)
-    end
-end
-
-
-g(k,r) = cis(k*r)/(4π*r)
-
 ## Test sets
-# dimension_cases = ["2D", "3D"]  # TODO: "Runtime for 3D tests are very long. Investigate
+#dimension_cases = ["2D", "3D"] # TODO: "Runtime for 3D tests are very long. Investigate
 dimension_cases = ["2D"]
 
 function_cases = Dict(
@@ -138,11 +148,11 @@ function_cases = Dict(
 
 grid_cases = Dict(
     "2D" => [
-        "EquidistantGrid" => (ps = unitsquare(Float64), sz = (41, 41),     c = with_jacobian(identity, unitsquare(Float64), jacobian)),
+        "EquidistantGrid" => (ps = unitsquare(Float64), sz = (41, 41),     c = with_jacobian(identity, unitsquare(Float64), J)),
         "MappedGrid"      => (ps = c_2d,                sz = (41, 41),     c = c_2d),
     ],
     "3D" => [
-        "EquidistantGrid" => (ps = unitcube(Float64),   sz = (21, 21, 21), c = with_jacobian(identity, unitcube(Float64), jacobian)),
+        "EquidistantGrid" => (ps = unitcube(Float64),   sz = (21, 21, 21), c = with_jacobian(identity, unitcube(Float64), J)),
         "MappedGrid"      => (ps = c_3d,                sz = (21, 21, 21), c = c_3d),
     ],
 )
@@ -157,51 +167,6 @@ grid_cases = Dict(
         μ = x -> 1. + 0.2cos(norm(x)),
     ),
 ]
-
-
-@testset "elastic" begin
-    test_params = Dict(
-        "2D" => Dict(
-            "EquidistantGrid" => Dict(
-                "u = [x, y²], λ = 1, μ = 1" => (;rtol = 1e-12),
-                "u = [x, y²], λ = y, μ = x" => (;rtol = 1e-12),
-                "u = [x, y²], λ = x², μ = y" => (;rtol = 1e-12),
-                "u = [y, x], λ = x, μ = y" => (;rtol = 1e-12),
-                "u = [y, x], λ = y, μ = xy" => (;rtol = 1e-12),
-            ),
-            "MappedGrid" => Dict(
-                "u = [x, y²], λ = 1, μ = 1" => (;rtol = 1e-12),
-                "u = [x, y²], λ = y, μ = x" => (;rtol = 1e-12),
-                "u = [x, y²], λ = x², μ = y" => (;rtol = 1e-4),
-                "u = [y, x], λ = x, μ = y" => (;rtol = 1e-11),
-                "u = [y, x], λ = y, μ = xy" => (;rtol = 1e-11),
-            ),
-        ),
-        "3D" => Dict(
-            "EquidistantGrid" => Dict(
-                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol = 1e-13),
-            ),
-            "MappedGrid" => Dict(
-                "u = [x, y², xz], λ = 1, μ = 1" => (;rtol = 1e-12),
-            ),
-        ),
-    )
-    @testset "$dim" for dim ∈ dimension_cases
-        @testset "$grid_name" for (grid_name, (;ps, sz)) ∈ grid_cases[dim]
-            g = equidistant_grid(ps, sz...)
-            @testset "$case_name" for (case_name, (;u, λ, μ)) ∈ function_cases[dim]
-                λ̄ = map(λ, g)
-                μ̄ = map(μ, g)
-                test_accuracy(g;
-                    L̄ = elastic(g, λ̄, μ̄, stencil_set),
-                    u = u,
-                    Lu = elastic_ad(u,λ,μ),
-                    test_params[dim][grid_name][case_name]...,
-                )
-            end
-        end
-    end
-end
 
 
 @testset "traction" begin
@@ -386,39 +351,3 @@ end
     end
 end
 
-
-@testset "SBP-properties" begin
-    # Test that the summation by parts property for the elastic operator
-    # ( vᵢ, [Eu]ᵢ)_Ω - ([Ev]ᵢ, uᵢ)_Ω = (vᵢ, [Tu]ᵢ )_∂Ω - ([Tv]ᵢ, uᵢ)_∂Ω
-    # holds
-    ip(u,H,v) = mapreduce(⋅, +, u , H*v)
-
-    @testset "$dim" for dim ∈ dimension_cases
-        @testset "$grid_name" for (grid_name, (;ps, sz)) ∈ grid_cases[dim]
-            g = equidistant_grid(ps, sz...)
-            @testset "$case_name" for (case_name, parameters) ∈ material_cases
-                (;λ, μ) = parameters
-                λ̄ = map(λ, g)
-                μ̄ = map(μ, g)
-        
-                E = elastic(g, λ̄, μ̄, stencil_set)
-
-                u = rand(SVector{ndims(g)}, size(g))
-                v = rand(SVector{ndims(g)}, size(g))
-
-                H = inner_product(g, stencil_set)
-
-                volume_term = ip(v,H,E*u) - ip(E*v,H,u)
-                boundary_term = sum(boundary_identifiers(g)) do boundary
-                    e = boundary_restriction(g, stencil_set, boundary)
-                    T = traction(g, λ̄, μ̄, stencil_set, boundary)
-                    Hᵧ = inner_product(boundary_grid(g, boundary), stencil_set)
-
-                    ip(e*v, Hᵧ, T*u) - ip(T*v, Hᵧ, e*u)
-                end
-
-                @test volume_term ≈ boundary_term
-           end
-        end
-    end
-end
