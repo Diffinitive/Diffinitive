@@ -8,8 +8,8 @@ using ForwardDiff
 
 using LinearAlgebra
 
-const operator_path = sbp_operators_path()*"standard_diagonal.toml"
-const stencil_set = read_stencil_set(operator_path, order = 4)
+operator_path = sbp_operators_path()*"standard_diagonal.toml"
+stencil_set = read_stencil_set(operator_path, order = 4)
 
 function test_accuracy(g; L̄, u, Lu, broken=false, debug=false, kwargs...)
     ū = map(u, g)
@@ -38,7 +38,6 @@ end
 
 ## Automatic differentiation
 onehot(k,N) = SVector(ntuple(i->k==i ? 1 : 0,N))
-tuple_range(n) = ntuple(identity, n)
 index_tuple(x) = tuple_range(length(x))
 
 δ(i,j) = i==j ? 1 : 0
