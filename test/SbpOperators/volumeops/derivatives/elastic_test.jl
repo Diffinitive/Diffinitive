@@ -267,7 +267,7 @@ grid_cases = Dict(
 ]
 
 
-@testset "elastic_isotropic" begin
+@testset "elastic" begin
     test_params = Dict(
         "2D" => Dict(
             "EquidistantGrid" => Dict(
@@ -301,7 +301,7 @@ grid_cases = Dict(
                 λ̄ = map(λ, g)
                 μ̄ = map(μ, g)
                 test_accuracy(g;
-                    L̄ = elastic_isotropic(g, λ̄, μ̄, stencil_set),
+                    L̄ = elastic(g, λ̄, μ̄, stencil_set),
                     u = u,
                     Lu = elastic_ad(u,λ,μ),
                     test_params[dim][grid_name][case_name]...,
@@ -312,7 +312,7 @@ grid_cases = Dict(
 end
 
 
-@testset "traction_isotropic" begin
+@testset "traction" begin
     test_params = Dict(
         "2D" => Dict(
             "EquidistantGrid" => Dict(
@@ -353,7 +353,7 @@ end
                         gᵧ = logical_grid(gᵧ)
                     end
                     test_accuracy(g, gᵧ;
-                        L̄ = traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
+                        L̄ = traction(g, λ̄, μ̄, stencil_set, bid),
                         u = u,
                         Lu = traction_ad(u, λ, μ, c, bid),
                         test_params[dim][grid_name][case_name]...,
@@ -365,7 +365,7 @@ end
 end
 
 
-@testset "normal_traction_isotropic" begin
+@testset "normal_traction" begin
     test_params = Dict(
         "2D" => Dict(
             "EquidistantGrid" => Dict(
@@ -406,7 +406,7 @@ end
                         gᵧ = logical_grid(gᵧ)
                     end
                     test_accuracy(g, gᵧ;
-                        L̄ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
+                        L̄ = normal_traction(g, λ̄, μ̄, stencil_set, bid),
                         u = u,
                         Lu = normal_traction_ad(u, λ, μ, c, bid),
                         test_params[dim][grid_name][case_name]...,
@@ -418,7 +418,7 @@ end
 end
 
 
-@testset "tangential_traction_isotropic" begin
+@testset "tangential_traction" begin
     test_params = Dict(
         "2D" => Dict(
             "EquidistantGrid" => Dict(
@@ -459,7 +459,7 @@ end
                         gᵧ = logical_grid(gᵧ)
                     end
                     test_accuracy(g, gᵧ;
-                        L̄ = tangential_traction_isotropic(g, λ̄, μ̄, stencil_set, bid),
+                        L̄ = tangential_traction(g, λ̄, μ̄, stencil_set, bid),
                         u = u,
                         Lu = tangential_traction_ad(u, λ, μ, c, bid),
                         test_params[dim][grid_name][case_name]...,
@@ -482,9 +482,9 @@ end
                 u = rand(SVector{ndims(g)}, size(g))
 
                 @testset "$boundary" for boundary ∈ boundary_identifiers(g)
-                    T = traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
-                    tₜ = tangential_traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
-                    tₙ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
+                    T = traction(g, λ̄, μ̄, stencil_set, boundary)
+                    tₜ = tangential_traction(g, λ̄, μ̄, stencil_set, boundary)
+                    tₙ = normal_traction(g, λ̄, μ̄, stencil_set, boundary)
                     n̂ = boundary_normal(g, boundary)
 
                     @test T*u ≈ tₜ*u + (tₙ*u).*n̂
@@ -510,7 +510,7 @@ end
                 # ( vᵢ, [Eu]ᵢ)_Ω - ([Ev]ᵢ, uᵢ)_Ω = (vᵢ, [Tu]ᵢ )_∂Ω - ([Tv]ᵢ, uᵢ)_∂Ω
                 # Holds
 
-                E = elastic_isotropic(g, λ̄, μ̄, stencil_set)
+                E = elastic(g, λ̄, μ̄, stencil_set)
 
                 u = rand(SVector{ndims(g)}, size(g))
                 v = rand(SVector{ndims(g)}, size(g))
@@ -520,7 +520,7 @@ end
                 volume_term = ip(v,H,E*u) - ip(E*v,H,u)
                 boundary_term = sum(boundary_identifiers(g)) do boundary
                     e = boundary_restriction(g, stencil_set, boundary)
-                    T = traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
+                    T = traction(g, λ̄, μ̄, stencil_set, boundary)
                     Hᵧ = inner_product(boundary_grid(g, boundary), stencil_set)
 
                     ip(e*v, Hᵧ, T*u) - ip(T*v, Hᵧ, e*u)

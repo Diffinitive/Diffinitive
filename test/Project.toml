@@ -1,5 +1,6 @@
 [deps]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+AutomaticCalculus = "8c525935-1fe7-4d03-8418-ce7452b6cb68"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 Diffinitive = "5a373a26-915f-4769-bcab-bf03835de17b"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"

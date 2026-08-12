@@ -22,12 +22,9 @@
 #      ∂₁μ∂₁u₂ + ∂₂μ∂₂u₂
 
 
-# TBD: Could we remove the "_isotropic" and add "_anisotropic" for a future variant.
-
-
 # Tensor grid
 # ===========
-function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
+function elastic(g::TensorGrid, λ, μ, stencil_set)
     # ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
     # =>
     # ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖδᵢⱼuⱼ
@@ -50,7 +47,7 @@ function elastic_isotropic(g::TensorGrid, λ, μ, stencil_set)
 end
 
 
-function traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
+function traction(g::TensorGrid, λ, μ, stencil_set, boundary)
     # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖuᵢ
     # =>
     # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖδᵢⱼuⱼ
@@ -77,7 +74,7 @@ function traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
 end
 
 
-function normal_traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
+function normal_traction(g::TensorGrid, λ, μ, stencil_set, boundary)
     # tₙ = nᵢtᵢ = (λ∂ⱼ + 2μnⱼ∂ₙ) uⱼ
 
     e = boundary_restriction(g, stencil_set, boundary)
@@ -96,7 +93,7 @@ function normal_traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
     end
 end
 
-function tangential_traction_isotropic(g::TensorGrid, λ, μ, stencil_set, boundary)
+function tangential_traction(g::TensorGrid, λ, μ, stencil_set, boundary)
     # tₜ = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
 
     e = boundary_restriction(g, stencil_set, boundary)
@@ -118,7 +115,7 @@ end
 
 # Mapped grid
 # ===========
-function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
+function elastic(grid::MappedGrid, λ, μ, stencil_set)
     # Lᵢⱼuⱼ = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
     #
     #       = J⁻¹(∂̃ₖλJg̃ᵏⁿⁱʲ∂̃ₙ + ∂̃ₖμJg̃ᵏⁿʲⁱ∂̃ₙ + δᵢⱼ∂̃ₖμJg̃ᵏⁿˢˢ∂̃ₙ) uⱼ
@@ -172,7 +169,7 @@ function elastic_isotropic(grid::MappedGrid, λ, μ, stencil_set)
 end
 
 
-function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
+function traction(g::MappedGrid, λ, μ, stencil_set, boundary)
     # In standard coordinates:
     # Tᵢ = nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖuᵢ
     # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖδᵢⱼuⱼ
@@ -218,7 +215,7 @@ function traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
 end
 
 
-function normal_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
+function normal_traction(g::MappedGrid, λ, μ, stencil_set, boundary)
     # tₙ = nᵢtᵢ = (λ∂ⱼ + 2μnⱼ∂ₙ) uⱼ
     #
     # With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ
@@ -247,7 +244,7 @@ function normal_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary)
     end
 end
 
-function tangential_traction_isotropic(g::MappedGrid, λ, μ, stencil_set, boundary) # TBD: Should we remove dependence on λ here? Add error hint?
+function tangential_traction(g::MappedGrid, λ, μ, stencil_set, boundary) # TBD: Should we remove dependence on λ here? Add error hint?
     # tₜ = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
     #
     # With fᵢⱼ = ∂ξᵢ/∂xⱼ => ∂ᵢ = fₖᵢ∂̃ₖ
