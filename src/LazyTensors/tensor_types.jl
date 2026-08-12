@@ -264,7 +264,7 @@ VectorTensor(ts::Vararg{LazyTensor}) = VectorTensor(ts)
 
 
 """
-    VectorTensor(f, n}
+    VectorTensor(f, n)
 
 A VectorTensor of `n` LazyTensors with elements determined by `f(i)` for ``i = 1...n``.
 """
@@ -322,7 +322,7 @@ VectorDotTensor(ts::Vararg{LazyTensor}) = VectorDotTensor(ts)
 
 
 """
-    VectorDotTensor(f, n}
+    VectorDotTensor(f, n)
 
 A VectorDotTensor of `n` LazyTensors with elements determined by `f(i)` for ``i = 1...n``.
 """
@@ -381,14 +381,14 @@ A MatrixTensor with elements `ts`.
 MatrixTensor(ts::NTuple{N, NTuple{M, LazyTensor}} where {N, M}) = MatrixTensor(TupleTable(ts))
 
 """
-    MatrixTensor(ts::Vararg{NTuple{N, LazyTensor} where N)
+    MatrixTensor(ts::Vararg{NTuple{N, LazyTensor} where N})
 
 A MatrixTensor with elements `ts`.
 """
 MatrixTensor(ts::Vararg{NTuple{N, LazyTensor} where N}) = MatrixTensor(ts)
 
 """
-    MatrixTensor(ts::Matrix}
+    MatrixTensor(ts::Matrix)
 
 A MatrixTensor with elements `ts`.
 """
@@ -397,7 +397,7 @@ function MatrixTensor(ts::Matrix)
 end
 
 """
-    MatrixTensor(f, n, m}
+    MatrixTensor(f, n, m)
 
 An MatrixTensor of n×m LazyTensors with elements determined by `f(i,j)` for ``i = 1...n`` and ``j = 1...m``.
 """
