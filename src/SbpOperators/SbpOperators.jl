@@ -30,6 +30,7 @@ export undivided_skewed04
 export closure_size
 export divergence
 export gradient
+export Elastic
 export elastic
 export traction
 export normal_traction

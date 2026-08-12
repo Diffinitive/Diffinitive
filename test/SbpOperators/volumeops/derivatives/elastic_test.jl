@@ -158,7 +158,19 @@ grid_cases = Dict(
         μ = x -> 1. + 0.2cos(norm(x)),
     ),
 ]
-
+@testset "Elastic" begin
+    @testset "$dim" for dim ∈ dimension_cases
+        @testset "$grid_name" for (grid_name, (;ps, sz)) ∈ grid_cases[dim]
+            g = equidistant_grid(ps, sz...)
+            u = rand(SVector{ndims(g)}, size(g))
+            λ = rand(sz...)
+            μ = rand(sz...)
+            E = Elastic(g, λ, μ, stencil_set)
+            L = elastic(g, λ, μ, stencil_set)
+            @test E*u == L*u
+        end
+    end
+end
 
 @testset "elastic" begin
     test_params = Dict(
@@ -393,33 +405,29 @@ end
     # ( vᵢ, [Eu]ᵢ)_Ω - ([Ev]ᵢ, uᵢ)_Ω = (vᵢ, [Tu]ᵢ )_∂Ω - ([Tv]ᵢ, uᵢ)_∂Ω
     # holds
     ip(u,H,v) = mapreduce(⋅, +, u , H*v)
-
     @testset "$dim" for dim ∈ dimension_cases
         @testset "$grid_name" for (grid_name, (;ps, sz)) ∈ grid_cases[dim]
             g = equidistant_grid(ps, sz...)
-            @testset "$case_name" for (case_name, parameters) ∈ material_cases
-                (;λ, μ) = parameters
-                λ̄ = map(λ, g)
-                μ̄ = map(μ, g)
+            λ̄ = rand(sz...)
+            μ̄ = rand(sz...)
         
-                E = elastic(g, λ̄, μ̄, stencil_set)
+            E = elastic(g, λ̄, μ̄, stencil_set)
 
-                u = rand(SVector{ndims(g)}, size(g))
-                v = rand(SVector{ndims(g)}, size(g))
+            u = rand(SVector{ndims(g)}, size(g))
+            v = rand(SVector{ndims(g)}, size(g))
 
-                H = inner_product(g, stencil_set)
+            H = inner_product(g, stencil_set)
 
-                volume_term = ip(v,H,E*u) - ip(E*v,H,u)
-                boundary_term = sum(boundary_identifiers(g)) do boundary
-                    e = boundary_restriction(g, stencil_set, boundary)
-                    T = traction(g, λ̄, μ̄, stencil_set, boundary)
-                    Hᵧ = inner_product(boundary_grid(g, boundary), stencil_set)
+            volume_term = ip(v,H,E*u) - ip(E*v,H,u)
+            boundary_term = sum(boundary_identifiers(g)) do boundary
+                e = boundary_restriction(g, stencil_set, boundary)
+                T = traction(g, λ̄, μ̄, stencil_set, boundary)
+                Hᵧ = inner_product(boundary_grid(g, boundary), stencil_set)
 
-                    ip(e*v, Hᵧ, T*u) - ip(T*v, Hᵧ, e*u)
-                end
+                ip(e*v, Hᵧ, T*u) - ip(T*v, Hᵧ, e*u)
+            end
 
-                @test volume_term ≈ boundary_term
-           end
+            @test volume_term ≈ boundary_term rtol=1e-12
         end
     end
 end

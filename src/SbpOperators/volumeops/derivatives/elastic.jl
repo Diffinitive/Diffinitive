@@ -10,6 +10,28 @@
 #              ∂₁μ∂₂u₁ + ∂₂μ∂₂u₂ +
 #              ∂₁μ∂₁u₂ + ∂₂μ∂₂u₂
 
+struct Elastic{Dim, TM<:LazyTensor{Dim, Dim}} <: LazyTensor{Dim, Dim}
+    D::TM       # Difference operator
+    stencil_set::StencilSet # Stencil set of the operator
+end
+
+"""
+    Elastic(g::Grid, stencil_set::StencilSet)
+
+Creates the `Elastic` operator `E` with the first and second Lamé parameters
+`λ` and `μ` on `g` given `stencil_set`.
+
+See also [`elastic`](@ref).
+"""
+function Elastic(g::Grid, λ, μ, stencil_set::StencilSet)
+    E = elastic(g, λ, μ, stencil_set)
+    return Elastic(E, stencil_set)
+end
+
+LazyTensors.range_size(E::Elastic) = LazyTensors.range_size(E.D)
+LazyTensors.domain_size(E::Elastic) = LazyTensors.domain_size(E.D)
+LazyTensors.apply(E::Elastic, v::AbstractArray, I...) = LazyTensors.apply(E.D, v, I...)
+
 
 # Tensor grid
 # ===========
