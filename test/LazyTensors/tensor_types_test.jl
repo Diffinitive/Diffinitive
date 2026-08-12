@@ -271,12 +271,37 @@ end
     end
 
     @testset "apply" begin
-        s = [4., 6., 5., 6., 7.]
-        t = VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
-        v = [10., 11., 12., 14., 15.]
-        expected = map((sᵢ, vᵢ)-> @SVector[sᵢ*vᵢ, 3vᵢ], s,v)
-        @test t*v == expected
-        @test collect(t*v) isa Vector{SVector{2,Float64}}
+        @testset "range_dim == domain_dim" begin
+            s = [4., 6., 5., 6., 7.]
+            t = VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+            v = [10., 11., 12., 14., 15.]
+            expected = map((sᵢ, vᵢ)-> @SVector[sᵢ*vᵢ, 3vᵢ], s,v)
+            @test t*v == expected
+            @test collect(t*v) isa Vector{SVector{2,Float64}}
+        end
+
+        @testset "range_dim != domain_dim" begin
+            A = Float64.(reshape(1:24, 2, 3, 4))
+            B = Float64.(reshape(25:48, 2, 3, 4))
+            t = VectorTensor(
+                DenseTensor(A, (1,2), (3,)),
+                DenseTensor(B, (1,2), (3,)),
+            )
+            v = [1., 2., 3., 4.]
+            expected = [
+                @SVector[
+                    sum(A[i,j,k]*v[k] for k ∈ axes(A, 3)),
+                    sum(B[i,j,k]*v[k] for k ∈ axes(B, 3)),
+                ]
+                for i ∈ axes(A, 1), j ∈ axes(A, 2)
+            ]
+
+            @test t isa LazyTensor{2, 1}
+            @test range_size(t) == (2, 3)
+            @test domain_size(t) == (4,)
+            @test t*v == expected
+            @test collect(t*v) isa Matrix{SVector{2,Float64}}
+        end
     end
 
     @testset "Base.:(==)" begin
@@ -306,12 +331,39 @@ end
     end
 
     @testset "apply" begin
-        s = [4., 6., 5., 6., 7.]
-        t = VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
-        v = rand(SVector{2,Float64}, 5)
-        expected = map((sᵢ, vᵢ)-> sᵢ*vᵢ[1]+3vᵢ[2], s,v)
-        @test t*v == expected
-        @test collect(t*v) isa Vector{Float64}
+        @testset "range_dim == domain_dim" begin
+            s = [4., 6., 5., 6., 7.]
+            t = VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+            v = rand(SVector{2,Float64}, 5)
+            expected = map((sᵢ, vᵢ)-> sᵢ*vᵢ[1]+3vᵢ[2], s,v)
+            @test t*v == expected
+            @test collect(t*v) isa Vector{Float64}
+        end
+
+        @testset "range_dim != domain_dim" begin
+            A = Float64.(reshape(1:24, 2, 3, 4))
+            B = Float64.(reshape(25:48, 2, 3, 4))
+            t = VectorDotTensor(
+                DenseTensor(A, (1,2), (3,)),
+                DenseTensor(B, (1,2), (3,)),
+            )
+            v = [
+                @SVector[1., 5.],
+                @SVector[2., 6.],
+                @SVector[3., 7.],
+                @SVector[4., 8.],
+            ]
+            expected = [
+                sum(A[i,j,k]*v[k][1] + B[i,j,k]*v[k][2] for k ∈ axes(A, 3))
+                for i ∈ axes(A, 1), j ∈ axes(A, 2)
+            ]
+
+            @test t isa LazyTensor{2, 1}
+            @test range_size(t) == (2, 3)
+            @test domain_size(t) == (4,)
+            @test t*v == expected
+            @test collect(t*v) isa Matrix{Float64}
+        end
     end
 
     @testset "Base.:(==)" begin
@@ -386,22 +438,54 @@ end
     end
 
     @testset "apply" begin
-        s1 = [4., 6., 5., 6., 7.]
-        s2 = [6., 9., 3., 5., 7.]
-        t = MatrixTensor(
-            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
-            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
-        )
-        v = reinterpret(SVector{2,Float64}, rand(1.:20., 10))
+        @testset "range_dim == domain_dim" begin
+            s1 = [4., 6., 5., 6., 7.]
+            s2 = [6., 9., 3., 5., 7.]
+            t = MatrixTensor(
+                (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+                (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+            )
+            v = reinterpret(SVector{2,Float64}, rand(1.:20., 10))
 
-        expected = map(s1,s2,v) do s1ᵢ, s2ᵢ, vᵢ
-            @SVector[
-                s1ᵢ*vᵢ[1] + 3*vᵢ[2],
-                6*vᵢ[1] + s2ᵢ*vᵢ[2],
-            ]
+            expected = map(s1,s2,v) do s1ᵢ, s2ᵢ, vᵢ
+                @SVector[
+                    s1ᵢ*vᵢ[1] + 3*vᵢ[2],
+                    6*vᵢ[1] + s2ᵢ*vᵢ[2],
+                ]
+            end
+
+            @test t*v == expected
         end
 
-        @test t*v == expected
+        @testset "range_dim != domain_dim" begin
+            A = Float64.(reshape(1:24, 2, 3, 4))
+            B = Float64.(reshape(25:48, 2, 3, 4))
+            C = Float64.(reshape(49:72, 2, 3, 4))
+            D = Float64.(reshape(73:96, 2, 3, 4))
+            t = MatrixTensor(
+                (DenseTensor(A, (1,2), (3,)), DenseTensor(B, (1,2), (3,))),
+                (DenseTensor(C, (1,2), (3,)), DenseTensor(D, (1,2), (3,))),
+            )
+            v = [
+                @SVector[1., 5.],
+                @SVector[2., 6.],
+                @SVector[3., 7.],
+                @SVector[4., 8.],
+            ]
+            expected = [
+                @SVector[
+                    sum(A[i,j,k]*v[k][1] + B[i,j,k]*v[k][2] for k ∈ axes(A, 3)),
+                    sum(C[i,j,k]*v[k][1] + D[i,j,k]*v[k][2] for k ∈ axes(A, 3)),
+                ]
+                for i ∈ axes(A, 1), j ∈ axes(A, 2)
+            ]
+
+            @test t isa LazyTensor{2, 1}
+            @test range_size(t) == (2, 3)
+            @test domain_size(t) == (4,)
+            @test t*v == expected
+            @test collect(t*v) isa Matrix{SVector{2,Float64}}
+        end
     end
 
     @testset "Base.:(==)" begin
