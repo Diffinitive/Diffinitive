@@ -279,7 +279,6 @@ function apply(vt::VectorTensor{N, R, D}, v::AbstractArray{<:Any, D}, I::Vararg{
 end
 
 Base.adjoint(t::VectorTensor) = VectorDotTensor(map(adjoint, t.ts))
-Base.length(::VectorTensor{N}) where N = N
 LazyTensors.domain_size(t::VectorTensor) = domain_size(t.ts[1])
 LazyTensors.range_size(t::VectorTensor) = range_size(t.ts[1])
 
@@ -340,7 +339,6 @@ function apply(vdt::VectorDotTensor{N,R,D}, v::AbstractArray{<:Any, D}, I::Varar
 end
 
 Base.adjoint(vdt::VectorDotTensor) = VectorTensor(map(adjoint, vdt.ts))
-Base.length(::VectorDotTensor{N}) where N = N
 LazyTensors.domain_size(vdt::VectorDotTensor) = domain_size(vdt.ts[1])
 LazyTensors.range_size(vdt::VectorDotTensor) = range_size(vdt.ts[1])
 
@@ -427,7 +425,6 @@ end
 Base.adjoint(mt::MatrixTensor) = MatrixTensor(adjoint(mt.ts))
 LazyTensors.domain_size(mt::MatrixTensor) = domain_size(mt.ts[1,1])
 LazyTensors.range_size(mt::MatrixTensor) = range_size(mt.ts[1,1])
-Base.size(mt::MatrixTensor) = size(mt.ts)
 
 function Base.:(==)(a::MatrixTensor, b::MatrixTensor)
     return a.ts == b.ts
