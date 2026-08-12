@@ -1,22 +1,88 @@
-# Traction operator:
-# Tᵢ = (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ
+# Traction operator  T:
+# tᵢ = Tᵢⱼuⱼ = (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ
 
-# Normal traction operator:
+# Normal traction operator Tₙ:
 # Tₙ = nᵢTᵢ = (λ∂ⱼ + 2μnⱼnᵢ∂ᵢ) uⱼ
 #           = (λ∂ⱼ + 2μnⱼ∂ₙ) uⱼ
 
-# Tangential traction operator:
+# Tangential traction operator T̄ₜ = t:
 # tᵢ = Tᵢ - nₖtₖnᵢ = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)nₖ∂ₖ) uⱼ
 #                 = μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ
+
+#
+
+"""
+    traction(g::Grid, λ, μ, stencil_set, boundary)
+
+Creates the traction differential operator operator `T` for isotropic elasticity with
+first- and second Lamé parameters `λ` and `μ`, on the `boundary` of `g` using operators
+from `stencil_set`.
+
+`T` is the `MatrixTensor` approximating nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ, i,j = 1,...,`ndims(g)`.
+For a displacement vector grid function `ū`, `T*ū` approximates the traction vector on
+`boundary`, i.e., 
+
+`T*ū ≈ (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ`,
+
+with the normal pointing outwards.
+
+The approximation depends on the type of grid and the stencil set. It uses a combination of
+first- and normal derivative approximations, to ensure that `T` and the `Elastic` operator
+satisfies summation-by-parts properties.
+
+See also: [`Elastic`](@ref), [`MatrixTensor`](@ref)
+"""
+function traction end
+
+
+"""
+    normal_traction(g::Grid, λ, μ, stencil_set, boundary)
+
+Creates the normal traction differential operator operator `Tₙ` for isotropic elasticity with
+first- and second Lamé parameters `λ` and `μ`, on the `boundary` of `g` using operators
+from `stencil_set`.
+
+`Tₙ` is the `VectorDotTensor` approximating n̄⋅T = λ∂ᵢ + 2μnᵢ∂ₙ, i = 1,...,`ndims(g)` where T
+is the traction operator and n̄ is the outwards pointing normal. For a displacement vector grid
+function `ū`, `Tₙ*ū` approximates the normal traction on `boundary`, i.e.,
+
+`Tₙ*ū` ≈ (nᵢλ∂ⱼ + nⱼμ∂ᵢ + δᵢⱼμ∂ₙ) uⱼ.
+
+See also: [`traction`](@ref), [`VectorDotTensor`](@ref)
+"""
+function normal_traction end
+
+
+"""
+    tangential_traction(g::Grid, λ, μ, stencil_set, boundary)
+
+Creates the tangential traction differential operator operator `Tₜ` for isotropic elasticity with
+first- and second Lamé parameters `λ` and `μ`, on the `boundary` of `g` using operators
+from `stencil_set`.
+
+`Tₜ` is the `MatrixTensor` approximating μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ), i,j = 1,...,`ndims(g)`.
+For a displacement vector grid function `ū`, `Tₜ*ū` approximates the tangential traction on `boundary`,
+i.e.,
+
+`Tₜ*ū` ≈ μ(nⱼ∂ᵢ + (δᵢⱼ - 2nᵢnⱼ)∂ₙ) uⱼ,
+
+where the normal points outwards. 
+
+`Tₜ` also satisfies `Tₜ*ū = T*ū + (Tₙ*ū).*n̄`, where `T = traction(...)`, `Tₙ = normal_traction(...)`,
+and `n̄ = normal(...)`. Note that the dimensions of `Tₜ` are the same as those `T`.
+
+See also: [`traction`](@ref), [`normal_traction`](@ref), [`normal`](@ref), [`MatrixTensor`](@ref)
+"""
+function tangential_traction end
+
 
 # Tensor grid
 # ===========
 function traction(g::TensorGrid, λ, μ, stencil_set, boundary)
-    # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖuᵢ
-    # =>
-    # nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖδᵢⱼuⱼ
-    # (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ
-    # (nᵢλ∂ⱼ + nⱼμ∂ᵢ + δᵢⱼμ∂ₙ) uⱼ
+    # Tᵢ = nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖuᵢ
+    #    = nᵢλ∂ⱼuⱼ + nⱼμ∂ᵢuⱼ + nₖμ∂ₖδᵢⱼuⱼ
+    #    = (nᵢλ∂ⱼ + nⱼμ∂ᵢ + nₖμ∂ₖδᵢⱼ) uⱼ 
+    #    = (nᵢλ∂ⱼ + nⱼμ∂ᵢ + δᵢⱼμ∂ₙ) uⱼ
 
     N = ndims(g)
 

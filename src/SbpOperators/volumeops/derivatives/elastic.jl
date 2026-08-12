@@ -1,11 +1,9 @@
 """
     Elastic{Dim, TM} <: LazyTensor{Dim, Dim}
 
-The isotropic elastic (Navier-Cauchy) differential operator as a `LazyTensor`.
+The isotropic elastic (Navier-Cauchy) differential operator approximating
+∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ, i, j = 1,..,`Dim`. as a `LazyTensor`.
 
-The `Elastic` operator `E` is such that given a displacement vector `ū`, 
-`E*ū` approximates the  divergence of the Cauchy stress tensor, i.e.,
-Eᵢⱼuⱼ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ, i, j = 1,..,`Dim`.
 """
 struct Elastic{Dim, TM<:LazyTensor{Dim, Dim}} <: LazyTensor{Dim, Dim}
     D::TM       # Difference operator
@@ -30,30 +28,15 @@ LazyTensors.domain_size(E::Elastic) = LazyTensors.domain_size(E.D)
 LazyTensors.apply(E::Elastic, v::AbstractArray, I...) = LazyTensors.apply(E.D, v, I...)
 
 
-# Elastic operator:
-# Eᵢⱼuⱼ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
-#       = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
-
-# for 2d we have
-# v₁ = E₁ⱼuⱼ = ∂₁λ∂₁u₁ + ∂₁λ∂₂u₂ +
-#              ∂₁μ∂₁u₁ + ∂₂μ∂₁u₂ +
-#              ∂₁μ∂₁u₁ + ∂₂μ∂₂u₁
-# v₂ = E₂ⱼuⱼ = ∂₂λ∂₁u₁ + ∂₂λ∂₂u₂ +
-#              ∂₁μ∂₂u₁ + ∂₂μ∂₂u₂ +
-#              ∂₁μ∂₁u₂ + ∂₂μ∂₂u₂
-#
-# Tensor grid
-# ===========
 """
     elastic(g::Grid, λ, μ, stencil_set)
 
 Creates the isotropic elastic (Navier-Cauchy) differential operator operator `E` with
-first- and second Lamé parameters `λ`, `μ`, as a `LazyTensor` on `g` using SBP finite differnence operators
-from `stencil_set`.
+first- and second Lamé parameters `λ` and `μ`, on `g` using operators from `stencil_set`.
 
-`E` is a `MatrixTensor` on the grid `g`, such that for a displacement vector grid function ū,
-`E*ū` approximates the divergence of the Cauchy stress tensor
-Eᵢⱼuⱼ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ, i,j = 1,...,ndims(g)
+`E` is the `MatrixTensor` approximating ∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ, i,j = 1,...,`ndims(g)`.
+For a displacement vector grid function ū `E*ū` approximates the divergence of the Cauchy
+stress tensor, i.e., Eᵢⱼuⱼ = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
 
 The approximation depends on the type of grid and the stencil set. It uses a combination of
 narrow and wide second derivative approximations for improved dispersion properties.
@@ -63,10 +46,11 @@ See also: [`second_derivative_variable`](@ref), [`mixed_second_derivative_variab
 """
 function elastic end
 function elastic(g::TensorGrid, λ, μ, stencil_set)
-    # ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
-    # =>
-    # ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖδᵢⱼuⱼ
-    # (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
+    # Eᵢⱼuⱼ = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖuᵢ
+    #
+    #       = ∂ᵢλ∂ⱼuⱼ + ∂ⱼμ∂ᵢuⱼ + ∂ₖμ∂ₖδᵢⱼuⱼ
+    #
+    #       =(∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
 
     N = ndims(g)
 
@@ -85,8 +69,6 @@ function elastic(g::TensorGrid, λ, μ, stencil_set)
 end
 
 
-# Mapped grid
-# ===========
 function elastic(grid::MappedGrid, λ, μ, stencil_set)
     # Eᵢⱼuⱼ = (∂ᵢλ∂ⱼ + ∂ⱼμ∂ᵢ + ∂ₖμ∂ₖδᵢⱼ) uⱼ
     #
