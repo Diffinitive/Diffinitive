@@ -125,7 +125,7 @@ using LinearAlgebra
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=order)
 
                 @test sum(boundary_identifiers(mg)) do bId
-                    ∂ₙv = map(boundary_grid(mg,bId),normal(mg,bId)) do x̄,n̂
+                    ∂ₙv = map(boundary_grid(mg,bId),boundary_normal(mg,bId)) do x̄,n̂
                         n̂⋅∇v(x̄)
                     end
                     Hᵧ = inner_product(boundary_grid(mg,bId), stencil_set)

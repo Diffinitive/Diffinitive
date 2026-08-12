@@ -45,12 +45,30 @@ end
 
 boundary_identifiers(c::Chart) = boundary_identifiers(parameterspace(c))
 
-function normal(c::Chart, boundary, ξ)
-    ∂ξ∂x = inv(jacobian(c,ξ))
-    σ = _boundary_sign(eltype(∂ξ∂x), boundary)
+"""
+    boundary_normal(c::Chart, boundary, ξ)
+
+The normal on the `boundary` of the chart `c` evaluated at `ξ`. 
+"""
+function boundary_normal(c::Chart, boundary, ξ)
+    # The formula is based on expressing the normal in terms of vectors ∂x/∂ξᵢ.
+    # Call the coordinate vector for n in this basis a.
+    # In physical coordinates we have n = ∂x/∂ξᵢaᵢ.
+    # For a boundary where ξₖ = const, n should be orthogonal to ∂x/∂ξⱼ for all j != k
+    # This gives the system
+    #    ∂x/∂ξⱼ ⋅ ∂x/∂ξᵢaᵢ = δⱼₖ
+    #    ⇔ gᵢⱼaᵢ = δⱼₖ
+    #    ⇔ aᵢ = gⁱʲδⱼₖ
+    #    ⇔ n = ∂x/∂ξᵢ gⁱʲδⱼₖ
+
+    ∂x∂ξ = jacobian(c, ξ)
+    g = ∂x∂ξ' * ∂x∂ξ
+    g⁻¹ = inv(g)
+    σ = _boundary_sign(eltype(g), boundary)
 
     k = grid_id(boundary)
-    return σ*∂ξ∂x[k,:]/norm(∂ξ∂x[k,:])
+    n = ∂x∂ξ * g⁻¹[:, k]
+    return σ * n / norm(n)
 end
 
 
@@ -215,7 +233,7 @@ with_jacobian(f, Jfun) = FunctionWithJacobian(f, x->Jfun(f,x))
 """
     with_jacobian(x, pm::ParameterSpace, Jfun)
 
-Create a Chart from `f` and `pm` using `J(x) = Jfun(f,x)`.
+Create a Chart from `x(ξ)` and `pm` using `J(ξ) = Jfun(f,ξ)`.
 
 # Example
 ```julia-repl
@@ -270,8 +288,20 @@ julia> jacobian(c,[1,1/2])
 ```
 """
 function with_jacobian(xJ, pm::ParameterSpace)
+    _check_coordinates_and_jacobian(xJ, centroid(pm))
+
     x(ξ) = xJ(ξ)[1]
     J(ξ) = xJ(ξ)[2]
 
     return Chart(FunctionWithJacobian(x,J), pm)
+end
+
+function _check_coordinates_and_jacobian(xJ, ξ)
+    x_J = xJ(ξ)
+
+    if !(x_J isa Tuple && length(x_J) == 2)
+        throw(ArgumentError("with_jacobian(xJ, pm) expects xJ(ξ) to return a 2-tuple `(x, J)`."))
+    end
+
+    return nothing
 end

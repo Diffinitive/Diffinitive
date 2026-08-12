@@ -17,7 +17,7 @@ using LinearAlgebra
 
         d_l = normal_derivative(g_1D, stencil_set, LowerBoundary())
         @test d_l == normal_derivative(g_1D, stencil_set, LowerBoundary())
-        @test d_l isa BoundaryOperator{T,LowerBoundary} where T
+        @test d_l isa BoundaryOperator{LowerBoundary}
         @test d_l isa LazyTensor{0,1}
     end
 
@@ -105,7 +105,7 @@ using LinearAlgebra
                 for bid ∈ boundary_identifiers(mg)
                     @testset let bid=bid
                         d = normal_derivative(mg, stencil_set, bid)
-                        @test d*v ≈ normal(mg, bid) rtol=1e-13
+                        @test d*v ≈ boundary_normal(mg, bid) rtol=1e-13
                     end
                 end
              end
@@ -127,7 +127,7 @@ using LinearAlgebra
                 stencil_set = read_stencil_set(sbp_operators_path()*"standard_diagonal.toml"; order=order)
 
                 @testset for bId ∈ boundary_identifiers(mg)
-                    ∂ₙv = map(boundary_grid(mg,bId),normal(mg,bId)) do x̄,n̂
+                    ∂ₙv = map(boundary_grid(mg,bId),boundary_normal(mg,bId)) do x̄,n̂
                         n̂⋅∇v(x̄)
                     end
 

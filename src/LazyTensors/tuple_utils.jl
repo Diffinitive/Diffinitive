@@ -94,3 +94,89 @@ function right_pad_tuple(t, val, N)
     return (t..., padding...)
 end
 
+
+NMTuple{N, M, T} = NTuple{N, NTuple{M, T}}
+
+
+"""
+   TupleTable{N, M, T <: NMTuple{N, M, Any}}
+
+A static `N` row, `M` column table of types `T` built from tuples.
+
+A tuple table `t::TupleTable` is indexable, similar to matrix objects, i.e.,
+t[i,j] returns the the table entry in position i, j. In contrast to, e.g.,
+`StaticArrays.SMatrix` the elements of `t` can differ in type.
+"""
+struct TupleTable{N, M, T <: NMTuple{N, M, Any}}
+    table::T
+end
+
+"""
+   TupleTable(rows...)
+
+A `TupleTable` with elements specified by `rows`.
+
+"""
+function TupleTable(rows...)
+    if !allequal(length, rows)
+        throw(DimensionMismatch("All rows must have the same length"))
+    end
+    TupleTable(rows)
+end
+
+"""
+   TupleTable(A::Matrix)
+
+A `TupleTable{N,M}` with elements from the N×M matrix `A`.
+"""
+function TupleTable(A::Matrix)
+    N, M = size(A)
+
+    return map(tuple_range(N)) do i
+        map(tuple_range(M)) do j
+            A[i,j]
+        end
+    end |> TupleTable
+end
+
+Base.size(::Type{<:TupleTable{N, M}}) where {N, M} = (N, M)
+Base.size(t::TupleTable) = size(typeof(t))
+
+Base.getindex(t::TupleTable, i, j) = t.table[i][j]
+
+"""
+   Base.adjoint(tt::TupleTable)
+
+The adjoint of the `TupleTable` `tt`, similar to the adjoint of a matrix.
+"""
+function Base.adjoint(tt::TupleTable)
+    N, M = size(tt)
+
+    return map(tuple_range(M)) do j
+        map(tuple_range(N)) do i
+            adjoint(tt[i, j])
+        end
+    end |> TupleTable
+end
+
+function Base.:(==)(a::TupleTable, b::TupleTable)
+    return a.table == b.table
+end
+
+function Base.:+(a::TupleTable, b::TupleTable)
+    if size(a) != size(b)
+        throw(DimensionMismatch("adding TupleTable objects of sizes $(size(a)) and $(size(b))"))
+    end
+    return map(a.table, b.table) do aᵢ, bᵢ
+        aᵢ .+ bᵢ
+    end |> TupleTable
+end
+
+
+"""
+   tuple_range(n)
+
+The range 1, ..., n as a tuple
+"""
+tuple_range(n) = ntuple(identity, n)
+tuple_range(::Val{N}) where N = tuple_range(N)

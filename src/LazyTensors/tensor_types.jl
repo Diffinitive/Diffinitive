@@ -14,7 +14,8 @@ range_size(tmi::IdentityTensor) = tmi.size
 domain_size(tmi::IdentityTensor) = tmi.size
 
 apply(tmi::IdentityTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {D} = v[I...]
-apply_transpose(tmi::IdentityTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where {D} = v[I...]
+
+Base.adjoint(t::IdentityTensor) = t
 
 """
     ZeroTensor{R,D} <: LazyTensor{R,D}
@@ -58,6 +59,9 @@ function apply(t::ZeroTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any, R})
     return zero(eltype(v))
 end
 
+Base.adjoint(t::ZeroTensor) = ZeroTensor(domain_size(t), range_size(t))
+
+
 """
     ScalingTensor{T,D} <: LazyTensor{D,D}
 
@@ -69,7 +73,6 @@ struct ScalingTensor{T,D} <: LazyTensor{D,D}
 end
 
 LazyTensors.apply(tm::ScalingTensor{<:Any,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.λ*v[I...]
-LazyTensors.apply_transpose(tm::ScalingTensor{<:Any,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.λ*v[I...]
 
 LazyTensors.range_size(m::ScalingTensor) = m.size
 LazyTensors.domain_size(m::ScalingTensor) = m.size
@@ -77,6 +80,9 @@ LazyTensors.domain_size(m::ScalingTensor) = m.size
 function Base.:(==)(a::ScalingTensor, b::ScalingTensor)
     return a.λ == b.λ && a.size == b.size
 end
+
+Base.adjoint(t::ScalingTensor) = ScalingTensor(conj(t.λ), t.size)
+
 
 """
     DiagonalTensor{D, ...} <: LazyTensor{D,D}
@@ -91,11 +97,11 @@ end
 range_size(tm::DiagonalTensor) = size(tm.diagonal)
 domain_size(tm::DiagonalTensor) = size(tm.diagonal)
 
-
 LazyTensors.apply(tm::DiagonalTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.diagonal[I...]*v[I...]
-LazyTensors.apply_transpose(tm::DiagonalTensor{D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,D}) where D = tm.diagonal[I...]*v[I...]
 
 Base.:(==)(a::DiagonalTensor, b::DiagonalTensor) = a.diagonal == b.diagonal
+
+Base.adjoint(t::DiagonalTensor) = DiagonalTensor(conj(t.diagonal))
 
 
 """
@@ -133,148 +139,183 @@ function apply(llm::DenseTensor{R,D}, v::AbstractArray{<:Any,D}, I::Vararg{Any,R
     return sum(A_view.*v)
 end
 
-function apply_transpose(llm::DenseTensor{R,D}, v::AbstractArray{<:Any,R}, I::Vararg{Any,D}) where {R,D}
-    apply(DenseTensor(llm.A, llm.domain_indicies, llm.range_indicies), v, I...)
-end
-
 function Base.:(==)(a::DenseTensor, b::DenseTensor)
     return a.A == b.A && a.range_indicies == b.range_indicies && a.domain_indicies == b.domain_indicies
 end
 
+Base.adjoint(t::DenseTensor) = DenseTensor(conj(t.A), t.domain_indicies, t.range_indicies)
 
-NMTuple{N,M,T} = NTuple{N,NTuple{M, T}}
-# Different from SMatrix because the elements can differ in type
-struct TupleTable{N,M, T <: NMTuple{N,M,Any}}
-    table::T
-end
 
-function TupleTable(rows...)
-    if !allequal(length, rows)
-        throw(DimensionMismatch("All rows must have the same length"))
+"""
+    VectorTensor{N,R,D} <: LazyTensor{R,D}
+
+A vector of LazyTensors which when applied to an AbstractArray gives a
+TensorApplication with vector elements.
+"""
+struct VectorTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor{R, D}
+    ts::NT
+    function VectorTensor{N, R, D}(ts::NT) where {N, R, D, NT <: NTuple{N, LazyTensor{R, D}}}
+        check_equal_size(ts...)
+        return new{N, R, D, NT}(ts)
     end
-    TupleTable(rows)
 end
 
-function TupleTable(A::Matrix)
-    N, M = size(A)
 
-    return map(tuple_range(N)) do i
-        map(tuple_range(M)) do j
-            A[i,j]
-        end
-    end |> TupleTable
+"""
+    VectorTensor(ts::NTuple{N, LazyTensor}) where N
+
+A VectorTensor with elements `ts`.
+"""
+function VectorTensor(ts::NTuple{N, LazyTensor}) where N
+    R = range_dim(ts[1])
+    D = domain_dim(ts[1])
+    return VectorTensor{N, R, D}(ts)
 end
 
-Base.size(::Type{<:TupleTable{N,M}}) where {N,M} = (N,M)
-Base.size(t::TupleTable) = size(typeof(t))
+"""
+    VectorTensor(ts::Vararg{LazyTensor})
 
-Base.getindex(t::TupleTable, i, j) = t.table[i][j]
+A VectorTensor with elements `ts`.
+"""
+VectorTensor(ts::Vararg{LazyTensor}) = VectorTensor(ts)
 
-function Base.adjoint(tt::TupleTable)
-    N, M = size(tt)
 
-    return map(tuple_range(M)) do j
-        map(tuple_range(N)) do i
-            adjoint(tt[i,j])
-        end
-    end |> TupleTable
-end
+"""
+    VectorTensor(f, n)
 
-function Base.:(==)(a::TupleTable, b::TupleTable)
-    return a.table == b.table
-end
-
-function Base.:+(a::TupleTable, b::TupleTable)
-    return map(a.table, b.table) do aᵢ, bᵢ
-        aᵢ .+ bᵢ
-    end |> TupleTable
-end
-
-## "Vector of tensors ∘ scalar -> vector"
-struct VectorTensor{N,R,D,NT<:NTuple{N,LazyTensor{R,D}}} <: LazyTensor{R,D}
-    D::NT
-    ## TODO: add constructor with tests for checking domain and range size
-end
-
-VectorTensor(Ds::Vararg{LazyTensor}) = VectorTensor(Ds)
-
+A VectorTensor of `n` LazyTensors with elements determined by `f(i)` for ``i = 1...n``.
+"""
 function VectorTensor(f, n)
     return VectorTensor(map(f, tuple_range(n)))
 end
 
-function apply(t::VectorTensor{N,R,D}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {N,R,D}
-    return map(t.D) do Dᵢ
-        apply(Dᵢ, v, I...)
+function apply(vt::VectorTensor{N, R, D}, v::AbstractArray{<:Any, D}, I::Vararg{Any, R}) where {N, R, D}
+    return map(vt.ts) do tᵢ
+        apply(tᵢ, v, I...)
     end |> SVector
 end
 
-Base.adjoint(t::VectorTensor) = VectorDotTensor(map(adjoint, t.D))
-LazyTensors.domain_size(t::VectorTensor) = domain_size(t.D[1])
-LazyTensors.range_size(t::VectorTensor) = range_size(t.D[1])
+Base.adjoint(t::VectorTensor) = VectorDotTensor(map(adjoint, t.ts))
+LazyTensors.domain_size(t::VectorTensor) = domain_size(t.ts[1])
+LazyTensors.range_size(t::VectorTensor) = range_size(t.ts[1])
 
 function Base.:(==)(a::VectorTensor, b::VectorTensor)
-    return a.D == b.D
+    return a.ts == b.ts
 end
 
-function Base.:+(a::VectorTensor{N}, b::VectorTensor{N}) where N
-    return VectorTensor(a.D .+ b.D)
+"""
+    VectorDotTensor{N,R,D} <: LazyTensor{R,D}
+
+A vector of LazyTensors `ts` which when applied to an AbstractArray of vectors `a` gives a
+TensorApplication where each element `I` is the sum Σᵢ (ts[i]*a[:][i])[I].
+"""
+struct VectorDotTensor{N, R, D, NT <: NTuple{N, LazyTensor{R, D}}} <: LazyTensor{R, D}
+    ts::NT
+    function VectorDotTensor{N, R, D}(ts::NT) where {N, R, D, NT <: NTuple{N, LazyTensor{R, D}}}
+        check_equal_size(ts...)
+        return new{N, R, D, NT}(ts)
+    end
 end
 
 
-## "Vector of tensors ∘ vector -> scalar"
-struct VectorDotTensor{N,R,D,NT<:NTuple{N,LazyTensor{R,D}}} <: LazyTensor{R,D}
-    D::NT
-    ## TODO: add constructor with tests for checking domain and range size   (allequal(domain_size), tms)
+"""
+    VectorDotTensor(ts::NTuple{N, LazyTensor}) where N
+
+A VectorDotTensor with elements `ts`.
+"""
+function VectorDotTensor(ts::NTuple{N, LazyTensor}) where N
+    R = range_dim(ts[1])
+    D = domain_dim(ts[1])
+    return VectorDotTensor{N, R, D}(ts)
 end
 
-VectorDotTensor(Ds::Vararg{LazyTensor}) = VectorDotTensor(Ds)
+"""
+    VectorDotTensor(ts::Vararg{LazyTensor})
 
+A VectorDotTensor with elements `ts`.
+"""
+VectorDotTensor(ts::Vararg{LazyTensor}) = VectorDotTensor(ts)
+
+
+"""
+    VectorDotTensor(f, n)
+
+A VectorDotTensor of `n` LazyTensors with elements determined by `f(i)` for ``i = 1...n``.
+"""
 function VectorDotTensor(f, n)
     return VectorDotTensor(map(f, tuple_range(n)))
 end
 
-function apply(t::VectorDotTensor{N,R,D}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {N,R,D}
-    Dᵢvᵢs = map(tuple_range(N), t.D) do i, Dᵢ
+function apply(vdt::VectorDotTensor{N,R,D}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {N,R,D}
+    tᵢvᵢs = map(tuple_range(N), vdt.ts) do i, tᵢ
         vᵢ = componentview(v, i)
-        apply(Dᵢ, vᵢ, I...)
+        apply(tᵢ, vᵢ, I...)
     end
 
-    return +(Dᵢvᵢs...)
+    return +(tᵢvᵢs...)
 end
 
-Base.adjoint(t::VectorDotTensor) = VectorTensor(map(adjoint, t.D))
-LazyTensors.domain_size(t::VectorDotTensor) = domain_size(t.D[1])
-LazyTensors.range_size(t::VectorDotTensor) = range_size(t.D[1])
+Base.adjoint(vdt::VectorDotTensor) = VectorTensor(map(adjoint, vdt.ts))
+LazyTensors.domain_size(vdt::VectorDotTensor) = domain_size(vdt.ts[1])
+LazyTensors.range_size(vdt::VectorDotTensor) = range_size(vdt.ts[1])
 
 function Base.:(==)(a::VectorDotTensor, b::VectorDotTensor)
-    return a.D == b.D
+    return a.ts == b.ts
 end
 
-function Base.:+(a::VectorDotTensor{N}, b::VectorDotTensor{N}) where N
-    return VectorDotTensor(a.D .+ b.D)
+"""
+    MatrixTensor{N, M, R, D} <: LazyTensor{R, D}
+
+A matrix of LazyTensors `ts` which when applied to an AbstractArray of vectors `a` gives a
+TensorApplication `ta` such that  ta[I][i] equals the sum Σⱼ (ts[i,j]*a[:][j])[I].
+"""
+struct MatrixTensor{N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}}} <: LazyTensor{R, D}
+    ts::TT # Matrix of Tensors
+    function MatrixTensor{N, M, R, D}(ts::TT) where {N, M, R, D, TT <: TupleTable{N, M, <:NMTuple{N, M, LazyTensor{R, D}}}}
+        check_equal_size((ts.table...)...)
+        new{N, M, R, D, TT}(ts)
+    end
 end
 
+"""
+    MatrixTensor(ts::TupleTable)
 
-## "Matrix of tensors ∘ vector -> vector"
-struct MatrixTensor{N,M,R,D,TT<:TupleTable{N,M,<:NMTuple{N,M,LazyTensor{R,D}}}} <: LazyTensor{R,D}
-    D::TT # Matrix of Tensors
+A MatrixTensor with elements `ts`.
+"""
+function MatrixTensor(ts::TupleTable{N, M, <:NMTuple{N, M, LazyTensor}}) where {N, M}
+    R = range_dim(ts[1,1])
+    D = domain_dim(ts[1,1])
+    return MatrixTensor{N, M, R, D}(ts)
 end
 
-function MatrixTensor(Ds::NTuple{N, NTuple{M, LazyTensor}} where {N,M})
-    return MatrixTensor(TupleTable(Ds))
+"""
+    MatrixTensor(ts::NTuple{N, NTuple{M, LazyTensor}} where {N,M})
+
+A MatrixTensor with elements `ts`.
+"""
+MatrixTensor(ts::NTuple{N, NTuple{M, LazyTensor}} where {N, M}) = MatrixTensor(TupleTable(ts))
+
+"""
+    MatrixTensor(ts::Vararg{NTuple{N, LazyTensor} where N})
+
+A MatrixTensor with elements `ts`.
+"""
+MatrixTensor(ts::Vararg{NTuple{N, LazyTensor} where N}) = MatrixTensor(ts)
+
+"""
+    MatrixTensor(ts::Matrix)
+
+A MatrixTensor with elements `ts`.
+"""
+function MatrixTensor(ts::Matrix)
+    return MatrixTensor(TupleTable(ts))
 end
 
-function MatrixTensor(Ds::Vararg{NTuple{N, LazyTensor} where N})
-    return MatrixTensor(Ds)
-end
+"""
+    MatrixTensor(f, n, m)
 
-MatrixTensor(::Tuple{}) = throw(ArgumentError("All dimensions of a MatrixTensor must be larger than 1"))
-MatrixTensor(::NTuple{N, Tuple{}} where N) = throw(ArgumentError("The number of columns of a MatrixTensor must be larger than 1"))
-
-function MatrixTensor(Ds::Matrix)
-    return MatrixTensor(TupleTable(Ds))
-end
-
+An MatrixTensor of n×m LazyTensors with elements determined by `f(i,j)` for ``i = 1...n`` and ``j = 1...m``.
+"""
 function MatrixTensor(f, n, m)
     return map(tuple_range(n)) do i
         map(tuple_range(m)) do j
@@ -283,29 +324,25 @@ function MatrixTensor(f, n, m)
     end |> MatrixTensor
 end
 
-function apply(t::MatrixTensor{N,M,R,D}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {N,M,R,D}
+MatrixTensor(::Tuple{}) = throw(ArgumentError("All dimensions of a MatrixTensor must be larger than 1"))
+MatrixTensor(::NTuple{N, Tuple{}} where N) = throw(ArgumentError("The number of columns of a MatrixTensor must be larger than 1"))
+
+function apply(mt::MatrixTensor{N,M,R,D}, v::AbstractArray{<:Any, D}, I::Vararg{Any,R}) where {N,M,R,D}
     return map(tuple_range(N)) do i
         @inline
-        Dᵢⱼvⱼs = map(tuple_range(M), t.D[i,:]) do j, Dᵢⱼ
+        tᵢⱼvⱼs = map(tuple_range(M), mt.ts[i,:]) do j, tᵢⱼ
             vⱼ = componentview(v, j)
-            apply(Dᵢⱼ, vⱼ, I...)
+            apply(tᵢⱼ, vⱼ, I...)
         end
 
-        +(Dᵢⱼvⱼs...)
+        +(tᵢⱼvⱼs...)
     end |> SVector
 end
 
-Base.adjoint(t::MatrixTensor) = MatrixTensor(adjoint(t.D))
-LazyTensors.domain_size(t::MatrixTensor) = domain_size(t.D[1,1])
-LazyTensors.range_size(t::MatrixTensor) = range_size(t.D[1,1])
+Base.adjoint(mt::MatrixTensor) = MatrixTensor(adjoint(mt.ts))
+LazyTensors.domain_size(mt::MatrixTensor) = domain_size(mt.ts[1,1])
+LazyTensors.range_size(mt::MatrixTensor) = range_size(mt.ts[1,1])
 
 function Base.:(==)(a::MatrixTensor, b::MatrixTensor)
-    return a.D == b.D
+    return a.ts == b.ts
 end
-
-function Base.:+(a::MatrixTensor{N}, b::MatrixTensor{N}) where N
-    return MatrixTensor(a.D + b.D)
-end
-
-
-tuple_range(n) = ntuple(identity, n)

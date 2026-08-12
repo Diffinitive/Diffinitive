@@ -46,4 +46,6 @@ function LazyTensors.apply(op::ConstantInteriorScalingOperator, v::AbstractVecto
     return LazyTensors.apply(op, v, Index(i, r))
 end
 
-LazyTensors.apply_transpose(op::ConstantInteriorScalingOperator, v, i) = apply(op, v, i)
+function Base.adjoint(t::ConstantInteriorScalingOperator)
+    return ConstantInteriorScalingOperator(conj(t.interior_weight), conj.(t.closure_weights), t.size)
+end
