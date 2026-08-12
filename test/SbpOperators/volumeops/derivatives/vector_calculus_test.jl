@@ -10,7 +10,7 @@ using StaticArrays
     @testset "2D" begin
         g = equidistant_grid((0,0),(1,1), 20, 20)
 
-        ∇̇ = divergence(g, stencil_set)
+        ∇̇ = SbpOperators.divergence(g, stencil_set)
 
         v = map(x->@SVector[x[1], 0.], g)
         @test ∇̇*v ≈ map(x->1., g)

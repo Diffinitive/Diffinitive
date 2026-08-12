@@ -8,8 +8,8 @@ using AutomaticCalculus: e, ∂, δ, divergence, J
 
 using LinearAlgebra
 
-const operator_path = sbp_operators_path()*"standard_diagonal.toml"
-const stencil_set = read_stencil_set(operator_path, order = 4)
+operator_path = sbp_operators_path()*"standard_diagonal.toml"
+stencil_set = read_stencil_set(operator_path, order = 4)
 
 ## Automatic differentiation
 function stress_ad(u, λ, μ, x)

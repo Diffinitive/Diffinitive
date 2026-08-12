@@ -4,6 +4,7 @@ using Diffinitive.SbpOperators
 using Diffinitive.Grids
 
 using StaticArrays
+using AutomaticCalculus
 using AutomaticCalculus: e, ∂∂, δ, Δ, J, index_tuple
 
 using LinearAlgebra
@@ -138,11 +139,11 @@ function_cases = Dict(
 
 grid_cases = Dict(
     "2D" => [
-        "EquidistantGrid" => (ps = unitsquare(Float64), sz = (41, 41),     c = with_jacobian(identity, unitsquare(Float64), jacobian)),
+        "EquidistantGrid" => (ps = unitsquare(Float64), sz = (41, 41),     c = with_jacobian(identity, unitsquare(Float64), AutomaticCalculus.ForwardDiff.jacobian)),
         "MappedGrid"      => (ps = c_2d,                sz = (41, 41),     c = c_2d),
     ],
     "3D" => [
-        "EquidistantGrid" => (ps = unitcube(Float64),   sz = (21, 21, 21), c = with_jacobian(identity, unitcube(Float64), jacobian)),
+        "EquidistantGrid" => (ps = unitcube(Float64),   sz = (21, 21, 21), c = with_jacobian(identity, unitcube(Float64), AutomaticCalculus.ForwardDiff.jacobian)),
         "MappedGrid"      => (ps = c_3d,                sz = (21, 21, 21), c = c_3d),
     ],
 )
