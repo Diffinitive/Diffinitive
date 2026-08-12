@@ -8,8 +8,8 @@ using ForwardDiff
 
 using LinearAlgebra
 
-const operator_path = sbp_operators_path()*"standard_diagonal.toml"
-const stencil_set = read_stencil_set(operator_path, order = 4)
+operator_path = sbp_operators_path()*"standard_diagonal.toml"
+stencil_set = read_stencil_set(operator_path, order = 4)
 
 function test_accuracy(g; L̄, u, Lu, broken=false, debug=false, kwargs...)
     ū = map(u, g)
