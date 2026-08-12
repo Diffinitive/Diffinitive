@@ -117,7 +117,7 @@ stress_ad(u) = x->stress_ad(u,x)
 function traction_ad(u,λ,μ,c,boundary,ξ)
     x = c(ξ)
     σ = stress_ad(u,λ,μ,x)
-    n̂ = normal(c,boundary,ξ)
+    n̂ = boundary_normal(c,boundary,ξ)
 
     return σ*n̂
 end
@@ -128,7 +128,7 @@ traction_ad(u,λ,μ,c,boundary) = ξ->traction_ad(u,λ,μ,c,boundary,ξ)
 function normal_traction_ad(u,λ,μ,c,boundary,ξ)
     x = c(ξ)
     σ = stress_ad(u,λ,μ,x)
-    n̂ = normal(c,boundary,ξ)
+    n̂ = boundary_normal(c,boundary,ξ)
 
     return dot(n̂,σ,n̂)
 end
@@ -138,7 +138,7 @@ normal_traction_ad(u,λ,μ,c,boundary) = ξ->normal_traction_ad(u,λ,μ,c,bounda
 
 function tangential_traction_ad(u,λ,μ,c,boundary,ξ)
     x = c(ξ)
-    n̂ = normal(c,boundary,ξ)
+    n̂ = boundary_normal(c,boundary,ξ)
     tₙ = normal_traction_ad(u,λ,μ,c,boundary,ξ)
     T = traction_ad(u,λ,μ,c,boundary,ξ)
 
@@ -486,7 +486,7 @@ end
                     T = traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
                     tₜ = tangential_traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
                     tₙ = normal_traction_isotropic(g, λ̄, μ̄, stencil_set, boundary)
-                    n̂ = normal(g, boundary)
+                    n̂ = boundary_normal(g, boundary)
 
                     @test T*u ≈ tₜ*u + (tₙ*u).*n̂
                 end
