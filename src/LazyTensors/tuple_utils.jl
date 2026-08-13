@@ -103,9 +103,9 @@ NMTuple{N, M, T} = NTuple{N, NTuple{M, T}}
 
 A static `N` row, `M` column table of types `T` built from tuples.
 
-A tuple table `t::TupleTable` is indexable, similar to matrix objects, i.e.,
-t[i,j] returns the the table entry in position i, j. In contrast to, e.g.,
-`StaticArrays.SMatrix` the elements of `t` can differ in type.
+A TupleTable `t` is indexable, similar to matrix objects, i.e.,
+`t[i,j]` returns the the table entry in position i, j. In contrast to, e.g.,
+StaticArrays.SMatrix the elements of `t` can differ in type.
 """
 struct TupleTable{N, M, T <: NMTuple{N, M, Any}}
     table::T
@@ -114,7 +114,7 @@ end
 """
    TupleTable(rows...)
 
-A `TupleTable` with elements specified by `rows`.
+A TupleTable with elements specified by `rows`.
 
 """
 function TupleTable(rows...)
@@ -127,7 +127,7 @@ end
 """
    TupleTable(A::Matrix)
 
-A `TupleTable{N,M}` with elements from the N×M matrix `A`.
+A TupleTable{N, M} with elements from the N × M matrix `A`.
 """
 function TupleTable(A::Matrix)
     N, M = size(A)
@@ -147,7 +147,7 @@ Base.getindex(t::TupleTable, i, j) = t.table[i][j]
 """
    Base.adjoint(tt::TupleTable)
 
-The adjoint of the `TupleTable` `tt`, similar to the adjoint of a matrix.
+The adjoint of the TupleTable `tt`, similar to the adjoint of a matrix.
 """
 function Base.adjoint(tt::TupleTable)
     N, M = size(tt)
