@@ -1,5 +1,7 @@
 module LazyTensors
 
+using StaticArrays
+
 export LazyTensor
 export apply
 export range_dim, domain_dim
@@ -20,6 +22,9 @@ export ScalingTensor
 export DiagonalTensor
 export DenseTensor
 export InflatedTensor
+export VectorTensor
+export VectorDotTensor
+export MatrixTensor
 export ⊗
 export DomainSizeMismatch
 export RangeSizeMismatch
@@ -31,11 +36,11 @@ export LazyFunctionArray
 export +̃, -̃, *̃, /̃
 
 include("lazy_tensor.jl")
+include("tuple_utils.jl")
 include("tensor_types.jl")
 include("lazy_array.jl")
 include("lazy_tensor_operations.jl")
 include("lazy_tensor_operator_overloads.jl")
-include("tuple_manipulation.jl")
 include("componentview.jl")
 
 function __init__()

@@ -1,6 +1,8 @@
 using Test
 using Diffinitive.LazyTensors
+using Diffinitive.LazyTensors: TupleTable
 using BenchmarkTools
+using StaticArrays
 
 @testset "IdentityTensor" begin
     @test IdentityTensor((4,5)) isa IdentityTensor{2}
@@ -251,4 +253,283 @@ end
 
     # TODO:
     # @inferred (B̃*v)[2]
+end
+
+@testset "VectorTensor" begin
+    @testset "Constructors" begin
+        s = [4., 6., 5., 6., 7.]
+        @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
+        @test_throws DomainSizeMismatch VectorTensor(ZeroTensor((1,), (1,)), ZeroTensor((1,), (2,)))
+        @test_throws RangeSizeMismatch VectorTensor(ZeroTensor((1,), (1,)), ZeroTensor((2,), (1,)))
+
+        @test VectorTensor(ZeroTensor((2,), (3,4)), ZeroTensor((2,), (3,4))) isa LazyTensor{1, 2}
+
+        A = VectorTensor(3) do i
+            DiagonalTensor(i*s)
+        end
+        @test A == VectorTensor(DiagonalTensor(s),DiagonalTensor(2s),DiagonalTensor(3s))
+    end
+
+    @testset "apply" begin
+        @testset "range_dim == domain_dim" begin
+            s = [4., 6., 5., 6., 7.]
+            t = VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+            v = [10., 11., 12., 14., 15.]
+            expected = map((sᵢ, vᵢ)-> @SVector[sᵢ*vᵢ, 3vᵢ], s,v)
+            @test t*v == expected
+            @test collect(t*v) isa Vector{SVector{2,Float64}}
+        end
+
+        @testset "range_dim != domain_dim" begin
+            A = Float64.(reshape(1:24, 2, 3, 4))
+            B = Float64.(reshape(25:48, 2, 3, 4))
+            t = VectorTensor(
+                DenseTensor(A, (1,2), (3,)),
+                DenseTensor(B, (1,2), (3,)),
+            )
+            v = [1., 2., 3., 4.]
+            expected = [
+                @SVector[
+                    sum(A[i,j,k]*v[k] for k ∈ axes(A, 3)),
+                    sum(B[i,j,k]*v[k] for k ∈ axes(B, 3)),
+                ]
+                for i ∈ axes(A, 1), j ∈ axes(A, 2)
+            ]
+
+            @test t isa LazyTensor{2, 1}
+            @test range_size(t) == (2, 3)
+            @test domain_size(t) == (4,)
+            @test t*v == expected
+            @test collect(t*v) isa Matrix{SVector{2,Float64}}
+        end
+    end
+
+    @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+        @test VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) == VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) == VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,)))
+
+        @test VectorTensor(DiagonalTensor(s), ScalingTensor(2., (5,))) != VectorTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) != VectorTensor(DiagonalTensor(3s), ScalingTensor(3., (5,)))
+    end
+
+end
+
+@testset "VectorDotTensor" begin
+    @testset "Constructors" begin
+        s = [4., 6., 5., 6., 7.]
+        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) isa LazyTensor{1, 1}
+        @test_throws DomainSizeMismatch VectorDotTensor(ZeroTensor((1,), (1,)), ZeroTensor((1,), (2,)))
+        @test_throws RangeSizeMismatch VectorDotTensor(ZeroTensor((1,), (1,)), ZeroTensor((2,), (1,)))
+
+        @test VectorDotTensor(ZeroTensor((2,), (3,4)), ZeroTensor((2,), (3,4))) isa LazyTensor{1, 2}
+
+         A = VectorDotTensor(3) do i
+            DiagonalTensor(i*s)
+        end
+        @test A == VectorDotTensor(DiagonalTensor(s),DiagonalTensor(2s),DiagonalTensor(3s))
+    end
+
+    @testset "apply" begin
+        @testset "range_dim == domain_dim" begin
+            s = [4., 6., 5., 6., 7.]
+            t = VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+            v = rand(SVector{2,Float64}, 5)
+            expected = map((sᵢ, vᵢ)-> sᵢ*vᵢ[1]+3vᵢ[2], s,v)
+            @test t*v == expected
+            @test collect(t*v) isa Vector{Float64}
+        end
+
+        @testset "range_dim != domain_dim" begin
+            A = Float64.(reshape(1:24, 2, 3, 4))
+            B = Float64.(reshape(25:48, 2, 3, 4))
+            t = VectorDotTensor(
+                DenseTensor(A, (1,2), (3,)),
+                DenseTensor(B, (1,2), (3,)),
+            )
+            v = [
+                @SVector[1., 5.],
+                @SVector[2., 6.],
+                @SVector[3., 7.],
+                @SVector[4., 8.],
+            ]
+            expected = [
+                sum(A[i,j,k]*v[k][1] + B[i,j,k]*v[k][2] for k ∈ axes(A, 3))
+                for i ∈ axes(A, 1), j ∈ axes(A, 2)
+            ]
+
+            @test t isa LazyTensor{2, 1}
+            @test range_size(t) == (2, 3)
+            @test domain_size(t) == (4,)
+            @test t*v == expected
+            @test collect(t*v) isa Matrix{Float64}
+        end
+    end
+
+    @testset "Base.:(==)" begin
+        s = [4., 6., 5., 6., 7.]
+
+        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,))) == VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorDotTensor(DiagonalTensor(2s), ScalingTensor(3., (5,))) == VectorDotTensor(DiagonalTensor(2s), ScalingTensor(3., (5,)))
+
+        @test VectorDotTensor(DiagonalTensor(s), ScalingTensor(2., (5,))) != VectorDotTensor(DiagonalTensor(s), ScalingTensor(3., (5,)))
+        @test VectorDotTensor(DiagonalTensor(3s), ScalingTensor(3., (5,))) != VectorDotTensor(DiagonalTensor(2s), ScalingTensor(3., (5,)))
+
+    end
+
+end
+
+@testset "MatrixTensor" begin
+    @testset "Constructors" begin
+        s1 = [4., 6., 5., 6., 7.]
+        s2 = [6., 9., 3., 5., 7.]
+        t = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+
+        @test t isa LazyTensor{1, 1}
+
+        @test MatrixTensor(
+            (ZeroTensor((2,), (3,4)), ZeroTensor((2,), (3,4))),
+            (ZeroTensor((2,), (3,4)), ZeroTensor((2,), (3,4))),
+        ) isa LazyTensor{1, 2}
+
+
+        t2 = MatrixTensor((
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        ))
+
+        @test t2 isa LazyTensor{1, 1}
+        @test t2 == t
+
+
+        A = [
+            DiagonalTensor(s1) ScalingTensor(3.,(5,));
+            ScalingTensor(6., (5,)) DiagonalTensor(s2);
+        ]
+
+        @test MatrixTensor(A) == t
+
+        TT = TupleTable(A)
+
+        @test MatrixTensor(TT) == t
+
+
+        A = MatrixTensor(3,2) do i,j
+            DiagonalTensor(i*s1 + j*s2)
+        end
+
+        @test A == MatrixTensor(
+            (DiagonalTensor(1s1 + 1s2), DiagonalTensor(1s1 + 2s2)),
+            (DiagonalTensor(2s1 + 1s2), DiagonalTensor(2s1 + 2s2)),
+            (DiagonalTensor(3s1 + 1s2), DiagonalTensor(3s1 + 2s2)),
+        )
+
+        @test_throws DomainSizeMismatch MatrixTensor(
+            (DiagonalTensor(1s1 + 1s2), DiagonalTensor(1s1 + 2s2)),
+            (DiagonalTensor(2s1 + 1s2), ZeroTensor((5,), (1,)))
+        )
+        @test_throws RangeSizeMismatch MatrixTensor(
+            (DiagonalTensor(1s1 + 1s2), DiagonalTensor(1s1 + 2s2)),
+            (DiagonalTensor(2s1 + 1s2), ZeroTensor((1,), (5,)))
+        )
+    end
+
+    @testset "apply" begin
+        @testset "range_dim == domain_dim" begin
+            s1 = [4., 6., 5., 6., 7.]
+            s2 = [6., 9., 3., 5., 7.]
+            t = MatrixTensor(
+                (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+                (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+            )
+            v = reinterpret(SVector{2,Float64}, rand(1.:20., 10))
+
+            expected = map(s1,s2,v) do s1ᵢ, s2ᵢ, vᵢ
+                @SVector[
+                    s1ᵢ*vᵢ[1] + 3*vᵢ[2],
+                    6*vᵢ[1] + s2ᵢ*vᵢ[2],
+                ]
+            end
+
+            @test t*v == expected
+        end
+
+        @testset "range_dim != domain_dim" begin
+            A = Float64.(reshape(1:24, 2, 3, 4))
+            B = Float64.(reshape(25:48, 2, 3, 4))
+            C = Float64.(reshape(49:72, 2, 3, 4))
+            D = Float64.(reshape(73:96, 2, 3, 4))
+            t = MatrixTensor(
+                (DenseTensor(A, (1,2), (3,)), DenseTensor(B, (1,2), (3,))),
+                (DenseTensor(C, (1,2), (3,)), DenseTensor(D, (1,2), (3,))),
+            )
+            v = [
+                @SVector[1., 5.],
+                @SVector[2., 6.],
+                @SVector[3., 7.],
+                @SVector[4., 8.],
+            ]
+            expected = [
+                @SVector[
+                    sum(A[i,j,k]*v[k][1] + B[i,j,k]*v[k][2] for k ∈ axes(A, 3)),
+                    sum(C[i,j,k]*v[k][1] + D[i,j,k]*v[k][2] for k ∈ axes(A, 3)),
+                ]
+                for i ∈ axes(A, 1), j ∈ axes(A, 2)
+            ]
+
+            @test t isa LazyTensor{2, 1}
+            @test range_size(t) == (2, 3)
+            @test domain_size(t) == (4,)
+            @test t*v == expected
+            @test collect(t*v) isa Matrix{SVector{2,Float64}}
+        end
+    end
+
+    @testset "Base.:(==)" begin
+        s1 = [4., 6., 5., 6., 7.]
+        s2 = [6., 9., 3., 5., 7.]
+        A  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A == B
+
+        A  = MatrixTensor(
+            (DiagonalTensor(2s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(2s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A == B
+
+
+        A  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(5., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A != B
+
+        A  = MatrixTensor(
+            (DiagonalTensor(2s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        B  = MatrixTensor(
+            (DiagonalTensor(3s1), ScalingTensor(3.,(5,))),
+            (ScalingTensor(6., (5,)), DiagonalTensor(s2)),
+        )
+        @test A != B
+    end
 end

@@ -113,3 +113,21 @@ See also: [`outer_product`](@ref).
 ⊗(t1::ZeroTensor, t2::ZeroTensor) = ZeroTensor((range_size(t1)..., range_size(t2)...), (domain_size(t1)..., domain_size(t2)...)) # Resolve ambiguity
 ⊗(t1::ZeroTensor, t2::IdentityTensor) = ZeroTensor((range_size(t1)..., range_size(t2)...), (domain_size(t1)..., domain_size(t2)...)) # Resolve ambiguity
 ⊗(t1::IdentityTensor, t2::ZeroTensor) = ZeroTensor((range_size(t1)..., range_size(t2)...), (domain_size(t1)..., domain_size(t2)...)) # Resolve ambiguity
+
+function Base.:+(a::VectorTensor{N}, b::VectorTensor{N}) where N
+    return VectorTensor(a.ts .+ b.ts)
+end
+
+Base.:+(a::VectorTensor, b::VectorTensor) = throw(DimensionMismatch("adding VectorTensor objects with different lengths"))
+
+function Base.:+(a::VectorDotTensor{N}, b::VectorDotTensor{N}) where N
+    return VectorDotTensor(a.ts .+ b.ts)
+end
+
+Base.:+(a::VectorDotTensor, b::VectorDotTensor) = throw(DimensionMismatch("adding VectorDotTensor objects with different lengths"))
+
+function Base.:+(a::MatrixTensor{N,M}, b::MatrixTensor{N,M}) where {N,M}
+    return MatrixTensor(a.ts + b.ts)
+end
+
+Base.:+(a::MatrixTensor, b::MatrixTensor) = throw(DimensionMismatch("adding MatrixTensor objects with different sizes"))
